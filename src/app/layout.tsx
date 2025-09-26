@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Amphibians wiki",
 };
 
-export default async function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
       <body className="container m-auto grid min-h-screen grid-rows-[auto_1fr_auto] gap-8 px-4 font-sans antialiased">

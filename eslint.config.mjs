@@ -60,7 +60,7 @@ const languageLintingConfig = tseslint.config(
       "@typescript-eslint/no-inferrable-types": "off",
       // Optionals
       // "@typescript-eslint/no-floating-promises": "off",
-      // "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
 );

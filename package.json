@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/postcss": "4.0.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -49,5 +51,6 @@
     "tailwindcss": "^4",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.0"
-  }
+  },
+  "packageManager": "pnpm@10.17.1+sha256.a1e0133f6801c13039ae41309e5e5a7d1058a3a1e1edd020a4944a83c5368d04"
 }
