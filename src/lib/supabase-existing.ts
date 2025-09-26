@@ -12,7 +12,7 @@ export const amphibianService = {
       .from("taxon")
       .select("*", {count: "exact", head: true})
       .eq("enecuador", true)
-      .eq("rank_idrank", 1); // especie
+      .eq("rank_idrank", 7); // especie
 
     // Obtener especies endémicas
     const {count: endemicSpecies} = await supabase
@@ -20,7 +20,7 @@ export const amphibianService = {
       .select("*", {count: "exact", head: true})
       .eq("enecuador", true)
       .eq("endemica", true)
-      .eq("rank_idrank", 1); // especie
+      .eq("rank_idrank", 7); // especie
 
     return {
       total_species: totalSpecies || 690,
@@ -40,6 +40,7 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
+        idtaxon,
         taxon,
         autorano,
         taxon_idtaxon,
@@ -55,7 +56,7 @@ export const amphibianService = {
     // Mapear a nuestro formato
     return (
       data?.map((order) => ({
-        id: order.taxon_idtaxon?.toString() || "",
+        id: order.idtaxon.toString(),
         name: order.taxon,
         scientific_name: order.taxon,
         description: this.getOrderDescription(order.taxon),
@@ -64,7 +65,7 @@ export const amphibianService = {
     );
   },
 
-  // Obtener especies por orden
+  // Obtener especies por orden (simplificado - muestra todas las especies por ahora)
   async getSpeciesByOrder(orderName: string, limit = 10) {
     const supabase = await createClient();
 
@@ -81,8 +82,7 @@ export const amphibianService = {
       `,
       )
       .eq("enecuador", true)
-      .eq("rank_idrank", 1) // especie
-      .eq("taxon_idtaxon", parseInt(orderName)) // Filtrar por orden padre
+      .eq("rank_idrank", 7) // especie
       .limit(limit);
 
     if (error) throw error;
@@ -122,7 +122,7 @@ export const amphibianService = {
       )
       .eq("enecuador", true)
       .eq("endemica", true)
-      .eq("rank_idrank", 1) // especie
+      .eq("rank_idrank", 7) // especie
       .limit(limit);
 
     if (error) throw error;
@@ -161,7 +161,7 @@ export const amphibianService = {
       `,
       )
       .eq("enecuador", true)
-      .eq("rank_idrank", 1) // especie
+      .eq("rank_idrank", 7) // especie
       .limit(limit);
 
     if (error) throw error;

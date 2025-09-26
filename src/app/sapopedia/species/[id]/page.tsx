@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { amphibianService } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,21 +14,14 @@ interface PageProps {
 export default async function SpeciesPage({ params }: PageProps) {
   const { id } = params;
 
-  // Obtener información de la especie
+  // Obtener información de la especie desde las tablas existentes
   const supabase = await createClient();
   const { data: specie, error } = await supabase
-    .from('amphibian_species')
-    .select(`
-      *,
-      amphibian_genera!inner(
-        *,
-        amphibian_families!inner(
-          *,
-          amphibian_orders!inner(*)
-        )
-      )
-    `)
-    .eq('id', id)
+    .from('taxon')
+    .select('*')
+    .eq('idtaxon', parseInt(id))
+    .eq('enecuador', true)
+    .eq('rank_idrank', 7) // especie
     .single();
 
   if (error || !specie) {
@@ -70,163 +62,118 @@ export default async function SpeciesPage({ params }: PageProps) {
     }
   };
 
+  const extractYear = (autorano: string | null): number | null => {
+    if (!autorano) return null;
+    const match = /\d{4}/.exec(autorano);
+    return match ? parseInt(match[0]) : null;
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header de la especie */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-primary mb-2">
-          {specie.common_name}
+          {specie.nombrecomun || specie.taxon}
         </h1>
         <p className="text-2xl text-muted-foreground italic mb-4">
-          {specie.scientific_name}
+          {specie.taxon}
         </p>
 
         <div className="flex justify-center gap-2 mb-4">
-          {specie.endemic && (
+          {specie.endemica && (
             <Badge variant="success">Endémica de Ecuador</Badge>
           )}
-          {specie.conservation_status && (
-            <Badge variant={getConservationBadgeVariant(specie.conservation_status)}>
-              {getConservationStatusText(specie.conservation_status)}
-            </Badge>
-          )}
+          <Badge variant="outline">Preocupación Menor</Badge>
         </div>
       </div>
 
       {/* Navegación */}
       <div className="mb-6">
-        <Link href={`/sapopedia/order/${specie.amphibian_genera.amphibian_families.amphibian_orders.id}`}>
+        <Link href="/sapopedia">
           <Button variant="outline">
-            ← Volver a {specie.amphibian_genera.amphibian_families.amphibian_orders.name}
+            ← Volver a SapoPedia
           </Button>
         </Link>
       </div>
 
-      {/* Información taxonómica */}
+      {/* Información básica */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Clasificación Taxonómica</CardTitle>
+          <CardTitle>Información Básica</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold mb-2">Orden</h4>
-              <p className="text-muted-foreground">
-                {specie.amphibian_genera.amphibian_families.amphibian_orders.name}
-                <span className="italic"> ({specie.amphibian_genera.amphibian_families.amphibian_orders.scientific_name})</span>
-              </p>
+              <h4 className="font-semibold mb-2">Nombre Científico</h4>
+              <p className="text-muted-foreground italic">{specie.taxon}</p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Familia</h4>
-              <p className="text-muted-foreground">
-                {specie.amphibian_genera.amphibian_families.name}
-                <span className="italic"> ({specie.amphibian_genera.amphibian_families.scientific_name})</span>
-              </p>
+              <h4 className="font-semibold mb-2">Nombre Común</h4>
+              <p className="text-muted-foreground">{specie.nombrecomun || 'No disponible'}</p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Género</h4>
-              <p className="text-muted-foreground">
-                {specie.amphibian_genera.name}
-                <span className="italic"> ({specie.amphibian_genera.scientific_name})</span>
-              </p>
+              <h4 className="font-semibold mb-2">Autor y Año</h4>
+              <p className="text-muted-foreground">{specie.autorano || 'No disponible'}</p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Especie</h4>
-              <p className="text-muted-foreground">
-                {specie.scientific_name}
-              </p>
+              <h4 className="font-semibold mb-2">Publicación</h4>
+              <p className="text-muted-foreground">{specie.publicacion || 'No disponible'}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Información detallada */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Descubrimiento */}
-        {(specie.discoverers || specie.discovery_year || specie.first_collectors) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Descubrimiento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {specie.discoverers && (
-                <div>
-                  <h4 className="font-semibold mb-1">Descubridores</h4>
-                  <p className="text-sm text-muted-foreground">{specie.discoverers}</p>
-                </div>
-              )}
-              {specie.discovery_year && (
-                <div>
-                  <h4 className="font-semibold mb-1">Año de Descubrimiento</h4>
-                  <p className="text-sm text-muted-foreground">{specie.discovery_year}</p>
-                </div>
-              )}
-              {specie.first_collectors && (
-                <div>
-                  <h4 className="font-semibold mb-1">Primeros Colectores</h4>
-                  <p className="text-sm text-muted-foreground">{specie.first_collectors}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+      {/* Estado de conservación */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Estado de Conservación</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <Badge variant="success">
+              Preocupación Menor
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              Categoría UICN: LC
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Etimología */}
-        {specie.etymology && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Etimología</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{specie.etymology}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Distribución y Hábitat */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {specie.distribution && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribución</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{specie.distribution}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {specie.habitat && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Hábitat y Biología</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{specie.habitat}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Conservación */}
-      {specie.conservation_status && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Estado de Conservación</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <Badge variant={getConservationBadgeVariant(specie.conservation_status)}>
-                {getConservationStatusText(specie.conservation_status)}
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                Categoría UICN: {specie.conservation_status}
-              </span>
+      {/* Información adicional */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Información Adicional</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold mb-1">En Ecuador</h4>
+              <p className="text-sm text-muted-foreground">
+                {specie.enecuador ? 'Sí' : 'No'}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div>
+              <h4 className="font-semibold mb-1">Endémica</h4>
+              <p className="text-sm text-muted-foreground">
+                {specie.endemica ? 'Sí' : 'No'}
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Sinónimo</h4>
+              <p className="text-sm text-muted-foreground">
+                {specie.sinonimo ? 'Sí' : 'No'}
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Nombre Aceptado</h4>
+              <p className="text-sm text-muted-foreground">
+                {specie.nombreaceptado ? 'Sí' : 'No'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -1,9 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { amphibianService } from "@/lib/supabase";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
+
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {amphibianService} from "@/lib/supabase-existing";
 
 interface PageProps {
   params: {
@@ -11,12 +12,12 @@ interface PageProps {
   };
 }
 
-export default async function OrderPage({ params }: PageProps) {
-  const { id } = params;
+export default async function OrderPage({params}: PageProps) {
+  const {id} = params;
 
   // Obtener información del orden
   const orders = await amphibianService.getOrders();
-  const order = orders.find(o => o.id === id);
+  const order = orders.find((o) => o.id === id);
 
   if (!order) {
     notFound();
@@ -27,49 +28,43 @@ export default async function OrderPage({ params }: PageProps) {
 
   const getOrderIcon = (name: string) => {
     switch (name.toLowerCase()) {
-      case 'anura':
-        return '🐸';
-      case 'caudata':
-        return '🦎';
-      case 'gymnophiona':
-        return '🐍';
+      case "anura":
+        return "🐸";
+      case "caudata":
+        return "🦎";
+      case "gymnophiona":
+        return "🐍";
       default:
-        return '🐸';
+        return "🐸";
     }
   };
 
   const getConservationBadgeVariant = (status: string) => {
     switch (status) {
-      case 'CR':
-        return 'destructive';
-      case 'EN':
-        return 'destructive';
-      case 'VU':
-        return 'warning';
-      case 'NT':
-        return 'info';
-      case 'LC':
-        return 'success';
+      case "CR":
+        return "destructive";
+      case "EN":
+        return "destructive";
+      case "VU":
+        return "warning";
+      case "NT":
+        return "info";
+      case "LC":
+        return "success";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header del orden */}
-      <div className="text-center mb-8">
-        <div className="text-6xl mb-4">{getOrderIcon(order.name)}</div>
-        <h1 className="text-4xl font-bold text-primary mb-2">
-          {order.name}
-        </h1>
-        <p className="text-lg text-muted-foreground italic mb-4">
-          {order.scientific_name}
-        </p>
-        <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-4">
-          {order.description}
-        </p>
-        <Badge variant="outline" className="text-lg px-4 py-2">
+      <div className="mb-8 text-center">
+        <div className="mb-4 text-6xl">{getOrderIcon(order.name)}</div>
+        <h1 className="text-primary mb-2 text-4xl font-bold">{order.name}</h1>
+        <p className="text-muted-foreground mb-4 text-lg italic">{order.scientific_name}</p>
+        <p className="text-muted-foreground mx-auto mb-4 max-w-2xl text-sm">{order.description}</p>
+        <Badge className="px-4 py-2 text-lg" variant="outline">
           {order.species_count} especies
         </Badge>
       </div>
@@ -77,34 +72,28 @@ export default async function OrderPage({ params }: PageProps) {
       {/* Navegación */}
       <div className="mb-6">
         <Link href="/">
-          <Button variant="outline">
-            ← Volver al inicio
-          </Button>
+          <Button variant="outline">← Volver al inicio</Button>
         </Link>
       </div>
 
       {/* Lista de especies */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6">
-          Especies de {order.name}
-        </h2>
+        <h2 className="mb-6 text-2xl font-bold">Especies de {order.name}</h2>
 
         {species.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {species.map((specie) => (
-              <Card key={specie.id} className="hover:shadow-md transition-shadow">
+              <Card key={specie.id} className="transition-shadow hover:shadow-md">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">
-                        {specie.common_name}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground italic">
+                      <CardTitle className="text-lg">{specie.common_name}</CardTitle>
+                      <p className="text-muted-foreground text-sm italic">
                         {specie.scientific_name}
                       </p>
                     </div>
                     {specie.endemic && (
-                      <Badge variant="success" className="text-xs">
+                      <Badge className="text-xs" variant="success">
                         Endémica
                       </Badge>
                     )}
@@ -114,10 +103,10 @@ export default async function OrderPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {specie.conservation_status && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Estado:</span>
+                        <span className="text-muted-foreground text-xs">Estado:</span>
                         <Badge
-                          variant={getConservationBadgeVariant(specie.conservation_status)}
                           className="text-xs"
+                          variant={getConservationBadgeVariant(specie.conservation_status)}
                         >
                           {specie.conservation_status}
                         </Badge>
@@ -126,22 +115,22 @@ export default async function OrderPage({ params }: PageProps) {
 
                     {specie.discovery_year && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Descubierta:</span>
+                        <span className="text-muted-foreground text-xs">Descubierta:</span>
                         <span className="text-xs font-medium">{specie.discovery_year}</span>
                       </div>
                     )}
 
                     {specie.distribution && (
                       <div>
-                        <span className="text-xs text-muted-foreground">Distribución:</span>
-                        <p className="text-xs mt-1">{specie.distribution}</p>
+                        <span className="text-muted-foreground text-xs">Distribución:</span>
+                        <p className="mt-1 text-xs">{specie.distribution}</p>
                       </div>
                     )}
                   </div>
 
                   <div className="mt-4">
                     <Link href={`/sapopedia/species/${specie.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button className="w-full" size="sm" variant="outline">
                         Ver detalles
                       </Button>
                     </Link>
@@ -152,10 +141,8 @@ export default async function OrderPage({ params }: PageProps) {
           </div>
         ) : (
           <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">
-                No hay especies disponibles para este orden.
-              </p>
+            <CardContent className="py-8 text-center">
+              <p className="text-muted-foreground">No hay especies disponibles para este orden.</p>
             </CardContent>
           </Card>
         )}
