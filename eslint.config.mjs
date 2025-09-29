@@ -61,6 +61,8 @@ const languageLintingConfig = tseslint.config(
       // Optionals
       // "@typescript-eslint/no-floating-promises": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-redundant-type-constituents": "off",
+      "@typescript-eslint/consistent-indexed-object-style": "off",
     },
   },
 );

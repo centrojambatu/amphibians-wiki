@@ -15,6 +15,7 @@ interface PageProps {
 export default async function GenusPage({params}: PageProps) {
   const {id} = await params;
   const genus = mockTaxonomy.getGenusById(id);
+
   if (!genus) {
     notFound();
   }
@@ -27,9 +28,7 @@ export default async function GenusPage({params}: PageProps) {
       <div className="mb-8 text-center">
         <h1 className="text-primary mb-2 text-4xl font-bold">{genus.name}</h1>
         <p className="text-muted-foreground mb-4 text-lg italic">{genus.scientific_name}</p>
-        {family && (
-          <Badge variant="outline">Familia: {family.name}</Badge>
-        )}
+        {family && <Badge variant="outline">Familia: {family.name}</Badge>}
       </div>
 
       <div className="mb-6">
@@ -38,7 +37,7 @@ export default async function GenusPage({params}: PageProps) {
             <Button variant="outline">← Volver a la familia</Button>
           </Link>
         ) : (
-          <Link href={`/sapopedia`}>
+          <Link href="/sapopedia">
             <Button variant="outline">← Volver</Button>
           </Link>
         )}
@@ -52,7 +51,9 @@ export default async function GenusPage({params}: PageProps) {
               <Link key={sp.id} href={`/sapopedia/species/${sp.id}`}>
                 <Card className="cursor-pointer transition-shadow hover:shadow-md">
                   <CardHeader>
-                    <CardTitle className="text-lg">{sp.common_name || sp.scientific_name}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {sp.common_name || sp.scientific_name}
+                    </CardTitle>
                     <p className="text-muted-foreground text-sm italic">{sp.scientific_name}</p>
                   </CardHeader>
                   <CardContent>
@@ -60,9 +61,7 @@ export default async function GenusPage({params}: PageProps) {
                       {sp.conservation_status && (
                         <Badge variant="outline">{sp.conservation_status}</Badge>
                       )}
-                      {sp.endemic && (
-                        <Badge variant="success">Endémica</Badge>
-                      )}
+                      {sp.endemic && <Badge variant="outline">Endémica</Badge>}
                     </div>
                   </CardContent>
                 </Card>
@@ -80,5 +79,3 @@ export default async function GenusPage({params}: PageProps) {
     </main>
   );
 }
-
-

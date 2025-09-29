@@ -38,7 +38,10 @@ export async function generateStaticParams() {
 export default async function Page({params}: {params: Promise<{id: string}>}) {
   const {id} = await params;
   const supabaseClient = createServiceClient();
-  const {data: taxons, error} = await supabaseClient.from("taxon").select("*").eq("idtaxon", id);
+  const {data: taxons, error} = await supabaseClient
+    .from("taxon")
+    .select("*")
+    .eq("idtaxon", Number(id));
 
   if (error) {
     console.error(error);
