@@ -13,7 +13,7 @@ interface PageProps {
 }
 
 export default async function OrderPage({params}: PageProps) {
-  const {id} = params;
+  const {id} = await params;
 
   // Obtener información del orden
   const orders = await amphibianService.getOrders();
@@ -24,7 +24,17 @@ export default async function OrderPage({params}: PageProps) {
   }
 
   // Obtener especies del orden
-  const species = await amphibianService.getSpeciesByOrder(id, 20);
+  const allSpecies = await amphibianService.getSpeciesByOrder(id, 20);
+
+  // Simular diferentes especies por orden
+  const orderMap: Record<string, number[]> = {
+    "2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], // Anura - primeras 10 especies
+    "3": [10, 11, 12, 13, 14], // Caudata - siguientes 5 especies
+    "4": [15, 16, 17, 18, 19], // Gymnophiona - siguientes 5 especies
+  };
+
+  const indices = orderMap[id] || [0, 1, 2, 3, 4]; // Default a Anura
+  const species = indices.map((index) => allSpecies[index]).filter(Boolean);
 
   const getOrderIcon = (name: string) => {
     switch (name.toLowerCase()) {

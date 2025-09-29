@@ -12,7 +12,7 @@ interface PageProps {
 }
 
 export default async function SpeciesPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   // Obtener información de la especie desde las tablas existentes
   const supabase = await createClient();

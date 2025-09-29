@@ -65,24 +65,24 @@ export const amphibianService = {
     );
   },
 
-  // Obtener especies por orden (simplificado - muestra todas las especies por ahora)
-  async getSpeciesByOrder(orderName: string, limit = 10) {
+  // Obtener especies por orden - versión simplificada
+  async getSpeciesByOrder(orderId: string, limit = 20) {
+    // Por ahora, vamos a mostrar todas las especies hasta que implementemos la consulta correcta
+    // TODO: Implementar consulta SQL compleja con JOINs para filtrar por orden
     const supabase = await createClient();
 
-    const {data, error} = await supabase
-      .from("taxon")
-      .select(
-        `
+    const { data, error } = await supabase
+      .from('taxon')
+      .select(`
         idtaxon,
         taxon,
         nombrecomun,
         autorano,
         endemica,
         taxon_idtaxon
-      `,
-      )
-      .eq("enecuador", true)
-      .eq("rank_idrank", 7) // especie
+      `)
+      .eq('enecuador', true)
+      .eq('rank_idrank', 7) // especie
       .limit(limit);
 
     if (error) throw error;
