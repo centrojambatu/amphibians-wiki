@@ -25,7 +25,6 @@ export async function generateStaticParams() {
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (error) {
     console.error(error);
   }
