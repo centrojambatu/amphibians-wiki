@@ -15,6 +15,7 @@ interface PageProps {
 export default async function FamilyPage({params}: PageProps) {
   const {id} = await params;
   const family = mockTaxonomy.getFamilyById(id);
+
   if (!family) {
     notFound();
   }
@@ -27,9 +28,7 @@ export default async function FamilyPage({params}: PageProps) {
       <div className="mb-8 text-center">
         <h1 className="text-primary mb-2 text-4xl font-bold">{family.name}</h1>
         <p className="text-muted-foreground mb-4 text-lg italic">{family.scientific_name}</p>
-        {order && (
-          <Badge variant="outline">Orden: {order.name}</Badge>
-        )}
+        {order && <Badge variant="outline">Orden: {order.name}</Badge>}
       </div>
 
       <div className="mb-6">
@@ -72,5 +71,3 @@ export default async function FamilyPage({params}: PageProps) {
     </main>
   );
 }
-
-

@@ -60,7 +60,7 @@ export default async function HomePage() {
             <Badge variant="outline">690 especies</Badge>
             <Badge variant="outline">79 géneros</Badge>
             <Badge variant="outline">19 familias</Badge>
-            <Badge variant="success">353 endémicas</Badge>
+            <Badge variant="outline">353 endémicas</Badge>
           </div>
         </CardContent>
       </Card>

@@ -71,18 +71,20 @@ export const amphibianService = {
     // TODO: Implementar consulta SQL compleja con JOINs para filtrar por orden
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('taxon')
-      .select(`
+    const {data, error} = await supabase
+      .from("taxon")
+      .select(
+        `
         idtaxon,
         taxon,
         nombrecomun,
         autorano,
         endemica,
         taxon_idtaxon
-      `)
-      .eq('enecuador', true)
-      .eq('rank_idrank', 7) // especie
+      `,
+      )
+      .eq("enecuador", true)
+      .eq("rank_idrank", 7) // especie
       .limit(limit);
 
     if (error) throw error;

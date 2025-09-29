@@ -1,29 +1,29 @@
 // Minimal mock taxonomy dataset for Order → Family → Genus → Species navigation
 
-export type MockOrder = {
+export interface MockOrder {
   id: string;
   name: string;
   scientific_name: string;
   description: string;
-};
+}
 
-export type MockFamily = {
+export interface MockFamily {
   id: string;
   orderId: string;
   name: string;
   scientific_name: string;
   description?: string;
-};
+}
 
-export type MockGenus = {
+export interface MockGenus {
   id: string;
   familyId: string;
   name: string;
   scientific_name: string;
   description?: string;
-};
+}
 
-export type MockSpecies = {
+export interface MockSpecies {
   id: string;
   genusId: string;
   scientific_name: string;
@@ -32,7 +32,7 @@ export type MockSpecies = {
   conservation_status?: "CR" | "EN" | "VU" | "NT" | "LC";
   discovery_year?: number | null;
   distribution?: string;
-};
+}
 
 const orders: MockOrder[] = [
   {
@@ -56,26 +56,101 @@ const orders: MockOrder[] = [
 ];
 
 const families: MockFamily[] = [
-  { id: "hylidae", orderId: "anura", name: "Hylidae", scientific_name: "Hylidae", description: "Ranas arborícolas" },
-  { id: "bufonidae", orderId: "anura", name: "Bufonidae", scientific_name: "Bufonidae", description: "Sapos verdaderos" },
-  { id: "plethodontidae", orderId: "caudata", name: "Plethodontidae", scientific_name: "Plethodontidae" },
-  { id: "typhlonectidae", orderId: "gymnophiona", name: "Typhlonectidae", scientific_name: "Typhlonectidae" },
+  {
+    id: "hylidae",
+    orderId: "anura",
+    name: "Hylidae",
+    scientific_name: "Hylidae",
+    description: "Ranas arborícolas",
+  },
+  {
+    id: "bufonidae",
+    orderId: "anura",
+    name: "Bufonidae",
+    scientific_name: "Bufonidae",
+    description: "Sapos verdaderos",
+  },
+  {
+    id: "plethodontidae",
+    orderId: "caudata",
+    name: "Plethodontidae",
+    scientific_name: "Plethodontidae",
+  },
+  {
+    id: "typhlonectidae",
+    orderId: "gymnophiona",
+    name: "Typhlonectidae",
+    scientific_name: "Typhlonectidae",
+  },
 ];
 
 const genera: MockGenus[] = [
-  { id: "hypsiboas", familyId: "hylidae", name: "Hypsiboas", scientific_name: "Hypsiboas" },
-  { id: "dendropsophus", familyId: "hylidae", name: "Dendropsophus", scientific_name: "Dendropsophus" },
-  { id: "rhinella", familyId: "bufonidae", name: "Rhinella", scientific_name: "Rhinella" },
-  { id: "bolitoglossa", familyId: "plethodontidae", name: "Bolitoglossa", scientific_name: "Bolitoglossa" },
-  { id: "typhlonectes", familyId: "typhlonectidae", name: "Typhlonectes", scientific_name: "Typhlonectes" },
+  {id: "hypsiboas", familyId: "hylidae", name: "Hypsiboas", scientific_name: "Hypsiboas"},
+  {
+    id: "dendropsophus",
+    familyId: "hylidae",
+    name: "Dendropsophus",
+    scientific_name: "Dendropsophus",
+  },
+  {id: "rhinella", familyId: "bufonidae", name: "Rhinella", scientific_name: "Rhinella"},
+  {
+    id: "bolitoglossa",
+    familyId: "plethodontidae",
+    name: "Bolitoglossa",
+    scientific_name: "Bolitoglossa",
+  },
+  {
+    id: "typhlonectes",
+    familyId: "typhlonectidae",
+    name: "Typhlonectes",
+    scientific_name: "Typhlonectes",
+  },
 ];
 
 const species: MockSpecies[] = [
-  { id: "sp1", genusId: "hypsiboas", scientific_name: "Hypsiboas pellucens", common_name: "Rana de cristal", endemic: true, conservation_status: "LC", discovery_year: 1882, distribution: "Costa del Ecuador" },
-  { id: "sp2", genusId: "dendropsophus", scientific_name: "Dendropsophus bifurcus", common_name: "Ranita amarilla", conservation_status: "NT", discovery_year: 1883, distribution: "Amazonía" },
-  { id: "sp3", genusId: "rhinella", scientific_name: "Rhinella marinus", common_name: "Sapo de caña", conservation_status: "LC", discovery_year: 1758 },
-  { id: "sp4", genusId: "bolitoglossa", scientific_name: "Bolitoglossa equatoriana", common_name: "Salamandra ecuatoriana", endemic: true, conservation_status: "EN", discovery_year: 1954 },
-  { id: "sp5", genusId: "typhlonectes", scientific_name: "Typhlonectes compressicauda", common_name: "Cecilia acuática", conservation_status: "VU" },
+  {
+    id: "sp1",
+    genusId: "hypsiboas",
+    scientific_name: "Hypsiboas pellucens",
+    common_name: "Rana de cristal",
+    endemic: true,
+    conservation_status: "LC",
+    discovery_year: 1882,
+    distribution: "Costa del Ecuador",
+  },
+  {
+    id: "sp2",
+    genusId: "dendropsophus",
+    scientific_name: "Dendropsophus bifurcus",
+    common_name: "Ranita amarilla",
+    conservation_status: "NT",
+    discovery_year: 1883,
+    distribution: "Amazonía",
+  },
+  {
+    id: "sp3",
+    genusId: "rhinella",
+    scientific_name: "Rhinella marinus",
+    common_name: "Sapo de caña",
+    conservation_status: "LC",
+    discovery_year: 1758,
+  },
+  {
+    id: "sp4",
+    genusId: "bolitoglossa",
+    scientific_name: "Bolitoglossa equatoriana",
+    common_name: "Salamandra ecuatoriana",
+    endemic: true,
+    conservation_status: "EN",
+    discovery_year: 1954,
+  },
+  {
+    id: "sp5",
+    genusId: "typhlonectes",
+    scientific_name: "Typhlonectes compressicauda",
+    common_name: "Cecilia acuática",
+    conservation_status: "VU",
+  },
 ];
 
 export const mockTaxonomy = {
@@ -111,5 +186,3 @@ export const mockTaxonomy = {
     return species.find((s) => s.id === id);
   },
 };
-
-
