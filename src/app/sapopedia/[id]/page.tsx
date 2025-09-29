@@ -1,0 +1,54 @@
+import {createServiceClient} from "@/utils/supabase/server";
+
+// interface Post {
+//   id: string;
+//   title: string;
+//   content: string;
+// }
+
+// Next.js will invalidate the cache when a
+// request comes in, at most once every 24 hours.
+export const revalidate = 86400; // 24 hours
+
+export async function generateStaticParams() {
+  // const posts: Post[] = await fetch("https://api.vercel.app/blog").then((res) => res.json());
+
+  // return posts.map((post) => ({
+  //   id: String(post.id),
+  // }));
+
+  const supabaseClient = createServiceClient();
+
+  const {data: taxons, error} = await supabaseClient.from("taxon").select("idtaxon");
+
+  if (!taxons) {
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (error) {
+    console.error(error);
+  }
+
+  return taxons.map((taxon) => ({
+    id: String(taxon.idtaxon),
+  }));
+}
+
+export default async function Page({params}: {params: Promise<{id: string}>}) {
+  const {id} = await params;
+  const supabaseClient = createServiceClient();
+  const {data: taxons, error} = await supabaseClient.from("taxon").select("*").eq("idtaxon", id);
+
+  if (error) {
+    console.error(error);
+  }
+
+  return (
+    <main>
+      {/* <h1>Sapopedia</h1> */}
+      <h1>{taxons?.[0].nombrecomun}</h1>
+      <p>{taxons?.[0].taxon}</p>
+    </main>
+  );
+}
