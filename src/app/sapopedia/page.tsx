@@ -1,14 +1,11 @@
 import Link from "next/link";
 
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
 import {Badge} from "@/components/ui/badge";
-import {amphibianService} from "@/lib/supabase-existing";
+import {mockTaxonomy} from "@/lib/mock-taxonomy";
 
-export default async function SapopediaPage() {
-  const orders = await amphibianService.getOrders();
-  const endemicSpecies = await amphibianService.getEndemicSpecies(5);
-  const endangeredSpecies = await amphibianService.getEndangeredSpecies(5);
+export default function SapopediaPage() {
+  const orders = mockTaxonomy.getOrders();
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -35,7 +32,9 @@ export default async function SapopediaPage() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground text-sm">{order.description}</span>
-                    <Badge variant="outline">{order.species_count} especies</Badge>
+                    <Badge variant="outline">
+                      {mockTaxonomy.getFamiliesByOrder(order.id).length} familias
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -45,9 +44,9 @@ export default async function SapopediaPage() {
       </div>
 
       {/* Especies destacadas */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Especies endémicas */}
-        <Card>
+      {/* <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2"> */}
+      {/* Especies endémicas */}
+      {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">🏔️ Especies Endémicas</CardTitle>
           </CardHeader>
@@ -81,10 +80,10 @@ export default async function SapopediaPage() {
               </Link>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        {/* Especies en peligro */}
-        <Card>
+      {/* Especies en peligro */}
+      {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">⚠️ Especies en Peligro</CardTitle>
           </CardHeader>
@@ -121,31 +120,31 @@ export default async function SapopediaPage() {
               </Link>
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card> */}
+      {/* </div> */}
 
       {/* Información adicional */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Acerca de SapoPedia Ecuador</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Esta enciclopedia electrónica es una iniciativa del Centro Jambatu para documentar y
-            difundir el conocimiento sobre la diversidad de anfibios de Ecuador.
-          </p>
-          <p className="text-muted-foreground text-sm">
-            Los datos presentados aquí provienen de investigaciones científicas, colecciones
-            museológicas y observaciones de la comunidad científica y ciudadana.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">Centro Jambatu</Badge>
-            <Badge variant="outline">Fundación Otonga</Badge>
-            <Badge variant="outline">Ciencia Ciudadana</Badge>
-            <Badge variant="outline">Conservación</Badge>
-          </div>
-        </CardContent>
-      </Card>
+      {/* <Card>
+          <CardHeader>
+            <CardTitle>Acerca de SapoPedia Ecuador</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              Esta enciclopedia electrónica es una iniciativa del Centro Jambatu para documentar y
+              difundir el conocimiento sobre la diversidad de anfibios de Ecuador.
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Los datos presentados aquí provienen de investigaciones científicas, colecciones
+              museológicas y observaciones de la comunidad científica y ciudadana.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">Centro Jambatu</Badge>
+              <Badge variant="outline">Fundación Otonga</Badge>
+              <Badge variant="outline">Ciencia Ciudadana</Badge>
+              <Badge variant="outline">Conservación</Badge>
+            </div>
+          </CardContent>
+        </Card> */}
     </main>
   );
 }
