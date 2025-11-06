@@ -1,1787 +1,6688 @@
-export type Json = string | number | boolean | null | {[key: string]: Json | undefined} | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export interface Database {
+export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
-  };
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       animacion: {
         Row: {
-          descripcion: string | null;
-          enlace: string;
-          idanimacion: number;
-          nombre: string;
-          taxon_idtaxon: number;
-          thumbnail: string | null;
-        };
+          descripcion: string | null
+          enlace: string
+          id_animacion: number
+          nombre: string
+          taxon_id: number
+          thumbnail: string | null
+        }
         Insert: {
-          descripcion?: string | null;
-          enlace?: string;
-          idanimacion?: number;
-          nombre?: string;
-          taxon_idtaxon: number;
-          thumbnail?: string | null;
-        };
+          descripcion?: string | null
+          enlace?: string
+          id_animacion?: number
+          nombre?: string
+          taxon_id: number
+          thumbnail?: string | null
+        }
         Update: {
-          descripcion?: string | null;
-          enlace?: string;
-          idanimacion?: number;
-          nombre?: string;
-          taxon_idtaxon?: number;
-          thumbnail?: string | null;
-        };
-        Relationships: [];
-      };
+          descripcion?: string | null
+          enlace?: string
+          id_animacion?: number
+          nombre?: string
+          taxon_id?: number
+          thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       audio: {
         Row: {
-          autor: string | null;
-          descripcion: string | null;
-          fecha: string | null;
-          idaudio: number;
-          nombre: string;
-          numeromuseo: string | null;
-          taxon_idtaxon: number;
-          urlaudio: string;
-          urlfotografia: string | null;
-          urlosciloespetrograma: string | null;
-          urlpublicacion: string | null;
-        };
+          autor: string | null
+          descripcion: string | null
+          fecha: string | null
+          id_audio: number
+          nombre: string
+          numero_museo: string | null
+          taxon_id: number
+          traducciones: Json | null
+          url_audio: string
+          url_fotografia: string | null
+          url_oscilo_espetrograma: string | null
+          url_publicacion: string | null
+        }
         Insert: {
-          autor?: string | null;
-          descripcion?: string | null;
-          fecha?: string | null;
-          idaudio?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          taxon_idtaxon: number;
-          urlaudio?: string;
-          urlfotografia?: string | null;
-          urlosciloespetrograma?: string | null;
-          urlpublicacion?: string | null;
-        };
+          autor?: string | null
+          descripcion?: string | null
+          fecha?: string | null
+          id_audio?: number
+          nombre?: string
+          numero_museo?: string | null
+          taxon_id: number
+          traducciones?: Json | null
+          url_audio?: string
+          url_fotografia?: string | null
+          url_oscilo_espetrograma?: string | null
+          url_publicacion?: string | null
+        }
         Update: {
-          autor?: string | null;
-          descripcion?: string | null;
-          fecha?: string | null;
-          idaudio?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          taxon_idtaxon?: number;
-          urlaudio?: string;
-          urlfotografia?: string | null;
-          urlosciloespetrograma?: string | null;
-          urlpublicacion?: string | null;
-        };
-        Relationships: [];
-      };
+          autor?: string | null
+          descripcion?: string | null
+          fecha?: string | null
+          id_audio?: number
+          nombre?: string
+          numero_museo?: string | null
+          taxon_id?: number
+          traducciones?: Json | null
+          url_audio?: string
+          url_fotografia?: string | null
+          url_oscilo_espetrograma?: string | null
+          url_publicacion?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "audio_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       autor: {
         Row: {
-          apellidos: string;
-          biografia_idbiografia: number | null;
-          enlacebiografia: string | null;
-          idautor: number;
-          nombres: string | null;
-        };
+          apellidos: string
+          biografia_id: number | null
+          enlace_biografia: string | null
+          id_autor: number
+          nombres: string | null
+        }
         Insert: {
-          apellidos: string;
-          biografia_idbiografia?: number | null;
-          enlacebiografia?: string | null;
-          idautor?: number;
-          nombres?: string | null;
-        };
+          apellidos: string
+          biografia_id?: number | null
+          enlace_biografia?: string | null
+          id_autor?: number
+          nombres?: string | null
+        }
         Update: {
-          apellidos?: string;
-          biografia_idbiografia?: number | null;
-          enlacebiografia?: string | null;
-          idautor?: number;
-          nombres?: string | null;
-        };
-        Relationships: [];
-      };
+          apellidos?: string
+          biografia_id?: number | null
+          enlace_biografia?: string | null
+          id_autor?: number
+          nombres?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autor_biografia_id_fkey"
+            columns: ["biografia_id"]
+            isOneToOne: false
+            referencedRelation: "biografia"
+            referencedColumns: ["id_biografia"]
+          },
+        ]
+      }
       biografia: {
         Row: {
-          anonacimiento: number | null;
-          asociacionesprofesionales: string | null;
-          email: string | null;
-          experiencialaboral: string | null;
-          idbiografia: number;
-          iniciointeresestudio: string | null;
-          interesinvestigacion: string | null;
-          lugarnacimiento: string | null;
-          posicionactual: string | null;
-          premiosreconocimientos: string | null;
-          titulosacademicos: string | null;
-        };
+          ano_nacimiento: number | null
+          asociaciones_profesionales: string | null
+          email: string | null
+          experiencia_laboral: string | null
+          id_biografia: number
+          inicio_interes_estudio: string | null
+          interes_investigacion: string | null
+          lugar_nacimiento: string | null
+          posicion_actual: string | null
+          premios_reconocimientos: string | null
+          titulos_academicos: string | null
+          traducciones: Json | null
+        }
         Insert: {
-          anonacimiento?: number | null;
-          asociacionesprofesionales?: string | null;
-          email?: string | null;
-          experiencialaboral?: string | null;
-          idbiografia?: number;
-          iniciointeresestudio?: string | null;
-          interesinvestigacion?: string | null;
-          lugarnacimiento?: string | null;
-          posicionactual?: string | null;
-          premiosreconocimientos?: string | null;
-          titulosacademicos?: string | null;
-        };
+          ano_nacimiento?: number | null
+          asociaciones_profesionales?: string | null
+          email?: string | null
+          experiencia_laboral?: string | null
+          id_biografia?: number
+          inicio_interes_estudio?: string | null
+          interes_investigacion?: string | null
+          lugar_nacimiento?: string | null
+          posicion_actual?: string | null
+          premios_reconocimientos?: string | null
+          titulos_academicos?: string | null
+          traducciones?: Json | null
+        }
         Update: {
-          anonacimiento?: number | null;
-          asociacionesprofesionales?: string | null;
-          email?: string | null;
-          experiencialaboral?: string | null;
-          idbiografia?: number;
-          iniciointeresestudio?: string | null;
-          interesinvestigacion?: string | null;
-          lugarnacimiento?: string | null;
-          posicionactual?: string | null;
-          premiosreconocimientos?: string | null;
-          titulosacademicos?: string | null;
-        };
-        Relationships: [];
-      };
+          ano_nacimiento?: number | null
+          asociaciones_profesionales?: string | null
+          email?: string | null
+          experiencia_laboral?: string | null
+          id_biografia?: number
+          inicio_interes_estudio?: string | null
+          interes_investigacion?: string | null
+          lugar_nacimiento?: string | null
+          posicion_actual?: string | null
+          premios_reconocimientos?: string | null
+          titulos_academicos?: string | null
+          traducciones?: Json | null
+        }
+        Relationships: []
+      }
       boletin: {
         Row: {
-          catalogo_idcatalogo: number;
-          enlace: string;
-          fecha: string;
-          idboletin: number;
-          titulo: string | null;
-        };
+          catalogo_id: number
+          enlace: string
+          fecha: string
+          id_boletin: number
+          titulo: string | null
+        }
         Insert: {
-          catalogo_idcatalogo: number;
-          enlace: string;
-          fecha?: string;
-          idboletin?: number;
-          titulo?: string | null;
-        };
+          catalogo_id: number
+          enlace: string
+          fecha?: string
+          id_boletin?: number
+          titulo?: string | null
+        }
         Update: {
-          catalogo_idcatalogo?: number;
-          enlace?: string;
-          fecha?: string;
-          idboletin?: number;
-          titulo?: string | null;
-        };
-        Relationships: [];
-      };
-      catalogoawe: {
+          catalogo_id?: number
+          enlace?: string
+          fecha?: string
+          id_boletin?: number
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boletin_catalogo_id_fkey"
+            columns: ["catalogo_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      catalogo_awe: {
         Row: {
-          descripcion: string | null;
-          idcatalogoawe: number;
-          nombre: string;
-          orden: number | null;
-          sigla: string | null;
-          tipocatalogoawe_idtipocatalogoawe: number;
-        };
+          descripcion: string | null
+          id_catalogo_awe: number
+          nombre: string
+          orden: number | null
+          sigla: string | null
+          tipo_catalogo_awe_id: number | null
+          traducciones: Json | null
+        }
         Insert: {
-          descripcion?: string | null;
-          idcatalogoawe?: number;
-          nombre: string;
-          orden?: number | null;
-          sigla?: string | null;
-          tipocatalogoawe_idtipocatalogoawe: number;
-        };
+          descripcion?: string | null
+          id_catalogo_awe?: number
+          nombre: string
+          orden?: number | null
+          sigla?: string | null
+          tipo_catalogo_awe_id?: number | null
+          traducciones?: Json | null
+        }
         Update: {
-          descripcion?: string | null;
-          idcatalogoawe?: number;
-          nombre?: string;
-          orden?: number | null;
-          sigla?: string | null;
-          tipocatalogoawe_idtipocatalogoawe?: number;
-        };
-        Relationships: [];
-      };
-      enlacerelacionadomanejoexsitu: {
+          descripcion?: string | null
+          id_catalogo_awe?: number
+          nombre?: string
+          orden?: number | null
+          sigla?: string | null
+          tipo_catalogo_awe_id?: number | null
+          traducciones?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogo_awe_tipo_catalogo_awe_id_fkey"
+            columns: ["tipo_catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "tipo_catalogo_awe"
+            referencedColumns: ["id_tipo_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "catalogo_awe_tipo_catalogo_awe_id_fkey"
+            columns: ["tipo_catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tipo_catalogo_lac"
+            referencedColumns: ["id_tipo_catalogo_awe"]
+          },
+        ]
+      }
+      enlace_relacionado_manejo_ex_situ: {
         Row: {
-          enlace: string;
-          idenlacerelacionadomanejoexsitu: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          nombre: string;
-        };
+          enlace: string
+          id_enlace_relacionado_manejo_ex_situ: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          nombre: string
+        }
         Insert: {
-          enlace?: string;
-          idenlacerelacionadomanejoexsitu?: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          nombre?: string;
-        };
+          enlace?: string
+          id_enlace_relacionado_manejo_ex_situ?: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          nombre?: string
+        }
         Update: {
-          enlace?: string;
-          idenlacerelacionadomanejoexsitu?: number;
-          manejoexsitu_idmanejoexsitu?: number;
-          manejoexsitu_taxon_idtaxon?: number;
-          nombre?: string;
-        };
-        Relationships: [];
-      };
-      enlacerelacionadotaxon: {
+          enlace?: string
+          id_enlace_relacionado_manejo_ex_situ?: number
+          manejo_ex_situ_id?: number
+          manejo_ex_situ_taxon_id?: number
+          nombre?: string
+        }
+        Relationships: []
+      }
+      enlace_relacionado_taxon: {
         Row: {
-          enlace: string;
-          idenlacerelacionadotaxon: number;
-          nombre: string;
-          taxon_idtaxon: number;
-        };
+          enlace: string
+          id_enlace_relacionado_taxon: number
+          nombre: string
+          taxon_id: number
+        }
         Insert: {
-          enlace?: string;
-          idenlacerelacionadotaxon?: number;
-          nombre?: string;
-          taxon_idtaxon: number;
-        };
+          enlace?: string
+          id_enlace_relacionado_taxon?: number
+          nombre?: string
+          taxon_id: number
+        }
         Update: {
-          enlace?: string;
-          idenlacerelacionadotaxon?: number;
-          nombre?: string;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      fichaespecie: {
+          enlace?: string
+          id_enlace_relacionado_taxon?: number
+          nombre?: string
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      ficha_especie: {
         Row: {
-          agradecimiento: string | null;
-          asw: string | null;
-          autorfotoficha: string | null;
-          autoriacompilador: string | null;
-          autoriaeditor: string | null;
-          aw: string | null;
-          blog: string | null;
-          canto: string | null;
-          colector: string | null;
-          colorenpreservacion: string | null;
-          colorenvida: string | null;
-          comentarioestatuspoblacional: string | null;
-          compilador: string | null;
-          descripcion: string | null;
-          descubridor: string | null;
-          diagnosis: string | null;
-          dieta: string | null;
-          distribucion: string | null;
-          distribucionglobal: string | null;
-          editor: string | null;
-          etimologia: string | null;
-          fechaactualizacion: string | null;
-          fechacompilacion: string | null;
-          fechaedicion: string | null;
-          fotografiaficha: string | null;
-          fuentelistaroja: string | null;
-          genbank: string | null;
-          habitatbiologia: string | null;
-          herpnet: string | null;
-          historial: string | null;
-          identificacion: string | null;
-          idfichaespecie: number;
-          inaturalist: string | null;
-          informacionadicional: string | null;
-          larva: string | null;
-          morfometria: string | null;
-          observacionzonaaltitudinal: string | null;
-          publicar: boolean;
-          rangoaltitudinal: string | null;
-          referenciaareaprotegida: string | null;
-          reproduccion: string | null;
-          sinonimia: string | null;
-          svlhembra: string | null;
-          svlmacho: string | null;
-          taxon_idtaxon: number;
-          taxonomia: string | null;
-          uicn: string | null;
-          usos: string | null;
-          wikipedia: string | null;
-        };
+          agradecimiento: string | null
+          asw: string | null
+          autor_foto_ficha: string | null
+          autoria_compilador: string | null
+          autoria_editor: string | null
+          aw: string | null
+          blog: string | null
+          canto: string | null
+          colector: string | null
+          color_en_preservacion: string | null
+          color_en_vida: string | null
+          comentario_estatus_poblacional: string | null
+          compilador: string | null
+          descripcion: string | null
+          descubridor: string | null
+          diagnosis: string | null
+          dieta: string | null
+          distribucion: string | null
+          distribucion_global: string | null
+          editor: string | null
+          etimologia: string | null
+          fecha_actualizacion: string | null
+          fecha_compilacion: string | null
+          fecha_edicion: string | null
+          fotografia_ficha: string | null
+          fuente_lista_roja: string | null
+          genbank: string | null
+          habitat_biologia: string | null
+          herpnet: string | null
+          historial: string | null
+          id_ficha_especie: number
+          identificacion: string | null
+          inaturalist: string | null
+          informacion_adicional: string | null
+          larva: string | null
+          morfometria: string | null
+          observacion_zona_altitudinal: string | null
+          publicar: boolean
+          rango_altitudinal: string | null
+          referencia_area_protegida: string | null
+          reproduccion: string | null
+          sinonimia: string | null
+          svl_hembra: string | null
+          svl_macho: string | null
+          taxon_id: number
+          taxonomia: string | null
+          traducciones: Json | null
+          uicn: string | null
+          usos: string | null
+          wikipedia: string | null
+        }
         Insert: {
-          agradecimiento?: string | null;
-          asw?: string | null;
-          autorfotoficha?: string | null;
-          autoriacompilador?: string | null;
-          autoriaeditor?: string | null;
-          aw?: string | null;
-          blog?: string | null;
-          canto?: string | null;
-          colector?: string | null;
-          colorenpreservacion?: string | null;
-          colorenvida?: string | null;
-          comentarioestatuspoblacional?: string | null;
-          compilador?: string | null;
-          descripcion?: string | null;
-          descubridor?: string | null;
-          diagnosis?: string | null;
-          dieta?: string | null;
-          distribucion?: string | null;
-          distribucionglobal?: string | null;
-          editor?: string | null;
-          etimologia?: string | null;
-          fechaactualizacion?: string | null;
-          fechacompilacion?: string | null;
-          fechaedicion?: string | null;
-          fotografiaficha?: string | null;
-          fuentelistaroja?: string | null;
-          genbank?: string | null;
-          habitatbiologia?: string | null;
-          herpnet?: string | null;
-          historial?: string | null;
-          identificacion?: string | null;
-          idfichaespecie?: number;
-          inaturalist?: string | null;
-          informacionadicional?: string | null;
-          larva?: string | null;
-          morfometria?: string | null;
-          observacionzonaaltitudinal?: string | null;
-          publicar?: boolean;
-          rangoaltitudinal?: string | null;
-          referenciaareaprotegida?: string | null;
-          reproduccion?: string | null;
-          sinonimia?: string | null;
-          svlhembra?: string | null;
-          svlmacho?: string | null;
-          taxon_idtaxon: number;
-          taxonomia?: string | null;
-          uicn?: string | null;
-          usos?: string | null;
-          wikipedia?: string | null;
-        };
+          agradecimiento?: string | null
+          asw?: string | null
+          autor_foto_ficha?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_ficha?: string | null
+          fuente_lista_roja?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          observacion_zona_altitudinal?: string | null
+          publicar?: boolean
+          rango_altitudinal?: string | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id: number
+          taxonomia?: string | null
+          traducciones?: Json | null
+          uicn?: string | null
+          usos?: string | null
+          wikipedia?: string | null
+        }
         Update: {
-          agradecimiento?: string | null;
-          asw?: string | null;
-          autorfotoficha?: string | null;
-          autoriacompilador?: string | null;
-          autoriaeditor?: string | null;
-          aw?: string | null;
-          blog?: string | null;
-          canto?: string | null;
-          colector?: string | null;
-          colorenpreservacion?: string | null;
-          colorenvida?: string | null;
-          comentarioestatuspoblacional?: string | null;
-          compilador?: string | null;
-          descripcion?: string | null;
-          descubridor?: string | null;
-          diagnosis?: string | null;
-          dieta?: string | null;
-          distribucion?: string | null;
-          distribucionglobal?: string | null;
-          editor?: string | null;
-          etimologia?: string | null;
-          fechaactualizacion?: string | null;
-          fechacompilacion?: string | null;
-          fechaedicion?: string | null;
-          fotografiaficha?: string | null;
-          fuentelistaroja?: string | null;
-          genbank?: string | null;
-          habitatbiologia?: string | null;
-          herpnet?: string | null;
-          historial?: string | null;
-          identificacion?: string | null;
-          idfichaespecie?: number;
-          inaturalist?: string | null;
-          informacionadicional?: string | null;
-          larva?: string | null;
-          morfometria?: string | null;
-          observacionzonaaltitudinal?: string | null;
-          publicar?: boolean;
-          rangoaltitudinal?: string | null;
-          referenciaareaprotegida?: string | null;
-          reproduccion?: string | null;
-          sinonimia?: string | null;
-          svlhembra?: string | null;
-          svlmacho?: string | null;
-          taxon_idtaxon?: number;
-          taxonomia?: string | null;
-          uicn?: string | null;
-          usos?: string | null;
-          wikipedia?: string | null;
-        };
-        Relationships: [];
-      };
+          agradecimiento?: string | null
+          asw?: string | null
+          autor_foto_ficha?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_ficha?: string | null
+          fuente_lista_roja?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          observacion_zona_altitudinal?: string | null
+          publicar?: boolean
+          rango_altitudinal?: string | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number
+          taxonomia?: string | null
+          traducciones?: Json | null
+          uicn?: string | null
+          usos?: string | null
+          wikipedia?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       fotografia: {
         Row: {
-          autor: string | null;
-          catalogoawe_idcatalogoawe: number;
-          descripcion: string | null;
-          enlace: string;
-          idfotografia: number;
-          nombre: string;
-          numeromuseo: string | null;
-          orden: number | null;
-          taxon_idtaxon: number;
-          thumbnail: string | null;
-        };
+          autor: string | null
+          catalogo_awe_id: number
+          descripcion: string | null
+          enlace: string
+          id_fotografia: number
+          nombre: string
+          numero_museo: string | null
+          orden: number | null
+          taxon_id: number
+          thumbnail: string | null
+        }
         Insert: {
-          autor?: string | null;
-          catalogoawe_idcatalogoawe: number;
-          descripcion?: string | null;
-          enlace?: string;
-          idfotografia?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          orden?: number | null;
-          taxon_idtaxon: number;
-          thumbnail?: string | null;
-        };
+          autor?: string | null
+          catalogo_awe_id: number
+          descripcion?: string | null
+          enlace?: string
+          id_fotografia?: number
+          nombre?: string
+          numero_museo?: string | null
+          orden?: number | null
+          taxon_id: number
+          thumbnail?: string | null
+        }
         Update: {
-          autor?: string | null;
-          catalogoawe_idcatalogoawe?: number;
-          descripcion?: string | null;
-          enlace?: string;
-          idfotografia?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          orden?: number | null;
-          taxon_idtaxon?: number;
-          thumbnail?: string | null;
-        };
-        Relationships: [];
-      };
+          autor?: string | null
+          catalogo_awe_id?: number
+          descripcion?: string | null
+          enlace?: string
+          id_fotografia?: number
+          nombre?: string
+          numero_museo?: string | null
+          orden?: number | null
+          taxon_id?: number
+          thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fotografia_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       geopolitica: {
         Row: {
-          geopolitica_idgeopolitica: number | null;
-          idgeopolitica: number;
-          nombre: string;
-          rankgeopolitica_idrankgeopolitica: number;
-        };
+          geopolitica_id: number | null
+          id_geopolitica: number
+          nombre: string
+          rank_geopolitica_id: number
+        }
         Insert: {
-          geopolitica_idgeopolitica?: number | null;
-          idgeopolitica?: number;
-          nombre: string;
-          rankgeopolitica_idrankgeopolitica: number;
-        };
+          geopolitica_id?: number | null
+          id_geopolitica?: number
+          nombre: string
+          rank_geopolitica_id: number
+        }
         Update: {
-          geopolitica_idgeopolitica?: number | null;
-          idgeopolitica?: number;
-          nombre?: string;
-          rankgeopolitica_idrankgeopolitica?: number;
-        };
-        Relationships: [];
-      };
-      imagenpagintro: {
+          geopolitica_id?: number | null
+          id_geopolitica?: number
+          nombre?: string
+          rank_geopolitica_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "geopolitica"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_localidades"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "geopolitica_rank_geopolitica_id_fkey"
+            columns: ["rank_geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "rank_geopolitica"
+            referencedColumns: ["id_rank_geopolitica"]
+          },
+        ]
+      }
+      imagen_pagina_intro: {
         Row: {
-          autor: string | null;
-          catalogo_idcatalogo: number;
-          descripcion: string | null;
-          enlace: string;
-          enlacenota: string | null;
-          idimagenpagintro: number;
-          publicar: boolean;
-        };
+          autor: string | null
+          catalogo_id: number
+          descripcion: string | null
+          enlace: string
+          enlace_nota: string | null
+          id_imagen_pagina_intro: number
+          publicar: boolean
+        }
         Insert: {
-          autor?: string | null;
-          catalogo_idcatalogo: number;
-          descripcion?: string | null;
-          enlace: string;
-          enlacenota?: string | null;
-          idimagenpagintro?: number;
-          publicar?: boolean;
-        };
+          autor?: string | null
+          catalogo_id: number
+          descripcion?: string | null
+          enlace: string
+          enlace_nota?: string | null
+          id_imagen_pagina_intro?: number
+          publicar?: boolean
+        }
         Update: {
-          autor?: string | null;
-          catalogo_idcatalogo?: number;
-          descripcion?: string | null;
-          enlace?: string;
-          enlacenota?: string | null;
-          idimagenpagintro?: number;
-          publicar?: boolean;
-        };
-        Relationships: [];
-      };
-      infoespecie: {
+          autor?: string | null
+          catalogo_id?: number
+          descripcion?: string | null
+          enlace?: string
+          enlace_nota?: string | null
+          id_imagen_pagina_intro?: number
+          publicar?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imagen_pagina_intro_catalogo_id_fkey"
+            columns: ["catalogo_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      info_especie: {
         Row: {
-          contenido: string;
-          fecha: string;
-          fotografia_idfotografia: number;
-          idinfoespecie: number;
-          publicar: boolean;
-          taxon_idtaxon: number;
-          tipo: boolean;
-          titulo: string | null;
-        };
+          contenido: string
+          fecha: string
+          fotografia_id: number
+          id_info_especie: number
+          publicar: boolean
+          taxon_id: number
+          tipo: boolean
+          titulo: string | null
+        }
         Insert: {
-          contenido: string;
-          fecha?: string;
-          fotografia_idfotografia: number;
-          idinfoespecie?: number;
-          publicar?: boolean;
-          taxon_idtaxon: number;
-          tipo?: boolean;
-          titulo?: string | null;
-        };
+          contenido: string
+          fecha?: string
+          fotografia_id: number
+          id_info_especie?: number
+          publicar?: boolean
+          taxon_id: number
+          tipo?: boolean
+          titulo?: string | null
+        }
         Update: {
-          contenido?: string;
-          fecha?: string;
-          fotografia_idfotografia?: number;
-          idinfoespecie?: number;
-          publicar?: boolean;
-          taxon_idtaxon?: number;
-          tipo?: boolean;
-          titulo?: string | null;
-        };
-        Relationships: [];
-      };
-      manejoexsitu: {
+          contenido?: string
+          fecha?: string
+          fotografia_id?: number
+          id_info_especie?: number
+          publicar?: boolean
+          taxon_id?: number
+          tipo?: boolean
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "info_especie_fotografia_id_fkey"
+            columns: ["fotografia_id"]
+            isOneToOne: false
+            referencedRelation: "fotografia"
+            referencedColumns: ["id_fotografia"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "info_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      manejo_ex_situ: {
         Row: {
-          administracionproyectorecursos: string | null;
-          antecedente: string | null;
-          autorfotoexsitu: string | null;
-          cita: string | null;
-          comentarios: string | null;
-          dietanutricion: string | null;
-          diversidadgenetica: string | null;
-          enlaceplanmenajo: string | null;
-          fechaactualizacion: string | null;
-          fotografiaexsitu: string | null;
-          geneticapieparental: string | null;
-          historialficha: string | null;
-          idmanejoexsitu: number;
-          mantenimiento: string | null;
-          numeroadultohembra: number | null;
-          numeroadultomacho: number | null;
-          numerofundadorhembra: number | null;
-          numerofundadormacho: number | null;
-          numerofundadornd: number | null;
-          numerofundadorrenacuajo: number | null;
-          numerojuvenil: number | null;
-          numerorenacuajo: number | null;
-          planmanejo: string | null;
-          procedenciahabitat: string | null;
-          publicar: boolean;
-          reintroduccion: string | null;
-          reproduccioncomportamiento: string | null;
-          taxon_idtaxon: number;
-        };
+          administracion_proyecto_recursos: string | null
+          antecedente: string | null
+          autor_foto_ex_situ: string | null
+          cita: string | null
+          comentarios: string | null
+          dieta_nutricion: string | null
+          diversidad_genetica: string | null
+          enlace_plan_manejo: string | null
+          fecha_actualizacion: string | null
+          fotografia_ex_situ: string | null
+          genetica_pie_parental: string | null
+          historial_ficha: string | null
+          id_manejo_ex_situ: number
+          mantenimiento: string | null
+          numero_adulto_hembra: number | null
+          numero_adulto_macho: number | null
+          numero_fundador_hembra: number | null
+          numero_fundador_macho: number | null
+          numero_fundador_nd: number | null
+          numero_fundador_renacuajo: number | null
+          numero_juvenil: number | null
+          numero_renacuajo: number | null
+          plan_manejo: string | null
+          procedencia_habitat: string | null
+          publicar: boolean
+          reintroduccion: string | null
+          reproduccion_comportamiento: string | null
+          taxon_id: number
+        }
         Insert: {
-          administracionproyectorecursos?: string | null;
-          antecedente?: string | null;
-          autorfotoexsitu?: string | null;
-          cita?: string | null;
-          comentarios?: string | null;
-          dietanutricion?: string | null;
-          diversidadgenetica?: string | null;
-          enlaceplanmenajo?: string | null;
-          fechaactualizacion?: string | null;
-          fotografiaexsitu?: string | null;
-          geneticapieparental?: string | null;
-          historialficha?: string | null;
-          idmanejoexsitu?: number;
-          mantenimiento?: string | null;
-          numeroadultohembra?: number | null;
-          numeroadultomacho?: number | null;
-          numerofundadorhembra?: number | null;
-          numerofundadormacho?: number | null;
-          numerofundadornd?: number | null;
-          numerofundadorrenacuajo?: number | null;
-          numerojuvenil?: number | null;
-          numerorenacuajo?: number | null;
-          planmanejo?: string | null;
-          procedenciahabitat?: string | null;
-          publicar?: boolean;
-          reintroduccion?: string | null;
-          reproduccioncomportamiento?: string | null;
-          taxon_idtaxon: number;
-        };
+          administracion_proyecto_recursos?: string | null
+          antecedente?: string | null
+          autor_foto_ex_situ?: string | null
+          cita?: string | null
+          comentarios?: string | null
+          dieta_nutricion?: string | null
+          diversidad_genetica?: string | null
+          enlace_plan_manejo?: string | null
+          fecha_actualizacion?: string | null
+          fotografia_ex_situ?: string | null
+          genetica_pie_parental?: string | null
+          historial_ficha?: string | null
+          id_manejo_ex_situ?: number
+          mantenimiento?: string | null
+          numero_adulto_hembra?: number | null
+          numero_adulto_macho?: number | null
+          numero_fundador_hembra?: number | null
+          numero_fundador_macho?: number | null
+          numero_fundador_nd?: number | null
+          numero_fundador_renacuajo?: number | null
+          numero_juvenil?: number | null
+          numero_renacuajo?: number | null
+          plan_manejo?: string | null
+          procedencia_habitat?: string | null
+          publicar?: boolean
+          reintroduccion?: string | null
+          reproduccion_comportamiento?: string | null
+          taxon_id: number
+        }
         Update: {
-          administracionproyectorecursos?: string | null;
-          antecedente?: string | null;
-          autorfotoexsitu?: string | null;
-          cita?: string | null;
-          comentarios?: string | null;
-          dietanutricion?: string | null;
-          diversidadgenetica?: string | null;
-          enlaceplanmenajo?: string | null;
-          fechaactualizacion?: string | null;
-          fotografiaexsitu?: string | null;
-          geneticapieparental?: string | null;
-          historialficha?: string | null;
-          idmanejoexsitu?: number;
-          mantenimiento?: string | null;
-          numeroadultohembra?: number | null;
-          numeroadultomacho?: number | null;
-          numerofundadorhembra?: number | null;
-          numerofundadormacho?: number | null;
-          numerofundadornd?: number | null;
-          numerofundadorrenacuajo?: number | null;
-          numerojuvenil?: number | null;
-          numerorenacuajo?: number | null;
-          planmanejo?: string | null;
-          procedenciahabitat?: string | null;
-          publicar?: boolean;
-          reintroduccion?: string | null;
-          reproduccioncomportamiento?: string | null;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      manejoexsitugeopolitica: {
+          administracion_proyecto_recursos?: string | null
+          antecedente?: string | null
+          autor_foto_ex_situ?: string | null
+          cita?: string | null
+          comentarios?: string | null
+          dieta_nutricion?: string | null
+          diversidad_genetica?: string | null
+          enlace_plan_manejo?: string | null
+          fecha_actualizacion?: string | null
+          fotografia_ex_situ?: string | null
+          genetica_pie_parental?: string | null
+          historial_ficha?: string | null
+          id_manejo_ex_situ?: number
+          mantenimiento?: string | null
+          numero_adulto_hembra?: number | null
+          numero_adulto_macho?: number | null
+          numero_fundador_hembra?: number | null
+          numero_fundador_macho?: number | null
+          numero_fundador_nd?: number | null
+          numero_fundador_renacuajo?: number | null
+          numero_juvenil?: number | null
+          numero_renacuajo?: number | null
+          plan_manejo?: string | null
+          procedencia_habitat?: string | null
+          publicar?: boolean
+          reintroduccion?: string | null
+          reproduccion_comportamiento?: string | null
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      manejo_ex_situ_geopolitica: {
         Row: {
-          geopolitica_idgeopolitica: number;
-          idmanejoexsitugeopolitica: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          microhabitat: string | null;
-        };
+          geopolitica_id: number
+          id_manejo_ex_situ_geopolitica: number
+          manejo_ex_situ_id: number | null
+          manejo_ex_situ_taxon_id: number
+          microhabitat: string | null
+        }
         Insert: {
-          geopolitica_idgeopolitica: number;
-          idmanejoexsitugeopolitica?: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          microhabitat?: string | null;
-        };
+          geopolitica_id: number
+          id_manejo_ex_situ_geopolitica?: number
+          manejo_ex_situ_id?: number | null
+          manejo_ex_situ_taxon_id: number
+          microhabitat?: string | null
+        }
         Update: {
-          geopolitica_idgeopolitica?: number;
-          idmanejoexsitugeopolitica?: number;
-          manejoexsitu_idmanejoexsitu?: number;
-          manejoexsitu_taxon_idtaxon?: number;
-          microhabitat?: string | null;
-        };
-        Relationships: [];
-      };
-      manejoexsituprotocolo: {
+          geopolitica_id?: number
+          id_manejo_ex_situ_geopolitica?: number
+          manejo_ex_situ_id?: number | null
+          manejo_ex_situ_taxon_id?: number
+          microhabitat?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "geopolitica"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_localidades"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_fkey"
+            columns: ["manejo_ex_situ_id", "manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "manejo_ex_situ"
+            referencedColumns: ["id_manejo_ex_situ", "taxon_id"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      manejo_ex_situ_protocolo: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          idmanejoexsituprotocolo: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          protocolo: string;
-        };
+          catalogo_awe_id: number
+          id_manejo_ex_situ_protocolo: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          protocolo: string
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          idmanejoexsituprotocolo?: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          protocolo: string;
-        };
+          catalogo_awe_id: number
+          id_manejo_ex_situ_protocolo?: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          protocolo: string
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          idmanejoexsituprotocolo?: number;
-          manejoexsitu_idmanejoexsitu?: number;
-          manejoexsitu_taxon_idtaxon?: number;
-          protocolo?: string;
-        };
-        Relationships: [];
-      };
-      manejoexsitupublicacion: {
+          catalogo_awe_id?: number
+          id_manejo_ex_situ_protocolo?: number
+          manejo_ex_situ_id?: number
+          manejo_ex_situ_taxon_id?: number
+          protocolo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manejo_ex_situ_protocolo_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_protocolo_manejo_ex_situ_fkey"
+            columns: ["manejo_ex_situ_id", "manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "manejo_ex_situ"
+            referencedColumns: ["id_manejo_ex_situ", "taxon_id"]
+          },
+        ]
+      }
+      manejo_ex_situ_publicacion: {
         Row: {
-          idmanejoexsitupublicacion: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          publicacion_idpublicacion: number;
-        };
+          id_manejo_ex_situ_publicacion: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          publicacion_id: number
+        }
         Insert: {
-          idmanejoexsitupublicacion?: number;
-          manejoexsitu_idmanejoexsitu: number;
-          manejoexsitu_taxon_idtaxon: number;
-          publicacion_idpublicacion: number;
-        };
+          id_manejo_ex_situ_publicacion?: number
+          manejo_ex_situ_id: number
+          manejo_ex_situ_taxon_id: number
+          publicacion_id: number
+        }
         Update: {
-          idmanejoexsitupublicacion?: number;
-          manejoexsitu_idmanejoexsitu?: number;
-          manejoexsitu_taxon_idtaxon?: number;
-          publicacion_idpublicacion?: number;
-        };
-        Relationships: [];
-      };
+          id_manejo_ex_situ_publicacion?: number
+          manejo_ex_situ_id?: number
+          manejo_ex_situ_taxon_id?: number
+          publicacion_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manejo_ex_situ_publicacion_manejo_ex_situ_fkey"
+            columns: ["manejo_ex_situ_id", "manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "manejo_ex_situ"
+            referencedColumns: ["id_manejo_ex_situ", "taxon_id"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
       mapa: {
         Row: {
-          descripcion: string | null;
-          enlace: string;
-          idmapa: number;
-          nombre: string;
-          taxon_idtaxon: number;
-          thumbnail: string | null;
-        };
+          descripcion: string | null
+          enlace: string
+          id_mapa: number
+          nombre: string
+          taxon_id: number
+          thumbnail: string | null
+        }
         Insert: {
-          descripcion?: string | null;
-          enlace?: string;
-          idmapa?: number;
-          nombre?: string;
-          taxon_idtaxon: number;
-          thumbnail?: string | null;
-        };
+          descripcion?: string | null
+          enlace?: string
+          id_mapa?: number
+          nombre?: string
+          taxon_id: number
+          thumbnail?: string | null
+        }
         Update: {
-          descripcion?: string | null;
-          enlace?: string;
-          idmapa?: number;
-          nombre?: string;
-          taxon_idtaxon?: number;
-          thumbnail?: string | null;
-        };
-        Relationships: [];
-      };
+          descripcion?: string | null
+          enlace?: string
+          id_mapa?: number
+          nombre?: string
+          taxon_id?: number
+          thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "mapa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       marcador: {
         Row: {
-          codigo: string | null;
-          descripcion: string;
-          idmarcador: number;
-          marcador: string;
-          pagina_idpagina: number;
-          timestampactualizar: string | null;
-          valorfinal: string | null;
-          valortemporal: string | null;
-        };
+          codigo: string | null
+          descripcion: string
+          id_marcador: number
+          marcador: string
+          pagina_id: number
+          timestamp_actualizar: string | null
+          valor_final: string | null
+          valor_temporal: string | null
+        }
         Insert: {
-          codigo?: string | null;
-          descripcion: string;
-          idmarcador?: number;
-          marcador: string;
-          pagina_idpagina: number;
-          timestampactualizar?: string | null;
-          valorfinal?: string | null;
-          valortemporal?: string | null;
-        };
+          codigo?: string | null
+          descripcion: string
+          id_marcador?: number
+          marcador: string
+          pagina_id: number
+          timestamp_actualizar?: string | null
+          valor_final?: string | null
+          valor_temporal?: string | null
+        }
         Update: {
-          codigo?: string | null;
-          descripcion?: string;
-          idmarcador?: number;
-          marcador?: string;
-          pagina_idpagina?: number;
-          timestampactualizar?: string | null;
-          valorfinal?: string | null;
-          valortemporal?: string | null;
-        };
-        Relationships: [];
-      };
+          codigo?: string | null
+          descripcion?: string
+          id_marcador?: number
+          marcador?: string
+          pagina_id?: number
+          timestamp_actualizar?: string | null
+          valor_final?: string | null
+          valor_temporal?: string | null
+        }
+        Relationships: []
+      }
       menu: {
         Row: {
-          contenido: boolean;
-          enlace: string | null;
-          idmenu: number;
-          nivel: number;
-          nombre: string;
-          orden: number;
-          target: boolean | null;
-        };
+          contenido: boolean
+          enlace: string | null
+          id_menu: number
+          nivel: number
+          nombre: string
+          orden: number
+          target: boolean | null
+        }
         Insert: {
-          contenido?: boolean;
-          enlace?: string | null;
-          idmenu?: number;
-          nivel?: number;
-          nombre: string;
-          orden?: number;
-          target?: boolean | null;
-        };
+          contenido?: boolean
+          enlace?: string | null
+          id_menu?: number
+          nivel?: number
+          nombre: string
+          orden?: number
+          target?: boolean | null
+        }
         Update: {
-          contenido?: boolean;
-          enlace?: string | null;
-          idmenu?: number;
-          nivel?: number;
-          nombre?: string;
-          orden?: number;
-          target?: boolean | null;
-        };
-        Relationships: [];
-      };
-      menuadmin: {
+          contenido?: boolean
+          enlace?: string | null
+          id_menu?: number
+          nivel?: number
+          nombre?: string
+          orden?: number
+          target?: boolean | null
+        }
+        Relationships: []
+      }
+      menu_admin: {
         Row: {
-          enlace: string | null;
-          idmenuadmin: number;
-          menuadmin_idmenuadmin: number;
-          nivel: number;
-          nombre: string | null;
-          orden: number;
-        };
+          enlace: string | null
+          id_menu_admin: number
+          menu_admin_id: number
+          nivel: number
+          nombre: string | null
+          orden: number
+        }
         Insert: {
-          enlace?: string | null;
-          idmenuadmin?: number;
-          menuadmin_idmenuadmin: number;
-          nivel?: number;
-          nombre?: string | null;
-          orden?: number;
-        };
+          enlace?: string | null
+          id_menu_admin?: number
+          menu_admin_id: number
+          nivel?: number
+          nombre?: string | null
+          orden?: number
+        }
         Update: {
-          enlace?: string | null;
-          idmenuadmin?: number;
-          menuadmin_idmenuadmin?: number;
-          nivel?: number;
-          nombre?: string | null;
-          orden?: number;
-        };
-        Relationships: [];
-      };
-      menuadminusuario: {
+          enlace?: string | null
+          id_menu_admin?: number
+          menu_admin_id?: number
+          nivel?: number
+          nombre?: string | null
+          orden?: number
+        }
+        Relationships: []
+      }
+      menu_admin_usuario: {
         Row: {
-          activado: boolean;
-          idmenuadminusuario: number;
-          menuadmin_idmenuadmin: number;
-          usuario_idusuario: number;
-        };
+          activado: boolean
+          id_menu_admin_usuario: number
+          menu_admin_id: number
+          usuario_id: number
+        }
         Insert: {
-          activado?: boolean;
-          idmenuadminusuario?: number;
-          menuadmin_idmenuadmin: number;
-          usuario_idusuario: number;
-        };
+          activado?: boolean
+          id_menu_admin_usuario?: number
+          menu_admin_id: number
+          usuario_id: number
+        }
         Update: {
-          activado?: boolean;
-          idmenuadminusuario?: number;
-          menuadmin_idmenuadmin?: number;
-          usuario_idusuario?: number;
-        };
-        Relationships: [];
-      };
-      menucatalogo: {
+          activado?: boolean
+          id_menu_admin_usuario?: number
+          menu_admin_id?: number
+          usuario_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_admin_usuario_menu_admin_id_fkey"
+            columns: ["menu_admin_id"]
+            isOneToOne: false
+            referencedRelation: "menu_admin"
+            referencedColumns: ["id_menu_admin"]
+          },
+          {
+            foreignKeyName: "menu_admin_usuario_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["id_usuario"]
+          },
+        ]
+      }
+      menu_catalogo: {
         Row: {
-          activo: boolean;
-          catalogo_idcatalogo: number;
-          idmenucatalogo: number;
-          menu_idmenu: number;
-        };
+          activo: boolean
+          catalogo_id: number
+          id_menu_catalogo: number
+          menu_id: number
+        }
         Insert: {
-          activo?: boolean;
-          catalogo_idcatalogo: number;
-          idmenucatalogo?: number;
-          menu_idmenu: number;
-        };
+          activo?: boolean
+          catalogo_id: number
+          id_menu_catalogo?: number
+          menu_id: number
+        }
         Update: {
-          activo?: boolean;
-          catalogo_idcatalogo?: number;
-          idmenucatalogo?: number;
-          menu_idmenu?: number;
-        };
-        Relationships: [];
-      };
-      nombrecomun: {
+          activo?: boolean
+          catalogo_id?: number
+          id_menu_catalogo?: number
+          menu_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_catalogo_catalogo_id_fkey"
+            columns: ["catalogo_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "menu_catalogo_menu_id_fkey"
+            columns: ["menu_id"]
+            isOneToOne: false
+            referencedRelation: "menu"
+            referencedColumns: ["id_menu"]
+          },
+        ]
+      }
+      nombre_comun: {
         Row: {
-          catalogoawe_idcatalogoaweetnia: number | null;
-          catalogoawe_idcatalogoaweidioma: number | null;
-          comentario: string | null;
-          idnombrecomun: number;
-          nombre: string;
-          principal: boolean;
-          publicacion_idpublicacion: number | null;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_etnia_id: number | null
+          catalogo_awe_idioma_id: number | null
+          comentario: string | null
+          id_nombre_comun: number
+          nombre: string
+          principal: boolean
+          publicacion_id: number | null
+          taxon_id: number | null
+        }
         Insert: {
-          catalogoawe_idcatalogoaweetnia?: number | null;
-          catalogoawe_idcatalogoaweidioma?: number | null;
-          comentario?: string | null;
-          idnombrecomun?: number;
-          nombre: string;
-          principal: boolean;
-          publicacion_idpublicacion?: number | null;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number
+          nombre: string
+          principal: boolean
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
         Update: {
-          catalogoawe_idcatalogoaweetnia?: number | null;
-          catalogoawe_idcatalogoaweidioma?: number | null;
-          comentario?: string | null;
-          idnombrecomun?: number;
-          nombre?: string;
-          principal?: boolean;
-          publicacion_idpublicacion?: number | null;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number
+          nombre?: string
+          principal?: boolean
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nombre_comun_catalogo_awe_etnia_id_fkey"
+            columns: ["catalogo_awe_etnia_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "nombre_comun_catalogo_awe_idioma_id_fkey"
+            columns: ["catalogo_awe_idioma_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "nombre_comun_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       noticia: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          enlace: string | null;
-          fecha: string;
-          fuente: string | null;
-          idnoticia: number;
-          resumen: string;
-          texto: string;
-          textoenlace: string | null;
-          titulo: string;
-        };
+          catalogo_awe_id: number
+          enlace: string | null
+          fecha: string
+          fuente: string | null
+          id_noticia: number
+          resumen: string
+          texto: string
+          texto_enlace: string | null
+          titulo: string
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          enlace?: string | null;
-          fecha: string;
-          fuente?: string | null;
-          idnoticia?: number;
-          resumen: string;
-          texto: string;
-          textoenlace?: string | null;
-          titulo: string;
-        };
+          catalogo_awe_id: number
+          enlace?: string | null
+          fecha: string
+          fuente?: string | null
+          id_noticia?: number
+          resumen: string
+          texto: string
+          texto_enlace?: string | null
+          titulo: string
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          enlace?: string | null;
-          fecha?: string;
-          fuente?: string | null;
-          idnoticia?: number;
-          resumen?: string;
-          texto?: string;
-          textoenlace?: string | null;
-          titulo?: string;
-        };
-        Relationships: [];
-      };
-      noticiaenlace: {
+          catalogo_awe_id?: number
+          enlace?: string | null
+          fecha?: string
+          fuente?: string | null
+          id_noticia?: number
+          resumen?: string
+          texto?: string
+          texto_enlace?: string | null
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noticia_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      noticia_enlace: {
         Row: {
-          enlace: string;
-          idnoticiaenlace: number;
-          noticia_idnoticia: number;
-          texto: string;
-        };
+          enlace: string
+          id_noticia_enlace: number
+          noticia_id: number
+          texto: string
+        }
         Insert: {
-          enlace: string;
-          idnoticiaenlace?: number;
-          noticia_idnoticia: number;
-          texto: string;
-        };
+          enlace: string
+          id_noticia_enlace?: number
+          noticia_id: number
+          texto: string
+        }
         Update: {
-          enlace?: string;
-          idnoticiaenlace?: number;
-          noticia_idnoticia?: number;
-          texto?: string;
-        };
-        Relationships: [];
-      };
+          enlace?: string
+          id_noticia_enlace?: number
+          noticia_id?: number
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noticia_enlace_noticia_id_fkey"
+            columns: ["noticia_id"]
+            isOneToOne: false
+            referencedRelation: "noticia"
+            referencedColumns: ["id_noticia"]
+          },
+        ]
+      }
       pagina: {
         Row: {
-          contenido: string;
-          idpagina: number;
-          menu_idmenu: number;
-          orden: number | null;
-          subtitulo: string | null;
-          titulo: string;
-        };
+          contenido: string
+          id_pagina: number
+          menu_id: number
+          orden: number | null
+          subtitulo: string | null
+          titulo: string
+        }
         Insert: {
-          contenido: string;
-          idpagina?: number;
-          menu_idmenu: number;
-          orden?: number | null;
-          subtitulo?: string | null;
-          titulo: string;
-        };
+          contenido: string
+          id_pagina?: number
+          menu_id: number
+          orden?: number | null
+          subtitulo?: string | null
+          titulo: string
+        }
         Update: {
-          contenido?: string;
-          idpagina?: number;
-          menu_idmenu?: number;
-          orden?: number | null;
-          subtitulo?: string | null;
-          titulo?: string;
-        };
-        Relationships: [];
-      };
+          contenido?: string
+          id_pagina?: number
+          menu_id?: number
+          orden?: number | null
+          subtitulo?: string | null
+          titulo?: string
+        }
+        Relationships: []
+      }
       personal: {
         Row: {
-          apellido: string;
-          celular: string | null;
-          centrojambatu: boolean;
-          cumpleanos: string | null;
-          cursos: string | null;
-          email: string | null;
-          estudios: string | null;
-          id: string | null;
-          idpersonal: number;
-          nombre: string | null;
-          paginaweb: string | null;
-          telefonodomicilio: string | null;
-          telefonotrabajo: string | null;
-          temasinteres: string | null;
-          wikiri: boolean;
-        };
+          apellido: string
+          celular: string | null
+          centro_jambatu: boolean
+          cumpleanos: string | null
+          cursos: string | null
+          email: string | null
+          estudios: string | null
+          id: string | null
+          id_personal: number
+          nombre: string | null
+          pagina_web: string | null
+          telefono_domicilio: string | null
+          telefono_trabajo: string | null
+          temas_interes: string | null
+          wikiri: boolean
+        }
         Insert: {
-          apellido: string;
-          celular?: string | null;
-          centrojambatu?: boolean;
-          cumpleanos?: string | null;
-          cursos?: string | null;
-          email?: string | null;
-          estudios?: string | null;
-          id?: string | null;
-          idpersonal?: number;
-          nombre?: string | null;
-          paginaweb?: string | null;
-          telefonodomicilio?: string | null;
-          telefonotrabajo?: string | null;
-          temasinteres?: string | null;
-          wikiri?: boolean;
-        };
+          apellido: string
+          celular?: string | null
+          centro_jambatu?: boolean
+          cumpleanos?: string | null
+          cursos?: string | null
+          email?: string | null
+          estudios?: string | null
+          id?: string | null
+          id_personal?: number
+          nombre?: string | null
+          pagina_web?: string | null
+          telefono_domicilio?: string | null
+          telefono_trabajo?: string | null
+          temas_interes?: string | null
+          wikiri?: boolean
+        }
         Update: {
-          apellido?: string;
-          celular?: string | null;
-          centrojambatu?: boolean;
-          cumpleanos?: string | null;
-          cursos?: string | null;
-          email?: string | null;
-          estudios?: string | null;
-          id?: string | null;
-          idpersonal?: number;
-          nombre?: string | null;
-          paginaweb?: string | null;
-          telefonodomicilio?: string | null;
-          telefonotrabajo?: string | null;
-          temasinteres?: string | null;
-          wikiri?: boolean;
-        };
-        Relationships: [];
-      };
-      personalautor: {
+          apellido?: string
+          celular?: string | null
+          centro_jambatu?: boolean
+          cumpleanos?: string | null
+          cursos?: string | null
+          email?: string | null
+          estudios?: string | null
+          id?: string | null
+          id_personal?: number
+          nombre?: string | null
+          pagina_web?: string | null
+          telefono_domicilio?: string | null
+          telefono_trabajo?: string | null
+          temas_interes?: string | null
+          wikiri?: boolean
+        }
+        Relationships: []
+      }
+      personal_autor: {
         Row: {
-          autor_idautor: number;
-          idpersonalautor: number;
-          personal_idpersonal: number;
-        };
+          autor_id: number
+          id_personal_autor: number
+          personal_id: number
+        }
         Insert: {
-          autor_idautor: number;
-          idpersonalautor?: number;
-          personal_idpersonal: number;
-        };
+          autor_id: number
+          id_personal_autor?: number
+          personal_id: number
+        }
         Update: {
-          autor_idautor?: number;
-          idpersonalautor?: number;
-          personal_idpersonal?: number;
-        };
-        Relationships: [];
-      };
-      personalpublicacion: {
+          autor_id?: number
+          id_personal_autor?: number
+          personal_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_autor_personal_id_fkey"
+            columns: ["personal_id"]
+            isOneToOne: false
+            referencedRelation: "personal"
+            referencedColumns: ["id_personal"]
+          },
+        ]
+      }
+      personal_publicacion: {
         Row: {
-          borrado: boolean;
-          idpersonalpublicacion: number;
-          personal_idpersonal: number;
-          publicacion_idpublicacion: number;
-          publicar: boolean;
-        };
+          borrado: boolean
+          id_personal_publicacion: number
+          personal_id: number
+          publicacion_id: number
+          publicar: boolean
+        }
         Insert: {
-          borrado?: boolean;
-          idpersonalpublicacion?: number;
-          personal_idpersonal: number;
-          publicacion_idpublicacion: number;
-          publicar?: boolean;
-        };
+          borrado?: boolean
+          id_personal_publicacion?: number
+          personal_id: number
+          publicacion_id: number
+          publicar?: boolean
+        }
         Update: {
-          borrado?: boolean;
-          idpersonalpublicacion?: number;
-          personal_idpersonal?: number;
-          publicacion_idpublicacion?: number;
-          publicar?: boolean;
-        };
-        Relationships: [];
-      };
+          borrado?: boolean
+          id_personal_publicacion?: number
+          personal_id?: number
+          publicacion_id?: number
+          publicar?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_publicacion_personal_id_fkey"
+            columns: ["personal_id"]
+            isOneToOne: false
+            referencedRelation: "personal"
+            referencedColumns: ["id_personal"]
+          },
+          {
+            foreignKeyName: "personal_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
       publicacion: {
         Row: {
-          categoria: boolean;
-          cita: string | null;
-          citacorta: string | null;
-          citalarga: string | null;
-          editor: boolean;
-          editorial: string | null;
-          fecha: string;
-          idpublicacion: number;
-          noticia: boolean;
-          numero: string | null;
-          numeropublicacionano: number | null;
-          observaciones: string | null;
-          pagina: string | null;
-          palabrasclave: string | null;
-          publicacioncj: boolean;
-          publicaenweb: boolean;
-          resumen: string | null;
-          titulo: string;
-          titulosecundario: string | null;
-          volumen: string | null;
-        };
+          categoria: boolean
+          cita: string | null
+          cita_corta: string | null
+          cita_larga: string | null
+          editor: boolean
+          editorial: string | null
+          fecha: string
+          id_publicacion: number
+          noticia: boolean
+          numero: string | null
+          numero_publicacion_ano: number | null
+          observaciones: string | null
+          pagina: string | null
+          palabras_clave: string | null
+          publica_en_web: boolean
+          publicacion_cj: boolean
+          resumen: string | null
+          titulo: string
+          titulo_secundario: string | null
+          volumen: string | null
+        }
         Insert: {
-          categoria?: boolean;
-          cita?: string | null;
-          citacorta?: string | null;
-          citalarga?: string | null;
-          editor?: boolean;
-          editorial?: string | null;
-          fecha: string;
-          idpublicacion?: number;
-          noticia?: boolean;
-          numero?: string | null;
-          numeropublicacionano?: number | null;
-          observaciones?: string | null;
-          pagina?: string | null;
-          palabrasclave?: string | null;
-          publicacioncj?: boolean;
-          publicaenweb?: boolean;
-          resumen?: string | null;
-          titulo: string;
-          titulosecundario?: string | null;
-          volumen?: string | null;
-        };
+          categoria?: boolean
+          cita?: string | null
+          cita_corta?: string | null
+          cita_larga?: string | null
+          editor?: boolean
+          editorial?: string | null
+          fecha: string
+          id_publicacion?: number
+          noticia?: boolean
+          numero?: string | null
+          numero_publicacion_ano?: number | null
+          observaciones?: string | null
+          pagina?: string | null
+          palabras_clave?: string | null
+          publica_en_web?: boolean
+          publicacion_cj?: boolean
+          resumen?: string | null
+          titulo: string
+          titulo_secundario?: string | null
+          volumen?: string | null
+        }
         Update: {
-          categoria?: boolean;
-          cita?: string | null;
-          citacorta?: string | null;
-          citalarga?: string | null;
-          editor?: boolean;
-          editorial?: string | null;
-          fecha?: string;
-          idpublicacion?: number;
-          noticia?: boolean;
-          numero?: string | null;
-          numeropublicacionano?: number | null;
-          observaciones?: string | null;
-          pagina?: string | null;
-          palabrasclave?: string | null;
-          publicacioncj?: boolean;
-          publicaenweb?: boolean;
-          resumen?: string | null;
-          titulo?: string;
-          titulosecundario?: string | null;
-          volumen?: string | null;
-        };
-        Relationships: [];
-      };
-      publicacionano: {
+          categoria?: boolean
+          cita?: string | null
+          cita_corta?: string | null
+          cita_larga?: string | null
+          editor?: boolean
+          editorial?: string | null
+          fecha?: string
+          id_publicacion?: number
+          noticia?: boolean
+          numero?: string | null
+          numero_publicacion_ano?: number | null
+          observaciones?: string | null
+          pagina?: string | null
+          palabras_clave?: string | null
+          publica_en_web?: boolean
+          publicacion_cj?: boolean
+          resumen?: string | null
+          titulo?: string
+          titulo_secundario?: string | null
+          volumen?: string | null
+        }
+        Relationships: []
+      }
+      publicacion_ano: {
         Row: {
-          ano: number;
-          idpublicacionano: number;
-          publicacion_idpublicacion: number;
-        };
+          ano: number
+          id_publicacion_ano: number
+          publicacion_id: number
+        }
         Insert: {
-          ano: number;
-          idpublicacionano?: number;
-          publicacion_idpublicacion: number;
-        };
+          ano: number
+          id_publicacion_ano?: number
+          publicacion_id: number
+        }
         Update: {
-          ano?: number;
-          idpublicacionano?: number;
-          publicacion_idpublicacion?: number;
-        };
-        Relationships: [];
-      };
-      publicacionautor: {
+          ano?: number
+          id_publicacion_ano?: number
+          publicacion_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_ano_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      publicacion_autor: {
         Row: {
-          autor_idautor: number;
-          idpublicacionautor: number;
-          ordenautor: number;
-          publicacion_idpublicacion: number;
-        };
+          autor_id: number
+          id_publicacion_autor: number
+          orden_autor: number
+          publicacion_id: number
+        }
         Insert: {
-          autor_idautor: number;
-          idpublicacionautor?: number;
-          ordenautor?: number;
-          publicacion_idpublicacion: number;
-        };
+          autor_id: number
+          id_publicacion_autor?: number
+          orden_autor?: number
+          publicacion_id: number
+        }
         Update: {
-          autor_idautor?: number;
-          idpublicacionautor?: number;
-          ordenautor?: number;
-          publicacion_idpublicacion?: number;
-        };
-        Relationships: [];
-      };
-      publicacioncatalogoawe: {
+          autor_id?: number
+          id_publicacion_autor?: number
+          orden_autor?: number
+          publicacion_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_autor_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "autor"
+            referencedColumns: ["id_autor"]
+          },
+          {
+            foreignKeyName: "publicacion_autor_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_autor"
+            referencedColumns: ["id_autor"]
+          },
+          {
+            foreignKeyName: "publicacion_autor_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      publicacion_catalogo_awe: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          idpublicacioncatalogoawe: number;
-          publicacion_idpublicacion: number;
-        };
+          catalogo_awe_id: number
+          id_publicacion_catalogo_awe: number
+          publicacion_id: number
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          idpublicacioncatalogoawe?: number;
-          publicacion_idpublicacion: number;
-        };
+          catalogo_awe_id: number
+          id_publicacion_catalogo_awe?: number
+          publicacion_id: number
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          idpublicacioncatalogoawe?: number;
-          publicacion_idpublicacion?: number;
-        };
-        Relationships: [];
-      };
-      publicacionenlace: {
+          catalogo_awe_id?: number
+          id_publicacion_catalogo_awe?: number
+          publicacion_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      publicacion_enlace: {
         Row: {
-          enlace: string;
-          exclusivocj: boolean;
-          idpublicacionenlace: number;
-          publicacion_idpublicacion: number;
-          textoenlace: string;
-        };
+          enlace: string
+          exclusivo_cj: boolean
+          id_publicacion_enlace: number
+          publicacion_id: number
+          texto_enlace: string
+        }
         Insert: {
-          enlace: string;
-          exclusivocj?: boolean;
-          idpublicacionenlace?: number;
-          publicacion_idpublicacion: number;
-          textoenlace: string;
-        };
+          enlace: string
+          exclusivo_cj?: boolean
+          id_publicacion_enlace?: number
+          publicacion_id: number
+          texto_enlace: string
+        }
         Update: {
-          enlace?: string;
-          exclusivocj?: boolean;
-          idpublicacionenlace?: number;
-          publicacion_idpublicacion?: number;
-          textoenlace?: string;
-        };
-        Relationships: [];
-      };
+          enlace?: string
+          exclusivo_cj?: boolean
+          id_publicacion_enlace?: number
+          publicacion_id?: number
+          texto_enlace?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_enlace_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
       rank: {
         Row: {
-          idrank: number;
-          orden: number;
-          rank: string;
-          rankingles: string | null;
-        };
+          id_rank: number
+          orden: number
+          rank: string
+          rank_ingles: string | null
+        }
         Insert: {
-          idrank?: number;
-          orden: number;
-          rank: string;
-          rankingles?: string | null;
-        };
+          id_rank?: number
+          orden: number
+          rank: string
+          rank_ingles?: string | null
+        }
         Update: {
-          idrank?: number;
-          orden?: number;
-          rank?: string;
-          rankingles?: string | null;
-        };
-        Relationships: [];
-      };
-      rankgeopolitica: {
+          id_rank?: number
+          orden?: number
+          rank?: string
+          rank_ingles?: string | null
+        }
+        Relationships: []
+      }
+      rank_geopolitica: {
         Row: {
-          idrankgeopolitica: number;
-          nombre: string;
-          orden: number;
-        };
+          id_rank_geopolitica: number
+          nombre: string
+          orden: number
+        }
         Insert: {
-          idrankgeopolitica?: number;
-          nombre: string;
-          orden: number;
-        };
+          id_rank_geopolitica?: number
+          nombre: string
+          orden: number
+        }
         Update: {
-          idrankgeopolitica?: number;
-          nombre?: string;
-          orden?: number;
-        };
-        Relationships: [];
-      };
-      registroingreso: {
+          id_rank_geopolitica?: number
+          nombre?: string
+          orden?: number
+        }
+        Relationships: []
+      }
+      registro_ingreso: {
         Row: {
-          fecha: string;
-          idregistroingreso: number;
-          ipmaquina: string | null;
-          navegador: string | null;
-          pais: string | null;
-          usuario_idusuario: number;
-        };
+          fecha: string
+          id_registro_ingreso: number
+          ip_maquina: string | null
+          navegador: string | null
+          pais: string | null
+          usuario_id: number
+        }
         Insert: {
-          fecha?: string;
-          idregistroingreso?: number;
-          ipmaquina?: string | null;
-          navegador?: string | null;
-          pais?: string | null;
-          usuario_idusuario: number;
-        };
+          fecha?: string
+          id_registro_ingreso?: number
+          ip_maquina?: string | null
+          navegador?: string | null
+          pais?: string | null
+          usuario_id: number
+        }
         Update: {
-          fecha?: string;
-          idregistroingreso?: number;
-          ipmaquina?: string | null;
-          navegador?: string | null;
-          pais?: string | null;
-          usuario_idusuario?: number;
-        };
-        Relationships: [];
-      };
-      sppabordo: {
+          fecha?: string
+          id_registro_ingreso?: number
+          ip_maquina?: string | null
+          navegador?: string | null
+          pais?: string | null
+          usuario_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registro_ingreso_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["id_usuario"]
+          },
+        ]
+      }
+      spp_a_bordo: {
         Row: {
-          enlacedatomanejo: string | null;
-          idsppabordo: number;
-          taxon_idtaxon: number;
-        };
+          enlace_dato_manejo: string | null
+          id_spp_a_bordo: number
+          taxon_id: number
+        }
         Insert: {
-          enlacedatomanejo?: string | null;
-          idsppabordo?: number;
-          taxon_idtaxon: number;
-        };
+          enlace_dato_manejo?: string | null
+          id_spp_a_bordo?: number
+          taxon_id: number
+        }
         Update: {
-          enlacedatomanejo?: string | null;
-          idsppabordo?: number;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      sppabordocatalogo: {
+          enlace_dato_manejo?: string | null
+          id_spp_a_bordo?: number
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      spp_a_bordo_catalogo: {
         Row: {
-          catalogo_idcatalogo: number;
-          hembras: number;
-          idsppabordocatalogo: number;
-          machos: number;
-          nivelgeneracion: number;
-          nosexados: number;
-          sppabordo_idsppabordo: number;
-        };
+          catalogo_id: number
+          hembras: number
+          id_spp_a_bordo_catalogo: number
+          machos: number
+          nivel_generacion: number
+          no_sexados: number
+          spp_a_bordo_id: number
+        }
         Insert: {
-          catalogo_idcatalogo: number;
-          hembras?: number;
-          idsppabordocatalogo?: number;
-          machos?: number;
-          nivelgeneracion?: number;
-          nosexados?: number;
-          sppabordo_idsppabordo: number;
-        };
+          catalogo_id: number
+          hembras?: number
+          id_spp_a_bordo_catalogo?: number
+          machos?: number
+          nivel_generacion?: number
+          no_sexados?: number
+          spp_a_bordo_id: number
+        }
         Update: {
-          catalogo_idcatalogo?: number;
-          hembras?: number;
-          idsppabordocatalogo?: number;
-          machos?: number;
-          nivelgeneracion?: number;
-          nosexados?: number;
-          sppabordo_idsppabordo?: number;
-        };
-        Relationships: [];
-      };
+          catalogo_id?: number
+          hembras?: number
+          id_spp_a_bordo_catalogo?: number
+          machos?: number
+          nivel_generacion?: number
+          no_sexados?: number
+          spp_a_bordo_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spp_a_bordo_catalogo_catalogo_id_fkey"
+            columns: ["catalogo_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "spp_a_bordo_catalogo_spp_a_bordo_id_fkey"
+            columns: ["spp_a_bordo_id"]
+            isOneToOne: false
+            referencedRelation: "spp_a_bordo"
+            referencedColumns: ["id_spp_a_bordo"]
+          },
+        ]
+      }
       taxon: {
         Row: {
-          autorano: string | null;
-          endemica: boolean;
-          enecuador: boolean;
-          eol: boolean | null;
-          idtaxon: number;
-          idtaxoncorrecto: number | null;
-          nombreaceptado: boolean;
-          nombrecomun: string | null;
-          nombreoriginal: boolean;
-          publicacion: string | null;
-          rank_idrank: number | null;
-          sinonimo: boolean;
-          taxon: string;
-          taxon_idtaxon: number | null;
-        };
+          autor_ano: string | null
+          en_ecuador: boolean
+          endemica: boolean
+          eol: boolean | null
+          id_taxon: number
+          id_taxon_correcto: number | null
+          nombre_aceptado: boolean
+          nombre_comun: string | null
+          nombre_original: boolean
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean
+          taxon: string
+          taxon_id: number | null
+        }
         Insert: {
-          autorano?: string | null;
-          endemica?: boolean;
-          enecuador?: boolean;
-          eol?: boolean | null;
-          idtaxon?: number;
-          idtaxoncorrecto?: number | null;
-          nombreaceptado?: boolean;
-          nombrecomun?: string | null;
-          nombreoriginal?: boolean;
-          publicacion?: string | null;
-          rank_idrank?: number | null;
-          sinonimo?: boolean;
-          taxon: string;
-          taxon_idtaxon?: number | null;
-        };
+          autor_ano?: string | null
+          en_ecuador?: boolean
+          endemica?: boolean
+          eol?: boolean | null
+          id_taxon?: number
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean
+          nombre_comun?: string | null
+          nombre_original?: boolean
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean
+          taxon: string
+          taxon_id?: number | null
+        }
         Update: {
-          autorano?: string | null;
-          endemica?: boolean;
-          enecuador?: boolean;
-          eol?: boolean | null;
-          idtaxon?: number;
-          idtaxoncorrecto?: number | null;
-          nombreaceptado?: boolean;
-          nombrecomun?: string | null;
-          nombreoriginal?: boolean;
-          publicacion?: string | null;
-          rank_idrank?: number | null;
-          sinonimo?: boolean;
-          taxon?: string;
-          taxon_idtaxon?: number | null;
-        };
-        Relationships: [];
-      };
-      taxoncatalogoawe: {
+          autor_ano?: string | null
+          en_ecuador?: boolean
+          endemica?: boolean
+          eol?: boolean | null
+          id_taxon?: number
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean
+          nombre_comun?: string | null
+          nombre_original?: boolean
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean
+          taxon?: string
+          taxon_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      taxon_catalogo_awe: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          idtaxoncatalogoawe: number;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          id_taxon_catalogo_awe: number
+          taxon_id: number
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          idtaxoncatalogoawe?: number;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          id_taxon_catalogo_awe?: number
+          taxon_id: number
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          idtaxoncatalogoawe?: number;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      taxoncatalogoaweregionbiogeografica: {
+          catalogo_awe_id?: number
+          id_taxon_catalogo_awe?: number
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      taxon_catalogo_awe_region_biogeografica: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          categoria: string;
-          idtaxoncatalogoaweregionbiogeografica: number;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          categoria: string
+          id_taxon_catalogo_awe_region_biogeografica: number
+          taxon_id: number
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          categoria: string;
-          idtaxoncatalogoaweregionbiogeografica?: number;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          categoria: string
+          id_taxon_catalogo_awe_region_biogeografica?: number
+          taxon_id: number
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          categoria?: string;
-          idtaxoncatalogoaweregionbiogeografica?: number;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      taxongeopolitica: {
+          catalogo_awe_id?: number
+          categoria?: string
+          id_taxon_catalogo_awe_region_biogeografica?: number
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      taxon_geopolitica: {
         Row: {
-          geopolitica_idgeopolitica: number;
-          idtaxongeopolitica: number;
-          principal: boolean;
-          taxon_idtaxon: number;
-        };
+          geopolitica_id: number
+          id_taxon_geopolitica: number
+          principal: boolean
+          taxon_id: number
+        }
         Insert: {
-          geopolitica_idgeopolitica: number;
-          idtaxongeopolitica?: number;
-          principal?: boolean;
-          taxon_idtaxon: number;
-        };
+          geopolitica_id: number
+          id_taxon_geopolitica?: number
+          principal?: boolean
+          taxon_id: number
+        }
         Update: {
-          geopolitica_idgeopolitica?: number;
-          idtaxongeopolitica?: number;
-          principal?: boolean;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      taxonpublicacion: {
+          geopolitica_id?: number
+          id_taxon_geopolitica?: number
+          principal?: boolean
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "geopolitica"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_localidades"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      taxon_publicacion: {
         Row: {
-          idtaxonpublicacion: number;
-          principal: boolean;
-          publicacion_idpublicacion: number;
-          svlhembra: boolean;
-          svlmacho: boolean;
-          taxon_idtaxon: number;
-        };
+          id_taxon_publicacion: number
+          principal: boolean
+          publicacion_id: number
+          svl_hembra: boolean
+          svl_macho: boolean
+          taxon_id: number
+        }
         Insert: {
-          idtaxonpublicacion?: number;
-          principal?: boolean;
-          publicacion_idpublicacion: number;
-          svlhembra?: boolean;
-          svlmacho?: boolean;
-          taxon_idtaxon: number;
-        };
+          id_taxon_publicacion?: number
+          principal?: boolean
+          publicacion_id: number
+          svl_hembra?: boolean
+          svl_macho?: boolean
+          taxon_id: number
+        }
         Update: {
-          idtaxonpublicacion?: number;
-          principal?: boolean;
-          publicacion_idpublicacion?: number;
-          svlhembra?: boolean;
-          svlmacho?: boolean;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
+          id_taxon_publicacion?: number
+          principal?: boolean
+          publicacion_id?: number
+          svl_hembra?: boolean
+          svl_macho?: boolean
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
       tipo: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          comentario: string | null;
-          geopolitica_idgeopolitica: number | null;
-          idtipo: number;
-          medidas: string | null;
-          numeromuseo: string;
-          principal: boolean;
-          publicacion_idpublicacion: number | null;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          comentario: string | null
+          geopolitica_id: number | null
+          id_tipo: number
+          medidas: string | null
+          numero_museo: string
+          principal: boolean
+          publicacion_id: number | null
+          taxon_id: number
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          comentario?: string | null;
-          geopolitica_idgeopolitica?: number | null;
-          idtipo?: number;
-          medidas?: string | null;
-          numeromuseo: string;
-          principal?: boolean;
-          publicacion_idpublicacion?: number | null;
-          taxon_idtaxon: number;
-        };
+          catalogo_awe_id: number
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number
+          medidas?: string | null
+          numero_museo: string
+          principal?: boolean
+          publicacion_id?: number | null
+          taxon_id: number
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          comentario?: string | null;
-          geopolitica_idgeopolitica?: number | null;
-          idtipo?: number;
-          medidas?: string | null;
-          numeromuseo?: string;
-          principal?: boolean;
-          publicacion_idpublicacion?: number | null;
-          taxon_idtaxon?: number;
-        };
-        Relationships: [];
-      };
-      tipocatalogoawe: {
+          catalogo_awe_id?: number
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number
+          medidas?: string | null
+          numero_museo?: string
+          principal?: boolean
+          publicacion_id?: number | null
+          taxon_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tipo_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "tipo_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "geopolitica"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "tipo_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_localidades"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "tipo_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      tipo_catalogo_awe: {
         Row: {
-          descripcion: string | null;
-          idtipocatalogoawe: number;
-          nombre: string;
-        };
+          descripcion: string | null
+          id_tipo_catalogo_awe: number
+          nombre: string
+        }
         Insert: {
-          descripcion?: string | null;
-          idtipocatalogoawe?: number;
-          nombre: string;
-        };
+          descripcion?: string | null
+          id_tipo_catalogo_awe?: number
+          nombre: string
+        }
         Update: {
-          descripcion?: string | null;
-          idtipocatalogoawe?: number;
-          nombre?: string;
-        };
-        Relationships: [];
-      };
+          descripcion?: string | null
+          id_tipo_catalogo_awe?: number
+          nombre?: string
+        }
+        Relationships: []
+      }
       usuario: {
         Row: {
-          activo: boolean;
-          administrador: boolean;
-          clave: string;
-          correo: string;
-          fecha: string;
-          idusuario: number;
-          nombre: string;
-          respuesta1: string | null;
-          respuesta2: string | null;
-          respuesta3: string | null;
-          usuario: string;
-        };
+          activo: boolean
+          administrador: boolean
+          clave: string
+          correo: string
+          fecha: string
+          id_usuario: number
+          nombre: string
+          respuesta1: string | null
+          respuesta2: string | null
+          respuesta3: string | null
+          usuario: string
+        }
         Insert: {
-          activo?: boolean;
-          administrador?: boolean;
-          clave: string;
-          correo: string;
-          fecha?: string;
-          idusuario?: number;
-          nombre: string;
-          respuesta1?: string | null;
-          respuesta2?: string | null;
-          respuesta3?: string | null;
-          usuario: string;
-        };
+          activo?: boolean
+          administrador?: boolean
+          clave: string
+          correo: string
+          fecha?: string
+          id_usuario?: number
+          nombre: string
+          respuesta1?: string | null
+          respuesta2?: string | null
+          respuesta3?: string | null
+          usuario: string
+        }
         Update: {
-          activo?: boolean;
-          administrador?: boolean;
-          clave?: string;
-          correo?: string;
-          fecha?: string;
-          idusuario?: number;
-          nombre?: string;
-          respuesta1?: string | null;
-          respuesta2?: string | null;
-          respuesta3?: string | null;
-          usuario?: string;
-        };
-        Relationships: [];
-      };
+          activo?: boolean
+          administrador?: boolean
+          clave?: string
+          correo?: string
+          fecha?: string
+          id_usuario?: number
+          nombre?: string
+          respuesta1?: string | null
+          respuesta2?: string | null
+          respuesta3?: string | null
+          usuario?: string
+        }
+        Relationships: []
+      }
       video: {
         Row: {
-          autor: string | null;
-          descripcion: string | null;
-          enlace: string;
-          idvideo: number;
-          nombre: string;
-          numeromuseo: string | null;
-          taxon_idtaxon: number;
-          thumbnail: string | null;
-        };
+          autor: string | null
+          descripcion: string | null
+          enlace: string
+          id_video: number
+          nombre: string
+          numero_museo: string | null
+          taxon_id: number
+          thumbnail: string | null
+        }
         Insert: {
-          autor?: string | null;
-          descripcion?: string | null;
-          enlace?: string;
-          idvideo?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          taxon_idtaxon: number;
-          thumbnail?: string | null;
-        };
+          autor?: string | null
+          descripcion?: string | null
+          enlace?: string
+          id_video?: number
+          nombre?: string
+          numero_museo?: string | null
+          taxon_id: number
+          thumbnail?: string | null
+        }
         Update: {
-          autor?: string | null;
-          descripcion?: string | null;
-          enlace?: string;
-          idvideo?: number;
-          nombre?: string;
-          numeromuseo?: string | null;
-          taxon_idtaxon?: number;
-          thumbnail?: string | null;
-        };
-        Relationships: [];
-      };
-      videoweb: {
+          autor?: string | null
+          descripcion?: string | null
+          enlace?: string
+          id_video?: number
+          nombre?: string
+          numero_museo?: string | null
+          taxon_id?: number
+          thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      video_web: {
         Row: {
-          catalogo_idcatalogo: number;
-          enlace: string;
-          fecha: string;
-          idvideoweb: number;
-          titulo: string;
-        };
+          catalogo_id: number
+          enlace: string
+          fecha: string
+          id_video_web: number
+          titulo: string
+        }
         Insert: {
-          catalogo_idcatalogo: number;
-          enlace: string;
-          fecha?: string;
-          idvideoweb?: number;
-          titulo: string;
-        };
+          catalogo_id: number
+          enlace: string
+          fecha?: string
+          id_video_web?: number
+          titulo: string
+        }
         Update: {
-          catalogo_idcatalogo?: number;
-          enlace?: string;
-          fecha?: string;
-          idvideoweb?: number;
-          titulo?: string;
-        };
-        Relationships: [];
-      };
-      webpageimagen: {
+          catalogo_id?: number
+          enlace?: string
+          fecha?: string
+          id_video_web?: number
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_web_catalogo_id_fkey"
+            columns: ["catalogo_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      web_page_imagen: {
         Row: {
-          autor: string | null;
-          catalogoawe_idcatalogoawe: number;
-          enlace: string;
-          idwebpageimagen: number;
-        };
+          autor: string | null
+          catalogo_awe_id: number
+          enlace: string
+          id_web_page_imagen: number
+        }
         Insert: {
-          autor?: string | null;
-          catalogoawe_idcatalogoawe: number;
-          enlace: string;
-          idwebpageimagen?: number;
-        };
+          autor?: string | null
+          catalogo_awe_id: number
+          enlace: string
+          id_web_page_imagen?: number
+        }
         Update: {
-          autor?: string | null;
-          catalogoawe_idcatalogoawe?: number;
-          enlace?: string;
-          idwebpageimagen?: number;
-        };
-        Relationships: [];
-      };
-      webpagtexto: {
+          autor?: string | null
+          catalogo_awe_id?: number
+          enlace?: string
+          id_web_page_imagen?: number
+        }
+        Relationships: []
+      }
+      web_page_texto: {
         Row: {
-          catalogoawe_idcatalogoawe: number;
-          contenido: string;
-          idwebpagtexto: number;
-          titulo: string;
-        };
+          catalogo_awe_id: number
+          contenido: string
+          id_web_page_texto: number
+          titulo: string
+        }
         Insert: {
-          catalogoawe_idcatalogoawe: number;
-          contenido: string;
-          idwebpagtexto?: number;
-          titulo: string;
-        };
+          catalogo_awe_id: number
+          contenido: string
+          id_web_page_texto?: number
+          titulo: string
+        }
         Update: {
-          catalogoawe_idcatalogoawe?: number;
-          contenido?: string;
-          idwebpagtexto?: number;
-          titulo?: string;
-        };
-        Relationships: [];
-      };
-    };
+          catalogo_awe_id?: number
+          contenido?: string
+          id_web_page_texto?: number
+          titulo?: string
+        }
+        Relationships: []
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      vw_autor: {
+        Row: {
+          apellidos: string | null
+          enlace_biografia: string | null
+          id_autor: number | null
+          nombre_completo: string | null
+          nombres: string | null
+        }
+        Insert: {
+          apellidos?: string | null
+          enlace_biografia?: string | null
+          id_autor?: number | null
+          nombre_completo?: never
+          nombres?: string | null
+        }
+        Update: {
+          apellidos?: string | null
+          enlace_biografia?: string | null
+          id_autor?: number | null
+          nombre_completo?: never
+          nombres?: string | null
+        }
+        Relationships: []
+      }
+      vw_lista_especies: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          eol: boolean | null
+          especie: string | null
+          genero: string | null
+          id_genero: number | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          id_taxon_padre: number | null
+          nombre_aceptado: boolean | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          nombre_original: boolean | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_lista_especies_alejandro_arteaga: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          especie: string | null
+          genero: string | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          id_taxon_padre: number | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_lista_especies_george_fletcher: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          especie: string | null
+          genero: string | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          id_taxon_padre: number | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_lista_especies_jmg: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          especie: string | null
+          genero: string | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          id_taxon_padre: number | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_lista_familias: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          familia: string | null
+          id_familia: number | null
+          id_orden: number | null
+          id_taxon_correcto: number | null
+          nombre_aceptado: boolean | null
+          nombre_comun: string | null
+          nombre_original: boolean | null
+          orden: string | null
+          publicacion: string | null
+          rank: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+        ]
+      }
+      vw_lista_generos: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          familia: string | null
+          genero: string | null
+          id_familia: number | null
+          id_genero: number | null
+          id_orden: number | null
+          id_taxon_correcto: number | null
+          nombre_aceptado: boolean | null
+          nombre_comun: string | null
+          nombre_comun_familia: string | null
+          nombre_original: boolean | null
+          orden: string | null
+          publicacion: string | null
+          rank: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "rank"
+            referencedColumns: ["id_rank"]
+          },
+        ]
+      }
+      vw_lista_localidades: {
+        Row: {
+          geopolitica_id: number | null
+          id_geopolitica: number | null
+          nombre: string | null
+          nombre_corto: string | null
+          rank_geopolitica_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "geopolitica"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "geopolitica_geopolitica_id_fkey"
+            columns: ["geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_localidades"
+            referencedColumns: ["id_geopolitica"]
+          },
+          {
+            foreignKeyName: "geopolitica_rank_geopolitica_id_fkey"
+            columns: ["rank_geopolitica_id"]
+            isOneToOne: false
+            referencedRelation: "rank_geopolitica"
+            referencedColumns: ["id_rank_geopolitica"]
+          },
+        ]
+      }
+      vw_lista_spp: {
+        Row: {
+          autor_ano: string | null
+          cites: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          eol: boolean | null
+          especie: string | null
+          familia: string | null
+          genero: string | null
+          id_especie: number | null
+          id_familia: number | null
+          id_genero: number | null
+          id_orden: number | null
+          id_taxon_correcto: number | null
+          lrcoloma: string | null
+          lruicn: string | null
+          nombre_aceptado: boolean | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          nombre_comun_familia: string | null
+          nombre_comun_genero: string | null
+          nombre_original: boolean | null
+          orden: string | null
+          publicacion: string | null
+          publicar: boolean | null
+          sinonimo: boolean | null
+        }
+        Relationships: []
+      }
+      vw_lista_spp_lrc: {
+        Row: {
+          autor_ano: string | null
+          cites: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          eol: boolean | null
+          especie: string | null
+          familia: string | null
+          genero: string | null
+          id_especie: number | null
+          id_familia: number | null
+          id_genero: number | null
+          id_orden: number | null
+          id_taxon_correcto: number | null
+          lrcoloma: string | null
+          lruicn: string | null
+          nombre_aceptado: boolean | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          nombre_comun_familia: string | null
+          nombre_comun_genero: string | null
+          nombre_lrcoloma: string | null
+          nombre_original: boolean | null
+          orden: string | null
+          orden_lrcoloma: number | null
+          publicacion: string | null
+          publicar: boolean | null
+          sinonimo: boolean | null
+        }
+        Relationships: []
+      }
+      vw_publicacion_categoria: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_publicacion_catalogo_awe: number | null
+          publicacion_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      vw_publicacion_sec_despliegue: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_publicacion_catalogo_awe: number | null
+          publicacion_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      vw_publicacion_tipo: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_publicacion_catalogo_awe: number | null
+          publicacion_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+        ]
+      }
+      vw_taxon_ar_pr_estado: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_ar_pr_privada: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_cites: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_coloma: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_dist_altitudinal: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_lista_roja: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_publicacion: {
+        Row: {
+          id_taxon_publicacion: number | null
+          principal: boolean | null
+          publicacion_id: number | null
+          svl_hembra: boolean | null
+          svl_macho: boolean | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_taxon_region_biogeografica: {
+        Row: {
+          catalogo_awe_id: number | null
+          categoria: string | null
+          id_taxon_catalogo_awe_region_biogeografica: number | null
+          taxon_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "taxon"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_alejandro_arteaga"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_george_fletcher"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_especies_jmg"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_familias"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_generos"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp"
+            referencedColumns: ["id_orden"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_especie"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_familia"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_region_biogeografica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_lista_spp_lrc"
+            referencedColumns: ["id_orden"]
+          },
+        ]
+      }
+      vw_tipo_catalogo_lac: {
+        Row: {
+          descripcion: string | null
+          id_tipo_catalogo_awe: number | null
+          nombre: string | null
+        }
+        Insert: {
+          descripcion?: string | null
+          id_tipo_catalogo_awe?: number | null
+          nombre?: string | null
+        }
+        Update: {
+          descripcion?: string | null
+          id_tipo_catalogo_awe?: number | null
+          nombre?: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Enums: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
+      [_ in never]: never
+    }
+  }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
+  schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
       }
       ? R
       : never
-    : never;
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
+  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
+        Insert: infer I
       }
       ? I
       : never
-    : never;
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
+  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
+        Update: infer U
       }
       ? U
       : never
-    : never;
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
+  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
+  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
+    : never
 
 export const Constants = {
   public: {
     Enums: {},
   },
-} as const;
+} as const

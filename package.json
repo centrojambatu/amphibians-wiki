@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
-    "generate-types": "node src/genSupaTypes.js"
+    "generate-types": "node src/genSupaTypes.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

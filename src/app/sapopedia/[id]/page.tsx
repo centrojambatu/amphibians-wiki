@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
   const supabaseClient = createServiceClient();
 
-  const {data: taxons, error} = await supabaseClient.from("taxon").select("idtaxon");
+  const {data: taxons, error} = await supabaseClient.from("taxon").select("id_taxon");
 
   if (!taxons) {
     return [];
@@ -30,7 +30,7 @@ export async function generateStaticParams() {
   }
 
   return taxons.map((taxon) => ({
-    id: String(taxon.idtaxon),
+    id: String(taxon.id_taxon),
   }));
 }
 
@@ -40,7 +40,7 @@ export default async function Page({params}: {params: Promise<{id: string}>}) {
   const {data: taxons, error} = await supabaseClient
     .from("taxon")
     .select("*")
-    .eq("idtaxon", Number(id));
+    .eq("id_taxon", Number(id));
 
   if (error) {
     console.error(error);

@@ -11,16 +11,16 @@ export const amphibianService = {
     const {count: totalSpecies} = await supabase
       .from("taxon")
       .select("*", {count: "exact", head: true})
-      .eq("enecuador", true)
-      .eq("rank_idrank", 7); // especie
+      .eq("en_ecuador", true)
+      .eq("rank_id", 7); // especie
 
     // Obtener especies endémicas
     const {count: endemicSpecies} = await supabase
       .from("taxon")
       .select("*", {count: "exact", head: true})
-      .eq("enecuador", true)
+      .eq("en_ecuador", true)
       .eq("endemica", true)
-      .eq("rank_idrank", 7); // especie
+      .eq("rank_id", 7); // especie
 
     return {
       total_species: totalSpecies || 690,
@@ -40,15 +40,15 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
-        idtaxon,
+        id_taxon,
         taxon,
-        autorano,
-        taxon_idtaxon,
-        rank_idrank
+        autor_ano,
+        taxon_id,
+        rank_id
       `,
       )
-      .eq("enecuador", true)
-      .eq("rank_idrank", 4) // Orden
+      .eq("en_ecuador", true)
+      .eq("rank_id", 4) // Orden
       .order("taxon");
 
     if (error) throw error;
@@ -56,7 +56,7 @@ export const amphibianService = {
     // Mapear a nuestro formato
     return (
       data?.map((order) => ({
-        id: order.idtaxon.toString(),
+        id: order.id_taxon.toString(),
         name: order.taxon,
         scientific_name: order.taxon,
         description: this.getOrderDescription(order.taxon),
@@ -75,27 +75,27 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
-        idtaxon,
+        id_taxon,
         taxon,
         nombrecomun,
-        autorano,
+        autor_ano,
         endemica,
-        taxon_idtaxon
+        taxon_id
       `,
       )
-      .eq("enecuador", true)
-      .eq("rank_idrank", 7) // especie
+      .eq("en_ecuador", true)
+      .eq("rank_id", 7) // especie
       .limit(limit);
 
     if (error) throw error;
 
     return (
       data?.map((specie) => ({
-        id: specie.idtaxon.toString(),
+        id: specie.id_taxon.toString(),
         scientific_name: specie.taxon,
         common_name: specie.nombrecomun || specie.taxon,
         discoverers: "",
-        discovery_year: this.extractYear(specie.autorano),
+        discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
         etymology: "",
         distribution: "",
@@ -115,27 +115,27 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
-        idtaxon,
+        id_taxon,
         taxon,
         nombrecomun,
-        autorano,
+        autor_ano,
         endemica
       `,
       )
-      .eq("enecuador", true)
+      .eq("en_ecuador", true)
       .eq("endemica", true)
-      .eq("rank_idrank", 7) // especie
+      .eq("rank_id", 7) // especie
       .limit(limit);
 
     if (error) throw error;
 
     return (
       data?.map((specie) => ({
-        id: specie.idtaxon.toString(),
+        id: specie.id_taxon.toString(),
         scientific_name: specie.taxon,
         common_name: specie.nombrecomun || specie.taxon,
         discoverers: "",
-        discovery_year: this.extractYear(specie.autorano),
+        discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
         etymology: "",
         distribution: "",
@@ -155,26 +155,26 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
-        idtaxon,
+        id_taxon,
         taxon,
         nombrecomun,
-        autorano,
+        autor_ano,
         endemica
       `,
       )
-      .eq("enecuador", true)
-      .eq("rank_idrank", 7) // especie
+      .eq("en_ecuador", true)
+      .eq("rank_id", 7) // especie
       .limit(limit);
 
     if (error) throw error;
 
     return (
       data?.map((specie) => ({
-        id: specie.idtaxon.toString(),
+        id: specie.id_taxon.toString(),
         scientific_name: specie.taxon,
         common_name: specie.nombrecomun || specie.taxon,
         discoverers: "",
-        discovery_year: this.extractYear(specie.autorano),
+        discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
         etymology: "",
         distribution: "",
@@ -207,9 +207,9 @@ export const amphibianService = {
     return counts[orderName] || 0;
   },
 
-  extractYear(autorano: string | null): number | null {
-    if (!autorano) return null;
-    const match = /\d{4}/.exec(autorano);
+  extractYear(autor_ano: string | null): number | null {
+    if (!autor_ano) return null;
+    const match = /\d{4}/.exec(autor_ano);
 
     return match ? parseInt(match[0]) : null;
   },
