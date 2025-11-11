@@ -62,6 +62,50 @@ export default async function SpeciesPage({params}: PageProps) {
     taxon_catalogo_awe_results,
   });
 
+  const {data: dataRegionBio, error: errorAweRegionBio} = await supabaseClient
+    .from("taxon_catalogo_awe_region_biogeografica")
+    .select(
+      `
+    *,
+    catalogo_awe!inner(*, tipo_catalogo_awe(*))
+  `,
+    )
+    .eq("taxon_id", fichaEspecie.taxon_id)
+    .eq("catalogo_awe.tipo_catalogo_awe_id", 6); // filtro en la tabla relacionada
+
+  if (errorAweRegionBio) {
+    console.error(errorAweRegionBio);
+  } else {
+    console.log({dataRegionBio});
+  }
+
+  const {data: geoPolitica, error: errorGeoPolitica} = await supabaseClient
+    .from("taxon_geopolitica")
+    .select("*, geopolitica(*, rank_geopolitica(*))")
+    .eq("taxon_id", fichaEspecie.taxon_id);
+
+  const {data: publicaciones, error: errorPublicaciones} = await supabaseClient
+    .from("taxon_publicacion")
+    .select("*, publicacion(*)")
+    .eq("taxon_id", fichaEspecie.taxon_id);
+
+  if (errorGeoPolitica) {
+    console.error(errorGeoPolitica);
+  }
+
+  const {data: taxones, error: errorTaxones} = await supabaseClient
+    .from("taxon")
+    .select("*, taxonPadre:taxon_id(*)")
+    .eq("id_taxon", fichaEspecie.taxon_id);
+
+  if (errorTaxones) {
+    console.error(errorTaxones);
+  }
+
+  console.log({
+    taxones,
+  });
+
   const getConservationBadgeVariant = (status: string) => {
     switch (status) {
       case "CR":
@@ -96,14 +140,20 @@ export default async function SpeciesPage({params}: PageProps) {
     }
   };
 
+  console.log({
+    geoPolitica,
+  });
+
   // No se requiere extraer año desde autorano en mock
 
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header de la especie */}
       <div className="mb-8 text-center">
-        <h1 className="text-primary mb-2 text-4xl font-bold">Nombre comun</h1>
-        <p className="text-muted-foreground mb-4 text-2xl italic">nombre cientifico</p>
+        <h1 className="text-primary mb-2 text-4xl font-bold">{taxones[0].nombre_comun}</h1>
+        <p className="text-muted-foreground mb-4 text-2xl italic">
+          {taxones[0]?.taxonPadre?.taxon} {taxones[0]?.taxon}
+        </p>
 
         <div className="mb-4 flex justify-center gap-2">
           {true && <Badge variant="outline">TODO Endémica de Ecuador</Badge>}
@@ -179,77 +229,105 @@ export default async function SpeciesPage({params}: PageProps) {
           </div>
         </CardContent>
       </Card>
-      {/* Estado de conservación */}
-      {/* <Card className="mb-6">
+      {/* Ecoregion */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Estado de Conservación</CardTitle>
+          <CardTitle>Regiones Biogeográficas AWE</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3">
-            {sp.conservation_status && (
-              <>
-                <Badge variant="outline">{getConservationStatusText(sp.conservation_status)}</Badge>
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
+            {dataRegionBio?.map((region) => (
+              <div
+                key={region.id_taxon_catalogo_awe_region_biogeografica}
+                className="flex items-center justify-between"
+              >
+                <span>{region.catalogo_awe.tipo_catalogo_awe?.nombre}</span>
                 <span className="text-muted-foreground text-sm">
-                  Categoría UICN: {sp.conservation_status}
+                  {region.catalogo_awe.nombre} ({region.catalogo_awe.descripcion})
                 </span>
-              </>
-            )}
+              </div>
+            ))}
           </div>
         </CardContent>
-      </Card> */}
-      {/* Información adicional */}
-      {/* <Card className="mb-6">
+      </Card>
+      {/* Geopolítica */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Información Adicional</CardTitle>
+          <CardTitle>Distribución Geopolítica</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div>
-              <h4 className="mb-1 font-semibold">En Ecuador</h4>
-              <p className="text-muted-foreground text-sm">Sí</p>
-            </div>
-            <div>
-              <h4 className="mb-1 font-semibold">Endémica</h4>
-              <p className="text-muted-foreground text-sm">{sp.endemic ? "Sí" : "No"}</p>
-            </div>
-            <div>
-              <h4 className="mb-1 font-semibold">Sinónimo</h4>
-              <p className="text-muted-foreground text-sm">No</p>
-            </div>
-            <div>
-              <h4 className="mb-1 font-semibold">Nombre Aceptado</h4>
-              <p className="text-muted-foreground text-sm">Sí</p>
-            </div>
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
+            {geoPolitica?.map((region) => (
+              <div key={region.id_taxon_geopolitica} className="flex items-center justify-between">
+                <span>{region.geopolitica?.rank_geopolitica.nombre}</span>
+                <span className="text-muted-foreground text-sm">{region.geopolitica?.nombre}</span>
+              </div>
+            ))}
           </div>
         </CardContent>
-      </Card> */}
+      </Card>
+      {/* {Identificacion} */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Identificación</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {fichaEspecie.identificacion ? (
+            fichaEspecie.identificacion
+          ) : (
+            <p className="text-muted-foreground">No disponible</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* { Publicaciones } */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Publicaciones</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {publicaciones && publicaciones.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
+              {publicaciones.map((pub) => (
+                <div key={pub.id_taxon_publicacion} className="flex items-center justify-between">
+                  <span>{pub.publicacion?.titulo || "Título no disponible"}</span>
+                  <span className="text-muted-foreground text-sm">
+                    {pub.publicacion?.cita_corta || "Cita corta no disponible"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">No hay publicaciones disponibles</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Historial de la ficha</CardTitle>
+          <CardContent>
+            {fichaEspecie.historial ? (
+              <span className="text-muted-foreground">{fichaEspecie.historial}</span>
+            ) : (
+              <p className="text-muted-foreground">No disponible</p>
+            )}
+          </CardContent>
+        </CardHeader>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Fecha Actualizacion</CardTitle>
+          <CardContent>
+            {fichaEspecie.fecha_actualizacion ? (
+              <span className="text-muted-foreground">{fichaEspecie.fecha_actualizacion}</span>
+            ) : (
+              <p className="text-muted-foreground">No disponible</p>
+            )}
+          </CardContent>
+        </CardHeader>
+      </Card>
     </main>
-    // <div className="flex flex-col">
-    //   {/* Ficha técnica científica con layout fijo + scroll */}
-    //   <div className="overflow-hidden">
-    //     <SpeciesTechnicalSheet
-    //       altitudinalRange= {fichaEspecie.rango_altitudinal }
-    //       // No hay "climaticFloors" directo; si quieres mostrar algo, usa la observación
-    //       climaticFloors= {undefined} // o f.observacion_zona_altitudinal ?? undefined,
-    //       collectors= {fichaEspecie.descubridor} // (sin año aquí)
-    //       distribution= {[fichaEspecie.distribucion, fichaEspecie.distribucion_global].filter(Boolean).join(". ")}
-    //       etymology= {fichaEspecie.etimologia ?? undefined}
-    //       identification= {fichaEspecie.identificacion ?? undefined}
-    //       naturalHistory= {fichaEspecie.habitat_biologia ?? undefined}
-    //       // Lo siguiente viene de otras tablas / lógica
-    //       commonName= {undefined}
-    //       conservation= {undefined} // podrías derivar un texto usando comentario_estatus_poblacional
-    //       family= {undefined}
-    //       familyId= {undefined}
-    //       genus= {undefined}
-    //       genusId= {undefined}
-    //       isEndemic= {undefined}
-    //       order= {undefined}
-    //       orderId= {undefined}
-    //       redListStatus= {undefined}
-    //       scientificName= {undefined}
-    //     />
-    //   </div>
-    // </div>
   );
 }
