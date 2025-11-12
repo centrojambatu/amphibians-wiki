@@ -728,6 +728,8 @@ export type Database = {
           observacion_zona_altitudinal: string | null
           publicar: boolean
           rango_altitudinal: string | null
+          rango_altitudinal_max: number | null
+          rango_altitudinal_min: number | null
           referencia_area_protegida: string | null
           reproduccion: string | null
           sinonimia: string | null
@@ -780,6 +782,8 @@ export type Database = {
           observacion_zona_altitudinal?: string | null
           publicar?: boolean
           rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
           referencia_area_protegida?: string | null
           reproduccion?: string | null
           sinonimia?: string | null
@@ -832,6 +836,8 @@ export type Database = {
           observacion_zona_altitudinal?: string | null
           publicar?: boolean
           rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
           referencia_area_protegida?: string | null
           reproduccion?: string | null
           sinonimia?: string | null
@@ -6553,7 +6559,18 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_taxon_geopolitica_hierarchy: {
+        Args: { _taxon_id: number }
+        Returns: {
+          depth: number
+          id_geopolitica: number
+          nombre: string
+          parent_id: number
+          rank_geopolitica_id: number
+          rank_id: number
+          rank_nombre: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
