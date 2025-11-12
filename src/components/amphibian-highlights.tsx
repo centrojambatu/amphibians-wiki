@@ -37,7 +37,7 @@ export function AmphibianHighlights() {
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="text-3xl">{highlight.icon}</div>
-              <CardTitle className="text-lg">{highlight.title}</CardTitle>
+              <CardTitle className="text-lg dark:text-black">{highlight.title}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
