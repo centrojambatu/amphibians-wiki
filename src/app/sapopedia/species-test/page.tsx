@@ -1,11 +1,17 @@
-import Link from "next/link";
+import {notFound} from "next/navigation";
 
-import {Card, CardHeader} from "@/components/ui/card";
-import {Separator} from "@/components/ui/separator";
 import {CardSpecies} from "@/components/card-species";
-// import Link from "next/dist/client/link";
 
-export default function Page() {
+import getFichaEspecie from "../species/[id]/get-ficha-especie";
+
+export default async function Page() {
+  //  const fichaEspecie = await getFichaEspecie(Number(id));
+  const fichaEspecie = await getFichaEspecie(5);
+
+  if (!fichaEspecie) {
+    notFound();
+  }
+
   return (
     <div className="bg-background min-h-screen">
       {/* Contenido de la especie */}
@@ -14,7 +20,7 @@ export default function Page() {
           <div className="flex flex-col">
             {/* Ficha técnica científica con layout fijo + scroll */}
             <div className="overflow-hidden">
-              <CardSpecies />
+              <CardSpecies fichaEspecie={fichaEspecie} />
             </div>
           </div>
         </div>

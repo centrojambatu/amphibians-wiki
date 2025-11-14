@@ -1,10 +1,10 @@
 import {Camera, MapPin, Volume2} from "lucide-react";
 
 import {Button} from "./ui/button";
-import {CardContent} from "./ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 
-export const CardSpeciesContent = () => {
+export const CardSpeciesContent = ({fichaEspecie}) => {
   return (
     <CardContent className="flex-1 overflow-y-auto p-0">
       <div className="flex">
@@ -12,6 +12,172 @@ export const CardSpeciesContent = () => {
         <div className="flex-1">
           <div className="space-y-10 p-8">
             {/* Secciones de contenido */}
+
+            {/* Información básica */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Información Básica</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
+                  <div>
+                    <h4 className="mb-2 font-semibold">Primeros colectores</h4>
+                    <p className="text-muted-foreground italic">TODO</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-2 font-semibold">Etimología</h4>
+                    <p className="text-muted-foreground">
+                      {fichaEspecie.etimologia || "No disponible"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="mb-2 font-semibold">Distribución</h4>
+                    <p className="text-muted-foreground">
+                      grafico TODO : {fichaEspecie.rango_altitudinal || "No disponible"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="mb-2 font-semibold">Distribución Altitudinal nombre</h4>
+                    <p className="text-muted-foreground">
+                      grafico TODO : {fichaEspecie.rango_altitudinal || "No disponible"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Catalogo Awe */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Categorías en Catálogos AWE</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
+                  {fichaEspecie.taxon_catalogo_awe_results.map((categoria) => (
+                    <div
+                      key={categoria.id_taxon_catalogo_awe}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{categoria.catalogo_awe.tipo_catalogo_awe?.nombre}</span>
+                      <span className="text-muted-foreground text-sm">
+                        {categoria.catalogo_awe.nombre}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ecoregion */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Regiones Biogeográficas AWE</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
+                  {fichaEspecie.dataRegionBio.map((region) => (
+                    <div
+                      key={region.id_taxon_catalogo_awe_region_biogeografica}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{region.catalogo_awe.tipo_catalogo_awe?.nombre}</span>
+                      <span className="text-muted-foreground text-sm">
+                        {region.catalogo_awe.nombre} ({region.catalogo_awe.descripcion})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Geopolítica */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Distribución Geopolítica</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
+                  {fichaEspecie.geoPolitica?.map((region) => (
+                    <div
+                      key={region.rank_geopolitica_id}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{region.rank_nombre}</span>
+                      <span className="text-muted-foreground text-sm">{region.nombre}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* {Identificacion} */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Identificación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.identificacion ? (
+                  fichaEspecie.identificacion
+                ) : (
+                  <p className="text-muted-foreground">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* { Publicaciones } */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Publicaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
+                    {fichaEspecie.publicaciones.map((pub) => (
+                      <div
+                        key={pub.id_taxon_publicacion}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{pub.publicacion?.titulo || "Título no disponible"}</span>
+                        <span className="text-muted-foreground text-sm">
+                          {pub.publicacion?.cita_corta || "Cita corta no disponible"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No hay publicaciones disponibles</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Historial de la ficha</CardTitle>
+                <CardContent>
+                  {fichaEspecie.historial ? (
+                    <span className="text-muted-foreground">{fichaEspecie.historial}</span>
+                  ) : (
+                    <p className="text-muted-foreground">No disponible</p>
+                  )}
+                </CardContent>
+              </CardHeader>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Fecha Actualizacion</CardTitle>
+                <CardContent>
+                  {fichaEspecie.fecha_actualizacion ? (
+                    <span className="text-muted-foreground">
+                      {fichaEspecie.fecha_actualizacion}
+                    </span>
+                  ) : (
+                    <p className="text-muted-foreground">No disponible</p>
+                  )}
+                </CardContent>
+              </CardHeader>
+            </Card>
+
             {true && (
               <section>
                 <h3 className="mb-4">Etimología</h3>
