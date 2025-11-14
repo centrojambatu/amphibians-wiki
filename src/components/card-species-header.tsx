@@ -3,7 +3,7 @@ import Link from "next/link";
 import {CardHeader} from "./ui/card";
 import {Separator} from "./ui/separator";
 
-export const CardSpeciesHeader = () => {
+export const CardSpeciesHeader = ({fichaEspecie}) => {
   return (
     <CardHeader className="sticky top-0 z-30 text-center">
       <div className="space-y-4" style={{padding: "40px 30px 30px"}}>
@@ -13,10 +13,6 @@ export const CardSpeciesHeader = () => {
           <Link
             className="text-foreground text-sm font-medium transition-all hover:underline"
             href="/TODO-ORDER-LINK"
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            }}
           >
             TODO order
           </Link>
@@ -28,10 +24,6 @@ export const CardSpeciesHeader = () => {
           <Link
             className="text-foreground text-sm font-medium transition-all hover:underline"
             href="/family/TODO familyId"
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            }}
           >
             TODO family
           </Link>
@@ -43,10 +35,6 @@ export const CardSpeciesHeader = () => {
           <Link
             className="text-foreground text-sm font-medium italic transition-all hover:underline"
             href="/genus/TODO genusId"
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            }}
           >
             TODO genus
           </Link>
@@ -55,30 +43,15 @@ export const CardSpeciesHeader = () => {
           </span>
 
           {/* Especie - GRANDE, destacado, en cursiva (no clicable) */}
-          <h1 className="text-4xl font-bold italic dark:text-white">TODO scientificName</h1>
+          <span className="text-foreground text-4xl font-bold italic">{`${fichaEspecie.taxones[0]?.taxonPadre?.taxon} ${fichaEspecie.taxones[0]?.taxon}`}</span>
 
           {/* Descriptor y año - MEDIANO */}
-          <span
-            className="text-foreground text-lg font-normal"
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            }}
-          >
-            (TODO collectors)
-          </span>
+          <span className="text-foreground text-lg font-normal">(TODO collectors)</span>
         </div>
 
         {/* Nombre común */}
-        <p
-          className="text-foreground text-xl font-semibold"
-          style={{
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            marginTop: "12px",
-          }}
-        >
-          TODO commonName
+        <p className="text-foreground text-xl font-semibold">
+          {fichaEspecie.taxones[0].nombre_comun}
         </p>
       </div>
 
