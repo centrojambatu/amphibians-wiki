@@ -7,8 +7,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   const isNumber = typeof idFichaEspecie === "number" || /^\d+$/.test(idFichaEspecie);
 
-  console.log({isNumber, idFichaEspecie});
-
   let fichaEspecies;
 
   if (isNumber) {
@@ -39,10 +37,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       console.error(errorVwListaEspecies);
     }
 
-    console.log({
-      vwListaEspecies,
-    });
-
     if (vwListaEspecies && vwListaEspecies.length > 0) {
       const taxonId = vwListaEspecies[0].id_taxon;
 
@@ -55,98 +49,77 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
         console.error(errorFichaByTaxonId);
       }
 
-      console.log({
-        fichaEspeciesByTaxonId,
-      });
-
       fichaEspecies = fichaEspeciesByTaxonId;
     }
   }
 
+  if (!fichaEspecies || fichaEspecies.length === 0) {
+    return null;
+  }
+
   const fichaEspecie = fichaEspecies[0];
 
-  const {data: taxon_catalogo_awe_results, error: taxon_catalogo_aweError} = await supabaseClient
-    .from("taxon_catalogo_awe")
-    .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
-    .eq("taxon_id", fichaEspecie.taxon_id);
+  // Ejecutar todas las queries en paralelo para mejor performance
+  const [
+    {data: taxon_catalogo_awe_results, error: taxon_catalogo_aweError},
+    {data: dataRegionBio, error: errorAweRegionBio},
+    {data: geoPolitica, error: errorGeoPolitica},
+    {data: publicaciones, error: errorPublicaciones},
+    {data: taxones, error: errorTaxones},
+    {data: lineage, error: errorLineage},
+  ] = await Promise.all([
+    supabaseClient
+      .from("taxon_catalogo_awe")
+      .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
+      .eq("taxon_id", fichaEspecie.taxon_id),
+    supabaseClient
+      .from("taxon_catalogo_awe_region_biogeografica")
+      .select(
+        `
+      *,
+      catalogo_awe!inner(*, tipo_catalogo_awe(*))
+    `,
+      )
+      .eq("taxon_id", fichaEspecie.taxon_id)
+      .eq("catalogo_awe.tipo_catalogo_awe_id", 6),
+    supabaseClient.rpc("get_taxon_geopolitica_hierarchy", {
+      _taxon_id: fichaEspecie.taxon_id,
+    }),
+    supabaseClient
+      .from("taxon_publicacion")
+      .select("*, publicacion(*)")
+      .eq("taxon_id", fichaEspecie.taxon_id),
+    supabaseClient
+      .from("taxon")
+      .select("*, taxonPadre:taxon_id(*)")
+      .eq("id_taxon", fichaEspecie.taxon_id),
+    supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: fichaEspecie.taxon_id}),
+  ]);
 
+  // Manejar errores
   if (taxon_catalogo_aweError) {
-    console.error(taxon_catalogo_aweError);
+    console.error("Error taxon_catalogo_awe:", taxon_catalogo_aweError);
   }
-
-  console.log({
-    taxon_catalogo_awe_results,
-  });
-
-  const {data: dataRegionBio, error: errorAweRegionBio} = await supabaseClient
-    .from("taxon_catalogo_awe_region_biogeografica")
-    .select(
-      `
-    *,
-    catalogo_awe!inner(*, tipo_catalogo_awe(*))
-  `,
-    )
-    .eq("taxon_id", fichaEspecie.taxon_id)
-    .eq("catalogo_awe.tipo_catalogo_awe_id", 6); // filtro en la tabla relacionada
-
   if (errorAweRegionBio) {
-    console.error(errorAweRegionBio);
+    console.error("Error dataRegionBio:", errorAweRegionBio);
   }
-
-  // const {data: geoPolitica, error: errorGeoPolitica} = await supabaseClient
-  //   .from("taxon_geopolitica")
-  //   .select("*, geopolitica(*, rank_geopolitica(*))")
-  //   .eq("taxon_id", fichaEspecie.taxon_id);
-
-  const {data: geoPolitica, error: errorGeoPolitica} = await supabaseClient.rpc(
-    "get_taxon_geopolitica_hierarchy",
-    {_taxon_id: fichaEspecie.taxon_id},
-  );
-
   if (errorGeoPolitica) {
-    console.error(errorGeoPolitica);
-  } else {
-    console.log(geoPolitica);
-    // data viene ordenado por depth (0 = nivel más específico)
+    console.error("Error geoPolitica:", errorGeoPolitica);
   }
-
-  if (errorGeoPolitica) {
-    console.error(errorGeoPolitica);
-  }
-
-  const {data: publicaciones, error: errorPublicaciones} = await supabaseClient
-    .from("taxon_publicacion")
-    .select("*, publicacion(*)")
-    .eq("taxon_id", fichaEspecie.taxon_id);
-
   if (errorPublicaciones) {
-    console.error(errorPublicaciones);
+    console.error("Error publicaciones:", errorPublicaciones);
   }
-
-  const {data: taxones, error: errorTaxones} = await supabaseClient
-    .from("taxon")
-    .select("*, taxonPadre:taxon_id(*)")
-    .eq("id_taxon", fichaEspecie.taxon_id);
-
   if (errorTaxones) {
-    console.error(errorTaxones);
+    console.error("Error taxones:", errorTaxones);
   }
-
-  const {data: lineage, error: errorLineage} = await supabaseClient.rpc(
-    "get_taxon_lineage",
-    {p_id_taxon: fichaEspecie.taxon_id}, // nombre del parámetro = nombre en la función
-  );
-
   if (errorLineage) {
-    console.error("Error get_taxon_lineage", errorLineage);
-  } else {
-    console.log(lineage);
-    // lineage es un array ordenado por depth:
-    // depth = 0  -> el taxón de partida
-    // depth > 0  -> sus ancestros
+    console.error("Error lineage:", errorLineage);
   }
 
-  // taxones[0].endemica
+  // Buscar listaRojaIUCN una sola vez
+  const listaRojaIUCN =
+    taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10) ||
+    null;
 
   return {
     ...fichaEspecie,
@@ -155,11 +128,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     geoPolitica: geoPolitica || [],
     publicaciones: publicaciones || [],
     taxones: taxones || [],
-    listaRojaIUCN: taxon_catalogo_awe_results?.find(
-      (item) => item.catalogo_awe.tipo_catalogo_awe_id === 10,
-    )
-      ? taxon_catalogo_awe_results.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10)
-      : null,
+    listaRojaIUCN,
     lineage: lineage || [],
   };
 }
