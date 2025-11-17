@@ -26,9 +26,14 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Etimología</h4>
-                    <p className="text-muted-foreground">
-                      {fichaEspecie.etimologia || "No disponible"}
-                    </p>
+                    {fichaEspecie.etimologia ? (
+                      <div
+                        dangerouslySetInnerHTML={{__html: fichaEspecie.etimologia}}
+                        className="text-muted-foreground"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground">No disponible</p>
+                    )}
                   </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Distribución</h4>
@@ -117,7 +122,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 {fichaEspecie.identificacion ? (
-                  fichaEspecie.identificacion
+                  <div dangerouslySetInnerHTML={{__html: fichaEspecie.identificacion}} />
                 ) : (
                   <p className="text-muted-foreground">No disponible</p>
                 )}
@@ -137,10 +142,17 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                         key={pub.id_taxon_publicacion}
                         className="flex items-center justify-between"
                       >
-                        <span>{pub.publicacion?.titulo || "Título no disponible"}</span>
-                        <span className="text-muted-foreground text-sm">
-                          {pub.publicacion?.cita_corta || "Cita corta no disponible"}
-                        </span>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: pub.publicacion?.titulo || "Título no disponible",
+                          }}
+                        />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: pub.publicacion?.cita_corta || "Cita corta no disponible",
+                          }}
+                          className="text-muted-foreground text-sm"
+                        />
                       </div>
                     ))}
                   </div>

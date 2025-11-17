@@ -139,7 +139,7 @@ export default async function SpeciesPage({params}: PageProps) {
         </CardHeader>
         <CardContent>
           {fichaEspecie.identificacion ? (
-            fichaEspecie.identificacion
+            <div dangerouslySetInnerHTML={{__html: fichaEspecie.identificacion}} />
           ) : (
             <p className="text-muted-foreground">No disponible</p>
           )}
