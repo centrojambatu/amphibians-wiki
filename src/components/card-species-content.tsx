@@ -232,6 +232,31 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   </span>
                 </div>
 
+                {/* En Ecuador */}
+                <div
+                  className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                >
+                  <h4
+                    className="mb-2"
+                    style={{
+                      color: "#666666",
+                      fontSize: "12px",
+                      fontFamily:
+                        '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                      fontWeight: "600",
+                    }}
+                  >
+                    En Ecuador
+                  </h4>
+                  <span
+                    className="text-center text-sm font-semibold"
+                    style={{color: fichaEspecie.taxones[0].en_ecuador ? "#16a34a" : "#6b7280"}}
+                  >
+                    {fichaEspecie.taxones[0].en_ecuador ? "Sí" : "No"}
+                  </span>
+                </div>
+
                 {/* Lista Roja */}
                 {fichaEspecie.listaRojaIUCN && (
                   <TooltipProvider>
