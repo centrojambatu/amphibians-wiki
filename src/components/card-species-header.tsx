@@ -14,7 +14,7 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
             className="text-foreground text-sm font-medium transition-all hover:underline"
             href="/TODO-ORDER-LINK"
           >
-            TODO order
+            {fichaEspecie.lineage[3]?.taxon}
           </Link>
           <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
             |
@@ -25,7 +25,7 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
             className="text-foreground text-sm font-medium transition-all hover:underline"
             href="/family/TODO familyId"
           >
-            TODO family
+            {fichaEspecie.lineage[2]?.taxon}
           </Link>
           <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
             |
@@ -36,7 +36,7 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
             className="text-foreground text-sm font-medium italic transition-all hover:underline"
             href="/genus/TODO genusId"
           >
-            TODO genus
+            {fichaEspecie.lineage[1]?.taxon}
           </Link>
           <span className="text-sm" style={{fontWeight: "300"}}>
             |

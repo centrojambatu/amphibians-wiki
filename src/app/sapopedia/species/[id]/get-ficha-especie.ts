@@ -85,6 +85,20 @@ export default async function getFichaEspecie(idFichaEspecie: number) {
     console.error(errorTaxones);
   }
 
+  const {data: lineage, error: errorLineage} = await supabaseClient.rpc(
+    "get_taxon_lineage",
+    {p_id_taxon: fichaEspecie.taxon_id}, // nombre del parámetro = nombre en la función
+  );
+
+  if (errorLineage) {
+    console.error("Error get_taxon_lineage", errorLineage);
+  } else {
+    console.log(lineage);
+    // lineage es un array ordenado por depth:
+    // depth = 0  -> el taxón de partida
+    // depth > 0  -> sus ancestros
+  }
+
   // taxones[0].endemica
 
   return {
@@ -99,5 +113,6 @@ export default async function getFichaEspecie(idFichaEspecie: number) {
     )
       ? taxon_catalogo_awe_results.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10)
       : null,
+    lineage: lineage || [],
   };
 }
