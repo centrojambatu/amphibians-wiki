@@ -17,8 +17,8 @@ interface PageProps {
 export default async function SpeciesPage({params}: PageProps) {
   const {id} = await params;
 
-  // Sanitizar el id reemplazando guiones y guiones bajos por espacios
-  const sanitizedId = id.replace(/[-_]/g, " ");
+  // Sanitizar el id: decodificar URL y reemplazar guiones/guiones bajos por espacios
+  const sanitizedId = decodeURIComponent(id).replace(/[-_]/g, " ");
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 
