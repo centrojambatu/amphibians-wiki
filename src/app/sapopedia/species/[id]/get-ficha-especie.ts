@@ -27,6 +27,10 @@ export default async function getFichaEspecie(idFichaEspecie: number) {
     console.error(taxon_catalogo_aweError);
   }
 
+  console.log({
+    taxon_catalogo_awe_results,
+  });
+
   const {data: dataRegionBio, error: errorAweRegionBio} = await supabaseClient
     .from("taxon_catalogo_awe_region_biogeografica")
     .select(
