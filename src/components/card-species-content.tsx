@@ -206,6 +206,20 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             <section>
               <h3 className="mb-4">Información General</h3>
 
+              {/* Fotografía de Ficha */}
+              {fichaEspecie.fotografia_ficha && (
+                <div
+                  className="mb-2 overflow-hidden rounded-none border"
+                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                >
+                  <img
+                    alt="Fotografía de la especie"
+                    className="h-full w-full object-cover"
+                    src={fichaEspecie.fotografia_ficha}
+                  />
+                </div>
+              )}
+
               <div className="grid grid-cols-1 gap-2">
                 {/* Endemismo */}
                 <div
