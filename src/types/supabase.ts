@@ -2484,6 +2484,13 @@ export type Database = {
             referencedRelation: "noticia"
             referencedColumns: ["id_noticia"]
           },
+          {
+            foreignKeyName: "noticia_enlace_noticia_id_fkey"
+            columns: ["noticia_id"]
+            isOneToOne: false
+            referencedRelation: "vista_noticias_completa"
+            referencedColumns: ["id_noticia"]
+          },
         ]
       }
       pagina: {
@@ -4457,6 +4464,33 @@ export type Database = {
       }
     }
     Views: {
+      vista_noticias_completa: {
+        Row: {
+          catalogo_awe_id: number | null
+          catalogo_descripcion: string | null
+          catalogo_nombre: string | null
+          catalogo_sigla: string | null
+          enlace: string | null
+          fecha: string | null
+          fuente: string | null
+          id_noticia: number | null
+          resumen: string | null
+          texto: string | null
+          texto_enlace: string | null
+          tipo_catalogo_descripcion: string | null
+          tipo_catalogo_nombre: string | null
+          titulo: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noticia_catalogo_awe_id_fkey"
+            columns: ["catalogo_awe_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       vw_autor: {
         Row: {
           apellidos: string | null
@@ -6569,6 +6603,17 @@ export type Database = {
           rank_geopolitica_id: number
           rank_id: number
           rank_nombre: string
+        }[]
+      }
+      get_taxon_lineage: {
+        Args: { p_id_taxon: number }
+        Returns: {
+          depth: number
+          id_taxon: number
+          parent_id: number
+          rank: Json
+          rank_id: number
+          taxon: string
         }[]
       }
     }

@@ -6,7 +6,7 @@ import getFichaEspecie from "../species/[id]/get-ficha-especie";
 
 export default async function Page() {
   //  const fichaEspecie = await getFichaEspecie(Number(id));
-  const fichaEspecie = await getFichaEspecie(5);
+  const fichaEspecie = await getFichaEspecie("Pristimantis bambu");
 
   if (!fichaEspecie) {
     notFound();

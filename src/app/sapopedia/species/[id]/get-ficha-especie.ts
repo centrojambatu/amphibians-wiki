@@ -1,19 +1,66 @@
 import {createServiceClient} from "@/utils/supabase/server";
 
-export default async function getFichaEspecie(idFichaEspecie: number) {
+export default async function getFichaEspecie(idFichaEspecie: string) {
   const supabaseClient = createServiceClient();
 
-  const {data: fichaEspecies, error} = await supabaseClient
-    .from("ficha_especie")
-    .select("*")
-    .eq("id_ficha_especie", idFichaEspecie);
+  // busqueda por Ficha Especie ID
 
-  if (error) {
-    console.error(error);
-  }
+  const isNumber = typeof idFichaEspecie === "number" || /^\d+$/.test(idFichaEspecie);
 
-  if (!fichaEspecies || fichaEspecies.length === 0) {
-    return null;
+  console.log({isNumber, idFichaEspecie});
+
+  let fichaEspecies;
+
+  if (isNumber) {
+    const {data: fichaEspeciesData, error} = await supabaseClient
+      .from("ficha_especie")
+      .select("*")
+      .eq("id_ficha_especie", Number(idFichaEspecie));
+
+    if (error) {
+      console.error(error);
+    }
+
+    if (!fichaEspeciesData || fichaEspeciesData.length === 0) {
+      return null;
+    }
+
+    fichaEspecies = fichaEspeciesData;
+  } else {
+    // busqueda por nombre cientifco
+    // 1st buscar en vw_lista_especies por nombre cientifico
+
+    const {data: vwListaEspecies, error: errorVwListaEspecies} = await supabaseClient
+      .from("vw_lista_especies")
+      .select("*")
+      .eq("nombre_cientifico", idFichaEspecie);
+
+    if (errorVwListaEspecies) {
+      console.error(errorVwListaEspecies);
+    }
+
+    console.log({
+      vwListaEspecies,
+    });
+
+    if (vwListaEspecies && vwListaEspecies.length > 0) {
+      const taxonId = vwListaEspecies[0].id_taxon;
+
+      const {data: fichaEspeciesByTaxonId, error: errorFichaByTaxonId} = await supabaseClient
+        .from("ficha_especie")
+        .select("*")
+        .eq("taxon_id", taxonId!);
+
+      if (errorFichaByTaxonId) {
+        console.error(errorFichaByTaxonId);
+      }
+
+      console.log({
+        fichaEspeciesByTaxonId,
+      });
+
+      fichaEspecies = fichaEspeciesByTaxonId;
+    }
   }
 
   const fichaEspecie = fichaEspecies[0];
