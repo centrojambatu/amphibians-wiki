@@ -1,5 +1,12 @@
 import {Camera, MapPin, Volume2} from "lucide-react";
 
+import {
+  getBackgroundColor,
+  getBorderColor,
+  getRedListStatusFullName,
+  getTextColor,
+} from "@/lib/get-badge-color-by-red-list-status";
+
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
@@ -195,23 +202,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         {/* Columna derecha - Sidebar fijo */}
         <div className="sticky top-0 h-screen w-96 overflow-y-auto border-l">
           <div className="space-y-8" style={{padding: "25px 30px"}}>
-            {/* Distribución Altitudinal */}
-            {true && true && (
-              <section>
-                <h3 className="mb-4">Distribución altitudinal</h3>
-                <div
-                  className="rounded-none border p-4"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  {/* <ClimaticFloorChart
-                    altitudinalRange={altitudinalRange}
-                    climaticFloors={climaticFloors}
-                  /> */}
-                  <span> todo climaticFloors graphic</span>
-                </div>
-              </section>
-            )}
-
             {/* Información General */}
             <section>
               <h3 className="mb-4">Información General</h3>
@@ -236,14 +226,14 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   </h4>
                   <span
                     className="text-center text-sm font-semibold"
-                    style={{color: true ? "#16a34a" : "#6b7280"}}
+                    style={{color: fichaEspecie.taxones[0].endemica ? "#16a34a" : "#6b7280"}}
                   >
-                    {true ? "TODO Endémica" : " TODO No endémica"}
+                    {fichaEspecie.taxones[0].endemica ? "Endémica" : " No endémica"}
                   </span>
                 </div>
 
                 {/* Lista Roja */}
-                {true && (
+                {fichaEspecie.listaRojaIUCN && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -263,73 +253,26 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                           >
                             Lista Roja IUCN
                           </h4>
-                          {/* <span
+                          <span
                             className="rounded-none px-2 py-1 font-mono text-base"
                             style={{
-                              backgroundColor:
-                                redListStatus === "LC"
-                                  ? "#f8f9fa"
-                                  : redListStatus === "NT"
-                                    ? "#f1f3f4"
-                                    : redListStatus === "VU"
-                                      ? "#e8eaed"
-                                      : redListStatus === "EN"
-                                        ? "#dadce0"
-                                        : redListStatus === "CR"
-                                          ? "#bdc1c6"
-                                          : "#f8f9fa",
-                              color:
-                                redListStatus === "LC"
-                                  ? "#5f6368"
-                                  : redListStatus === "NT"
-                                    ? "#5f6368"
-                                    : redListStatus === "VU"
-                                      ? "#5f6368"
-                                      : redListStatus === "EN"
-                                        ? "#3c4043"
-                                        : redListStatus === "CR"
-                                          ? "#202124"
-                                          : "#5f6368",
+                              backgroundColor: getBackgroundColor(
+                                fichaEspecie.listaRojaIUCN.catalogo_awe.sigla,
+                              ),
+                              color: getTextColor(fichaEspecie.listaRojaIUCN.catalogo_awe.sigla),
                               border: "1px solid",
-                              borderColor:
-                                redListStatus === "LC"
-                                  ? "#e8eaed"
-                                  : redListStatus === "NT"
-                                    ? "#dadce0"
-                                    : redListStatus === "VU"
-                                      ? "#bdc1c6"
-                                      : redListStatus === "EN"
-                                        ? "#9aa0a6"
-                                        : redListStatus === "CR"
-                                          ? "#5f6368"
-                                          : "#e8eaed",
+                              borderColor: getBorderColor(
+                                fichaEspecie.listaRojaIUCN.catalogo_awe.sigla,
+                              ),
                             }}
                           >
-                            {redListStatus}
-                          </span> */}
-                          todo redListStatus badge
+                            {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla}
+                          </span>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
-                          {/* {redListStatus === "LC"
-                            ? "Preocupación Menor"
-                            : redListStatus === "NT"
-                              ? "Casi Amenazada"
-                              : redListStatus === "VU"
-                                ? "Vulnerable"
-                                : redListStatus === "EN"
-                                  ? "En Peligro"
-                                  : redListStatus === "CR"
-                                    ? "Críticamente Amenazada"
-                                    : redListStatus === "EW"
-                                      ? "Extinta en Estado Silvestre"
-                                      : redListStatus === "EX"
-                                        ? "Extinta"
-                                        : redListStatus === "DD"
-                                          ? "Datos Deficientes"
-                                          : redListStatus} */}
-                          TODO redListStatus full text
+                          {getRedListStatusFullName(fichaEspecie.listaRojaIUCN.catalogo_awe.sigla)}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -369,155 +312,194 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             <section>
               <h3 className="mb-4">Fuentes externas</h3>
               <div className="grid grid-cols-1 gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="ASW Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/wikipedia.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>ASW - Amphibian Species of the World</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.wikipedia && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.wikipedia}>
+                            <img
+                              alt="ASW Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/wikipedia.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>ASW - Amphibian Species of the World</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="AmphibiaWeb Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/amphibiaweb.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>AmphibiaWeb</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.aw && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.aw}>
+                            <img
+                              alt="AmphibiaWeb Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/amphibiaweb.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>AmphibiaWeb</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="NCBI Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/ncbi.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>NCBI - National Center for Biotechnology Information</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.genbank && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.genbank}>
+                            <img
+                              alt="NCBI Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/ncbi.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>NCBI - National Center for Biotechnology Information</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="VertNet Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/vertnet.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>VertNet</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.herpnet && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.herpnet}>
+                            <img
+                              alt="VertNet Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/vertnet.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>VertNet</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="iNaturalist Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/iNaturalist.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>iNaturalist</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.inaturalist && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.inaturalist}>
+                            <img
+                              alt="iNaturalist Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/iNaturalist.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>iNaturalist</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        asChild
-                        className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                        style={{backgroundColor: "#f9f9f9"}}
-                        variant="outline"
-                      >
-                        <a href="#">
-                          <img
-                            alt="IUCN Logo"
-                            className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                            src="/assets/references/redlist.png"
-                            style={{width: "100%", height: "auto"}}
-                          />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>IUCN Red List</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {fichaEspecie.asw && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.asw}>
+                            <img
+                              alt="amnh Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/amnh.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>amnh</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+
+                {fichaEspecie.uicn && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                          style={{backgroundColor: "#f9f9f9"}}
+                          variant="outline"
+                        >
+                          <a href={fichaEspecie.uicn}>
+                            <img
+                              alt="IUCN Logo"
+                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                              src="/assets/references/redlist.png"
+                              style={{width: "100%", height: "auto"}}
+                            />
+                          </a>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>IUCN Red List</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </div>
             </section>
           </div>

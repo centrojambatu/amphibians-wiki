@@ -12,6 +12,10 @@ export default async function Page() {
     notFound();
   }
 
+  console.log({
+    fichaEspecie,
+  });
+
   return (
     <div className="bg-background min-h-screen">
       {/* Contenido de la especie */}

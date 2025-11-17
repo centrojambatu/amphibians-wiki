@@ -85,6 +85,8 @@ export default async function getFichaEspecie(idFichaEspecie: number) {
     console.error(errorTaxones);
   }
 
+  // taxones[0].endemica
+
   return {
     ...fichaEspecie,
     taxon_catalogo_awe_results: taxon_catalogo_awe_results || [],
@@ -92,5 +94,10 @@ export default async function getFichaEspecie(idFichaEspecie: number) {
     geoPolitica: geoPolitica || [],
     publicaciones: publicaciones || [],
     taxones: taxones || [],
+    listaRojaIUCN: taxon_catalogo_awe_results?.find(
+      (item) => item.catalogo_awe.tipo_catalogo_awe_id === 10,
+    )
+      ? taxon_catalogo_awe_results.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10)
+      : null,
   };
 }
