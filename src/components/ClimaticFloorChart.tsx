@@ -7,12 +7,12 @@ interface ClimaticFloorChartProps {
     readonly occidente?: {min: number; max: number};
     readonly oriente?: {min: number; max: number};
   };
-  readonly climaticFloors: readonly string[];
+  // readonly climaticFloors: readonly string[];
 }
 
 export default function ClimaticFloorChart({
   altitudinalRange,
-  climaticFloors,
+  // climaticFloors,
 }: ClimaticFloorChartProps) {
   // Colores representando Costa → Sierra → Oriente (Ecuador)
   // Verde claro → Beige claro → Beige grisáceo → Marrón → Beige grisáceo → Verde claro

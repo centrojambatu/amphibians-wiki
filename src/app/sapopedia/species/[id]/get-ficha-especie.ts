@@ -121,6 +121,40 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10) ||
     null;
 
+  // revisar si tiene distribucion oriental
+  const hasOrientalDistribution = taxon_catalogo_awe_results?.some((item) =>
+    item.catalogo_awe.nombre?.toLowerCase().includes("oriental"),
+  );
+
+  const hasOccidentalDistribution = taxon_catalogo_awe_results?.some((item) =>
+    item.catalogo_awe.nombre?.toLowerCase().includes("occidental"),
+  );
+
+  const distributions = taxon_catalogo_awe_results?.filter(
+    (item) => item.catalogo_awe.tipo_catalogo_awe_id === 5,
+  );
+
+  const altitudinalRange = {
+    min:
+      hasOccidentalDistribution === false || hasOrientalDistribution === false
+        ? null
+        : fichaEspecie.rango_altitudinal_min,
+    max:
+      hasOccidentalDistribution === false || hasOrientalDistribution === false
+        ? null
+        : fichaEspecie.rango_altitudinal_max,
+    occidente: {
+      min: hasOccidentalDistribution === false ? null : fichaEspecie.rango_altitudinal_min,
+      max: hasOccidentalDistribution === false ? null : fichaEspecie.rango_altitudinal_max,
+    },
+    oriente: {
+      min: hasOrientalDistribution === false ? null : fichaEspecie.rango_altitudinal_min,
+      max: hasOrientalDistribution === false ? null : fichaEspecie.rango_altitudinal_max,
+    },
+  };
+
+  console.log("altitudinalRange", altitudinalRange);
+
   return {
     ...fichaEspecie,
     taxon_catalogo_awe_results: taxon_catalogo_awe_results || [],
@@ -130,5 +164,9 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     taxones: taxones || [],
     listaRojaIUCN,
     lineage: lineage || [],
+    hasOrientalDistribution,
+    hasOccidentalDistribution,
+    distributions,
+    altitudinalRange: altitudinalRange,
   };
 }

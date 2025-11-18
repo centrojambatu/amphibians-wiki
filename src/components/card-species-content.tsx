@@ -10,6 +10,7 @@ import {
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
+import ClimaticFloorChart from "./ClimaticFloorChart";
 
 export const CardSpeciesContent = ({fichaEspecie}) => {
   return (
@@ -44,15 +45,38 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Distribución</h4>
-                    <p className="text-muted-foreground">
+                    {/* <p className="text-muted-foreground">
                       grafico TODO : {fichaEspecie.rango_altitudinal || "No disponible"}
-                    </p>
+                    </p> */}
+                    <ClimaticFloorChart
+                      altitudinalRange={fichaEspecie.altitudinalRange}
+                      // altitudinalRange={{
+                      //   min: null,
+                      //   max: null,
+                      //   occidente: {
+                      //     min: null,
+                      //     max: null,
+                      //   },
+                      //   oriente: {
+                      //     min: 2000,
+                      //     max: 2500,
+                      //   },
+                      // }}
+                    />
                   </div>
                   <div>
-                    <h4 className="mb-2 font-semibold">Distribución Altitudinal nombre</h4>
-                    <p className="text-muted-foreground">
-                      grafico TODO : {fichaEspecie.rango_altitudinal || "No disponible"}
-                    </p>
+                    <h4 className="mb-2 font-semibold">Distribución Altitudinal</h4>
+                    {fichaEspecie.distributions.map((categoria) => (
+                      <div
+                        key={`${categoria.catalogo_awe_id}-graphic`}
+                        className="flex items-center justify-between"
+                      >
+                        {/* <span>{categoria.catalogo_awe.tipo_catalogo_awe?.nombre}</span> */}
+                        <span className="text-muted-foreground text-sm">
+                          {categoria.catalogo_awe.nombre}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -111,7 +135,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
                   {fichaEspecie.geoPolitica?.map((region) => (
                     <div
-                      key={region.rank_geopolitica_id}
+                      key={`${region.rank_geopolitica_id}-geopolitica`}
                       className="flex items-center justify-between"
                     >
                       <span>{region.rank_nombre}</span>
