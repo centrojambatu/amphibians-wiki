@@ -46,7 +46,10 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
           <span className="text-foreground text-4xl font-bold italic">{`${fichaEspecie.taxones[0]?.taxonPadre?.taxon} ${fichaEspecie.taxones[0]?.taxon}`}</span>
 
           {/* Descriptor y año - MEDIANO */}
-          <span className="text-foreground text-lg font-normal">(TODO collectors)</span>
+          <span
+            dangerouslySetInnerHTML={{__html: fichaEspecie.taxones[0]?.autor_ano}}
+            className="text-foreground text-lg font-normal"
+          />
         </div>
 
         {/* Nombre común */}
