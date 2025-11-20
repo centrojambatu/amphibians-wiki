@@ -18,7 +18,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
     <CardContent className="flex-1 overflow-y-auto p-0">
       <div className="flex">
         {/* Columna izquierda - Contenido principal */}
-        <div className="flex-1">
+        <div className="w-[75%]">
           <div className="space-y-10 p-8">
             {/* Secciones de contenido */}
 
@@ -232,7 +232,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen w-96 overflow-y-auto border-l">
+        <div className="sticky top-0 h-screen w-[25%] overflow-y-auto border-l">
           <div className="space-y-8" style={{padding: "25px 30px"}}>
             {/* Información General */}
             <section>
@@ -241,12 +241,12 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               {/* Fotografía de Ficha */}
               {fichaEspecie.fotografia_ficha && (
                 <div
-                  className="group flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  className="group mb-2 flex w-full flex-col items-center justify-center overflow-hidden rounded-none border p-2"
+                  style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
                 >
                   <img
                     alt="Fotografía de la especie"
-                    className="mx-auto h-full w-full cursor-pointer object-cover grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
+                    className="mx-auto h-auto w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
                     src={fichaEspecie.fotografia_ficha}
                   />
                 </div>
@@ -305,50 +305,24 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
                 {/* Lista Roja */}
                 {fichaEspecie.listaRojaIUCN && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div
-                          className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-none border p-2"
-                          style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                        >
-                          <h4
-                            className="mb-2"
-                            style={{
-                              color: "#666666",
-                              fontSize: "12px",
-                              fontFamily:
-                                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                              fontWeight: "600",
-                            }}
-                          >
-                            Lista Roja IUCN
-                          </h4>
-                          {/* <span
-                            className="rounded-none px-2 py-1 font-mono text-base"
-                            style={{
-                              backgroundColor: getBackgroundColor(
-                                fichaEspecie.listaRojaIUCN.catalogo_awe.sigla,
-                              ),
-                              color: getTextColor(fichaEspecie.listaRojaIUCN.catalogo_awe.sigla),
-                              border: "1px solid",
-                              borderColor: getBorderColor(
-                                fichaEspecie.listaRojaIUCN.catalogo_awe.sigla,
-                              ),
-                            }}
-                          >
-                            {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla}
-                          </span> */}
-                          <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          {getRedListStatusFullName(fichaEspecie.listaRojaIUCN.catalogo_awe.sigla)}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <div
+                    className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  >
+                    <h4
+                      className="mb-2"
+                      style={{
+                        color: "#666666",
+                        fontSize: "12px",
+                        fontFamily:
+                          '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                        fontWeight: "600",
+                      }}
+                    >
+                      Lista Roja IUCN
+                    </h4>
+                    <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
+                  </div>
                 )}
               </div>
             </section>
