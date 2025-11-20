@@ -205,6 +205,10 @@ export default function ClimaticFloorChart({
   return (
     <div className="flex w-full flex-col items-center">
       {/* Gráfico de pisos climáticos - Referencia geográfica */}
+      <div className="mb-1 flex w-full max-w-118 text-xs font-semibold text-gray-700">
+        <span className="w-1/2 text-center">← Occidental</span>
+        <span className="w-1/2 text-center">Oriental →</span>
+      </div>
       <div className="relative flex h-8 w-full max-w-80">
         {/* Base: Todos los pisos en color plomo */}
         {allClimaticFloors.map((floor, index) => {

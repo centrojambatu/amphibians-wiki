@@ -31,7 +31,14 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
                   <div>
                     <h4 className="mb-2 font-semibold">Primeros colectores</h4>
-                    <p className="text-muted-foreground italic">TODO</p>
+                    {fichaEspecie.descubridor ? (
+                      <div
+                        dangerouslySetInnerHTML={{__html: fichaEspecie.descubridor}}
+                        className="text-muted-foreground italic"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground italic">No disponible</p>
+                    )}
                   </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Etimología</h4>
@@ -234,12 +241,13 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               {/* Fotografía de Ficha */}
               {fichaEspecie.fotografia_ficha && (
                 <div
-                  className="mb-2 overflow-hidden rounded-none border"
+                  className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
                   style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                 >
                   <img
                     alt="Fotografía de la especie"
-                    className="h-full w-full object-cover"
+                    // className="h-full w-full object-cover"
+                    className="mx-auto h-full w-full object-cover grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                     src={fichaEspecie.fotografia_ficha}
                   />
                 </div>
