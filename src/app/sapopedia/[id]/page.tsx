@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
   const supabaseClient = createServiceClient();
 
-  const {data: taxons, error} = await supabaseClient.from("taxon").select("idtaxon");
+  const {data: taxons, error} = await supabaseClient.from("taxon").select("id_taxon");
 
   if (!taxons) {
     return [];
@@ -30,7 +30,7 @@ export async function generateStaticParams() {
   }
 
   return taxons.map((taxon) => ({
-    id: String(taxon.idtaxon),
+    id: String(taxon.id_taxon),
   }));
 }
 
@@ -38,19 +38,21 @@ export default async function Page({params}: {params: Promise<{id: string}>}) {
   const {id} = await params;
   const supabaseClient = createServiceClient();
   const {data: taxons, error} = await supabaseClient
-    .from("taxon")
+    .from("ficha_especie")
     .select("*")
-    .eq("idtaxon", Number(id));
+    .eq("id_taxon", Number(id));
 
   if (error) {
     console.error(error);
   }
 
+  console.log(taxons);
+
   return (
     <main>
       {/* <h1>Sapopedia</h1> */}
-      <h1>{taxons?.[0].nombrecomun}</h1>
-      <p>{taxons?.[0].taxon}</p>
+      <h1>{taxons?.[0].nombre_comun}</h1>
+      <p>{taxons?.[0].taxon_id}</p>
     </main>
   );
 }

@@ -7,10 +7,7 @@ import {amphibianService} from "@/lib/supabase-existing";
 
 export default async function HomePage() {
   // Obtener datos de Supabase
-  const [statistics, orders] = await Promise.all([
-    amphibianService.getStatistics(),
-    amphibianService.getOrders(),
-  ]);
+  const [statistics] = await Promise.all([amphibianService.getStatistics()]);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -34,12 +31,6 @@ export default async function HomePage() {
 
       {/* Destacados */}
       <AmphibianHighlights />
-
-      {/* Órdenes de Anfibios */}
-      <div className="mb-8">
-        <h2 className="mb-6 text-center text-2xl font-bold">Órdenes de Anfibios</h2>
-        <AmphibianOrders orders={orders} />
-      </div>
 
       {/* Información adicional */}
       <Card className="mb-8">
