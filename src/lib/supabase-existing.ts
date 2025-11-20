@@ -75,10 +75,10 @@ export const amphibianService = {
       .from("taxon")
       .select(
         `
-        idtaxon,
+        id_taxon,
         taxon,
-        nombre_comun,
-        autorano,
+        nombrecomun,
+        autor_ano,
         endemica,
         taxon_id
       `,
@@ -117,7 +117,7 @@ export const amphibianService = {
         `
         id_taxon,
         taxon,
-        nombre_comun,
+        nombrecomun,
         autor_ano,
         endemica
       `,
@@ -157,7 +157,7 @@ export const amphibianService = {
         `
         id_taxon,
         taxon,
-        nombre_comun,
+        nombrecomun,
         autor_ano,
         endemica
       `,
@@ -207,9 +207,9 @@ export const amphibianService = {
     return counts[orderName] || 0;
   },
 
-  extractYear(autorano: string | null): number | null {
-    if (!autorano) return null;
-    const match = /\d{4}/.exec(autorano);
+  extractYear(autor_ano: string | null): number | null {
+    if (!autor_ano) return null;
+    const match = /\d{4}/.exec(autor_ano);
 
     return match ? parseInt(match[0]) : null;
   },

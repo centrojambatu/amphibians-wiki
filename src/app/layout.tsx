@@ -4,6 +4,8 @@ import Link from "next/link";
 import localFont from "next/font/local";
 
 import {Button} from "@/components/ui/button";
+import {ThemeProvider} from "@/components/theme-provider";
+import {ThemeSwitcher} from "@/components/theme-switcher";
 import "./globals.css";
 
 const styreneB = localFont({
@@ -80,39 +82,47 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="es">
+    <html suppressHydrationWarning lang="es">
       <body className={`${styreneB.className} bg-background min-h-screen font-sans antialiased`}>
-        <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <Link className="text-primary text-2xl font-bold" href="/">
-                🐸 Anfibios de Ecuador
-              </Link>
-              <nav className="flex items-center gap-4">
-                <Link href="/">
-                  <Button variant="ghost">Inicio</Button>
+        <ThemeProvider
+          disableTransitionOnChange
+          enableSystem
+          attribute="class"
+          defaultTheme="system"
+        >
+          <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <Link className="text-primary text-2xl font-bold" href="/">
+                  🐸 Anfibios de Ecuador
                 </Link>
-                <Link href="/sapopedia">
-                  <Button variant="ghost">SapoPedia</Button>
-                </Link>
-                <Link href="/blog">
-                  <Button variant="ghost">Blog</Button>
-                </Link>
-              </nav>
+                <nav className="flex items-center gap-4">
+                  <Link href="/">
+                    <Button variant="ghost">Inicio</Button>
+                  </Link>
+                  <Link href="/sapopedia">
+                    <Button variant="ghost">SapoPedia</Button>
+                  </Link>
+                  <Link href="/blog">
+                    <Button variant="ghost">Blog</Button>
+                  </Link>
+                  <ThemeSwitcher />
+                </nav>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <main className="flex-1">{children}</main>
+          <main className="flex-1">{children}</main>
 
-        <footer className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-muted-foreground text-center text-sm">
-              <p className="mb-2">© 2024 Centro Jambatu</p>
-              <p>Enciclopedia electrónica de Anfibios de Ecuador</p>
+          <footer className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
+            <div className="container mx-auto px-4 py-8">
+              <div className="text-muted-foreground text-center text-sm">
+                <p className="mb-2">© 2024 Centro Jambatu</p>
+                <p>Enciclopedia electrónica de Anfibios de Ecuador</p>
+              </div>
             </div>
-          </div>
-        </footer>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

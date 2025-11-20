@@ -1,26 +1,12 @@
-import Link from "next/link";
 import {notFound} from "next/navigation";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
 import {CardSpecies} from "@/components/card-species";
 
-import getFichaEspecie from "./get-ficha-especie";
+import getFichaEspecie from "../species/[id]/get-ficha-especie";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function SpeciesPage({params}: PageProps) {
-  const {id} = await params;
-
-  // Sanitizar el id: decodificar URL y reemplazar guiones/guiones bajos por espacios
-  const sanitizedId = decodeURIComponent(id).replace(/[-_]/g, " ");
-
-  const fichaEspecie = await getFichaEspecie(sanitizedId);
+export default async function Page() {
+  //  const fichaEspecie = await getFichaEspecie(Number(id));
+  const fichaEspecie = await getFichaEspecie("Pristimantis bambu");
 
   if (!fichaEspecie) {
     notFound();
