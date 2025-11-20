@@ -18,7 +18,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
     <CardContent className="flex-1 overflow-y-auto p-0">
       <div className="flex">
         {/* Columna izquierda - Contenido principal */}
-        <div className="w-[75%]">
+        <div className="w-[80%]">
           <div className="space-y-10 p-8">
             {/* Secciones de contenido */}
 
@@ -204,107 +204,56 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Historial de la ficha</CardTitle>
-                <CardContent>
-                  {fichaEspecie.historial ? (
-                    <span className="text-muted-foreground">{fichaEspecie.historial}</span>
-                  ) : (
-                    <p className="text-muted-foreground">No disponible</p>
-                  )}
-                </CardContent>
               </CardHeader>
+              <CardContent>
+                {fichaEspecie.historial ? (
+                  <span className="text-muted-foreground">{fichaEspecie.historial}</span>
+                ) : (
+                  <p className="text-muted-foreground">No disponible</p>
+                )}
+              </CardContent>
             </Card>
 
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Fecha Actualizacion</CardTitle>
-                <CardContent>
-                  {fichaEspecie.fecha_actualizacion ? (
-                    <span className="text-muted-foreground">
-                      {fichaEspecie.fecha_actualizacion}
-                    </span>
-                  ) : (
-                    <p className="text-muted-foreground">No disponible</p>
-                  )}
-                </CardContent>
               </CardHeader>
+              <CardContent>
+                {fichaEspecie.fecha_actualizacion ? (
+                  <span className="text-muted-foreground">{fichaEspecie.fecha_actualizacion}</span>
+                ) : (
+                  <p className="text-muted-foreground">No disponible</p>
+                )}
+              </CardContent>
             </Card>
           </div>
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen w-[25%] overflow-y-auto border-l">
-          <div className="space-y-8" style={{padding: "25px 30px"}}>
+        <div className="sticky top-0 h-screen w-[20%] overflow-y-auto border-l">
+          <div className="space-y-6 p-8">
             {/* Información General */}
-            <section>
-              <h3 className="mb-4">Información General</h3>
-
-              {/* Fotografía de Ficha */}
-              {fichaEspecie.fotografia_ficha && (
-                <div
-                  className="group mb-2 flex w-full flex-col items-center justify-center overflow-hidden rounded-none border p-2"
-                  style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
-                >
-                  <img
-                    alt="Fotografía de la especie"
-                    className="mx-auto h-auto w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
-                    src={fichaEspecie.fotografia_ficha}
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-2">
-                {/* Endemismo */}
-                <div
-                  className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  <h4
-                    className="mb-2"
-                    style={{
-                      color: "#666666",
-                      fontSize: "12px",
-                      fontFamily:
-                        '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                      fontWeight: "600",
-                    }}
+            <Card>
+              <CardHeader>
+                <CardTitle>Información General</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Fotografía de Ficha */}
+                {fichaEspecie.fotografia_ficha && (
+                  <div
+                    className="group mb-2 flex w-full flex-col items-center justify-center overflow-hidden rounded-none border p-2"
+                    style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
                   >
-                    Endemismo
-                  </h4>
-                  <span
-                    className="text-center text-sm font-semibold"
-                    style={{color: fichaEspecie.taxones[0].endemica ? "#16a34a" : "#6b7280"}}
-                  >
-                    {fichaEspecie.taxones[0].endemica ? "Endémica" : " No endémica"}
-                  </span>
-                </div>
+                    <img
+                      alt="Fotografía de la especie"
+                      className="mx-auto h-auto w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
+                      src={fichaEspecie.fotografia_ficha}
+                    />
+                  </div>
+                )}
 
-                {/* En Ecuador */}
-                <div
-                  className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  <h4
-                    className="mb-2"
-                    style={{
-                      color: "#666666",
-                      fontSize: "12px",
-                      fontFamily:
-                        '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                      fontWeight: "600",
-                    }}
-                  >
-                    En Ecuador
-                  </h4>
-                  <span
-                    className="text-center text-sm font-semibold"
-                    style={{color: fichaEspecie.taxones[0].en_ecuador ? "#16a34a" : "#6b7280"}}
-                  >
-                    {fichaEspecie.taxones[0].en_ecuador ? "Sí" : "No"}
-                  </span>
-                </div>
-
-                {/* Lista Roja */}
-                {fichaEspecie.listaRojaIUCN && (
+                <div className="grid grid-cols-1 gap-2">
+                  {/* Endemismo */}
                   <div
                     className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
                     style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
@@ -319,235 +268,295 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                         fontWeight: "600",
                       }}
                     >
-                      Lista Roja IUCN
+                      Endemismo
                     </h4>
-                    <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
+                    <span
+                      className="text-center text-sm font-semibold"
+                      style={{color: fichaEspecie.taxones[0].endemica ? "#16a34a" : "#6b7280"}}
+                    >
+                      {fichaEspecie.taxones[0].endemica ? "Endémica" : " No endémica"}
+                    </span>
                   </div>
-                )}
-              </div>
-            </section>
+
+                  {/* En Ecuador */}
+                  <div
+                    className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  >
+                    <h4
+                      className="mb-2"
+                      style={{
+                        color: "#666666",
+                        fontSize: "12px",
+                        fontFamily:
+                          '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                        fontWeight: "600",
+                      }}
+                    >
+                      En Ecuador
+                    </h4>
+                    <span
+                      className="text-center text-sm font-semibold"
+                      style={{color: fichaEspecie.taxones[0].en_ecuador ? "#16a34a" : "#6b7280"}}
+                    >
+                      {fichaEspecie.taxones[0].en_ecuador ? "Sí" : "No"}
+                    </span>
+                  </div>
+
+                  {/* Lista Roja */}
+                  {fichaEspecie.listaRojaIUCN && (
+                    <div
+                      className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                      style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    >
+                      <h4
+                        className="mb-2"
+                        style={{
+                          color: "#666666",
+                          fontSize: "12px",
+                          fontFamily:
+                            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: "600",
+                        }}
+                      >
+                        Lista Roja IUCN
+                      </h4>
+                      <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Recursos */}
-            <section>
-              <h3 className="mb-4">Recursos</h3>
-              <div className="grid grid-cols-1 gap-2">
-                <div
-                  className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  <Camera className="h-8 w-8" style={{color: "#333333"}} />
-                </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recursos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-2">
+                  <div
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  >
+                    <Camera className="h-8 w-8" style={{color: "#333333"}} />
+                  </div>
 
-                <div
-                  className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
-                </div>
+                  <div
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  >
+                    <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
+                  </div>
 
-                <div
-                  className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                  style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                >
-                  <MapPin className="h-8 w-8" style={{color: "#333333"}} />
+                  <div
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                  >
+                    <MapPin className="h-8 w-8" style={{color: "#333333"}} />
+                  </div>
                 </div>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Fuentes Externas */}
-            <section>
-              <h3 className="mb-4">Fuentes externas</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {fichaEspecie.wikipedia && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.wikipedia}>
-                            <img
-                              alt="ASW Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/wikipedia.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>ASW - Amphibian Species of the World</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+            <Card>
+              <CardHeader>
+                <CardTitle>Fuentes externas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-2">
+                  {fichaEspecie.wikipedia && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.wikipedia}>
+                              <img
+                                alt="ASW Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/wikipedia.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>ASW - Amphibian Species of the World</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.aw && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.aw}>
-                            <img
-                              alt="AmphibiaWeb Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/amphibiaweb.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>AmphibiaWeb</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {fichaEspecie.aw && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.aw}>
+                              <img
+                                alt="AmphibiaWeb Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/amphibiaweb.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>AmphibiaWeb</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.genbank && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.genbank}>
-                            <img
-                              alt="NCBI Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/ncbi.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>NCBI - National Center for Biotechnology Information</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {fichaEspecie.genbank && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.genbank}>
+                              <img
+                                alt="NCBI Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/ncbi.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>NCBI - National Center for Biotechnology Information</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.herpnet && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.herpnet}>
-                            <img
-                              alt="VertNet Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/vertnet.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>VertNet</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {fichaEspecie.herpnet && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.herpnet}>
+                              <img
+                                alt="VertNet Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/vertnet.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>VertNet</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.inaturalist && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.inaturalist}>
-                            <img
-                              alt="iNaturalist Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/iNaturalist.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>iNaturalist</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {fichaEspecie.inaturalist && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.inaturalist}>
+                              <img
+                                alt="iNaturalist Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/iNaturalist.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>iNaturalist</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.asw && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.asw}>
-                            <img
-                              alt="amnh Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/amnh.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>amnh</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {fichaEspecie.asw && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.asw}>
+                              <img
+                                alt="amnh Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/amnh.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>amnh</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
-                {fichaEspecie.uicn && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
-                          variant="outline"
-                        >
-                          <a href={fichaEspecie.uicn}>
-                            <img
-                              alt="IUCN Logo"
-                              className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
-                              src="/assets/references/redlist.png"
-                              style={{width: "100%", height: "auto"}}
-                            />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>IUCN Red List</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            </section>
+                  {fichaEspecie.uicn && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={fichaEspecie.uicn}>
+                              <img
+                                alt="IUCN Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/redlist.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>IUCN Red List</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
