@@ -241,13 +241,12 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               {/* Fotografía de Ficha */}
               {fichaEspecie.fotografia_ficha && (
                 <div
-                  className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                  className="group flex aspect-square flex-col items-center justify-center rounded-none border p-2"
                   style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                 >
                   <img
                     alt="Fotografía de la especie"
-                    // className="h-full w-full object-cover"
-                    className="mx-auto h-full w-full object-cover grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                    className="mx-auto h-full w-full cursor-pointer object-cover grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
                     src={fichaEspecie.fotografia_ficha}
                   />
                 </div>
