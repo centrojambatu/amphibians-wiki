@@ -11,6 +11,7 @@ import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
+import RedListStatus from "./RedListStatus";
 
 export const CardSpeciesContent = ({fichaEspecie}) => {
   return (
@@ -316,7 +317,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                           >
                             Lista Roja IUCN
                           </h4>
-                          <span
+                          {/* <span
                             className="rounded-none px-2 py-1 font-mono text-base"
                             style={{
                               backgroundColor: getBackgroundColor(
@@ -330,7 +331,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                             }}
                           >
                             {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla}
-                          </span>
+                          </span> */}
+                          <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
