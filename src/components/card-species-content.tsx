@@ -92,6 +92,25 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
 
+            {/* Etimología */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Etimología</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.etimologia ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: processHTMLLinks(fichaEspecie.etimologia),
+                    }}
+                    className="text-muted-foreground"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Información básica */}
             <Card className="mb-6">
               <CardHeader>
@@ -99,19 +118,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
-                  <div>
-                    <h4 className="mb-2 font-semibold">Etimología</h4>
-                    {fichaEspecie.etimologia ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: processHTMLLinks(fichaEspecie.etimologia),
-                        }}
-                        className="text-muted-foreground"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground">No disponible</p>
-                    )}
-                  </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Distribución</h4>
                     {/* <p className="text-muted-foreground">
@@ -148,6 +154,53 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     ))}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* {Identificacion} */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Identificación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Taxonomía */}
+                {fichaEspecie.taxonomia && (
+                  <div className="mt-4">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(fichaEspecie.taxonomia),
+                      }}
+                      className="text-muted-foreground"
+                    />
+                  </div>
+                )}
+
+                {/* Longitud rostro-cloacal */}
+                <div className="mt-4 space-y-2">
+                  {fichaEspecie.svl_macho && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">Longitud rostro-cloacal ♂:</span>
+                      <span className="text-muted-foreground">{fichaEspecie.svl_macho} mm</span>
+                    </div>
+                  )}
+                  {fichaEspecie.svl_hembra && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">Longitud rostro-cloacal ♀:</span>
+                      <span className="text-muted-foreground">{fichaEspecie.svl_hembra} mm</span>
+                    </div>
+                  )}
+                </div>
+
+                {fichaEspecie.identificacion ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: processHTMLLinks(fichaEspecie.identificacion),
+                    }}
+                    className="text-muted-foreground mt-4"
+                  />
+                ) : (
+                  <p className="text-muted-foreground mt-4">No disponible</p>
+                )}
               </CardContent>
             </Card>
 
@@ -251,25 +304,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 </CardContent>
               </Card>
             )}
-
-            {/* {Identificacion} */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Identificación</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.identificacion ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: processHTMLLinks(fichaEspecie.identificacion),
-                    }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
 
             {/* { Publicaciones } */}
             <Card className="mb-6">
