@@ -93,7 +93,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
-                <Link className="text-2xl font-bold" href="/" style={{color: '#006d1b'}}>
+                <Link className="text-2xl font-bold" href="/" style={{color: "#006d1b"}}>
                   🐸 Anfibios de Ecuador
                 </Link>
                 <nav className="flex items-center gap-4">

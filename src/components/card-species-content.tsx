@@ -1,3 +1,5 @@
+"use client";
+
 import {Camera, MapPin, Volume2} from "lucide-react";
 
 import {
@@ -14,6 +16,53 @@ import {Separator} from "./ui/separator";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
+
+// Función para agrupar datos geopolíticos jerárquicamente
+const groupGeoPoliticalData = (geoPolitica: any[]) => {
+  if (!geoPolitica || geoPolitica.length === 0) return {};
+
+  // Ordenar por rank_geopolitica_id (de menor a mayor, asumiendo que 1=Continente, 2=País, 3=Provincia)
+  const sortedData = [...geoPolitica].sort((a, b) => a.rank_geopolitica_id - b.rank_geopolitica_id);
+
+  const grouped: any = {};
+  let currentContinente: string | null = null;
+  let currentPais: string | null = null;
+
+  sortedData.forEach((item) => {
+    const {rank_nombre, nombre} = item;
+    const normalizedRankNombre = rank_nombre?.toLowerCase();
+
+    if (normalizedRankNombre === "continente") {
+      currentContinente = nombre;
+      if (!grouped[nombre]) {
+        grouped[nombre] = {paises: {}};
+      }
+    } else if (normalizedRankNombre === "país" || normalizedRankNombre === "pais") {
+      if (!currentContinente) {
+        currentContinente = "Sin continente";
+        grouped[currentContinente] = {paises: {}};
+      }
+      currentPais = nombre;
+      if (!grouped[currentContinente].paises[nombre]) {
+        grouped[currentContinente].paises[nombre] = {provincias: []};
+      }
+    } else if (normalizedRankNombre === "provincia") {
+      if (!currentContinente) {
+        currentContinente = "Sin continente";
+        grouped[currentContinente] = {paises: {}};
+      }
+      if (!currentPais) {
+        currentPais = "Sin país";
+        grouped[currentContinente].paises[currentPais] = {provincias: []};
+      }
+      if (!grouped[currentContinente].paises[currentPais].provincias.includes(nombre)) {
+        grouped[currentContinente].paises[currentPais].provincias.push(nombre);
+      }
+    }
+  });
+
+  return grouped;
+};
 
 export const CardSpeciesContent = ({fichaEspecie}) => {
   return (
@@ -141,24 +190,61 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             </Card>
 
             {/* Geopolítica */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Distribución Geopolítica</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
-                  {fichaEspecie.geoPolitica?.map((region, index) => (
-                    <div
-                      key={`${region.rank_geopolitica_id}-${region.nombre}-${index}`}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{region.rank_nombre}</span>
-                      <span className="text-muted-foreground text-sm">{region.nombre}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Distribución Geopolítica</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
+                      ([continente, continenteData]: [string, any], index) => (
+                        <div key={continente}>
+                          {index > 0 && <Separator className="mb-6" />}
+                          <div className="space-y-2">
+                            {/* Continente */}
+                            <div className="flex items-center gap-2">
+                              <div className="h-3 w-3 shrink-0 rounded-full bg-green-600" />
+                              <div className="text-foreground text-base font-bold">
+                                {continente}
+                              </div>
+                            </div>
+                            {/* Países */}
+                            <div className="space-y-2">
+                              {Object.entries(continenteData.paises).map(
+                                ([pais, paisData]: [string, any]) => (
+                                  <div key={`${continente}-${pais}`} className="ml-6 space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
+                                      <div className="text-foreground text-sm font-semibold">
+                                        {pais}
+                                      </div>
+                                    </div>
+                                    {/* Provincias */}
+                                    {paisData.provincias && paisData.provincias.length > 0 && (
+                                      <div className="text-muted-foreground ml-6 text-sm">
+                                        {paisData.provincias.map(
+                                          (provincia: string, idx: number) => (
+                                            <span key={`${pais}-${provincia}-${idx}`}>
+                                              • {provincia}
+                                              {idx < paisData.provincias.length - 1 && " "}
+                                            </span>
+                                          ),
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* {Identificacion} */}
             <Card className="mb-6">
@@ -222,7 +308,11 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 {fichaEspecie.historial ? (
-                  <span className="text-muted-foreground">{fichaEspecie.historial}</span>
+                  <div className="text-muted-foreground">
+                    {fichaEspecie.historial.split(/\r\n?|\n/).map((line: string, idx: number) => (
+                      <div key={idx}>{line}</div>
+                    ))}
+                  </div>
                 ) : (
                   <p className="text-muted-foreground">No disponible</p>
                 )}
