@@ -142,9 +142,9 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
-                  {fichaEspecie.geoPolitica?.map((region) => (
+                  {fichaEspecie.geoPolitica?.map((region, index) => (
                     <div
-                      key={`${region.rank_geopolitica_id}-geopolitica`}
+                      key={`${region.rank_geopolitica_id}-${region.nombre}-${index}`}
                       className="flex items-center justify-between"
                     >
                       <span>{region.rank_nombre}</span>
