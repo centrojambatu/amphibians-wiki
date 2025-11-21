@@ -73,6 +73,25 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
           <div className="space-y-10 p-8">
             {/* Secciones de contenido */}
 
+            {/* Primer(os) colector(es) */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Primer(os) colector(es)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.descubridor ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: processHTMLLinks(fichaEspecie.descubridor),
+                    }}
+                    className="text-muted-foreground italic"
+                  />
+                ) : (
+                  <p className="text-muted-foreground italic">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Información básica */}
             <Card className="mb-6">
               <CardHeader>
@@ -80,19 +99,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
-                  <div>
-                    <h4 className="mb-2 font-semibold">Primeros colectores</h4>
-                    {fichaEspecie.descubridor ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: processHTMLLinks(fichaEspecie.descubridor),
-                        }}
-                        className="text-muted-foreground italic"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground italic">No disponible</p>
-                    )}
-                  </div>
                   <div>
                     <h4 className="mb-2 font-semibold">Etimología</h4>
                     {fichaEspecie.etimologia ? (

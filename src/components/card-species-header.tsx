@@ -5,12 +5,11 @@ import Link from "next/link";
 import {processHTMLLinks} from "@/lib/process-html-links";
 
 import {CardHeader} from "./ui/card";
-import {Separator} from "./ui/separator";
 
 export const CardSpeciesHeader = ({fichaEspecie}) => {
   return (
     <CardHeader className="sticky top-0 z-30 text-center">
-      <div className="space-y-4" style={{padding: "40px 30px 30px"}}>
+      <div className="space-y-4" style={{padding: "20px 30px 30px"}}>
         {/* Título principal - Jerarquía taxonómica completa */}
         <div className="flex flex-wrap items-baseline justify-center gap-2">
           {/* Orden - PEQUEÑO con link */}
@@ -66,9 +65,6 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
           {fichaEspecie.taxones[0].nombre_comun}
         </p>
       </div>
-
-      {/* Línea divisoria horizontal - extremo a extremo */}
-      <Separator className="bg-foreground" style={{margin: "0"}} />
     </CardHeader>
   );
 };
