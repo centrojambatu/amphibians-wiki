@@ -6,6 +6,7 @@ import {
   getRedListStatusFullName,
   getTextColor,
 } from "@/lib/get-badge-color-by-red-list-status";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
@@ -34,7 +35,9 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     <h4 className="mb-2 font-semibold">Primeros colectores</h4>
                     {fichaEspecie.descubridor ? (
                       <div
-                        dangerouslySetInnerHTML={{__html: fichaEspecie.descubridor}}
+                        dangerouslySetInnerHTML={{
+                          __html: processHTMLLinks(fichaEspecie.descubridor),
+                        }}
                         className="text-muted-foreground italic"
                       />
                     ) : (
@@ -45,7 +48,9 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     <h4 className="mb-2 font-semibold">Etimología</h4>
                     {fichaEspecie.etimologia ? (
                       <div
-                        dangerouslySetInnerHTML={{__html: fichaEspecie.etimologia}}
+                        dangerouslySetInnerHTML={{
+                          __html: processHTMLLinks(fichaEspecie.etimologia),
+                        }}
                         className="text-muted-foreground"
                       />
                     ) : (
@@ -162,7 +167,12 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 {fichaEspecie.identificacion ? (
-                  <div dangerouslySetInnerHTML={{__html: fichaEspecie.identificacion}} />
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: processHTMLLinks(fichaEspecie.identificacion),
+                    }}
+                    className="text-muted-foreground"
+                  />
                 ) : (
                   <p className="text-muted-foreground">No disponible</p>
                 )}
@@ -184,12 +194,16 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       >
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: pub.publicacion?.titulo || "Título no disponible",
+                            __html: processHTMLLinks(
+                              pub.publicacion?.titulo || "Título no disponible",
+                            ),
                           }}
                         />
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: pub.publicacion?.cita_corta || "Cita corta no disponible",
+                            __html: processHTMLLinks(
+                              pub.publicacion?.cita_corta || "Cita corta no disponible",
+                            ),
                           }}
                           className="text-muted-foreground text-sm"
                         />

@@ -26,10 +26,6 @@ export default async function SpeciesPage({params}: PageProps) {
     notFound();
   }
 
-  console.log({
-    fichaEspecie,
-  });
-
   return (
     <div className="bg-background min-h-screen">
       {/* Contenido de la especie */}

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import {processHTMLLinks} from "@/lib/process-html-links";
+
 import {CardHeader} from "./ui/card";
 import {Separator} from "./ui/separator";
 
@@ -11,8 +13,9 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
         <div className="flex flex-wrap items-baseline justify-center gap-2">
           {/* Orden - PEQUEÑO con link */}
           <Link
-            className="text-foreground text-sm font-medium transition-all hover:underline"
+            className="text-sm font-medium transition-all hover:underline"
             href="/TODO-ORDER-LINK"
+            style={{color: "#006d1b"}}
           >
             {fichaEspecie.lineage[3]?.taxon}
           </Link>
@@ -22,8 +25,9 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
 
           {/* Familia - PEQUEÑO con link */}
           <Link
-            className="text-foreground text-sm font-medium transition-all hover:underline"
+            className="text-sm font-medium transition-all hover:underline"
             href="/family/TODO familyId"
+            style={{color: "#006d1b"}}
           >
             {fichaEspecie.lineage[2]?.taxon}
           </Link>
@@ -33,8 +37,9 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
 
           {/* Género - PEQUEÑO e itálica con link */}
           <Link
-            className="text-foreground text-sm font-medium italic transition-all hover:underline"
+            className="text-sm font-medium italic transition-all hover:underline"
             href="/genus/TODO genusId"
+            style={{color: "#006d1b"}}
           >
             {fichaEspecie.lineage[1]?.taxon}
           </Link>
@@ -47,8 +52,10 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
 
           {/* Descriptor y año - MEDIANO */}
           <span
-            dangerouslySetInnerHTML={{__html: fichaEspecie.taxones[0]?.autor_ano}}
-            className="text-foreground text-lg font-normal"
+            dangerouslySetInnerHTML={{
+              __html: processHTMLLinks(fichaEspecie.taxones[0]?.autor_ano),
+            }}
+            className="autor-ano-links"
           />
         </div>
 
