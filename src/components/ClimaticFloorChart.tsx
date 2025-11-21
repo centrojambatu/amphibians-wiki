@@ -202,14 +202,29 @@ export default function ClimaticFloorChart({
     };
   };
 
+  // Calcular las posiciones para las etiquetas de altitud
+  const altitudeMarkers = [
+    {altitude: 0, position: 0},
+    {altitude: 1000, position: 10},
+    {altitude: 2000, position: 20},
+    {altitude: 3000, position: 30},
+    {altitude: 4000, position: 40},
+    {altitude: 5000, position: 50},
+    {altitude: 4000, position: 60},
+    {altitude: 3000, position: 70},
+    {altitude: 2000, position: 80},
+    {altitude: 1000, position: 90},
+    {altitude: 0, position: 100},
+  ];
+
   return (
-    <div className="flex w-full flex-col items-center">
+    <div className="flex w-full flex-col items-center px-6">
       {/* Gráfico de pisos climáticos - Referencia geográfica */}
-      <div className="mb-1 flex w-full max-w-118 text-xs font-semibold text-gray-700">
-        <span className="w-1/2 text-center">← Occidental</span>
-        <span className="w-1/2 text-center">Oriental →</span>
+      <div className="mb-1 flex w-full justify-between text-xs font-semibold text-gray-700">
+        <span>← Occidental</span>
+        <span>Oriental →</span>
       </div>
-      <div className="relative flex h-8 w-full max-w-80">
+      <div className="relative flex h-8 w-full">
         {/* Base: Todos los pisos en color plomo */}
         {allClimaticFloors.map((floor, index) => {
           const range = Math.abs(floor.max - floor.min);
@@ -310,27 +325,22 @@ export default function ClimaticFloorChart({
         })}
       </div>
 
-      {/* Rango altitudinal - Indica dónde está presente */}
-      <div className="mt-1 text-xs text-gray-600">
-        {altitudinalRange.min === 0 && altitudinalRange.max === 0 ? (
-          "No presente"
-        ) : altitudinalRange.occidente || altitudinalRange.oriente ? (
-          <div className="flex items-center justify-center gap-2">
-            {altitudinalRange.occidente && (
-              <span>
-                Occ: {altitudinalRange.occidente.min}-{altitudinalRange.occidente.max}m
-              </span>
-            )}
-            {altitudinalRange.occidente && altitudinalRange.oriente && <span>|</span>}
-            {altitudinalRange.oriente && (
-              <span>
-                Or: {altitudinalRange.oriente.min}-{altitudinalRange.oriente.max}m
-              </span>
-            )}
-          </div>
-        ) : (
-          `${altitudinalRange.min}-${altitudinalRange.max}m`
-        )}
+      {/* Etiquetas de altitud */}
+      <div className="relative mt-1 w-full">
+        <div className="relative flex h-4 w-full">
+          {altitudeMarkers.map((marker, index) => (
+            <div
+              key={`altitude-marker-${index}`}
+              className="absolute text-[10px] text-gray-600"
+              style={{
+                left: `${marker.position}%`,
+                transform: "translateX(-50%)",
+              }}
+            >
+              {marker.altitude}m
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

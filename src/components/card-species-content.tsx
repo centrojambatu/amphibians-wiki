@@ -72,7 +72,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         <div className="flex-1">
           <div className="space-y-10 p-8">
             {/* Secciones de contenido */}
-
             {/* Primer(os) colector(es) */}
             <Card className="mb-6">
               <CardHeader>
@@ -91,7 +90,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-
             {/* Etimología */}
             <Card className="mb-6">
               <CardHeader>
@@ -110,53 +108,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Información básica */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Información Básica</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
-                  <div>
-                    <h4 className="mb-2 font-semibold">Distribución</h4>
-                    {/* <p className="text-muted-foreground">
-                      grafico TODO : {fichaEspecie.rango_altitudinal || "No disponible"}
-                    </p> */}
-                    <ClimaticFloorChart
-                      altitudinalRange={fichaEspecie.altitudinalRange}
-                      // altitudinalRange={{
-                      //   min: null,
-                      //   max: null,
-                      //   occidente: {
-                      //     min: null,
-                      //     max: null,
-                      //   },
-                      //   oriente: {
-                      //     min: 2000,
-                      //     max: 2500,
-                      //   },
-                      // }}
-                    />
-                  </div>
-                  <div>
-                    <h4 className="mb-2 font-semibold">Distribución Altitudinal</h4>
-                    {fichaEspecie.distributions.map((categoria) => (
-                      <div
-                        key={`${categoria.catalogo_awe_id}-graphic`}
-                        className="flex items-center justify-between"
-                      >
-                        {/* <span>{categoria.catalogo_awe.tipo_catalogo_awe?.nombre}</span> */}
-                        <span className="text-muted-foreground text-sm">
-                          {categoria.catalogo_awe.nombre}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* {Identificacion} */}
             <Card className="mb-6">
               <CardHeader>
@@ -203,7 +154,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-
             {/* Historia Natural */}
             <Card className="mb-6">
               <CardHeader>
@@ -222,7 +172,142 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
+            {/* Contenido */} {/* Información básica */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Distribución</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Distribución Geopolítica */}
+                  {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Distribución Geopolítica</h4>
+                      <div className="space-y-4">
+                        {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
+                          ([continente, continenteData]: [string, any]) => (
+                            <div key={continente} className="space-y-2">
+                              {Object.entries(continenteData.paises).map(
+                                ([pais, paisData]: [string, any]) => (
+                                  <div key={`${continente}-${pais}`} className="text-sm">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-foreground font-semibold">
+                                        {continente}
+                                      </span>
+                                      <span className="text-muted-foreground">›</span>
+                                      <span className="text-foreground font-medium">{pais}</span>
+                                      {paisData.provincias && paisData.provincias.length > 0 && (
+                                        <>
+                                          <span className="text-muted-foreground">›</span>
+                                          <span className="text-muted-foreground">
+                                            {paisData.provincias.map(
+                                              (provincia: string, idx: number) => (
+                                                <span key={`${pais}-${provincia}-${idx}`}>
+                                                  {idx > 0 && ", "}
+                                                  {provincia}
+                                                </span>
+                                              ),
+                                            )}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
 
+                  {/* Zonas Altitudinales */}
+                  <div>
+                    <h4 className="mb-2 font-semibold">Zonas Altitudinales</h4>
+                    <div className="space-y-2">
+                      {fichaEspecie.distributions.map((categoria) => (
+                        <div key={`${categoria.catalogo_awe_id}-graphic`}>
+                          <span className="text-muted-foreground text-sm">
+                            {categoria.catalogo_awe.nombre}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rango Altitudinal */}
+                  <div>
+                    <h4 className="mb-2 font-semibold">Rango Altitudinal</h4>
+                    <p className="text-muted-foreground text-sm">
+                      {(() => {
+                        const occidente = fichaEspecie.altitudinalRange?.occidente;
+                        const oriente = fichaEspecie.altitudinalRange?.oriente;
+
+                        // Verificar si realmente hay valores (no solo el objeto vacío)
+                        const hasOccidenteValues = occidente?.min != null && occidente?.max != null;
+                        const hasOrienteValues = oriente?.min != null && oriente?.max != null;
+
+                        // Si hay ambas vertientes con valores, mostrar con prefijos
+                        if (hasOccidenteValues && hasOrienteValues) {
+                          return (
+                            <>
+                              <span>
+                                Occ:{" "}
+                                {occidente.min && occidente.max
+                                  ? `${occidente.min}-${occidente.max}`
+                                  : "-"}{" "}
+                                m
+                              </span>
+                              <span> | </span>
+                              <span>
+                                Or:{" "}
+                                {oriente.min && oriente.max ? `${oriente.min}-${oriente.max}` : "-"}{" "}
+                                m
+                              </span>
+                            </>
+                          );
+                        }
+
+                        // Si solo hay una vertiente, mostrar solo los números
+                        if (hasOccidenteValues) {
+                          return `${occidente.min}-${occidente.max} m`;
+                        }
+
+                        if (hasOrienteValues) {
+                          return `${oriente.min}-${oriente.max} m`;
+                        }
+
+                        // Fallback al rango general
+                        return `${fichaEspecie.altitudinalRange?.min || 0}-${fichaEspecie.altitudinalRange?.max || 0} m`;
+                      })()}
+                    </p>
+                  </div>
+
+                  {/* ClimaticFloorChart - Ancho completo */}
+                  <div className="-mx-6">
+                    <h4 className="mb-2 px-6 font-semibold">Distribución Altitudinal</h4>
+                    <div className="mb-8 w-full">
+                      <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
+                    </div>
+                  </div>
+
+                  {/* Regiones Biogeográficas */}
+                  <div>
+                    <h4 className="mb-2 font-semibold">Regiones Biogeográficas</h4>
+                    <div className="space-y-2">
+                      {fichaEspecie.dataRegionBio.map((region) => (
+                        <div key={region.id_taxon_catalogo_awe_region_biogeografica}>
+                          <span className="text-muted-foreground text-sm">
+                            {region.catalogo_awe.nombre}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {/* Catalogo Awe */}
             <Card className="mb-6">
               <CardHeader>
@@ -244,86 +329,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Ecoregion */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Regiones Biogeográficas AWE</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
-                  {fichaEspecie.dataRegionBio.map((region) => (
-                    <div
-                      key={region.id_taxon_catalogo_awe_region_biogeografica}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{region.catalogo_awe.tipo_catalogo_awe?.nombre}</span>
-                      <span className="text-muted-foreground text-sm">
-                        {region.catalogo_awe.nombre} ({region.catalogo_awe.descripcion})
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Geopolítica */}
-            {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Distribución Geopolítica</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
-                      ([continente, continenteData]: [string, any], index) => (
-                        <div key={continente}>
-                          {index > 0 && <Separator className="mb-6" />}
-                          <div className="space-y-2">
-                            {/* Continente */}
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 shrink-0 rounded-full bg-green-600" />
-                              <div className="text-foreground text-base font-bold">
-                                {continente}
-                              </div>
-                            </div>
-                            {/* Países */}
-                            <div className="space-y-2">
-                              {Object.entries(continenteData.paises).map(
-                                ([pais, paisData]: [string, any]) => (
-                                  <div key={`${continente}-${pais}`} className="ml-6 space-y-1">
-                                    <div className="flex items-center gap-2">
-                                      <div className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
-                                      <div className="text-foreground text-sm font-semibold">
-                                        {pais}
-                                      </div>
-                                    </div>
-                                    {/* Provincias */}
-                                    {paisData.provincias && paisData.provincias.length > 0 && (
-                                      <div className="text-muted-foreground ml-6 text-sm">
-                                        {paisData.provincias.map(
-                                          (provincia: string, idx: number) => (
-                                            <span key={`${pais}-${provincia}-${idx}`}>
-                                              • {provincia}
-                                              {idx < paisData.provincias.length - 1 && " "}
-                                            </span>
-                                          ),
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* { Publicaciones } */}
             <Card className="mb-6">
               <CardHeader>
@@ -360,7 +365,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Historial de la ficha</CardTitle>
@@ -377,7 +381,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Fecha Actualizacion</CardTitle>
