@@ -180,13 +180,13 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.svl_macho && (
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Longitud rostro-cloacal ♂:</span>
-                      <span className="text-muted-foreground">{fichaEspecie.svl_macho} mm</span>
+                      <span className="text-muted-foreground">{fichaEspecie.svl_macho}</span>
                     </div>
                   )}
                   {fichaEspecie.svl_hembra && (
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Longitud rostro-cloacal ♀:</span>
-                      <span className="text-muted-foreground">{fichaEspecie.svl_hembra} mm</span>
+                      <span className="text-muted-foreground">{fichaEspecie.svl_hembra}</span>
                     </div>
                   )}
                 </div>
@@ -200,6 +200,25 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   />
                 ) : (
                   <p className="text-muted-foreground mt-4">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Historia Natural */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Historia Natural</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.habitat_biologia ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: processHTMLLinks(fichaEspecie.habitat_biologia),
+                    }}
+                    className="text-muted-foreground"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">No disponible</p>
                 )}
               </CardContent>
             </Card>
