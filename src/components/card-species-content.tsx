@@ -230,7 +230,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen w-[20%] overflow-y-auto border-l">
+        <div className="sticky top-0 h-screen w-[20%] overflow-y-auto">
           <div className="space-y-6 p-8">
             {/* Información General */}
             <Card>
