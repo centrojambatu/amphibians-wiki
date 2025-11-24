@@ -28,29 +28,46 @@ export default function ClimaticFloorChart({
   ];
 
   const allClimaticFloors = [
-    // Occidente (ascendente de 0 a 5000 en pasos de 1000)
-    {name: "Tropical Occidental", min: 0, max: 1000, colorIndex: 0, region: "Costa"},
-    {name: "Subtropical Occidental", min: 1000, max: 2000, colorIndex: 1, region: "Pie de monte"},
-    {name: "Templado Occidental", min: 2000, max: 3000, colorIndex: 2, region: "Sierra baja"},
-    {name: "Frío", min: 3000, max: 4000, colorIndex: 3, region: "Sierra alta"},
-    {name: "Páramo", min: 4000, max: 5000, colorIndex: 4, region: "Pico máximo"},
-    // Oriente (descendente de 5000 a 0 en pasos de 1000)
-    {name: "Páramo Oriental", min: 5000, max: 4000, colorIndex: 4, region: "Pico máximo"},
-    {name: "Frío Oriental", min: 4000, max: 3000, colorIndex: 3, region: "Sierra alta"},
-    {name: "Templado Oriental", min: 3000, max: 2000, colorIndex: 2, region: "Sierra oriental"},
+    // Occidente (ascendente)
+    {name: "Tropical Occidental", min: 0, max: 1000, colorIndex: 0, region: "Costa del Pacífico"},
+    {
+      name: "Subtropical Occidental",
+      min: 1000,
+      max: 2300,
+      colorIndex: 1,
+      region: "Vertiente occidental",
+    },
+    {
+      name: "Templada Occidental",
+      min: 2300,
+      max: 3400,
+      colorIndex: 2,
+      region: "Vertiente occidental",
+    },
+    // Centro (compartida)
+    {name: "Altoandina", min: 3400, max: 4800, colorIndex: 3, region: "Páramo y zona nival"},
+    // Oriente (descendente)
+    {
+      name: "Templada Oriental",
+      min: 3400,
+      max: 2300,
+      colorIndex: 2,
+      region: "Vertiente oriental",
+    },
     {
       name: "Subtropical Oriental",
-      min: 2000,
+      min: 2300,
       max: 1000,
       colorIndex: 1,
-      region: "Pie de monte oriental",
+      region: "Amazonía alta",
     },
-    {name: "Tropical Oriental", min: 1000, max: 0, colorIndex: 0, region: "Oriente"},
+    {name: "Tropical Oriental", min: 1000, max: 0, colorIndex: 0, region: "Amazonía baja"},
   ];
 
-  // Calcular el rango total altitudinal (0 a 5000 en occidente + 5000 a 0 en oriente)
-  // Todos los pisos tienen 1000m: 10 pisos × 1000m = 10000m total
-  const totalAltitudeRange = 1000 + 1000 + 1000 + 1000 + 1000 + 1000 + 1000 + 1000 + 1000 + 1000; // = 10000m total
+  // Calcular el rango total altitudinal sumando todos los pisos
+  // Tropical Occ: 1000m + Subtropical Occ: 1300m + Templada Occ: 1100m + Altoandina: 1400m +
+  // Templada Or: 1100m + Subtropical Or: 1300m + Tropical Or: 1000m = 8200m total
+  const totalAltitudeRange = 1000 + 1300 + 1100 + 1400 + 1100 + 1300 + 1000; // = 8200m total
 
   // Color plomo por defecto
   const defaultColor = "#9CA3AF"; // Gris plomo
@@ -87,26 +104,26 @@ export default function ClimaticFloorChart({
     const floorIsAscending = floor.min < floor.max; // Occidente: 0→5000
     const floorIsDescending = floor.min > floor.max; // Oriente: 5000→0
 
-    // Pisos centrales (Frío, Páramo sin especificar vertiente)
-    // Solo se activan si están en la mitad alta del rango
+    // Pisos centrales (Altoandina sin especificar vertiente)
+    // Solo se activan si están en la zona alta del rango (≥ 3400m)
     if (!isOccidental && !isOriental) {
       // Si hay rangos específicos por vertiente, verificar ambos
       if (altitudinalRange.occidente || altitudinalRange.oriente) {
         const occidenteHigh =
           altitudinalRange.occidente &&
-          Math.max(altitudinalRange.occidente.min, altitudinalRange.occidente.max) >= 3000;
+          Math.max(altitudinalRange.occidente.min, altitudinalRange.occidente.max) >= 3400;
         const orienteHigh =
           altitudinalRange.oriente &&
-          Math.max(altitudinalRange.oriente.min, altitudinalRange.oriente.max) >= 3000;
+          Math.max(altitudinalRange.oriente.min, altitudinalRange.oriente.max) >= 3400;
 
-        return (occidenteHigh || orienteHigh) && (floorIsAscending || floorIsDescending);
+        return (occidenteHigh || orienteHigh) && floorIsAscending;
       }
 
       const speciesMin = Math.min(altitudinalRange.min, altitudinalRange.max);
       const speciesMax = Math.max(altitudinalRange.min, altitudinalRange.max);
       const midPoint = (speciesMin + speciesMax) / 2;
 
-      return midPoint >= 3000 && (floorIsAscending || floorIsDescending);
+      return midPoint >= 3400 && floorIsAscending;
     }
 
     // Pisos occidentales: solo activar si occidente está en vertientes activas
@@ -202,14 +219,28 @@ export default function ClimaticFloorChart({
     };
   };
 
+  // Calcular las posiciones para las etiquetas de altitud basadas en los nuevos rangos
+  const altitudeMarkers = [
+    // Lado Occidental (ascendente)
+    {altitude: 0, position: 0}, // Inicio
+    {altitude: 1000, position: (1000 / totalAltitudeRange) * 100}, // ~12.2%
+    {altitude: 2300, position: (2300 / totalAltitudeRange) * 100}, // ~28.0%
+    {altitude: 3400, position: (3400 / totalAltitudeRange) * 100}, // ~41.5%
+    {altitude: 4800, position: (4800 / totalAltitudeRange) * 100}, // ~58.5% (pico)
+    // Lado Oriental (descendente)
+    {altitude: 2300, position: (5900 / totalAltitudeRange) * 100}, // ~72.0%
+    {altitude: 1000, position: (7200 / totalAltitudeRange) * 100}, // ~87.8%
+    {altitude: 0, position: 100}, // Fin
+  ];
+
   return (
-    <div className="flex w-full flex-col items-center">
+    <div className="flex w-full flex-col items-center px-6">
       {/* Gráfico de pisos climáticos - Referencia geográfica */}
-      <div className="mb-1 flex w-full max-w-118 text-xs font-semibold text-gray-700">
-        <span className="w-1/2 text-center">← Occidental</span>
-        <span className="w-1/2 text-center">Oriental →</span>
+      <div className="mb-1 flex w-full justify-between text-xs font-semibold text-gray-700">
+        <span>← Occidental</span>
+        <span>Oriental →</span>
       </div>
-      <div className="relative flex h-8 w-full max-w-80">
+      <div className="relative flex h-8 w-full">
         {/* Base: Todos los pisos en color plomo */}
         {allClimaticFloors.map((floor, index) => {
           const range = Math.abs(floor.max - floor.min);
@@ -310,27 +341,22 @@ export default function ClimaticFloorChart({
         })}
       </div>
 
-      {/* Rango altitudinal - Indica dónde está presente */}
-      <div className="mt-1 text-xs text-gray-600">
-        {altitudinalRange.min === 0 && altitudinalRange.max === 0 ? (
-          "No presente"
-        ) : altitudinalRange.occidente || altitudinalRange.oriente ? (
-          <div className="flex items-center justify-center gap-2">
-            {altitudinalRange.occidente && (
-              <span>
-                Occ: {altitudinalRange.occidente.min}-{altitudinalRange.occidente.max}m
-              </span>
-            )}
-            {altitudinalRange.occidente && altitudinalRange.oriente && <span>|</span>}
-            {altitudinalRange.oriente && (
-              <span>
-                Or: {altitudinalRange.oriente.min}-{altitudinalRange.oriente.max}m
-              </span>
-            )}
-          </div>
-        ) : (
-          `${altitudinalRange.min}-${altitudinalRange.max}m`
-        )}
+      {/* Etiquetas de altitud */}
+      <div className="relative mt-1 w-full">
+        <div className="relative flex h-4 w-full">
+          {altitudeMarkers.map((marker, index) => (
+            <div
+              key={`altitude-marker-${index}`}
+              className="absolute text-[10px] text-gray-600"
+              style={{
+                left: `${marker.position}%`,
+                transform: "translateX(-50%)",
+              }}
+            >
+              {marker.altitude}m
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

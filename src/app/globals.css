@@ -136,5 +136,90 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: Arial, Helvetica, sans-serif;
   }
+}
+
+/* Estilos globales para enlaces fuera de las capas de Tailwind */
+a,
+a:link,
+a:visited {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  transition: color 0.3s ease, text-decoration 0.3s ease !important;
+}
+
+a:hover,
+a:active {
+  color: #004d13 !important;
+  text-decoration: underline !important;
+}
+
+/* Estilos para botones del header */
+header a button {
+  color: #006d1b !important;
+}
+
+header a:hover button {
+  color: #004d13 !important;
+}
+
+/* Estilos para links del header de especies */
+header a[href*="TODO"],
+header a[href*="/family/"],
+header a[href*="/genus/"],
+header a[href*="/order/"] {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  transition: color 0.3s ease, text-decoration 0.3s ease !important;
+}
+
+header a[href*="TODO"]:hover,
+header a[href*="/family/"]:hover,
+header a[href*="/genus/"]:hover,
+header a[href*="/order/"]:hover {
+  color: #004d13 !important;
+  text-decoration: underline !important;
+}
+
+/* Estilos específicos para enlaces en autor_ano */
+span.autor-ano-links a,
+span.autor-ano-links a:link,
+span.autor-ano-links a:visited,
+.autor-ano-links a,
+.autor-ano-links a:link,
+.autor-ano-links a:visited {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  transition: color 0.3s ease, text-decoration 0.3s ease !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 1.125rem !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+span.autor-ano-links a:hover,
+span.autor-ano-links a:active,
+.autor-ano-links a:hover,
+.autor-ano-links a:active {
+  color: #004d13 !important;
+  text-decoration: underline !important;
+}
+
+/* Selector super específico para enlaces inyectados via dangerouslySetInnerHTML  */
+span[class~="autor-ano-links"] * a[href*="wikipedia"],
+span[class~="autor-ano-links"] * a[href*="http"],
+span[class~="autor-ano-links"] a[href] {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 1.125rem !important;
+  font-weight: 400 !important;
+}
+
+span[class~="autor-ano-links"] * a[href*="wikipedia"]:hover,
+span[class~="autor-ano-links"] * a[href*="http"]:hover,
+span[class~="autor-ano-links"] a[href]:hover {
+  color: #004d13 !important;
+  text-decoration: underline !important;
 }

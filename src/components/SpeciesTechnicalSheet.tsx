@@ -7,6 +7,7 @@ import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {Separator} from "@/components/ui/separator";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 
@@ -197,7 +198,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: etymology}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(etymology)}} />
                   </div>
                 </section>
               )}
@@ -227,7 +228,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: identification}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(identification)}} />
                   </div>
                 </section>
               )}
@@ -257,7 +258,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: comparisons}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(comparisons)}} />
                   </div>
                 </section>
               )}
@@ -287,7 +288,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: naturalHistory}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(naturalHistory)}} />
                   </div>
                 </section>
               )}
@@ -317,7 +318,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: content}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(content)}} />
                   </div>
                 </section>
               )}
@@ -347,7 +348,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: distribution}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(distribution)}} />
                   </div>
                 </section>
               )}
@@ -377,7 +378,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: conservation}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(conservation)}} />
                   </div>
                 </section>
               )}
@@ -407,7 +408,7 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: references}} />
+                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(references)}} />
                   </div>
                 </section>
               )}
