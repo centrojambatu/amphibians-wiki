@@ -152,6 +152,19 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 ) : (
                   <p className="text-muted-foreground mt-4">No disponible</p>
                 )}
+
+                {/* Especies Similares */}
+                {/* {fichaEspecie.sinonimia && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 font-semibold">Especies similares</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(fichaEspecie.sinonimia),
+                      }}
+                      className="text-muted-foreground"
+                    />
+                  </div>
+                )} */}
               </CardContent>
             </Card>
             {/* Historia Natural */}
@@ -160,16 +173,27 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 <CardTitle>Historia Natural</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.habitat_biologia ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: processHTMLLinks(fichaEspecie.habitat_biologia),
-                    }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">No disponible</p>
-                )}
+                <div className="space-y-4">
+                  {fichaEspecie.habitat_biologia ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(fichaEspecie.habitat_biologia),
+                      }}
+                      className="text-muted-foreground"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">No disponible</p>
+                  )}
+
+                  {fichaEspecie.informacion_adicional && (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(fichaEspecie.informacion_adicional),
+                      }}
+                      className="text-muted-foreground"
+                    />
+                  )}
+                </div>
               </CardContent>
             </Card>
             {/* Contenido */} {/* Información básica */}
@@ -179,6 +203,19 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Distribución Global */}
+                  {fichaEspecie.distribucion_global && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Distribución Global</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: processHTMLLinks(fichaEspecie.distribucion_global),
+                        }}
+                        className="text-muted-foreground"
+                      />
+                    </div>
+                  )}
+
                   {/* Distribución Geopolítica */}
                   {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
                     <div>
@@ -305,6 +342,209 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       ))}
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Conservación */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Conservación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Comentario Estatus Poblacional */}
+                  {fichaEspecie.comentario_estatus_poblacional ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(fichaEspecie.comentario_estatus_poblacional),
+                      }}
+                      className="text-muted-foreground"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">No disponible</p>
+                  )}
+
+                  {/* Áreas Protegidas */}
+                  {fichaEspecie.taxon_catalogo_awe_results?.filter(
+                    (categoria) =>
+                      categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                        "Áreas protegidas Privadas" ||
+                      categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                        "Áreas protegidas del Estado",
+                  ).length > 0 && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Áreas Protegidas</h4>
+                      <div className="space-y-3">
+                        {/* Áreas protegidas del Estado */}
+                        {fichaEspecie.taxon_catalogo_awe_results.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Áreas protegidas del Estado",
+                        ).length > 0 && (
+                          <div className="mb-4 ml-4">
+                            <p className="mb-2 text-xs font-semibold text-gray-600">
+                              Áreas protegidas del Estado
+                            </p>
+                            <div className="space-y-1">
+                              {fichaEspecie.taxon_catalogo_awe_results
+                                .filter(
+                                  (categoria) =>
+                                    categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                                    "Áreas protegidas del Estado",
+                                )
+                                .map((categoria) => (
+                                  <div
+                                    key={categoria.id_taxon_catalogo_awe}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <span className="text-muted-foreground text-sm">•</span>
+                                    <span className="text-muted-foreground text-sm">
+                                      {categoria.catalogo_awe.nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Áreas protegidas Privadas */}
+                        {fichaEspecie.taxon_catalogo_awe_results.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Áreas protegidas Privadas",
+                        ).length > 0 && (
+                          <div className="ml-4">
+                            <p className="mb-2 text-xs font-semibold text-gray-600">
+                              Áreas protegidas Privadas
+                            </p>
+                            <div className="space-y-1">
+                              {fichaEspecie.taxon_catalogo_awe_results
+                                .filter(
+                                  (categoria) =>
+                                    categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                                    "Áreas protegidas Privadas",
+                                )
+                                .map((categoria) => (
+                                  <div
+                                    key={categoria.id_taxon_catalogo_awe}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <span className="text-muted-foreground text-sm">•</span>
+                                    <span className="text-muted-foreground text-sm">
+                                      {categoria.catalogo_awe.nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Categorías de Conservación */}
+                  {fichaEspecie.taxon_catalogo_awe_results?.filter(
+                    (categoria) =>
+                      categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Lista Roja Coloma" ||
+                      categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Lista Roja UICN" ||
+                      categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
+                  ).length > 0 && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Categorías de Conservación</h4>
+                      <div className="space-y-3">
+                        {/* Lista Roja Coloma */}
+                        {fichaEspecie.taxon_catalogo_awe_results.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Lista Roja Coloma",
+                        ).length > 0 && (
+                          <div className="mb-4 ml-4">
+                            <p className="mb-2 text-xs font-semibold text-gray-600">
+                              Lista Roja Coloma
+                            </p>
+                            <div className="space-y-1">
+                              {fichaEspecie.taxon_catalogo_awe_results
+                                .filter(
+                                  (categoria) =>
+                                    categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                                    "Lista Roja Coloma",
+                                )
+                                .map((categoria) => (
+                                  <div
+                                    key={categoria.id_taxon_catalogo_awe}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <span className="text-muted-foreground text-sm">•</span>
+                                    <span className="text-muted-foreground text-sm">
+                                      {categoria.catalogo_awe.nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Lista Roja UICN */}
+                        {fichaEspecie.taxon_catalogo_awe_results.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Lista Roja UICN",
+                        ).length > 0 && (
+                          <div className="mb-4 ml-4">
+                            <p className="mb-2 text-xs font-semibold text-gray-600">
+                              Lista Roja UICN
+                            </p>
+                            <div className="space-y-1">
+                              {fichaEspecie.taxon_catalogo_awe_results
+                                .filter(
+                                  (categoria) =>
+                                    categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                                    "Lista Roja UICN",
+                                )
+                                .map((categoria) => (
+                                  <div
+                                    key={categoria.id_taxon_catalogo_awe}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <span className="text-muted-foreground text-sm">•</span>
+                                    <span className="text-muted-foreground text-sm">
+                                      {categoria.catalogo_awe.nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* CITES */}
+                        {fichaEspecie.taxon_catalogo_awe_results.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
+                        ).length > 0 && (
+                          <div className="ml-4">
+                            <p className="mb-2 text-xs font-semibold text-gray-600">CITES</p>
+                            <div className="space-y-1">
+                              {fichaEspecie.taxon_catalogo_awe_results
+                                .filter(
+                                  (categoria) =>
+                                    categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
+                                )
+                                .map((categoria) => (
+                                  <div
+                                    key={categoria.id_taxon_catalogo_awe}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <span className="text-muted-foreground text-sm">•</span>
+                                    <span className="text-muted-foreground text-sm">
+                                      {categoria.catalogo_awe.nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
