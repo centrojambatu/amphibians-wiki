@@ -2,12 +2,6 @@
 
 import {Camera, MapPin, Volume2} from "lucide-react";
 
-import {
-  getBackgroundColor,
-  getBorderColor,
-  getRedListStatusFullName,
-  getTextColor,
-} from "@/lib/get-badge-color-by-red-list-status";
 import {processHTMLLinks} from "@/lib/process-html-links";
 
 import {Button} from "./ui/button";

@@ -1,11 +1,23 @@
-import Link from "next/link";
-
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
-import {mockTaxonomy} from "@/lib/mock-taxonomy";
+import {SapopediaContent} from "@/components/sapopedia-content";
 
-export default function SapopediaPage() {
-  const orders = mockTaxonomy.getOrders();
+import getAllEspecies from "./get-all-especies";
+
+export default async function SapopediaPage() {
+  const especies = await getAllEspecies();
+
+  // Agrupar por orden para las estadísticas
+  const especiesPorOrden = especies.reduce<Record<string, typeof especies>>((acc, especie) => {
+    const orden = especie.orden || "Sin clasificar";
+
+    if (!acc[orden]) {
+      acc[orden] = [];
+    }
+    acc[orden].push(especie);
+
+    return acc;
+  }, {});
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -18,111 +30,39 @@ export default function SapopediaPage() {
         </p>
       </div>
 
-      {/* Navegación rápida */}
-      <div className="mb-8">
-        <h2 className="mb-6 text-2xl font-bold">Explorar por Orden</h2>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {orders.map((order) => (
-            <Link key={order.id} href={`/sapopedia/order/${order.id}`}>
-              <Card className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg">{order.name}</CardTitle>
-                  <p className="text-muted-foreground text-sm italic">{order.scientific_name}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">{order.description}</span>
-                    <Badge variant="outline">
-                      {mockTaxonomy.getFamiliesByOrder(order.id).length} familias
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+      {/* Estadísticas */}
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Total de Especies</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold">{especies.length}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Especies Endémicas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold">{especies.filter((e) => e.endemica).length}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Órdenes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold">{Object.keys(especiesPorOrden).length}</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Especies destacadas */}
-      {/* <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2"> */}
-      {/* Especies endémicas */}
-      {/* <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">🏔️ Especies Endémicas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4 text-sm">
-              Especies que solo se encuentran en Ecuador
-            </p>
-            <div className="space-y-2">
-              {endemicSpecies.map((specie) => (
-                <div
-                  key={specie.id}
-                  className="flex items-center justify-between rounded bg-green-50 p-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{specie.common_name}</p>
-                    <p className="text-muted-foreground text-xs italic">{specie.scientific_name}</p>
-                  </div>
-                  <Link href={`/sapopedia/species/${specie.id}`}>
-                    <Button size="sm" variant="outline">
-                      Ver
-                    </Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Link href="/sapopedia/endemic">
-                <Button className="w-full" variant="outline">
-                  Ver todas las especies endémicas
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card> */}
-
-      {/* Especies en peligro */}
-      {/* <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">⚠️ Especies en Peligro</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4 text-sm">
-              Especies con categorías de riesgo de extinción
-            </p>
-            <div className="space-y-2">
-              {endangeredSpecies.map((specie) => (
-                <div
-                  key={specie.id}
-                  className="flex items-center justify-between rounded bg-red-50 p-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{specie.common_name}</p>
-                    <p className="text-muted-foreground text-xs italic">{specie.scientific_name}</p>
-                    <Badge className="mt-1 text-xs" variant="destructive">
-                      {specie.conservation_status}
-                    </Badge>
-                  </div>
-                  <Link href={`/sapopedia/species/${specie.id}`}>
-                    <Button size="sm" variant="outline">
-                      Ver
-                    </Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Link href="/sapopedia/endangered">
-                <Button className="w-full" variant="outline">
-                  Ver todas las especies en peligro
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card> */}
-      {/* </div> */}
+      {/* Contenido con tabs */}
+      <div className="mb-8">
+        <h2 className="mb-6 text-2xl font-bold">Explorar Especies</h2>
+        <SapopediaContent especies={especies} />
+      </div>
 
       {/* Información adicional */}
       <Card>
