@@ -70,7 +70,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
       <div className="flex">
         {/* Columna izquierda - Contenido principal */}
         <div className="flex-1">
-          <div className="space-y-10 p-8">
+          <div className="space-y-10 p-4">
             {/* Secciones de contenido */}
             {/* Primer(os) colector(es) */}
             <Card className="mb-6">
@@ -548,27 +548,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 </div>
               </CardContent>
             </Card>
-            {/* Catalogo Awe */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Categorías en Catálogos AWE</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-6 md:grid-cols-2">
-                  {fichaEspecie.taxon_catalogo_awe_results.map((categoria) => (
-                    <div
-                      key={categoria.id_taxon_catalogo_awe}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{categoria.catalogo_awe.tipo_catalogo_awe?.nombre}</span>
-                      <span className="text-muted-foreground text-sm">
-                        {categoria.catalogo_awe.nombre}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
             {/* { Publicaciones } */}
             <Card className="mb-6">
               <CardHeader>
@@ -637,12 +616,11 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen py-8 pr-8 pl-4" style={{width: "25%"}}>
+        <div className="sticky top-0 h-screen py-4 pr-8 pl-4" style={{width: "20%"}}>
           <Card className="h-full overflow-hidden">
-            <CardContent className="h-full space-y-8 overflow-y-auto p-8">
+            <CardContent className="h-full space-y-2 overflow-y-auto p-4">
               {/* Información General */}
               <section>
-                <h3 className="mb-4 text-lg font-semibold">Información General</h3>
                 {/* Fotografía de Ficha */}
                 {fichaEspecie.fotografia_ficha && (
                   <div
