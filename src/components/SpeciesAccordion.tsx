@@ -59,14 +59,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="relative flex items-center gap-4 rounded-md border border-purple-100 bg-purple-50/50 px-4 py-3 transition-all hover:border-purple-300 hover:bg-purple-50"
+      className="relative flex items-center gap-4 rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
     >
-      {/* Círculo de nodo */}
-      <div
-        className="absolute h-2 w-2 rounded-full bg-purple-500 ring-2 ring-white"
-        style={{left: "4px"}}
-      />
-
       {/* Nombre científico */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -131,7 +125,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderGenus = (genus: GenusGroup) => (
     <div key={genus.id} className="relative bg-white">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-blue-100 bg-blue-50/50 px-4 py-3 transition-all hover:border-blue-300 hover:bg-blue-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`genus-${genus.id}`)}
@@ -142,14 +136,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Círculo de nodo para género */}
-        <div
-          className="absolute h-3 w-3 rounded-full bg-blue-500 ring-2 ring-white"
-          style={{left: "4px"}}
-        />
-
         {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 text-blue-600">
+        <div className="mr-3 flex-shrink-0 text-gray-600">
           {isOpen(`genus-${genus.id}`) ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
@@ -195,7 +183,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderFamily = (family: FamilyGroup) => (
     <div key={family.id} className="relative bg-white">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-green-100 bg-green-50/50 px-4 py-3 transition-all hover:border-green-300 hover:bg-green-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`family-${family.id}`)}
@@ -206,14 +194,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Círculo de nodo para familia */}
-        <div
-          className="absolute h-3.5 w-3.5 rounded-full bg-green-600 ring-2 ring-white"
-          style={{left: "4px"}}
-        />
-
         {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 text-green-700">
+        <div className="mr-3 flex-shrink-0 text-gray-600">
           {isOpen(`family-${family.id}`) ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
@@ -249,7 +231,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderOrder = (order: OrderGroup) => (
     <div key={order.id} className="relative mb-4 bg-white">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-red-100 bg-red-50/50 px-4 py-3 transition-all hover:border-red-300 hover:bg-red-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`order-${order.id}`)}
@@ -260,14 +242,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Círculo de nodo para orden */}
-        <div
-          className="absolute h-4 w-4 rounded-full bg-red-600 ring-2 ring-white"
-          style={{left: "8px"}}
-        />
-
         {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 pl-6 text-red-700">
+        <div className="mr-3 flex-shrink-0 text-gray-600">
           {isOpen(`order-${order.id}`) ? (
             <ChevronDown className="h-5 w-5" />
           ) : (
