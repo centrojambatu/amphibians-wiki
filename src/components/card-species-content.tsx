@@ -69,7 +69,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* Primer(os) colector(es) */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Primer(os) colector(es)</CardTitle>
+                <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.descubridor ? (
@@ -77,17 +77,17 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     dangerouslySetInnerHTML={{
                       __html: processHTMLLinks(fichaEspecie.descubridor),
                     }}
-                    className="text-muted-foreground italic"
+                    className="text-muted-foreground text-sm italic"
                   />
                 ) : (
-                  <p className="text-muted-foreground italic">No disponible</p>
+                  <p className="text-muted-foreground text-sm italic">No disponible</p>
                 )}
               </CardContent>
             </Card>
             {/* Etimología */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Etimología</CardTitle>
+                <CardTitle className="text-base">Etimología</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.etimologia ? (
@@ -95,17 +95,17 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     dangerouslySetInnerHTML={{
                       __html: processHTMLLinks(fichaEspecie.etimologia),
                     }}
-                    className="text-muted-foreground"
+                    className="text-muted-foreground text-sm"
                   />
                 ) : (
-                  <p className="text-muted-foreground">No disponible</p>
+                  <p className="text-muted-foreground text-sm">No disponible</p>
                 )}
               </CardContent>
             </Card>
             {/* {Identificacion} */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Identificación</CardTitle>
+                <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
               <CardContent>
                 {/* Taxonomía */}
@@ -115,7 +115,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       dangerouslySetInnerHTML={{
                         __html: processHTMLLinks(fichaEspecie.taxonomia),
                       }}
-                      className="text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                     />
                   </div>
                 )}
@@ -124,14 +124,18 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 <div className="mt-4 space-y-2">
                   {fichaEspecie.svl_macho && (
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold">Longitud rostro-cloacal ♂:</span>
-                      <span className="text-muted-foreground">{fichaEspecie.svl_macho}</span>
+                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♂:</span>
+                      <span className="text-muted-foreground text-sm">
+                        {fichaEspecie.svl_macho}
+                      </span>
                     </div>
                   )}
                   {fichaEspecie.svl_hembra && (
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold">Longitud rostro-cloacal ♀:</span>
-                      <span className="text-muted-foreground">{fichaEspecie.svl_hembra}</span>
+                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♀:</span>
+                      <span className="text-muted-foreground text-sm">
+                        {fichaEspecie.svl_hembra}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -141,10 +145,10 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     dangerouslySetInnerHTML={{
                       __html: processHTMLLinks(fichaEspecie.identificacion),
                     }}
-                    className="text-muted-foreground mt-4"
+                    className="text-muted-foreground mt-4 text-sm"
                   />
                 ) : (
-                  <p className="text-muted-foreground mt-4">No disponible</p>
+                  <p className="text-muted-foreground mt-4 text-sm">No disponible</p>
                 )}
 
                 {/* Especies Similares */}
@@ -164,7 +168,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* Historia Natural */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Historia Natural</CardTitle>
+                <CardTitle className="text-base">Historia Natural</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -173,10 +177,10 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       dangerouslySetInnerHTML={{
                         __html: processHTMLLinks(fichaEspecie.habitat_biologia),
                       }}
-                      className="text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                     />
                   ) : (
-                    <p className="text-muted-foreground">No disponible</p>
+                    <p className="text-muted-foreground text-sm">No disponible</p>
                   )}
 
                   {fichaEspecie.informacion_adicional && (
@@ -184,7 +188,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       dangerouslySetInnerHTML={{
                         __html: processHTMLLinks(fichaEspecie.informacion_adicional),
                       }}
-                      className="text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                     />
                   )}
                 </div>
@@ -193,19 +197,19 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* Contenido */} {/* Información básica */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Distribución</CardTitle>
+                <CardTitle className="text-base">Distribución</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* Distribución Global */}
                   {fichaEspecie.distribucion_global && (
                     <div>
-                      <h4 className="mb-2 font-semibold">Distribución Global</h4>
+                      <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
                       <div
                         dangerouslySetInnerHTML={{
                           __html: processHTMLLinks(fichaEspecie.distribucion_global),
                         }}
-                        className="text-muted-foreground"
+                        className="text-muted-foreground text-sm"
                       />
                     </div>
                   )}
@@ -213,14 +217,14 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {/* Distribución Geopolítica */}
                   {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
                     <div>
-                      <h4 className="mb-2 font-semibold">Distribución Geopolítica</h4>
+                      <h4 className="mb-2 text-sm font-semibold">Distribución Geopolítica</h4>
                       <div className="space-y-4">
                         {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
                           ([continente, continenteData]: [string, any]) => (
                             <div key={continente} className="space-y-2">
                               {Object.entries(continenteData.paises).map(
                                 ([pais, paisData]: [string, any]) => (
-                                  <div key={`${continente}-${pais}`} className="text-sm">
+                                  <div key={`${continente}-${pais}`} className="text-xs">
                                     <div className="flex items-center gap-2">
                                       <span className="text-foreground font-semibold">
                                         {continente}
@@ -255,11 +259,11 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
                   {/* Zonas Altitudinales */}
                   <div>
-                    <h4 className="mb-2 font-semibold">Zonas Altitudinales</h4>
+                    <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
                     <div className="space-y-2">
                       {fichaEspecie.distributions.map((categoria) => (
                         <div key={`${categoria.catalogo_awe_id}-graphic`}>
-                          <span className="text-muted-foreground text-sm">
+                          <span className="text-muted-foreground text-xs">
                             {categoria.catalogo_awe.nombre}
                           </span>
                         </div>
@@ -269,8 +273,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
                   {/* Rango Altitudinal */}
                   <div>
-                    <h4 className="mb-2 font-semibold">Rango Altitudinal</h4>
-                    <p className="text-muted-foreground text-sm">
+                    <h4 className="mb-2 text-sm font-semibold">Rango Altitudinal</h4>
+                    <p className="text-muted-foreground text-xs">
                       {(() => {
                         const occidente = fichaEspecie.altitudinalRange?.occidente;
                         const oriente = fichaEspecie.altitudinalRange?.oriente;
@@ -317,7 +321,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
                   {/* ClimaticFloorChart - Ancho completo */}
                   <div className="-mx-6">
-                    <h4 className="mb-2 px-6 font-semibold">Distribución Altitudinal</h4>
+                    <h4 className="mb-2 px-6 text-sm font-semibold">Distribución Altitudinal</h4>
                     <div className="mb-8 w-full">
                       <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
                     </div>
@@ -325,11 +329,11 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
                   {/* Regiones Biogeográficas */}
                   <div>
-                    <h4 className="mb-2 font-semibold">Regiones Biogeográficas</h4>
+                    <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
                     <div className="space-y-2">
                       {fichaEspecie.dataRegionBio.map((region) => (
                         <div key={region.id_taxon_catalogo_awe_region_biogeografica}>
-                          <span className="text-muted-foreground text-sm">
+                          <span className="text-muted-foreground text-xs">
                             {region.catalogo_awe.nombre}
                           </span>
                         </div>
@@ -342,7 +346,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* Conservación */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Conservación</CardTitle>
+                <CardTitle className="text-base">Conservación</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -352,10 +356,10 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       dangerouslySetInnerHTML={{
                         __html: processHTMLLinks(fichaEspecie.comentario_estatus_poblacional),
                       }}
-                      className="text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                     />
                   ) : (
-                    <p className="text-muted-foreground">No disponible</p>
+                    <p className="text-muted-foreground text-sm">No disponible</p>
                   )}
 
                   {/* Áreas Protegidas */}
@@ -367,7 +371,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                         "Áreas protegidas del Estado",
                   ).length > 0 && (
                     <div>
-                      <h4 className="mb-2 font-semibold">Áreas Protegidas</h4>
+                      <h4 className="mb-2 text-sm font-semibold">Áreas Protegidas</h4>
                       <div className="space-y-3">
                         {/* Áreas protegidas del Estado */}
                         {fichaEspecie.taxon_catalogo_awe_results.filter(
@@ -391,8 +395,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                     key={categoria.id_taxon_catalogo_awe}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-muted-foreground text-sm">•</span>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-muted-foreground text-xs">•</span>
+                                    <span className="text-muted-foreground text-xs">
                                       {categoria.catalogo_awe.nombre}
                                     </span>
                                   </div>
@@ -423,8 +427,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                     key={categoria.id_taxon_catalogo_awe}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-muted-foreground text-sm">•</span>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-muted-foreground text-xs">•</span>
+                                    <span className="text-muted-foreground text-xs">
                                       {categoria.catalogo_awe.nombre}
                                     </span>
                                   </div>
@@ -444,7 +448,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
                   ).length > 0 && (
                     <div>
-                      <h4 className="mb-2 font-semibold">Categorías de Conservación</h4>
+                      <h4 className="mb-2 text-sm font-semibold">Categorías de Conservación</h4>
                       <div className="space-y-3">
                         {/* Lista Roja Coloma */}
                         {fichaEspecie.taxon_catalogo_awe_results.filter(
@@ -468,8 +472,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                     key={categoria.id_taxon_catalogo_awe}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-muted-foreground text-sm">•</span>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-muted-foreground text-xs">•</span>
+                                    <span className="text-muted-foreground text-xs">
                                       {categoria.catalogo_awe.nombre}
                                     </span>
                                   </div>
@@ -499,8 +503,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                     key={categoria.id_taxon_catalogo_awe}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-muted-foreground text-sm">•</span>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-muted-foreground text-xs">•</span>
+                                    <span className="text-muted-foreground text-xs">
                                       {categoria.catalogo_awe.nombre}
                                     </span>
                                   </div>
@@ -527,8 +531,8 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                     key={categoria.id_taxon_catalogo_awe}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-muted-foreground text-sm">•</span>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-muted-foreground text-xs">•</span>
+                                    <span className="text-muted-foreground text-xs">
                                       {categoria.catalogo_awe.nombre}
                                     </span>
                                   </div>
@@ -545,7 +549,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* { Publicaciones } */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Publicaciones</CardTitle>
+                <CardTitle className="text-base">Publicaciones</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
@@ -561,6 +565,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                               pub.publicacion?.titulo || "Título no disponible",
                             ),
                           }}
+                          className="text-sm"
                         />
                         <div
                           dangerouslySetInnerHTML={{
@@ -568,41 +573,43 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                               pub.publicacion?.cita_corta || "Cita corta no disponible",
                             ),
                           }}
-                          className="text-muted-foreground text-sm"
+                          className="text-muted-foreground text-xs"
                         />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No hay publicaciones disponibles</p>
+                  <p className="text-muted-foreground text-sm">No hay publicaciones disponibles</p>
                 )}
               </CardContent>
             </Card>
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Historial de la ficha</CardTitle>
+                <CardTitle className="text-base">Historial de la ficha</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.historial ? (
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground text-sm">
                     {fichaEspecie.historial.split(/\r\n?|\n/).map((line: string, idx: number) => (
                       <div key={idx}>{line}</div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No disponible</p>
+                  <p className="text-muted-foreground text-sm">No disponible</p>
                 )}
               </CardContent>
             </Card>
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Fecha Actualizacion</CardTitle>
+                <CardTitle className="text-base">Fecha Actualizacion</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.fecha_actualizacion ? (
-                  <span className="text-muted-foreground">{fichaEspecie.fecha_actualizacion}</span>
+                  <span className="text-muted-foreground text-sm">
+                    {fichaEspecie.fecha_actualizacion}
+                  </span>
                 ) : (
-                  <p className="text-muted-foreground">No disponible</p>
+                  <p className="text-muted-foreground text-sm">No disponible</p>
                 )}
               </CardContent>
             </Card>
@@ -639,7 +646,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       className="mb-2"
                       style={{
                         color: "#666666",
-                        fontSize: "12px",
+                        fontSize: "11px",
                         fontFamily:
                           '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
                         fontWeight: "600",
@@ -647,7 +654,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     >
                       Endemismo
                     </h4>
-                    <span className="text-center text-sm font-semibold" style={{color: "#000000"}}>
+                    <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
                       {fichaEspecie.taxones[0].endemica ? "Endémica" : " No endémica"}
                     </span>
                   </div>
@@ -661,7 +668,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       className="mb-2"
                       style={{
                         color: "#666666",
-                        fontSize: "12px",
+                        fontSize: "11px",
                         fontFamily:
                           '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
                         fontWeight: "600",
@@ -669,7 +676,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     >
                       En Ecuador
                     </h4>
-                    <span className="text-center text-sm font-semibold" style={{color: "#000000"}}>
+                    <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
                       {fichaEspecie.taxones[0].en_ecuador ? "Sí" : "No"}
                     </span>
                   </div>
@@ -684,7 +691,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                         className="mb-2"
                         style={{
                           color: "#666666",
-                          fontSize: "12px",
+                          fontSize: "11px",
                           fontFamily:
                             '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
                           fontWeight: "600",
@@ -702,7 +709,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
               {/* Recursos */}
               <section>
-                <h3 className="mb-4 text-lg font-semibold">Recursos</h3>
+                <h3 className="mb-4 text-sm font-semibold">Recursos</h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div
                     className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
@@ -731,7 +738,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
               {/* Fuentes Externas */}
               <section>
-                <h3 className="mb-4 text-lg font-semibold">Fuentes externas</h3>
+                <h3 className="mb-4 text-sm font-semibold">Fuentes externas</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {fichaEspecie.wikipedia && (
                     <Button

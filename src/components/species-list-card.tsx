@@ -12,7 +12,10 @@ interface SpeciesListCardProps {
 
 export function SpeciesListCard({species}: SpeciesListCardProps) {
   return (
-    <Link href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}>
+    <Link
+      className="no-underline"
+      href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
+    >
       <Card className="cursor-pointer transition-all hover:shadow-lg">
         <CardHeader className="space-y-1">
           <div className="flex items-start justify-between gap-2">

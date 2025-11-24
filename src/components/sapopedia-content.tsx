@@ -1,16 +1,15 @@
 "use client";
 
-import {useState} from "react";
-
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SpeciesListCard} from "@/components/species-list-card";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
+import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {organizeTaxonomyData} from "@/lib/organize-taxonomy";
 import {SpeciesData} from "@/types/taxonomy";
 
 interface SapopediaContentProps {
-  especies: SpeciesListItem[];
+  readonly especies: SpeciesListItem[];
 }
 
 export function SapopediaContent({especies}: SapopediaContentProps) {
@@ -35,10 +34,26 @@ export function SapopediaContent({especies}: SapopediaContentProps) {
   const ordenesOrganizados = organizeTaxonomyData(especiesParaAccordion);
 
   return (
-    <Tabs className="w-full" defaultValue="cards">
-      <TabsList className="mb-6 grid w-full max-w-md grid-cols-2">
-        <TabsTrigger value="cards">Vista de Cards</TabsTrigger>
-        <TabsTrigger value="accordion">Vista Jerárquica</TabsTrigger>
+    <Tabs className="w-full" defaultValue="accordion">
+      <TabsList className="mb-6 inline-flex h-12 w-auto gap-1 rounded-lg bg-gray-100 p-1">
+        <TabsTrigger
+          className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
+          value="cards"
+        >
+          Vista de Cards
+        </TabsTrigger>
+        <TabsTrigger
+          className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
+          value="accordion"
+        >
+          Vista Jerárquica
+        </TabsTrigger>
+        <TabsTrigger
+          className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
+          value="tree"
+        >
+          Árbol Filogenético
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="cards">
@@ -60,6 +75,11 @@ export function SapopediaContent({especies}: SapopediaContentProps) {
       <TabsContent value="accordion">
         {/* Vista de accordion */}
         <SpeciesAccordion orders={ordenesOrganizados} />
+      </TabsContent>
+
+      <TabsContent value="tree">
+        {/* Vista de árbol filogenético */}
+        <PhylogeneticTreeReal orders={ordenesOrganizados} />
       </TabsContent>
     </Tabs>
   );

@@ -24,7 +24,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   let query = (supabaseClient as any)
     .from("vw_ficha_especie_completa")
     .select("*")
-    .eq("publicar", true)
+    // .eq("publicar", true) // ⚠️ Filtro comentado temporalmente para ver todas las especies
     .order("nombre_cientifico", {ascending: true});
 
   // Filtrar por familia si se proporciona
@@ -44,12 +44,41 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     return [];
   }
 
+  // Obtener las siglas de Lista Roja IUCN para todas las especies
+  // Similar a como lo hace get-ficha-especie.ts
+  const taxonIds: number[] = especies.map((e: any) => e.especie_taxon_id as number);
+
+  const {data: listaRojaData, error: errorListaRoja} = await supabaseClient
+    .from("taxon_catalogo_awe")
+    .select("taxon_id, catalogo_awe(sigla, tipo_catalogo_awe_id)")
+    .in("taxon_id", taxonIds)
+    .eq("catalogo_awe.tipo_catalogo_awe_id", 10); // 10 = Lista Roja UICN
+
+  if (errorListaRoja) {
+    console.error("Error al obtener lista roja:", errorListaRoja);
+  }
+
+  // Crear un mapa de taxon_id -> sigla de lista roja
+  const listaRojaMap = new Map<number, string>();
+
+  if (listaRojaData) {
+    for (const item of listaRojaData as any[]) {
+      if (
+        item.catalogo_awe?.sigla &&
+        typeof item.taxon_id === "number" &&
+        typeof item.catalogo_awe.sigla === "string"
+      ) {
+        listaRojaMap.set(item.taxon_id as number, item.catalogo_awe.sigla as string);
+      }
+    }
+  }
+
   // Mapear los datos de la vista a nuestro tipo SpeciesListItem
   const especiesFormateadas: SpeciesListItem[] = especies.map((especie: any) => ({
-    id_taxon: especie.id_taxon,
+    id_taxon: especie.especie_taxon_id,
     nombre_cientifico: especie.nombre_cientifico,
     nombre_comun: especie.nombre_comun,
-    descubridor: especie.descubridor,
+    descubridor: especie.especie_autor,
     orden: especie.orden,
     familia: especie.familia,
     genero: especie.genero,
@@ -58,7 +87,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     endemica: especie.endemica,
     rango_altitudinal_min: especie.rango_altitudinal_min,
     rango_altitudinal_max: especie.rango_altitudinal_max,
-    lista_roja_iucn: especie.lista_roja_iucn,
+    lista_roja_iucn: listaRojaMap.get(especie.especie_taxon_id as number) || null, // ✅ Sigla directa de la BD
   }));
 
   return especiesFormateadas;

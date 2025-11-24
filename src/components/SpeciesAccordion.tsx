@@ -2,9 +2,10 @@
 
 import {useState, useEffect} from "react";
 import Link from "next/link";
-import {Menu} from "lucide-react";
+import {ChevronRight, ChevronDown} from "lucide-react";
 
 import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -58,9 +59,14 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="flex items-center gap-4 bg-white px-4 py-3"
-      style={{marginLeft: "48px"}}
+      className="relative flex items-center gap-4 rounded-md border border-purple-100 bg-purple-50/50 px-4 py-3 transition-all hover:border-purple-300 hover:bg-purple-50"
     >
+      {/* Círculo de nodo */}
+      <div
+        className="absolute h-2 w-2 rounded-full bg-purple-500 ring-2 ring-white"
+        style={{left: "4px"}}
+      />
+
       {/* Nombre científico */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -71,7 +77,12 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             {species.nombre_cientifico}
           </Link>
           {species.descubridor && (
-            <span className="text-xs text-gray-500">{species.descubridor}</span>
+            <span
+              dangerouslySetInnerHTML={{
+                __html: processHTMLLinks(species.descubridor),
+              }}
+              className="text-xs text-gray-500"
+            />
           )}
         </div>
         {species.nombre_comun && (
@@ -102,7 +113,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {/* Pisos Climáticos */}
-      <div className="w-80">
+      <div className="flex w-80 items-center justify-center">
         {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
@@ -118,9 +129,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   );
 
   const renderGenus = (genus: GenusGroup) => (
-    <div key={genus.id} className="bg-white" style={{marginLeft: "48px"}}>
+    <div key={genus.id} className="relative bg-white">
       <div
-        className="flex w-full cursor-pointer items-center justify-between px-4 py-4"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-blue-100 bg-blue-50/50 px-4 py-3 transition-all hover:border-blue-300 hover:bg-blue-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`genus-${genus.id}`)}
@@ -131,7 +142,22 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        <div className="flex-1">
+        {/* Círculo de nodo para género */}
+        <div
+          className="absolute h-3 w-3 rounded-full bg-blue-500 ring-2 ring-white"
+          style={{left: "4px"}}
+        />
+
+        {/* Flecha de expansión */}
+        <div className="mr-3 flex-shrink-0 text-blue-600">
+          {isOpen(`genus-${genus.id}`) ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </div>
+
+        <div className="flex-1 pr-4">
           <div className="mb-1 flex items-center gap-2">
             <span className="font-semibold text-gray-800 italic">{genus.name}</span>
             {genus.nombre_comun && (
@@ -145,16 +171,13 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             Roja)
           </p>
         </div>
-        <div className="ml-2 text-gray-600">
-          <Menu className="h-5 w-3" />
-        </div>
       </div>
 
       {isOpen(`genus-${genus.id}`) && (
-        <div>
+        <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de la tabla */}
-          <div className="px-4 py-2" style={{marginLeft: "48px", backgroundColor: "#e8e8e8"}}>
-            <div className="mb-2 text-sm font-semibold text-gray-700">Especie</div>
+          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
+            <div className="mb-2 text-sm font-semibold text-gray-700">Especies</div>
             <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
               <div className="flex-1">Nombre</div>
               <div className="w-12 text-center">En</div>
@@ -162,18 +185,17 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
               <div className="w-80 text-center">Distribución</div>
             </div>
           </div>
-
           {/* Lista de especies */}
-          <div>{genus.species.map(renderSpecies)}</div>
+          <div className="space-y-2">{genus.species.map((species) => renderSpecies(species))}</div>
         </div>
       )}
     </div>
   );
 
   const renderFamily = (family: FamilyGroup) => (
-    <div key={family.id} className="bg-white" style={{marginLeft: "48px"}}>
+    <div key={family.id} className="relative bg-white">
       <div
-        className="flex w-full cursor-pointer items-center justify-between px-4 py-4"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-green-100 bg-green-50/50 px-4 py-3 transition-all hover:border-green-300 hover:bg-green-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`family-${family.id}`)}
@@ -184,7 +206,22 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        <div className="flex-1">
+        {/* Círculo de nodo para familia */}
+        <div
+          className="absolute h-3.5 w-3.5 rounded-full bg-green-600 ring-2 ring-white"
+          style={{left: "4px"}}
+        />
+
+        {/* Flecha de expansión */}
+        <div className="mr-3 flex-shrink-0 text-green-700">
+          {isOpen(`family-${family.id}`) ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </div>
+
+        <div className="flex-1 pr-4">
           <div className="mb-1 flex items-center gap-2">
             <span className="font-semibold text-gray-800">{family.name}</span>
           </div>
@@ -194,29 +231,25 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             Roja)
           </p>
         </div>
-        <div className="ml-2 text-gray-600">
-          <Menu className="h-5 w-3" />
-        </div>
       </div>
 
       {isOpen(`family-${family.id}`) && (
-        <div>
+        <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de géneros */}
-          <div className="px-4 py-2" style={{marginLeft: "48px", backgroundColor: "#e8e8e8"}}>
-            <div className="text-sm font-semibold text-gray-700">Género</div>
+          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
+            <div className="text-sm font-semibold text-gray-700">Géneros</div>
           </div>
-
           {/* Lista de géneros */}
-          {family.genera.map(renderGenus)}
+          <div className="space-y-2">{family.genera.map((genus) => renderGenus(genus))}</div>
         </div>
       )}
     </div>
   );
 
   const renderOrder = (order: OrderGroup) => (
-    <div key={order.id} className="mb-4 bg-white">
+    <div key={order.id} className="relative mb-4 bg-white">
       <div
-        className="flex w-full cursor-pointer items-center justify-between px-6 py-4"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-red-100 bg-red-50/50 px-4 py-3 transition-all hover:border-red-300 hover:bg-red-50"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`order-${order.id}`)}
@@ -227,27 +260,38 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        <div className="flex-1">
-          <span className="inline-block text-xl font-bold text-gray-800">{order.name}</span>
-          <p className="mt-1 text-gray-600">
+        {/* Círculo de nodo para orden */}
+        <div
+          className="absolute h-4 w-4 rounded-full bg-red-600 ring-2 ring-white"
+          style={{left: "8px"}}
+        />
+
+        {/* Flecha de expansión */}
+        <div className="mr-3 flex-shrink-0 pl-6 text-red-700">
+          {isOpen(`order-${order.id}`) ? (
+            <ChevronDown className="h-5 w-5" />
+          ) : (
+            <ChevronRight className="h-5 w-5" />
+          )}
+        </div>
+
+        <div className="flex-1 pr-4">
+          <span className="inline-block text-lg font-bold text-gray-800">{order.name}</span>
+          <p className="mt-1 text-sm text-gray-600">
             {order.summary.totalSpecies} especies, {order.summary.totalFamilies} familias (
             {order.summary.endemicSpecies} endémicas, {order.summary.redListSpecies} en Lista Roja)
           </p>
         </div>
-        <div className="ml-2 text-gray-600">
-          <Menu className="h-6 w-4" />
-        </div>
       </div>
 
       {isOpen(`order-${order.id}`) && (
-        <div>
+        <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de familias */}
-          <div className="px-6 py-2" style={{marginLeft: "48px", backgroundColor: "#e8e8e8"}}>
-            <div className="text-sm font-semibold text-gray-700">Familia</div>
+          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
+            <div className="text-sm font-semibold text-gray-700">Familias</div>
           </div>
-
           {/* Lista de familias */}
-          {order.families.map(renderFamily)}
+          <div className="space-y-3">{order.families.map((family) => renderFamily(family))}</div>
         </div>
       )}
     </div>
@@ -256,11 +300,11 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   return (
     <div className="relative w-full">
       {/* Header de órdenes */}
-      <div className="mb-4 bg-gray-100 px-6 py-2" style={{backgroundColor: "#e8e8e8"}}>
-        <div className="text-sm font-semibold text-gray-700">Orden</div>
+      <div className="mb-4 rounded-md bg-white px-4 py-3 shadow-sm">
+        <div className="text-base font-bold text-gray-800">Órdenes</div>
       </div>
 
-      <div className="space-y-4">{orders.map(renderOrder)}</div>
+      <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
 
       {/* Modal de Guía de Interpretación */}
       <InterpretationGuide isOpen={showGuide} onClose={() => setShowGuide(false)} />
