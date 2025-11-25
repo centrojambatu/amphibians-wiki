@@ -66,8 +66,28 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
         <div className="flex-1">
           <div className="space-y-10 p-4">
             {/* Secciones de contenido */}
+            {/* Fotografía de la especie */}
+            {fichaEspecie.fotografia_ficha && (
+              <Card className="mb-3">
+                <CardHeader>
+                  <CardTitle className="text-base">Fotografía</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className="group flex w-full flex-col items-center justify-center overflow-hidden rounded-lg border p-2"
+                    style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
+                  >
+                    <img
+                      alt="Fotografía de la especie"
+                      className="mx-auto max-h-[600px] w-auto cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
+                      src={fichaEspecie.fotografia_ficha}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Primer(os) colector(es) */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
@@ -85,7 +105,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Etimología */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Etimología</CardTitle>
               </CardHeader>
@@ -103,7 +123,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* {Identificacion} */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
@@ -166,7 +186,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Historia Natural */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Historia Natural</CardTitle>
               </CardHeader>
@@ -195,7 +215,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Contenido */} {/* Información básica */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Distribución</CardTitle>
               </CardHeader>
@@ -344,7 +364,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Conservación */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Conservación</CardTitle>
               </CardHeader>
@@ -547,7 +567,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* { Publicaciones } */}
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Publicaciones</CardTitle>
               </CardHeader>
@@ -583,7 +603,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Historial de la ficha</CardTitle>
               </CardHeader>
@@ -599,7 +619,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle className="text-base">Fecha Actualizacion</CardTitle>
               </CardHeader>
@@ -622,20 +642,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             <CardContent className="h-full space-y-2 overflow-y-auto p-4">
               {/* Información General */}
               <section>
-                {/* Fotografía de Ficha */}
-                {fichaEspecie.fotografia_ficha && (
-                  <div
-                    className="group mb-2 flex w-full flex-col items-center justify-center overflow-hidden rounded-none border p-2"
-                    style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
-                  >
-                    <img
-                      alt="Fotografía de la especie"
-                      className="mx-auto h-auto w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
-                      src={fichaEspecie.fotografia_ficha}
-                    />
-                  </div>
-                )}
-
                 <div className="grid grid-cols-1 gap-2">
                   {/* Endemismo */}
                   <div
