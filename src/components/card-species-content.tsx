@@ -68,18 +68,18 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
             {/* Secciones de contenido */}
             {/* Fotografía de la especie */}
             {fichaEspecie.fotografia_ficha && (
-              <Card className="mb-3">
-                <CardHeader>
+              <Card className="mb-3 h-[500px]">
+                <CardHeader className="py-3">
                   <CardTitle className="text-base">Fotografía</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="h-[calc(100%-60px)] p-2">
                   <div
-                    className="group flex w-full flex-col items-center justify-center overflow-hidden rounded-lg border p-2"
-                    style={{backgroundColor: "#ffffff", borderColor: "#dddddd"}}
+                    className="group flex h-full w-full items-center justify-center overflow-hidden"
+                    style={{backgroundColor: "#ffffff"}}
                   >
                     <img
                       alt="Fotografía de la especie"
-                      className="mx-auto max-h-[600px] w-auto cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
+                      className="max-h-full max-w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
                       src={fichaEspecie.fotografia_ficha}
                     />
                   </div>
@@ -643,9 +643,31 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-1 gap-2">
+                  {/* Lista Roja */}
+                  {fichaEspecie.listaRojaIUCN && (
+                    <div
+                      className="flex aspect-square flex-col items-center justify-center rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    >
+                      <h4
+                        className="mb-2"
+                        style={{
+                          color: "#666666",
+                          fontSize: "11px",
+                          fontFamily:
+                            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: "600",
+                        }}
+                      >
+                        Lista Roja IUCN
+                      </h4>
+                      <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
+                    </div>
+                  )}
+
                   {/* Endemismo */}
                   <div
-                    className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
+                    className="flex aspect-square flex-col items-center justify-center rounded-md border p-2"
                     style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                   >
                     <h4
@@ -664,83 +686,35 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       {fichaEspecie.taxones[0].endemica ? "Endémica" : " No endémica"}
                     </span>
                   </div>
-
-                  {/* En Ecuador */}
-                  <div
-                    className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                  >
-                    <h4
-                      className="mb-2"
-                      style={{
-                        color: "#666666",
-                        fontSize: "11px",
-                        fontFamily:
-                          '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                        fontWeight: "600",
-                      }}
-                    >
-                      En Ecuador
-                    </h4>
-                    <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
-                      {fichaEspecie.taxones[0].en_ecuador ? "Sí" : "No"}
-                    </span>
-                  </div>
-
-                  {/* Lista Roja */}
-                  {fichaEspecie.listaRojaIUCN && (
-                    <div
-                      className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                      style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
-                    >
-                      <h4
-                        className="mb-2"
-                        style={{
-                          color: "#666666",
-                          fontSize: "11px",
-                          fontFamily:
-                            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                          fontWeight: "600",
-                        }}
-                      >
-                        Lista Roja IUCN
-                      </h4>
-                      <RedListStatus status={fichaEspecie.listaRojaIUCN.catalogo_awe.sigla} />
-                    </div>
-                  )}
                 </div>
               </section>
-
-              <Separator />
 
               {/* Recursos */}
               <section>
                 <h3 className="mb-4 text-sm font-semibold">Recursos</h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
                     style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                   >
                     <Camera className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
 
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
                     style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                   >
                     <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
 
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
                     style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
                   >
                     <MapPin className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
                 </div>
               </section>
-
-              <Separator />
 
               {/* Fuentes Externas */}
               <section>
@@ -749,7 +723,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.wikipedia && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -767,7 +741,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.aw && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -785,7 +759,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.genbank && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -803,7 +777,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.herpnet && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -821,7 +795,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.inaturalist && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -839,7 +813,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.asw && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -857,7 +831,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.uicn && (
                     <Button
                       asChild
-                      className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                      className="group h-auto rounded-md border p-2 hover:bg-gray-50"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
