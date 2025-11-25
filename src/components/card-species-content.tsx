@@ -64,11 +64,11 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
       <div className="flex">
         {/* Columna izquierda - Contenido principal */}
         <div className="flex-1">
-          <div className="space-y-10 p-4">
+          <div className="space-y-4 p-4">
             {/* Secciones de contenido */}
             {/* Fotografía de la especie */}
             {fichaEspecie.fotografia_ficha && (
-              <Card className="mb-3 h-[500px]">
+              <Card className="h-[500px]">
                 <CardHeader className="py-3">
                   <CardTitle className="text-base">Fotografía</CardTitle>
                 </CardHeader>
@@ -87,7 +87,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </Card>
             )}
             {/* Primer(os) colector(es) */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
@@ -105,7 +105,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Etimología */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Etimología</CardTitle>
               </CardHeader>
@@ -123,7 +123,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* {Identificacion} */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
@@ -186,7 +186,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Historia Natural */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Historia Natural</CardTitle>
               </CardHeader>
@@ -215,7 +215,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Contenido */} {/* Información básica */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Distribución</CardTitle>
               </CardHeader>
@@ -364,7 +364,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* Conservación */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Conservación</CardTitle>
               </CardHeader>
@@ -567,7 +567,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               </CardContent>
             </Card>
             {/* { Publicaciones } */}
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Publicaciones</CardTitle>
               </CardHeader>
@@ -603,7 +603,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Historial de la ficha</CardTitle>
               </CardHeader>
@@ -619,7 +619,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 )}
               </CardContent>
             </Card>
-            <Card className="mb-3">
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-base">Fecha Actualizacion</CardTitle>
               </CardHeader>
@@ -691,7 +691,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
               {/* Recursos */}
               <section>
-                <h3 className="mb-4 text-sm font-semibold">Recursos</h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div
                     className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
@@ -718,7 +717,6 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
 
               {/* Fuentes Externas */}
               <section>
-                <h3 className="mb-4 text-sm font-semibold">Fuentes externas</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {fichaEspecie.wikipedia && (
                     <Button
