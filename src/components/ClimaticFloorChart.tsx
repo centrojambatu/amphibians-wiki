@@ -44,9 +44,21 @@ export default function ClimaticFloorChart({
       colorIndex: 2,
       region: "Vertiente occidental",
     },
-    // Centro (compartida)
-    {name: "Altoandina", min: 3400, max: 4800, colorIndex: 3, region: "Páramo y zona nival"},
+    {
+      name: "Altoandina Occidental",
+      min: 3400,
+      max: 4800,
+      colorIndex: 3,
+      region: "Páramo occidental",
+    },
     // Oriente (descendente)
+    {
+      name: "Altoandina Oriental",
+      min: 4800,
+      max: 3400,
+      colorIndex: 3,
+      region: "Páramo oriental",
+    },
     {
       name: "Templada Oriental",
       min: 3400,
@@ -65,9 +77,9 @@ export default function ClimaticFloorChart({
   ];
 
   // Calcular el rango total altitudinal sumando todos los pisos
-  // Tropical Occ: 1000m + Subtropical Occ: 1300m + Templada Occ: 1100m + Altoandina: 1400m +
-  // Templada Or: 1100m + Subtropical Or: 1300m + Tropical Or: 1000m = 8200m total
-  const totalAltitudeRange = 1000 + 1300 + 1100 + 1400 + 1100 + 1300 + 1000; // = 8200m total
+  // Tropical Occ: 1000m + Subtropical Occ: 1300m + Templada Occ: 1100m + Altoandina Occ: 1400m +
+  // Altoandina Or: 1400m + Templada Or: 1100m + Subtropical Or: 1300m + Tropical Or: 1000m = 9600m total
+  const totalAltitudeRange = 1000 + 1300 + 1100 + 1400 + 1400 + 1100 + 1300 + 1000; // = 9600m total
 
   // Color plomo por defecto
   const defaultColor = "#9CA3AF"; // Gris plomo
@@ -104,8 +116,8 @@ export default function ClimaticFloorChart({
     const floorIsAscending = floor.min < floor.max; // Occidente: 0→5000
     const floorIsDescending = floor.min > floor.max; // Oriente: 5000→0
 
-    // Pisos centrales (Altoandina sin especificar vertiente)
-    // Solo se activan si están en la zona alta del rango (≥ 3400m)
+    // Pisos sin vertiente especificada (actualmente no hay ninguno)
+    // Esta lógica se mantiene por si se añaden pisos compartidos en el futuro
     if (!isOccidental && !isOriental) {
       // Si hay rangos específicos por vertiente, verificar ambos
       if (altitudinalRange.occidente || altitudinalRange.oriente) {
@@ -219,24 +231,17 @@ export default function ClimaticFloorChart({
     };
   };
 
-  // Calcular las posiciones para las etiquetas de altitud basadas en los nuevos rangos
+  // Etiquetas principales de altitud (sin la "m")
   const altitudeMarkers = [
-    // Lado Occidental (ascendente)
-    {altitude: 0, position: 0}, // Inicio
-    {altitude: 1000, position: (1000 / totalAltitudeRange) * 100}, // ~12.2%
-    {altitude: 2300, position: (2300 / totalAltitudeRange) * 100}, // ~28.0%
-    {altitude: 3400, position: (3400 / totalAltitudeRange) * 100}, // ~41.5%
-    {altitude: 4800, position: (4800 / totalAltitudeRange) * 100}, // ~58.5% (pico)
-    // Lado Oriental (descendente)
-    {altitude: 2300, position: (5900 / totalAltitudeRange) * 100}, // ~72.0%
-    {altitude: 1000, position: (7200 / totalAltitudeRange) * 100}, // ~87.8%
-    {altitude: 0, position: 100}, // Fin
+    {altitude: 0, position: 0},
+    {altitude: 4800, position: (4800 / totalAltitudeRange) * 100},
+    {altitude: 0, position: 100},
   ];
 
   return (
     <div className="flex w-full flex-col items-center px-6">
       {/* Gráfico de pisos climáticos - Referencia geográfica */}
-      <div className="mb-1 flex w-full justify-between text-xs font-semibold text-gray-700">
+      <div className="mb-1 flex w-full justify-between text-[10px] text-gray-400">
         <span>← Occidental</span>
         <span>Oriental →</span>
       </div>

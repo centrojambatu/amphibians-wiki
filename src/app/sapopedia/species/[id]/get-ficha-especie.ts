@@ -121,36 +121,38 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10) ||
     null;
 
-  // revisar si tiene distribucion oriental
-  const hasOrientalDistribution = taxon_catalogo_awe_results?.some((item) =>
-    item.catalogo_awe.nombre?.toLowerCase().includes("oriental"),
-  );
-
-  const hasOccidentalDistribution = taxon_catalogo_awe_results?.some((item) =>
-    item.catalogo_awe.nombre?.toLowerCase().includes("occidental"),
-  );
-
+  // Filtrar solo las distribuciones altitudinales (tipo_catalogo_awe_id = 5)
   const distributions = taxon_catalogo_awe_results?.filter(
     (item) => item.catalogo_awe.tipo_catalogo_awe_id === 5,
   );
 
+  // Revisar si tiene distribución occidental/oriental basándose SOLO en distribuciones altitudinales
+  const hasOrientalDistribution = distributions?.some((item) =>
+    item.catalogo_awe.nombre?.toLowerCase().includes("oriental"),
+  );
+
+  const hasOccidentalDistribution = distributions?.some((item) =>
+    item.catalogo_awe.nombre?.toLowerCase().includes("occidental"),
+  );
+
   const altitudinalRange = {
-    min:
-      hasOccidentalDistribution === false || hasOrientalDistribution === false
-        ? null
-        : fichaEspecie.rango_altitudinal_min,
-    max:
-      hasOccidentalDistribution === false || hasOrientalDistribution === false
-        ? null
-        : fichaEspecie.rango_altitudinal_max,
-    occidente: {
-      min: hasOccidentalDistribution === false ? null : fichaEspecie.rango_altitudinal_min,
-      max: hasOccidentalDistribution === false ? null : fichaEspecie.rango_altitudinal_max,
-    },
-    oriente: {
-      min: hasOrientalDistribution === false ? null : fichaEspecie.rango_altitudinal_min,
-      max: hasOrientalDistribution === false ? null : fichaEspecie.rango_altitudinal_max,
-    },
+    // Siempre usar los valores de rango si existen
+    min: fichaEspecie.rango_altitudinal_min ?? 0,
+    max: fichaEspecie.rango_altitudinal_max ?? 0,
+    // Solo incluir occidente si tiene distribución occidental
+    occidente: hasOccidentalDistribution
+      ? {
+          min: fichaEspecie.rango_altitudinal_min ?? 0,
+          max: fichaEspecie.rango_altitudinal_max ?? 0,
+        }
+      : undefined,
+    // Solo incluir oriente si tiene distribución oriental
+    oriente: hasOrientalDistribution
+      ? {
+          min: fichaEspecie.rango_altitudinal_min ?? 0,
+          max: fichaEspecie.rango_altitudinal_max ?? 0,
+        }
+      : undefined,
   };
 
   console.log("altitudinalRange", altitudinalRange);

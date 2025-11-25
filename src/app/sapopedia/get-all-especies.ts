@@ -14,6 +14,8 @@ export interface SpeciesListItem {
   rango_altitudinal_min: number | null;
   rango_altitudinal_max: number | null;
   lista_roja_iucn: string | null;
+  has_distribucion_occidental: boolean;
+  has_distribucion_oriental: boolean;
 }
 
 export default async function getAllEspecies(familia?: string): Promise<SpeciesListItem[]> {
@@ -48,6 +50,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   // Similar a como lo hace get-ficha-especie.ts
   const taxonIds: number[] = especies.map((e: any) => e.especie_taxon_id as number);
 
+  // Obtener las siglas de Lista Roja IUCN
   const {data: listaRojaData, error: errorListaRoja} = await supabaseClient
     .from("taxon_catalogo_awe")
     .select("taxon_id, catalogo_awe(sigla, tipo_catalogo_awe_id)")
@@ -74,21 +77,30 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   }
 
   // Mapear los datos de la vista a nuestro tipo SpeciesListItem
-  const especiesFormateadas: SpeciesListItem[] = especies.map((especie: any) => ({
-    id_taxon: especie.especie_taxon_id,
-    nombre_cientifico: especie.nombre_cientifico,
-    nombre_comun: especie.nombre_comun,
-    descubridor: especie.especie_autor,
-    orden: especie.orden,
-    familia: especie.familia,
-    genero: especie.genero,
-    fotografia_ficha: especie.fotografia_ficha,
-    en_ecuador: especie.en_ecuador,
-    endemica: especie.endemica,
-    rango_altitudinal_min: especie.rango_altitudinal_min,
-    rango_altitudinal_max: especie.rango_altitudinal_max,
-    lista_roja_iucn: listaRojaMap.get(especie.especie_taxon_id as number) || null, // ✅ Sigla directa de la BD
-  }));
+  const especiesFormateadas: SpeciesListItem[] = especies.map((especie: any) => {
+    // Usar el campo awe_distribucion_altitudinal de la vista para determinar occidental/oriental
+    const distribucionAltitudinal = (especie.awe_distribucion_altitudinal || "").toLowerCase();
+    const hasOccidental = distribucionAltitudinal.includes("occidental");
+    const hasOriental = distribucionAltitudinal.includes("oriental");
+
+    return {
+      id_taxon: especie.especie_taxon_id,
+      nombre_cientifico: especie.nombre_cientifico,
+      nombre_comun: especie.nombre_comun,
+      descubridor: especie.especie_autor,
+      orden: especie.orden,
+      familia: especie.familia,
+      genero: especie.genero,
+      fotografia_ficha: especie.fotografia_ficha,
+      en_ecuador: especie.en_ecuador,
+      endemica: especie.endemica,
+      rango_altitudinal_min: especie.rango_altitudinal_min,
+      rango_altitudinal_max: especie.rango_altitudinal_max,
+      lista_roja_iucn: listaRojaMap.get(especie.especie_taxon_id as number) || null,
+      has_distribucion_occidental: hasOccidental,
+      has_distribucion_oriental: hasOriental,
+    };
+  });
 
   return especiesFormateadas;
 }

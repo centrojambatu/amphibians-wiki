@@ -1,7 +1,6 @@
 "use client";
 
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {SpeciesListCard} from "@/components/species-list-card";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
 import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
@@ -13,22 +12,12 @@ interface SapopediaContentProps {
 }
 
 export function SapopediaContent({especies}: SapopediaContentProps) {
-  // Agrupar por orden para la vista de cards
-  const especiesPorOrden = especies.reduce<Record<string, typeof especies>>((acc, especie) => {
-    const orden = especie.orden || "Sin clasificar";
-
-    if (!acc[orden]) {
-      acc[orden] = [];
-    }
-    acc[orden].push(especie);
-
-    return acc;
-  }, {});
-
   // Convertir datos para el accordion
   const especiesParaAccordion: SpeciesData[] = especies.map((e) => ({
     ...e,
     lista_roja_iucn: e.lista_roja_iucn || null,
+    has_distribucion_occidental: e.has_distribucion_occidental || false,
+    has_distribucion_oriental: e.has_distribucion_oriental || false,
   }));
 
   const ordenesOrganizados = organizeTaxonomyData(especiesParaAccordion);
@@ -36,12 +25,6 @@ export function SapopediaContent({especies}: SapopediaContentProps) {
   return (
     <Tabs className="w-full" defaultValue="accordion">
       <TabsList className="mb-6 inline-flex h-12 w-auto gap-1 rounded-lg bg-gray-100 p-1">
-        <TabsTrigger
-          className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
-          value="cards"
-        >
-          Vista de Cards
-        </TabsTrigger>
         <TabsTrigger
           className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
           value="accordion"
@@ -55,22 +38,6 @@ export function SapopediaContent({especies}: SapopediaContentProps) {
           Árbol Filogenético
         </TabsTrigger>
       </TabsList>
-
-      <TabsContent value="cards">
-        {/* Listado de especies en cards */}
-        <div className="mb-8">
-          {Object.entries(especiesPorOrden).map(([orden, especiesDelOrden]) => (
-            <div key={orden} className="mb-8">
-              <h3 className="text-primary mb-4 text-xl font-semibold">{orden}</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {especiesDelOrden.map((especie) => (
-                  <SpeciesListCard key={especie.id_taxon} species={especie} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </TabsContent>
 
       <TabsContent value="accordion">
         {/* Vista de accordion */}

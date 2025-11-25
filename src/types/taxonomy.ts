@@ -13,6 +13,8 @@ export interface SpeciesData {
   rango_altitudinal_min: number | null;
   rango_altitudinal_max: number | null;
   lista_roja_iucn?: string | null;
+  has_distribucion_occidental?: boolean;
+  has_distribucion_oriental?: boolean;
 }
 
 export interface GenusGroup {

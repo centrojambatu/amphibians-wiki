@@ -1,5 +1,4 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
 import {SapopediaContent} from "@/components/sapopedia-content";
 
 import getAllEspecies from "./get-all-especies";
@@ -63,29 +62,6 @@ export default async function SapopediaPage() {
         <h2 className="mb-6 text-2xl font-bold">Explorar Especies</h2>
         <SapopediaContent especies={especies} />
       </div>
-
-      {/* Información adicional */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Acerca de SapoPedia Ecuador</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Esta enciclopedia electrónica es una iniciativa del Centro Jambatu para documentar y
-            difundir el conocimiento sobre la diversidad de anfibios de Ecuador.
-          </p>
-          <p className="text-muted-foreground text-sm">
-            Los datos presentados aquí provienen de investigaciones científicas, colecciones
-            museológicas y observaciones de la comunidad científica y ciudadana.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">Centro Jambatu</Badge>
-            <Badge variant="outline">Fundación Otonga</Badge>
-            <Badge variant="outline">Ciencia Ciudadana</Badge>
-            <Badge variant="outline">Conservación</Badge>
-          </div>
-        </CardContent>
-      </Card>
     </main>
   );
 }

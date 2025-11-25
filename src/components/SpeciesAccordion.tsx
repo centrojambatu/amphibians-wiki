@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from "react";
 import Link from "next/link";
-import {ChevronRight, ChevronDown} from "lucide-react";
+import {Menu} from "lucide-react";
 
 import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
 import {processHTMLLinks} from "@/lib/process-html-links";
@@ -113,6 +113,12 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             altitudinalRange={{
               min: species.rango_altitudinal_min,
               max: species.rango_altitudinal_max,
+              occidente: species.has_distribucion_occidental
+                ? {min: species.rango_altitudinal_min, max: species.rango_altitudinal_max}
+                : undefined,
+              oriente: species.has_distribucion_oriental
+                ? {min: species.rango_altitudinal_min, max: species.rango_altitudinal_max}
+                : undefined,
             }}
           />
         ) : (
@@ -123,9 +129,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   );
 
   const renderGenus = (genus: GenusGroup) => (
-    <div key={genus.id} className="relative bg-white">
+    <div key={genus.id} className="relative">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`genus-${genus.id}`)}
@@ -136,37 +142,33 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 text-gray-600">
-          {isOpen(`genus-${genus.id}`) ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </div>
-
-        <div className="flex-1 pr-4">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="font-semibold text-gray-800 italic">{genus.name}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 italic">{genus.name}</span>
             {genus.nombre_comun && (
-              <span className="text-sm text-gray-500">{genus.nombre_comun}</span>
+              <span className="text-xs text-gray-400">{genus.nombre_comun}</span>
             )}
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-400">
             {genus.summary.totalSpecies} especie{genus.summary.totalSpecies !== 1 ? "s" : ""} (
             {genus.summary.endemicSpecies} endémica
             {genus.summary.endemicSpecies !== 1 ? "s" : ""}, {genus.summary.redListSpecies} en Lista
             Roja)
           </p>
         </div>
+
+        {/* Icono de barras */}
+        <div className="ml-3 flex-shrink-0 text-gray-300">
+          <Menu className="h-4 w-4" />
+        </div>
       </div>
 
       {isOpen(`genus-${genus.id}`) && (
         <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de la tabla */}
-          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
-            <div className="mb-2 text-sm font-semibold text-gray-700">Especies</div>
-            <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
+          <div className="mb-3 px-4 py-2">
+            <div className="mb-2 text-xs text-gray-400">Especies</div>
+            <div className="flex items-center gap-4 text-xs text-gray-400">
               <div className="flex-1">Nombre</div>
               <div className="w-12 text-center">En</div>
               <div className="w-16 text-center">LR</div>
@@ -181,9 +183,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   );
 
   const renderFamily = (family: FamilyGroup) => (
-    <div key={family.id} className="relative bg-white">
+    <div key={family.id} className="relative">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`family-${family.id}`)}
@@ -194,32 +196,28 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 text-gray-600">
-          {isOpen(`family-${family.id}`) ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </div>
-
-        <div className="flex-1 pr-4">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="font-semibold text-gray-800">{family.name}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">{family.name}</span>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs text-gray-400">
             {family.summary.totalSpecies} especies, {family.summary.totalGenera} géneros (
             {family.summary.endemicSpecies} endémicas, {family.summary.redListSpecies} en Lista
             Roja)
           </p>
+        </div>
+
+        {/* Icono de barras */}
+        <div className="ml-3 flex-shrink-0 text-gray-300">
+          <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(`family-${family.id}`) && (
         <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de géneros */}
-          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
-            <div className="text-sm font-semibold text-gray-700">Géneros</div>
+          <div className="mb-3 px-4 py-2">
+            <div className="text-xs text-gray-400">Géneros</div>
           </div>
           {/* Lista de géneros */}
           <div className="space-y-2">{family.genera.map((genus) => renderGenus(genus))}</div>
@@ -229,9 +227,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   );
 
   const renderOrder = (order: OrderGroup) => (
-    <div key={order.id} className="relative mb-4 bg-white">
+    <div key={order.id} className="relative mb-4">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`order-${order.id}`)}
@@ -242,29 +240,25 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           }
         }}
       >
-        {/* Flecha de expansión */}
-        <div className="mr-3 flex-shrink-0 text-gray-600">
-          {isOpen(`order-${order.id}`) ? (
-            <ChevronDown className="h-5 w-5" />
-          ) : (
-            <ChevronRight className="h-5 w-5" />
-          )}
-        </div>
-
-        <div className="flex-1 pr-4">
-          <span className="inline-block text-lg font-bold text-gray-800">{order.name}</span>
-          <p className="mt-1 text-sm text-gray-600">
+        <div className="flex-1">
+          <span className="inline-block text-sm text-gray-600">{order.name}</span>
+          <p className="text-xs text-gray-400">
             {order.summary.totalSpecies} especies, {order.summary.totalFamilies} familias (
             {order.summary.endemicSpecies} endémicas, {order.summary.redListSpecies} en Lista Roja)
           </p>
+        </div>
+
+        {/* Icono de barras */}
+        <div className="ml-3 flex-shrink-0 text-gray-300">
+          <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(`order-${order.id}`) && (
         <div className="mt-3 rounded-lg bg-gray-50 p-4">
           {/* Header de familias */}
-          <div className="mb-3 rounded-md bg-white px-4 py-2 shadow-sm">
-            <div className="text-sm font-semibold text-gray-700">Familias</div>
+          <div className="mb-3 px-4 py-2">
+            <div className="text-xs text-gray-400">Familias</div>
           </div>
           {/* Lista de familias */}
           <div className="space-y-3">{order.families.map((family) => renderFamily(family))}</div>
@@ -276,8 +270,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   return (
     <div className="relative w-full">
       {/* Header de órdenes */}
-      <div className="mb-4 rounded-md bg-white px-4 py-3 shadow-sm">
-        <div className="text-base font-bold text-gray-800">Órdenes</div>
+      <div className="mb-4 px-4 py-2">
+        <div className="text-xs text-gray-400">Órdenes</div>
       </div>
 
       <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
