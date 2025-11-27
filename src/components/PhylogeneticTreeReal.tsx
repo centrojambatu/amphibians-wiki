@@ -1,7 +1,7 @@
 "use client";
 
-import {useEffect, useRef, useState} from "react";
-import Link from "next/link";
+import {useState, useCallback, useMemo, useRef, useEffect, type ReactNode} from "react";
+import {useRouter} from "next/navigation";
 
 import {OrderGroup} from "@/types/taxonomy";
 
@@ -9,430 +9,509 @@ interface PhylogeneticTreeRealProps {
   readonly orders: OrderGroup[];
 }
 
-interface TreeNode {
-  name: string;
+interface TreeNodeData {
   id: string;
+  name: string;
   type: "root" | "order" | "family" | "genus" | "species";
-  children: TreeNode[];
+  count?: number;
   href?: string;
-  x?: number;
-  y?: number;
-  depth?: number;
-  isExpanded?: boolean;
+  children?: TreeNodeData[];
 }
 
+interface PositionedNode extends TreeNodeData {
+  x: number;
+  y: number;
+  children?: PositionedNode[];
+}
+
+const NODE_HEIGHT = 22;
+const LEVEL_WIDTH = 140;
+const STORAGE_KEY = "phylo-tree-expanded-nodes";
+const STORAGE_SCROLL_KEY = "phylo-tree-scroll-position";
+
 export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps) {
+  const router = useRouter();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [treeData, setTreeData] = useState<TreeNode | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Construir el árbol solo una vez
-  useEffect(() => {
-    if (!orders || orders.length === 0) return;
+  // Cargar estado desde localStorage
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
+    if (typeof globalThis.window === "undefined") return new Set(["root"]);
 
-    const root: TreeNode = {
-      name: "Anfibios",
+    try {
+      const saved = globalThis.window.localStorage.getItem(STORAGE_KEY);
+
+      if (saved) {
+        const parsed = JSON.parse(saved) as string[];
+
+        return new Set(parsed);
+      }
+    } catch {
+      // Ignorar errores de parsing
+    }
+
+    return new Set(["root"]);
+  });
+
+  const [dimensions, setDimensions] = useState({width: 1200, height: 400});
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      router.push(href);
+    },
+    [router],
+  );
+
+  const handleToggle = useCallback((nodeId: string) => {
+    setExpandedNodes((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+
+      // Guardar en localStorage
+      try {
+        globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+      } catch {
+        // Ignorar errores de localStorage
+      }
+
+      return next;
+    });
+  }, []);
+
+  // Construir datos del árbol
+  const treeData: TreeNodeData = useMemo(
+    () => ({
       id: "root",
+      name: "Anfibios",
       type: "root",
+      count: orders.reduce((sum, o) => sum + o.summary.totalSpecies, 0),
       children: orders.map((order) => ({
-        name: order.name,
         id: `order-${order.id}`,
+        name: order.name,
         type: "order" as const,
+        count: order.summary.totalSpecies,
         href: `/sapopedia/order/${order.id}`,
         children: order.families.map((family) => ({
-          name: family.name,
           id: `family-${family.id}`,
+          name: family.name,
           type: "family" as const,
+          count: family.summary.totalSpecies,
           href: `/sapopedia/family/${family.id}`,
           children: family.genera.map((genus) => ({
-            name: genus.name,
             id: `genus-${genus.id}`,
+            name: genus.name,
             type: "genus" as const,
+            count: genus.species.length,
             href: `/sapopedia/genus/${genus.id}`,
             children: genus.species.map((species) => ({
+              id: `species-${String(species.id_taxon)}`,
               name: species.nombre_cientifico,
-              id: `species-${species.id_taxon}`,
               type: "species" as const,
-              href: `/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`,
-              children: [],
+              href: `/sapopedia/species/${String(species.id_taxon)}`,
             })),
           })),
         })),
       })),
-    };
+    }),
+    [orders],
+  );
 
-    setTreeData(root);
-  }, [orders]);
+  // Calcular posiciones de los nodos
+  const {positionedTree, totalHeight} = useMemo(() => {
+    const yCounter = {value: 0};
 
-  // Redibujar el árbol cuando cambien los nodos expandidos
-  useEffect(() => {
-    if (!treeData || !svgRef.current) return;
+    const positionNode = (node: TreeNodeData, level: number): PositionedNode => {
+      const isExpanded = expandedNodes.has(node.id);
+      const hasChildren = node.children && node.children.length > 0;
 
-    // Filtrar el árbol basado en nodos expandidos
-    const getVisibleNodes = (node: TreeNode): TreeNode => {
-      const hasChildren = node.children.length > 0;
-      const isExpanded = expandedNodes.has(node.id) || node.type === "root";
+      if (!hasChildren || !isExpanded) {
+        const y = yCounter.value;
+
+        yCounter.value += NODE_HEIGHT;
+
+        return {
+          id: node.id,
+          name: node.name,
+          type: node.type,
+          count: node.count,
+          href: node.href,
+          x: level * LEVEL_WIDTH,
+          y,
+        };
+      }
+
+      // Posicionar hijos primero
+      const positionedChildren = node.children!.map((child) => positionNode(child, level + 1));
+
+      // El nodo padre se posiciona en el centro vertical de sus hijos
+      const firstChildY = positionedChildren[0].y;
+      const lastChild = positionedChildren.at(-1);
+      const lastChildY = lastChild ? lastChild.y : firstChildY;
+      const centerY = (firstChildY + lastChildY) / 2;
+
+      // Ajustar hacia arriba solo un poco para separar del primer hijo, pero mantener la forma del árbol
+      const parentY = centerY - NODE_HEIGHT * 0.3;
 
       return {
-        ...node,
-        children: isExpanded && hasChildren ? node.children.map(getVisibleNodes) : [],
-        isExpanded,
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        count: node.count,
+        href: node.href,
+        x: level * LEVEL_WIDTH,
+        y: parentY,
+        children: positionedChildren,
       };
     };
 
-    const visibleTree = getVisibleNodes(treeData);
+    const positioned = positionNode(treeData, 0);
 
-    // Calcular posiciones
-    const calculateLayout = (node: TreeNode, depth = 0, startY = 0): number => {
-      node.depth = depth;
-
-      if (node.children.length === 0) {
-        node.y = startY;
-        return startY + 1;
-      }
-
-      let currentY = startY;
-      const childYs: number[] = [];
-
-      node.children.forEach((child) => {
-        currentY = calculateLayout(child, depth + 1, currentY);
-        childYs.push(child.y!);
-      });
-
-      // El nodo padre se coloca en el centro de sus hijos
-      node.y = (childYs[0] + childYs[childYs.length - 1]) / 2;
-
-      return currentY;
-    };
-
-    calculateLayout(visibleTree);
-
-    // Encontrar el máximo de profundidad y hojas
-    const getMaxDepth = (node: TreeNode): number => {
-      if (node.children.length === 0) return node.depth || 0;
-      return Math.max(...node.children.map(getMaxDepth));
-    };
-
-    const countLeaves = (node: TreeNode): number => {
-      if (node.children.length === 0) return 1;
-      return node.children.reduce((sum, child) => sum + countLeaves(child), 0);
-    };
-
-    const maxDepth = getMaxDepth(visibleTree);
-    const numLeaves = countLeaves(visibleTree);
-
-    // Dimensiones
-    const margin = {top: 20, right: 200, bottom: 20, left: 100};
-    const verticalSpacing = 25;
-    const horizontalSpacing = 200;
-    const width = (maxDepth + 1) * horizontalSpacing + margin.left + margin.right;
-    const height = numLeaves * verticalSpacing + margin.top + margin.bottom;
-
-    // Asignar coordenadas X
-    const assignX = (node: TreeNode) => {
-      node.x = margin.left + (node.depth || 0) * horizontalSpacing;
-      node.children.forEach(assignX);
-    };
-
-    assignX(visibleTree);
-
-    // Configurar SVG
-    const svg = svgRef.current;
-
-    svg.setAttribute("width", width.toString());
-    svg.setAttribute("height", height.toString());
-    svg.innerHTML = "";
-
-    // Dibujar líneas
-    const drawConnections = (node: TreeNode) => {
-      if (!node.x || node.y === undefined) return;
-
-      const y = margin.top + (node.y || 0) * verticalSpacing;
-
-      node.children.forEach((child) => {
-        if (!child.x || child.y === undefined) return;
-
-        const childY = margin.top + child.y * verticalSpacing;
-
-        // Línea horizontal desde el padre
-        const horizontalLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-
-        horizontalLine.setAttribute("x1", node.x.toString());
-        horizontalLine.setAttribute("y1", y.toString());
-        horizontalLine.setAttribute("x2", child.x.toString());
-        horizontalLine.setAttribute("y2", y.toString());
-        horizontalLine.setAttribute("stroke", "#9ca3af");
-        horizontalLine.setAttribute("stroke-width", "2");
-        svg.appendChild(horizontalLine);
-
-        // Línea vertical al hijo
-        const verticalLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-
-        verticalLine.setAttribute("x1", child.x.toString());
-        verticalLine.setAttribute("y1", y.toString());
-        verticalLine.setAttribute("x2", child.x.toString());
-        verticalLine.setAttribute("y2", childY.toString());
-        verticalLine.setAttribute("stroke", "#9ca3af");
-        verticalLine.setAttribute("stroke-width", "2");
-        svg.appendChild(verticalLine);
-
-        drawConnections(child);
-      });
-    };
-
-    drawConnections(visibleTree);
-
-    // Dibujar nodos
-    const drawNodes = (node: TreeNode, originalNode: TreeNode) => {
-      if (!node.x || node.y === undefined) return;
-
-      const y = margin.top + node.y * verticalSpacing;
-      const hasChildren = originalNode.children.length > 0;
-      const isExpanded = expandedNodes.has(node.id);
-
-      // Grupo para el nodo
-      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-      group.style.cursor = "pointer";
-
-      // Círculo
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-
-      circle.setAttribute("cx", node.x.toString());
-      circle.setAttribute("cy", y.toString());
-
-      let radius = 4;
-      let fill = "#9ca3af";
-
-      switch (node.type) {
-        case "root":
-          radius = 8;
-          fill = "#000000";
-          break;
-        case "order":
-          radius = 6;
-          fill = "#dc2626";
-          break;
-        case "family":
-          radius = 5;
-          fill = "#16a34a";
-          break;
-        case "genus":
-          radius = 4;
-          fill = "#2563eb";
-          break;
-        case "species":
-          radius = 3;
-          fill = "#9333ea";
-          break;
-      }
-
-      circle.setAttribute("r", radius.toString());
-      circle.setAttribute("fill", fill);
-      circle.setAttribute("stroke", "white");
-      circle.setAttribute("stroke-width", "2");
-      group.appendChild(circle);
-
-      // Indicador de expansión (+/-)
-      if (hasChildren) {
-        const indicator = document.createElementNS("http://www.w3.org/2000/svg", "text");
-
-        indicator.setAttribute("x", node.x.toString());
-        indicator.setAttribute("y", y.toString());
-        indicator.setAttribute("text-anchor", "middle");
-        indicator.setAttribute("dominant-baseline", "middle");
-        indicator.setAttribute("font-size", "10");
-        indicator.setAttribute("font-weight", "bold");
-        indicator.setAttribute("fill", "white");
-        indicator.setAttribute("pointer-events", "none");
-        indicator.textContent = isExpanded ? "−" : "+";
-        group.appendChild(indicator);
-      }
-
-      // Texto
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-
-      text.setAttribute("x", (node.x + 15).toString());
-      text.setAttribute("y", (y + 4).toString());
-      text.setAttribute("font-size", node.type === "species" ? "10" : "12");
-      text.setAttribute("fill", "#374151");
-      text.style.fontStyle = node.type === "genus" || node.type === "species" ? "italic" : "normal";
-      text.style.fontWeight = node.type === "order" ? "bold" : "normal";
-      text.textContent = node.name;
-
-      if (hasChildren) {
-        const countText = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-
-        countText.setAttribute("fill", "#9ca3af");
-        countText.setAttribute("font-size", "9");
-        countText.textContent = ` (${originalNode.children.length})`;
-        text.appendChild(countText);
-      }
-
-      group.appendChild(text);
-
-      // Eventos
-      group.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (hasChildren) {
-          // Toggle expansión
-          const newExpanded = new Set(expandedNodes);
-
-          if (newExpanded.has(node.id)) {
-            newExpanded.delete(node.id);
-          } else {
-            newExpanded.add(node.id);
-          }
-          setExpandedNodes(newExpanded);
-        } else if (node.href) {
-          // Navegar
-          window.location.href = node.href;
-        }
-      });
-
-      group.addEventListener("mouseenter", () => {
-        circle.setAttribute("stroke", "#374151");
-        circle.setAttribute("stroke-width", "3");
-        if (!hasChildren) {
-          text.style.textDecoration = "underline";
-        }
-      });
-
-      group.addEventListener("mouseleave", () => {
-        circle.setAttribute("stroke", "white");
-        circle.setAttribute("stroke-width", "2");
-        text.style.textDecoration = "none";
-      });
-
-      svg.appendChild(group);
-
-      // Recursivamente dibujar hijos visibles
-      node.children.forEach((child, idx) => {
-        const originalChild = originalNode.children[idx];
-
-        drawNodes(child, originalChild);
-      });
-    };
-
-    // Encontrar el nodo original correspondiente para obtener el conteo real de hijos
-    const findOriginalNode = (visNode: TreeNode, origTree: TreeNode): TreeNode => {
-      if (visNode.id === origTree.id) return origTree;
-
-      for (const child of origTree.children) {
-        const found = findOriginalNode(visNode, child);
-
-        if (found) return found;
-      }
-
-      return visNode; // fallback
-    };
-
-    drawNodes(visibleTree, treeData);
+    return {positionedTree: positioned, totalHeight: yCounter.value};
   }, [treeData, expandedNodes]);
 
-  const expandAll = () => {
-    if (!treeData) return;
+  // Actualizar dimensiones
+  useEffect(() => {
+    const maxLevel = 5; // root, order, family, genus, species
 
-    const allIds = new Set<string>();
-    const collectIds = (node: TreeNode) => {
-      allIds.add(node.id);
-      node.children.forEach(collectIds);
+    setDimensions({
+      width: maxLevel * LEVEL_WIDTH + 200,
+      height: Math.max(400, totalHeight + 40),
+    });
+  }, [totalHeight]);
+
+  // Restaurar posición del scroll al montar
+  useEffect(() => {
+    if (containerRef.current) {
+      try {
+        const saved = globalThis.window.localStorage.getItem(STORAGE_SCROLL_KEY);
+
+        if (saved) {
+          const parsed = JSON.parse(saved) as {
+            scrollLeft: number;
+            scrollTop: number;
+          };
+
+          // Pequeño delay para asegurar que el contenido esté renderizado
+          const timeoutId = setTimeout(() => {
+            if (containerRef.current) {
+              containerRef.current.scrollLeft = parsed.scrollLeft;
+              containerRef.current.scrollTop = parsed.scrollTop;
+            }
+          }, 100);
+
+          return () => clearTimeout(timeoutId);
+        }
+      } catch {
+        // Ignorar errores
+      }
+    }
+  }, [positionedTree]);
+
+  // Guardar posición del scroll cuando cambie
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) return;
+
+    const handleScroll = () => {
+      try {
+        globalThis.window.localStorage.setItem(
+          STORAGE_SCROLL_KEY,
+          JSON.stringify({
+            scrollLeft: container.scrollLeft,
+            scrollTop: container.scrollTop,
+          }),
+        );
+      } catch {
+        // Ignorar errores de localStorage
+      }
     };
 
-    collectIds(treeData);
-    setExpandedNodes(allIds);
+    container.addEventListener("scroll", handleScroll, {passive: true});
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Generar curva bezier entre dos puntos
+  const generatePath = (x1: number, y1: number, x2: number, y2: number): string => {
+    const midX = (x1 + x2) / 2;
+
+    return `M ${String(x1)} ${String(y1)} C ${String(midX)} ${String(y1)}, ${String(midX)} ${String(y2)}, ${String(x2)} ${String(y2)}`;
   };
 
-  const collapseAll = () => {
-    setExpandedNodes(new Set());
+  // Renderizar enlaces
+  const renderLinks = (node: PositionedNode): ReactNode[] => {
+    const links: ReactNode[] = [];
+
+    if (node.children) {
+      node.children.forEach((child) => {
+        links.push(
+          <path
+            key={`link-${node.id}-${child.id}`}
+            d={generatePath(node.x + 6, node.y, child.x - 4, child.y)}
+            fill="none"
+            stroke="#bbb"
+            strokeWidth={1}
+          />,
+        );
+        const childLinks = renderLinks(child);
+
+        childLinks.forEach((link) => links.push(link));
+      });
+    }
+
+    return links;
   };
 
-  const expandOrders = () => {
-    if (!treeData) return;
+  // Calcular ancho aproximado del texto
+  const estimateTextWidth = (text: string, fontSize: number): number => {
+    // Aproximación más precisa: considerar ancho variable por carácter
+    // Caracteres más anchos (m, w) y más estrechos (i, l)
+    let width = 0;
 
-    const orderIds = new Set<string>();
+    for (const char of text) {
+      if (char === "m" || char === "w" || char === "M" || char === "W") {
+        width += fontSize * 0.8;
+      } else if (
+        char === "i" ||
+        char === "l" ||
+        char === "I" ||
+        char === "L" ||
+        char === " " ||
+        char === "."
+      ) {
+        width += fontSize * 0.3;
+      } else {
+        width += fontSize * 0.6;
+      }
+    }
 
-    treeData.children.forEach((order) => {
-      orderIds.add(order.id);
-    });
-    setExpandedNodes(orderIds);
+    return width;
   };
 
-  if (!orders || orders.length === 0) {
-    return (
-      <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-600">No hay datos disponibles para mostrar el árbol filogenético.</p>
-      </div>
+  // Renderizar nodos
+  const renderNodes = (node: PositionedNode): ReactNode[] => {
+    const nodes: ReactNode[] = [];
+    const hasChildren = node.children && node.children.length > 0;
+    const isItalic = node.type === "genus" || node.type === "species";
+
+    const handleClick = () => {
+      if (hasChildren || (node.children === undefined && node.type !== "species")) {
+        handleToggle(node.id);
+      } else if (node.href) {
+        handleNavigate(node.href);
+      }
+    };
+
+    // Calcular ancho del texto para el subrayado
+    // Solo subrayar el nombre, no el contador
+    const nameWidth = estimateTextWidth(node.name, 11);
+    const underlineX2 = 8 + nameWidth;
+
+    nodes.push(
+      <g
+        key={node.id}
+        className="tree-node-group"
+        style={{cursor: "pointer"}}
+        transform={`translate(${String(node.x)}, ${String(node.y)})`}
+        onClick={handleClick}
+      >
+        {/* Punto del nodo */}
+        <circle cx={0} cy={0} fill="#888" r={3} />
+
+        {/* Nombre del nodo */}
+        <text
+          className="node-text"
+          dominantBaseline="middle"
+          fill="#555"
+          fontSize={11}
+          fontStyle={isItalic ? "italic" : "normal"}
+          fontWeight={400}
+          x={8}
+          y={0}
+        >
+          {node.name}
+          {node.count !== undefined && (
+            <tspan fill="#999" fontSize={10}>
+              {" "}
+              ({node.count})
+            </tspan>
+          )}
+        </text>
+        {/* Línea de subrayado (visible en hover) */}
+        <line
+          className="underline-line"
+          stroke="#555"
+          strokeWidth={1}
+          x1={8}
+          x2={String(underlineX2)}
+          y1={5}
+          y2={5}
+        />
+      </g>,
     );
-  }
+
+    if (node.children) {
+      node.children.forEach((child) => {
+        const childNodes = renderNodes(child);
+
+        childNodes.forEach((n) => nodes.push(n));
+      });
+    }
+
+    return nodes;
+  };
+
+  // Expandir todo
+  const expandAll = useCallback(() => {
+    const newExpanded = new Set<string>(["root"]);
+
+    const addAll = (node: TreeNodeData) => {
+      if (node.children) {
+        node.children.forEach((child) => {
+          newExpanded.add(child.id);
+          addAll(child);
+        });
+      }
+    };
+
+    addAll(treeData);
+    setExpandedNodes(newExpanded);
+
+    // Guardar en localStorage
+    try {
+      globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newExpanded)));
+    } catch {
+      // Ignorar errores de localStorage
+    }
+  }, [treeData]);
+
+  const collapseAll = useCallback(() => {
+    const newExpanded = new Set(["root"]);
+
+    setExpandedNodes(newExpanded);
+
+    // Guardar en localStorage
+    try {
+      globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newExpanded)));
+    } catch {
+      // Ignorar errores de localStorage
+    }
+  }, []);
 
   return (
-    <div className="relative">
-      {/* Título */}
-      <div className="mb-6">
-        <h2 className="mb-2 text-xl font-bold text-gray-800">Árbol Filogenético</h2>
-        <p className="text-sm text-gray-600">
-          Representación de las relaciones evolutivas entre grupos taxonómicos. Haz clic en los nodos (+) para
-          expandir.
+    <div className="phylo-tree">
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="mb-1 text-lg font-medium text-gray-700">Árbol Filogenético</h2>
+        <p className="text-xs text-gray-400">
+          Clic en los nodos para expandir/colapsar. Clic en especies para ver detalles.
         </p>
-      </div>
-
-      {/* Leyenda */}
-      <div className="mb-6 flex flex-wrap gap-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-red-600"></div>
-          <span>Orden</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-green-600"></div>
-          <span>Familia</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-blue-600"></div>
-          <span>Género</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-purple-600"></div>
-          <span>Especie</span>
-        </div>
       </div>
 
       {/* Controles */}
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
-          onClick={expandOrders}
-        >
-          Expandir órdenes
-        </button>
-        <button
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+          className="tree-btn"
+          disabled={!orders || orders.length === 0}
+          type="button"
           onClick={expandAll}
         >
-          Expandir todo
+          Expandir
         </button>
         <button
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+          className="tree-btn"
+          disabled={!orders || orders.length === 0}
+          type="button"
           onClick={collapseAll}
         >
-          Colapsar todo
+          Colapsar
         </button>
       </div>
 
-      {/* SVG Container */}
-      <div className="overflow-auto rounded-lg border border-gray-200 bg-white p-4">
-        <svg ref={svgRef} className="block"></svg>
+      {/* Árbol SVG */}
+      <div ref={containerRef} className="tree-container">
+        {!orders || orders.length === 0 ? (
+          <div className="flex h-[400px] items-center justify-center">
+            <p className="text-gray-400">No hay especies disponibles.</p>
+          </div>
+        ) : (
+          <svg
+            ref={svgRef}
+            height={dimensions.height}
+            style={{
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            }}
+            width={dimensions.width}
+          >
+            <g transform="translate(20, 20)">
+              {/* Enlaces primero (debajo de los nodos) */}
+              {renderLinks(positionedTree)}
+
+              {/* Nodos encima */}
+              {renderNodes(positionedTree)}
+            </g>
+          </svg>
+        )}
       </div>
 
-      {/* Nota */}
-      <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm text-gray-700">
-        <p>
-          <strong>Cómo usar:</strong> Haz clic en los nodos con símbolo <strong>+</strong> para expandir y
-          ver los niveles inferiores. Los nodos con <strong>−</strong> se pueden colapsar. Las especies
-          (nodos morados sin símbolo) son clicables para ver sus detalles.
-        </p>
-      </div>
+      <style>{`
+        .phylo-tree {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .tree-btn {
+          padding: 5px 12px;
+          font-size: 11px;
+          color: #666;
+          background: #fff;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .tree-btn:hover {
+          background: #f5f5f5;
+        }
+
+        .tree-container {
+          background: #fff;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
+          overflow: auto;
+          min-height: 400px;
+          max-height: 70vh;
+        }
+
+        .tree-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .tree-node-group:hover circle {
+          fill: #666;
+        }
+        .tree-node-group:hover .node-text {
+          fill: #333;
+        }
+        .underline-line {
+          opacity: 0;
+          transition: opacity 0.15s;
+        }
+        .tree-node-group:hover .underline-line {
+          opacity: 1;
+        }
+        /* Calcular ancho aproximado del texto para el subrayado */
+        .tree-node-group:hover .underline-line {
+          stroke-dasharray: none;
+        }
+      `}</style>
     </div>
   );
 }
-

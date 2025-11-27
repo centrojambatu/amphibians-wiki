@@ -2,9 +2,11 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {SapopediaContent} from "@/components/sapopedia-content";
 
 import getAllEspecies from "./get-all-especies";
+import getFilterCatalogs from "./get-filter-catalogs";
 
 export default async function SapopediaPage() {
-  const especies = await getAllEspecies();
+  // Obtener especies y catálogos de filtros en paralelo
+  const [especies, filterCatalogs] = await Promise.all([getAllEspecies(), getFilterCatalogs()]);
 
   // Agrupar por orden para las estadísticas
   const especiesPorOrden = especies.reduce<Record<string, typeof especies>>((acc, especie) => {
@@ -60,7 +62,7 @@ export default async function SapopediaPage() {
       {/* Contenido con tabs */}
       <div className="mb-8">
         <h2 className="mb-6 text-2xl font-bold">Explorar Especies</h2>
-        <SapopediaContent especies={especies} />
+        <SapopediaContent especies={especies} filterCatalogs={filterCatalogs} />
       </div>
     </main>
   );

@@ -16,13 +16,44 @@ export interface SpeciesListItem {
   lista_roja_iucn: string | null;
   has_distribucion_occidental: boolean;
   has_distribucion_oriental: boolean;
+  // Catálogos para filtrado (slugs)
+  catalogos: {
+    regiones_biogeograficas: string[];
+    ecosistemas: string[];
+    reservas_biosfera: string[];
+    bosques_protegidos: string[];
+    areas_protegidas_estado: string[];
+    areas_protegidas_privadas: string[];
+    provincias: string[];
+  };
+}
+
+// Función para convertir nombre a slug
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+// Función para parsear string de catálogos separados por coma a array de slugs
+function parseCatalogString(catalogString: string | null): string[] {
+  if (!catalogString) return [];
+
+  return catalogString
+    .split(",")
+    .map((item) => toSlug(item.trim()))
+    .filter((slug) => slug.length > 0);
 }
 
 export default async function getAllEspecies(familia?: string): Promise<SpeciesListItem[]> {
   const supabaseClient = createServiceClient();
 
   // Obtener todas las especies publicadas desde la vista completa
-  // vw_ficha_especie_completa no está en los tipos generados aún
   let query = (supabaseClient as any)
     .from("vw_ficha_especie_completa")
     .select("*")
@@ -46,32 +77,90 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     return [];
   }
 
-  // Obtener las siglas de Lista Roja IUCN para todas las especies
-  // Similar a como lo hace get-ficha-especie.ts
+  // Obtener los catálogos que NO están en la vista (ecosistemas, reservas biosfera, bosques protegidos, provincias)
   const taxonIds: number[] = especies.map((e: any) => e.especie_taxon_id as number);
 
-  // Obtener las siglas de Lista Roja IUCN
-  const {data: listaRojaData, error: errorListaRoja} = await supabaseClient
-    .from("taxon_catalogo_awe")
-    .select("taxon_id, catalogo_awe(sigla, tipo_catalogo_awe_id)")
-    .in("taxon_id", taxonIds)
-    .eq("catalogo_awe.tipo_catalogo_awe_id", 10); // 10 = Lista Roja UICN
+  // IDs de tipos de catálogo que necesitamos obtener por separado
+  const TIPO_LISTA_ROJA = 10;
+  const TIPO_PROVINCIAS = 1; // No está en la vista
+  const TIPO_ECOSISTEMAS = 21; // No está en la vista
+  const TIPO_RESERVAS_BIOSFERA = 22; // No está en la vista
+  const TIPO_BOSQUES_PROTEGIDOS = 23; // No está en la vista
 
-  if (errorListaRoja) {
-    console.error("Error al obtener lista roja:", errorListaRoja);
+  // Obtener catálogos que faltan en la vista
+  const {data: catalogosData, error: errorCatalogos} = await supabaseClient
+    .from("taxon_catalogo_awe")
+    .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
+    .in("taxon_id", taxonIds)
+    .in("catalogo_awe.tipo_catalogo_awe_id", [
+      TIPO_LISTA_ROJA,
+      TIPO_PROVINCIAS,
+      TIPO_ECOSISTEMAS,
+      TIPO_RESERVAS_BIOSFERA,
+      TIPO_BOSQUES_PROTEGIDOS,
+    ]);
+
+  if (errorCatalogos) {
+    console.error("Error al obtener catálogos:", errorCatalogos);
   }
 
-  // Crear un mapa de taxon_id -> sigla de lista roja
+  // Crear mapas de taxon_id -> catálogos
   const listaRojaMap = new Map<number, string>();
+  const catalogosExtraMap = new Map<
+    number,
+    {
+      ecosistemas: string[];
+      reservas_biosfera: string[];
+      bosques_protegidos: string[];
+      provincias: string[];
+    }
+  >();
 
-  if (listaRojaData) {
-    for (const item of listaRojaData as any[]) {
-      if (
-        item.catalogo_awe?.sigla &&
-        typeof item.taxon_id === "number" &&
-        typeof item.catalogo_awe.sigla === "string"
-      ) {
-        listaRojaMap.set(item.taxon_id as number, item.catalogo_awe.sigla as string);
+  // Inicializar el mapa para cada especie
+  for (const taxonId of taxonIds) {
+    catalogosExtraMap.set(taxonId, {
+      ecosistemas: [],
+      reservas_biosfera: [],
+      bosques_protegidos: [],
+      provincias: [],
+    });
+  }
+
+  if (catalogosData) {
+    for (const item of catalogosData as any[]) {
+      const taxonId = item.taxon_id as number;
+      const catalogo = item.catalogo_awe;
+
+      if (!catalogo || typeof taxonId !== "number") continue;
+
+      const tipoId = catalogo.tipo_catalogo_awe_id;
+      const nombre = catalogo.nombre as string;
+      const sigla = catalogo.sigla as string | null;
+      const slug = toSlug(nombre);
+
+      // Lista Roja usa sigla
+      if (tipoId === TIPO_LISTA_ROJA && sigla) {
+        listaRojaMap.set(taxonId, sigla);
+      }
+
+      // Otros catálogos usan slug
+      const especieCatalogos = catalogosExtraMap.get(taxonId);
+
+      if (especieCatalogos) {
+        switch (tipoId) {
+          case TIPO_PROVINCIAS:
+            especieCatalogos.provincias.push(slug);
+            break;
+          case TIPO_ECOSISTEMAS:
+            especieCatalogos.ecosistemas.push(slug);
+            break;
+          case TIPO_RESERVAS_BIOSFERA:
+            especieCatalogos.reservas_biosfera.push(slug);
+            break;
+          case TIPO_BOSQUES_PROTEGIDOS:
+            especieCatalogos.bosques_protegidos.push(slug);
+            break;
+        }
       }
     }
   }
@@ -82,9 +171,23 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     const distribucionAltitudinal = (especie.awe_distribucion_altitudinal || "").toLowerCase();
     const hasOccidental = distribucionAltitudinal.includes("occidental");
     const hasOriental = distribucionAltitudinal.includes("oriental");
+    const taxonId = especie.especie_taxon_id as number;
+
+    // Obtener catálogos extra (los que no están en la vista)
+    const catalogosExtra = catalogosExtraMap.get(taxonId) || {
+      ecosistemas: [],
+      reservas_biosfera: [],
+      bosques_protegidos: [],
+      provincias: [],
+    };
+
+    // Parsear catálogos que SÍ vienen en la vista como strings
+    const regionesBiogeograficas = parseCatalogString(especie.awe_regiones_biogeograficas);
+    const areasProtegidasEstado = parseCatalogString(especie.awe_areas_protegidas_estado);
+    const areasProtegidasPrivadas = parseCatalogString(especie.awe_areas_protegidas_privadas);
 
     return {
-      id_taxon: especie.especie_taxon_id,
+      id_taxon: taxonId,
       nombre_cientifico: especie.nombre_cientifico,
       nombre_comun: especie.nombre_comun,
       descubridor: especie.especie_autor,
@@ -96,9 +199,20 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
       endemica: especie.endemica,
       rango_altitudinal_min: especie.rango_altitudinal_min,
       rango_altitudinal_max: especie.rango_altitudinal_max,
-      lista_roja_iucn: listaRojaMap.get(especie.especie_taxon_id as number) || null,
+      lista_roja_iucn: listaRojaMap.get(taxonId) || null,
       has_distribucion_occidental: hasOccidental,
       has_distribucion_oriental: hasOriental,
+      catalogos: {
+        // Catálogos que vienen de la vista (parseados de string a array)
+        regiones_biogeograficas: regionesBiogeograficas,
+        areas_protegidas_estado: areasProtegidasEstado,
+        areas_protegidas_privadas: areasProtegidasPrivadas,
+        // Catálogos que vienen de la query extra
+        ecosistemas: catalogosExtra.ecosistemas,
+        reservas_biosfera: catalogosExtra.reservas_biosfera,
+        bosques_protegidos: catalogosExtra.bosques_protegidos,
+        provincias: catalogosExtra.provincias,
+      },
     };
   });
 
