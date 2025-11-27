@@ -20,7 +20,6 @@ export interface FilterCatalogs {
 
 // IDs de los tipos de catálogo según la base de datos
 const CATALOG_TYPE_IDS = {
-  PROVINCIAS: 1, // Verificar el ID correcto en la base de datos
   LISTA_ROJA_UICN: 10,
   ECOSISTEMAS: 21,
   REGIONES_BIOGEOGRAFICAS: 6,
@@ -29,6 +28,9 @@ const CATALOG_TYPE_IDS = {
   AREAS_PROTEGIDAS_ESTADO: 3,
   AREAS_PROTEGIDAS_PRIVADAS: 4,
 };
+
+// Rank de geopolitica para provincias
+const RANK_PROVINCIAS = 3;
 
 // Función para convertir nombre a slug
 function toSlug(text: string): string {
@@ -68,6 +70,29 @@ async function getCatalogByType(
   }));
 }
 
+async function getProvincias(
+  supabaseClient: ReturnType<typeof createServiceClient>,
+): Promise<CatalogOption[]> {
+  const {data, error} = await supabaseClient
+    .from("geopolitica")
+    .select("id_geopolitica, nombre")
+    .eq("rank_geopolitica_id", RANK_PROVINCIAS)
+    .order("nombre", {ascending: true});
+
+  if (error) {
+    console.error("Error al obtener provincias:", error);
+
+    return [];
+  }
+
+  return (data || []).map((item) => ({
+    id: item.id_geopolitica,
+    nombre: item.nombre,
+    sigla: null,
+    value: toSlug(item.nombre),
+  }));
+}
+
 export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
   const supabaseClient = createServiceClient();
 
@@ -82,7 +107,7 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
     areasProtegidasEstado,
     areasProtegidasPrivadas,
   ] = await Promise.all([
-    getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.PROVINCIAS),
+    getProvincias(supabaseClient), // Obtener desde geopolitica
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.LISTA_ROJA_UICN, true), // Usar sigla como value
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.ECOSISTEMAS),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.REGIONES_BIOGEOGRAFICAS),

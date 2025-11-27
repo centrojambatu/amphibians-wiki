@@ -77,31 +77,43 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     return [];
   }
 
-  // Obtener los catálogos que NO están en la vista (ecosistemas, reservas biosfera, bosques protegidos, provincias)
+  // Obtener los catálogos que NO están en la vista (ecosistemas, reservas biosfera, bosques protegidos)
   const taxonIds: number[] = especies.map((e: any) => e.especie_taxon_id as number);
 
   // IDs de tipos de catálogo que necesitamos obtener por separado
   const TIPO_LISTA_ROJA = 10;
-  const TIPO_PROVINCIAS = 1; // No está en la vista
   const TIPO_ECOSISTEMAS = 21; // No está en la vista
   const TIPO_RESERVAS_BIOSFERA = 22; // No está en la vista
   const TIPO_BOSQUES_PROTEGIDOS = 23; // No está en la vista
 
-  // Obtener catálogos que faltan en la vista
+  // Rank de geopolitica para provincias
+  const RANK_PROVINCIAS = 3;
+
+  // Obtener catálogos que faltan en la vista (sin provincias, que vienen de geopolitica)
   const {data: catalogosData, error: errorCatalogos} = await supabaseClient
     .from("taxon_catalogo_awe")
     .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
     .in("taxon_id", taxonIds)
     .in("catalogo_awe.tipo_catalogo_awe_id", [
       TIPO_LISTA_ROJA,
-      TIPO_PROVINCIAS,
       TIPO_ECOSISTEMAS,
       TIPO_RESERVAS_BIOSFERA,
       TIPO_BOSQUES_PROTEGIDOS,
     ]);
 
+  // Obtener provincias desde taxon_geopolitica
+  const {data: provinciasData, error: errorProvincias} = await supabaseClient
+    .from("taxon_geopolitica")
+    .select("taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)")
+    .in("taxon_id", taxonIds)
+    .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
+
   if (errorCatalogos) {
     console.error("Error al obtener catálogos:", errorCatalogos);
+  }
+
+  if (errorProvincias) {
+    console.error("Error al obtener provincias:", errorProvincias);
   }
 
   // Crear mapas de taxon_id -> catálogos
@@ -126,6 +138,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     });
   }
 
+  // Procesar catálogos desde taxon_catalogo_awe
   if (catalogosData) {
     for (const item of catalogosData as any[]) {
       const taxonId = item.taxon_id as number;
@@ -148,9 +161,6 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
 
       if (especieCatalogos) {
         switch (tipoId) {
-          case TIPO_PROVINCIAS:
-            especieCatalogos.provincias.push(slug);
-            break;
           case TIPO_ECOSISTEMAS:
             especieCatalogos.ecosistemas.push(slug);
             break;
@@ -161,6 +171,25 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
             especieCatalogos.bosques_protegidos.push(slug);
             break;
         }
+      }
+    }
+  }
+
+  // Procesar provincias desde taxon_geopolitica
+  if (provinciasData) {
+    for (const item of provinciasData as any[]) {
+      const taxonId = item.taxon_id as number;
+      const geopolitica = item.geopolitica;
+
+      if (!geopolitica || typeof taxonId !== "number") continue;
+
+      const nombre = geopolitica.nombre as string;
+      const slug = toSlug(nombre);
+
+      const especieCatalogos = catalogosExtraMap.get(taxonId);
+
+      if (especieCatalogos) {
+        especieCatalogos.provincias.push(slug);
       }
     }
   }

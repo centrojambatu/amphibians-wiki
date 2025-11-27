@@ -210,6 +210,21 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
     router.push(path);
   };
 
+  // Función para obtener los nombres de los filtros activos de un catálogo
+  const getActiveFilterNames = (
+    catalogItems: FilterCatalogs[keyof FilterCatalogs],
+    filterKey: keyof FiltersState,
+    useSigla = false,
+  ): string[] => {
+    const activeValues = filters[filterKey] as string[];
+
+    if (activeValues.length === 0 || !catalogItems) return [];
+
+    return catalogItems
+      .filter((item) => activeValues.includes(item.value))
+      .map((item) => (useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre));
+  };
+
   // Componente reutilizable para renderizar opciones de catálogo
   const renderCatalogOptions = (
     catalogItems: FilterCatalogs[keyof FilterCatalogs],
@@ -326,7 +341,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Provincias - desde Supabase */}
           {catalogs.provincias.length > 0 && (
             <AccordionItem value="provincia">
-              <AccordionTrigger>Provincia</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Provincia</span>
+                  {filters.provincia.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.provincias, "provincia").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.provincias, "provincia")}
               </AccordionContent>
@@ -336,7 +360,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Lista Roja UICN - desde Supabase */}
           {catalogs.listaRoja.length > 0 && (
             <AccordionItem value="listaRoja">
-              <AccordionTrigger>Lista Roja UICN</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Lista Roja UICN</span>
+                  {filters.listaRoja.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.listaRoja, "listaRoja", true).join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.listaRoja, "listaRoja", true)}
               </AccordionContent>
@@ -345,7 +378,18 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
           {/* Endemismo - hardcoded ya que son solo 2 opciones fijas */}
           <AccordionItem value="endemismo">
-            <AccordionTrigger>Endemismo</AccordionTrigger>
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold uppercase">Endemismo</span>
+                {filters.endemismo.length > 0 && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.endemismo
+                      .map((val) => (val === "endemic" ? "Endémicas" : "No endémicas"))
+                      .join(", ")}
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-2">
                 {[
@@ -376,7 +420,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
           {/* Pisos Altitudinales con gráfico */}
           <AccordionItem value="pisosAltitudinales">
-            <AccordionTrigger>Pisos altitudinales</AccordionTrigger>
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold uppercase">Pisos altitudinales</span>
+                {(filters.rangoAltitudinal.min !== 0 || filters.rangoAltitudinal.max !== 4800) && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
                 {/* Gráfico de pisos climáticos */}
@@ -407,7 +460,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
           {/* Área de Distribución */}
           <AccordionItem value="areaDistribucion">
-            <AccordionTrigger>Área de distribución</AccordionTrigger>
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold uppercase">Área de distribución</span>
+                {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
                 <div className="flex justify-between text-sm text-gray-600">
@@ -428,7 +490,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Ecosistemas - desde Supabase */}
           {catalogs.ecosistemas.length > 0 && (
             <AccordionItem value="ecosistemas">
-              <AccordionTrigger>Ecosistemas</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Ecosistemas</span>
+                  {filters.ecosistemas.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.ecosistemas, "ecosistemas").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.ecosistemas, "ecosistemas")}
               </AccordionContent>
@@ -438,7 +509,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Regiones Biogeográficas - desde Supabase */}
           {catalogs.regionesBiogeograficas.length > 0 && (
             <AccordionItem value="regionesBiogeograficas">
-              <AccordionTrigger>Regiones biogeográficas</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Regiones biogeográficas</span>
+                  {filters.regionesBiogeograficas.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.regionesBiogeograficas, "regionesBiogeograficas").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.regionesBiogeograficas, "regionesBiogeograficas")}
               </AccordionContent>
@@ -448,7 +528,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Reservas de la Biosfera - desde Supabase */}
           {catalogs.reservasBiosfera.length > 0 && (
             <AccordionItem value="reservasBiosfera">
-              <AccordionTrigger>Reservas de la biosfera</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Reservas de la biosfera</span>
+                  {filters.reservasBiosfera.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.reservasBiosfera, "reservasBiosfera")}
               </AccordionContent>
@@ -458,7 +547,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Bosques Protegidos - desde Supabase */}
           {catalogs.bosquesProtegidos.length > 0 && (
             <AccordionItem value="bosquesProtegidos">
-              <AccordionTrigger>Bosques protegidos</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Bosques protegidos</span>
+                  {filters.bosquesProtegidos.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.bosquesProtegidos, "bosquesProtegidos")}
               </AccordionContent>
@@ -468,7 +566,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Áreas Protegidas del Estado - desde Supabase */}
           {catalogs.areasProtegidasEstado.length > 0 && (
             <AccordionItem value="areasProtegidasEstado">
-              <AccordionTrigger>Áreas protegidas del Estado</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Áreas protegidas del Estado</span>
+                  {filters.areasProtegidasEstado.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.areasProtegidasEstado, "areasProtegidasEstado").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.areasProtegidasEstado, "areasProtegidasEstado")}
               </AccordionContent>
@@ -478,7 +585,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
           {/* Áreas Protegidas Privadas - desde Supabase */}
           {catalogs.areasProtegidasPrivadas.length > 0 && (
             <AccordionItem value="areasProtegidasPrivadas">
-              <AccordionTrigger>Áreas protegidas privadas</AccordionTrigger>
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold uppercase">Áreas protegidas privadas</span>
+                  {filters.areasProtegidasPrivadas.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas").join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
                 {renderCatalogOptions(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas")}
               </AccordionContent>
@@ -487,7 +603,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
           {/* Pluviocidad */}
           <AccordionItem value="pluviocidad">
-            <AccordionTrigger>Pluviocidad</AccordionTrigger>
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold uppercase">Pluviocidad</span>
+                {(filters.pluviocidad.min !== 640 || filters.pluviocidad.max !== 4000) && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
                 <div className="flex justify-between text-sm text-gray-600">
@@ -507,7 +632,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
           {/* Temperatura */}
           <AccordionItem value="temperatura">
-            <AccordionTrigger>Temperatura</AccordionTrigger>
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold uppercase">Temperatura</span>
+                {(filters.temperatura.min !== 5 || filters.temperatura.max !== 25) && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.temperatura.min} - {filters.temperatura.max} °C
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
                 <div className="flex justify-between text-sm text-gray-600">

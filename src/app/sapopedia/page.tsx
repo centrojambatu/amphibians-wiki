@@ -21,66 +21,62 @@ export default async function SapopediaPage() {
 
       {/* Estadísticas */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-md transition-all hover:shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-gray-700">
-              Total de Especies
-            </CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Total de Especies</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-blue-600">{especies.length}</p>
-            <p className="mt-1 text-xs text-gray-500">Especies registradas</p>
+            <p className="text-4xl font-bold">{especies.length}</p>
+            <p className="text-muted-foreground text-sm">Especies registradas</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 to-white shadow-md transition-all hover:shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-gray-700">Familias</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Familias</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-amber-600">
+            <p className="text-4xl font-bold">
               {new Set(especies.map((e) => e.familia).filter(Boolean)).size}
             </p>
-            <p className="mt-1 text-xs text-gray-500">Familias taxonómicas</p>
+            <p className="text-muted-foreground text-sm">Familias taxonómicas</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50 to-white shadow-md transition-all hover:shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-gray-700">Géneros</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Géneros</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-purple-600">
+            <p className="text-4xl font-bold">
               {new Set(especies.map((e) => e.genero).filter(Boolean)).size}
             </p>
-            <p className="mt-1 text-xs text-gray-500">Géneros taxonómicos</p>
+            <p className="text-muted-foreground text-sm">Géneros taxonómicos</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-white shadow-md transition-all hover:shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-gray-700">Endémicas</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Endémicas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-green-600">
-              {especies.filter((e) => e.endemica).length}
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="text-4xl font-bold">{especies.filter((e) => e.endemica).length}</p>
+            <p className="text-muted-foreground text-sm">
               {((especies.filter((e) => e.endemica).length / especies.length) * 100).toFixed(1)}%
               del total
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-red-500 bg-gradient-to-br from-red-50 to-white shadow-md transition-all hover:shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-gray-700">Peligro Crítico</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Peligro Crítico</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-red-600">
+            <p className="text-4xl font-bold">
               {especies.filter((e) => e.lista_roja_iucn === "CR").length}
             </p>
-            <p className="mt-1 text-xs text-gray-500">Especies en peligro crítico</p>
+            <p className="text-muted-foreground text-sm">Especies en peligro crítico</p>
           </CardContent>
         </Card>
       </div>
