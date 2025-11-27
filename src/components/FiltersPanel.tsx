@@ -248,7 +248,7 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
   };
 
   return (
-    <div className="sticky top-0 flex h-screen flex-col rounded-lg border border-gray-200 bg-white">
+    <div className="sticky top-0 flex h-screen max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
       {/* Buscador */}
       <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4">
         <Popover open={open} onOpenChange={setOpen}>
@@ -321,7 +321,7 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
         </div>
       </div>
 
-      <div className="filters-panel-scroll flex-1 overflow-y-auto px-6">
+      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-6 py-4">
         <Accordion className="w-full" type="multiple">
           {/* Provincias - desde Supabase */}
           {catalogs.provincias.length > 0 && (
