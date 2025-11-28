@@ -78,20 +78,40 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
       }
     }
 
-    // Agregar los nuevos
+    // Agregar los nuevos (verificar que no existan duplicados antes de insertar)
     if (idsAAgregar.length > 0) {
-      const nuevosRegistros = idsAAgregar.map((catalogo_awe_id: number) => ({
-        taxon_id: taxonIdNum,
-        catalogo_awe_id,
-      }));
-
-      const {error: errorAgregar} = await supabaseClient
+      // Verificar que no existan ya estos registros (por si hay duplicados en la BD)
+      const {data: registrosExistentes, error: errorVerificar} = await supabaseClient
         .from("taxon_catalogo_awe")
-        .insert(nuevosRegistros);
+        .select("catalogo_awe_id")
+        .eq("taxon_id", taxonIdNum)
+        .in("catalogo_awe_id", idsAAgregar);
 
-      if (errorAgregar) {
-        console.error("Error al agregar registros:", errorAgregar);
-        return NextResponse.json({error: errorAgregar.message}, {status: 500});
+      if (errorVerificar) {
+        console.error("Error al verificar registros existentes:", errorVerificar);
+        return NextResponse.json({error: errorVerificar.message}, {status: 500});
+      }
+
+      // Filtrar solo los que realmente no existen
+      const idsExistentes = new Set(
+        (registrosExistentes || []).map((r) => r.catalogo_awe_id),
+      );
+      const idsParaAgregar = idsAAgregar.filter((id: number) => !idsExistentes.has(id));
+
+      if (idsParaAgregar.length > 0) {
+        const nuevosRegistros = idsParaAgregar.map((catalogo_awe_id: number) => ({
+          taxon_id: taxonIdNum,
+          catalogo_awe_id,
+        }));
+
+        const {error: errorAgregar} = await supabaseClient
+          .from("taxon_catalogo_awe")
+          .insert(nuevosRegistros);
+
+        if (errorAgregar) {
+          console.error("Error al agregar registros:", errorAgregar);
+          return NextResponse.json({error: errorAgregar.message}, {status: 500});
+        }
       }
     }
 

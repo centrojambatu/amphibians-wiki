@@ -178,9 +178,19 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     null;
 
   // Filtrar solo las distribuciones altitudinales (tipo_catalogo_awe_id = 5)
-  const distributions = taxon_catalogo_awe_results?.filter(
+  // Eliminar duplicados basándose en catalogo_awe_id (combinación única de taxon_id + catalogo_awe_id)
+  const distributionsSinDuplicados = taxon_catalogo_awe_results?.filter(
     (item) => item.catalogo_awe.tipo_catalogo_awe_id === 5,
   );
+  // Eliminar duplicados usando un Map basado en catalogo_awe_id (mantener solo el primero encontrado)
+  const distributionsMap = new Map();
+  distributionsSinDuplicados?.forEach((item) => {
+    const key = item.catalogo_awe_id;
+    if (!distributionsMap.has(key)) {
+      distributionsMap.set(key, item);
+    }
+  });
+  const distributions = Array.from(distributionsMap.values());
 
   // Revisar si tiene distribución occidental/oriental basándose en awe_distribucion_altitudinal de la vista
   const distribucionAltitudinal = (vistaDataTyped.awe_distribucion_altitudinal || "").toLowerCase();
@@ -361,10 +371,20 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     inaturalist: fichaEspecie?.inaturalist ?? null,
     genbank: fichaEspecie?.genbank ?? null,
     herpnet: fichaEspecie?.herpnet ?? null,
-    // Datos relacionados - asegurar que siempre sean arrays
-    taxon_catalogo_awe_results: Array.isArray(taxon_catalogo_awe_results)
-      ? taxon_catalogo_awe_results
-      : [],
+    // Datos relacionados - asegurar que siempre sean arrays y eliminar duplicados
+    taxon_catalogo_awe_results: (() => {
+      if (!Array.isArray(taxon_catalogo_awe_results)) return [];
+      // Eliminar duplicados basándose en catalogo_awe_id (combinación única de taxon_id + catalogo_awe_id)
+      // Mantener solo el primer registro encontrado para cada catalogo_awe_id
+      const uniqueMap = new Map();
+      taxon_catalogo_awe_results.forEach((item) => {
+        const key = item.catalogo_awe_id;
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, item);
+        }
+      });
+      return Array.from(uniqueMap.values());
+    })(),
     dataRegionBio: Array.isArray(dataRegionBio) ? dataRegionBio : [],
     geoPolitica: Array.isArray(geoPolitica) ? geoPolitica : [],
     publicaciones: publicacionesParaMostrar,
