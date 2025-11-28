@@ -1,10 +1,11 @@
 import {createServerClient} from "@supabase/ssr";
-import {cookies} from "next/headers";
 import {createClient as createSupabaseClient} from "@supabase/supabase-js";
 
 import {Database} from "@/types/supabase";
 
 export async function createClient() {
+  // Importación dinámica de cookies para evitar problemas con Turbopack
+  const {cookies} = await import("next/headers");
   const cookieStore = await cookies();
 
   return createServerClient<Database>(

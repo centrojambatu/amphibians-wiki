@@ -254,3 +254,23 @@ span[class~="autor-ano-links"] a[href]:hover {
 .filters-panel-scroll::-webkit-scrollbar-thumb:hover {
   background-color: #9ca3af;
 }
+
+/* Estilos para Leaflet */
+.region-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.region-polygon {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.region-label {
+  background: transparent !important;
+  border: none !important;
+}

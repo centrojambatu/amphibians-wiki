@@ -103,6 +103,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   <Link href="/sapopedia">
                     <Button variant="ghost">SapoPedia</Button>
                   </Link>
+                  <Link href="/sapopedia/lista-roja">
+                    <Button variant="ghost">Lista Roja</Button>
+                  </Link>
+                  <Link href="/sapopedia/nombres">
+                    <Button variant="ghost">Nombres</Button>
+                  </Link>
+                  <Link href="/sapopedia/editor-citas">
+                    <Button variant="ghost">Editor Citas</Button>
+                  </Link>
                   <Link href="/blog">
                     <Button variant="ghost">Blog</Button>
                   </Link>
