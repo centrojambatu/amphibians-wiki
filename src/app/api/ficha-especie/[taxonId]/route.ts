@@ -37,6 +37,14 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
       "canto",
       "usos",
       "agradecimiento",
+      // Campos numéricos
+      "rango_altitudinal_min",
+      "rango_altitudinal_max",
+      "area_distribucion",
+      "pluviocidad_min",
+      "pluviocidad_max",
+      "temperatura_min",
+      "temperatura_max",
     ];
 
     // Filtrar solo los campos editables del body

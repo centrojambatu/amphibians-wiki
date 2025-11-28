@@ -1,5 +1,6 @@
 "use client";
 
+import {useMemo} from "react";
 import {Camera, MapPin, Volume2} from "lucide-react";
 
 import {processHTMLLinks, processCitationReferences} from "@/lib/process-html-links";
@@ -72,6 +73,23 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
     );
   }
 
+  // Memoizar las publicaciones para evitar recálculos
+  const publicaciones = useMemo(
+    () => fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones || [],
+    [fichaEspecie.publicacionesOrdenadas, fichaEspecie.publicaciones],
+  );
+
+  // Función helper para procesar HTML de forma consistente
+  const procesarHTML = useMemo(
+    () => (texto: string | null | undefined) => {
+      if (!texto) return "";
+      const textoConCitas = processCitationReferences(texto, publicaciones);
+
+      return processHTMLLinks(textoConCitas);
+    },
+    [publicaciones],
+  );
+
   // Log solo en desarrollo
   if (process.env.NODE_ENV === "development") {
     console.log("✅ CardSpeciesContent recibió fichaEspecie:", {
@@ -117,12 +135,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 {fichaEspecie.descubridor ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: processHTMLLinks(
-                        processCitationReferences(
-                          fichaEspecie.descubridor,
-                          fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                        ),
-                      ),
+                      __html: procesarHTML(fichaEspecie.descubridor),
                     }}
                     className="text-muted-foreground text-sm italic"
                   />
@@ -140,12 +153,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 {fichaEspecie.etimologia ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: processHTMLLinks(
-                        processCitationReferences(
-                          fichaEspecie.etimologia,
-                          fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                        ),
-                      ),
+                      __html: procesarHTML(fichaEspecie.etimologia),
                     }}
                     className="text-muted-foreground text-sm"
                   />
@@ -165,12 +173,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   <div className="mt-4">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: processHTMLLinks(
-                          processCitationReferences(
-                            fichaEspecie.taxonomia,
-                            fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                          ),
-                        ),
+                        __html: procesarHTML(fichaEspecie.taxonomia),
                       }}
                       className="text-muted-foreground text-sm"
                     />
@@ -200,12 +203,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                 {fichaEspecie.identificacion ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: processHTMLLinks(
-                        processCitationReferences(
-                          fichaEspecie.identificacion,
-                          fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                        ),
-                      ),
+                      __html: procesarHTML(fichaEspecie.identificacion),
                     }}
                     className="text-muted-foreground mt-4 text-sm"
                   />
@@ -242,12 +240,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.habitat_biologia ? (
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: processHTMLLinks(
-                          processCitationReferences(
-                            fichaEspecie.habitat_biologia,
-                            fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                          ),
-                        ),
+                        __html: procesarHTML(fichaEspecie.habitat_biologia),
                       }}
                       className="text-muted-foreground text-sm"
                     />
@@ -258,12 +251,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.informacion_adicional && (
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: processHTMLLinks(
-                          processCitationReferences(
-                            fichaEspecie.informacion_adicional,
-                            fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                          ),
-                        ),
+                        __html: procesarHTML(fichaEspecie.informacion_adicional),
                       }}
                       className="text-muted-foreground text-sm"
                     />
@@ -284,12 +272,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                       <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: processHTMLLinks(
-                            processCitationReferences(
-                              fichaEspecie.distribucion_global,
-                              fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                            ),
-                          ),
+                          __html: procesarHTML(fichaEspecie.distribucion_global),
                         }}
                         className="text-muted-foreground text-sm"
                       />
@@ -440,12 +423,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {fichaEspecie.comentario_estatus_poblacional ? (
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: processHTMLLinks(
-                          processCitationReferences(
-                            fichaEspecie.comentario_estatus_poblacional,
-                            fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones,
-                          ),
-                        ),
+                        __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
                       }}
                       className="text-muted-foreground text-sm"
                     />

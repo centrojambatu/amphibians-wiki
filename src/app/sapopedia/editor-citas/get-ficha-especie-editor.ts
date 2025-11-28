@@ -55,7 +55,11 @@ export interface FichaEspecieEditor {
   rango_altitudinal_min: number | null;
   area_distribucion: number | null;
   pluviocidad: number | null;
+  pluviocidad_min: number | null;
+  pluviocidad_max: number | null;
   temperatura: number | null;
+  temperatura_min: number | null;
+  temperatura_max: number | null;
 }
 
 // Función para obtener la ficha de especie por taxon_id
