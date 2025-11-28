@@ -466,9 +466,9 @@ export default function EditorCitas({
   };
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-gray-50">
       {/* Header */}
-      <div className="border-b bg-white px-6 py-4">
+      <div className="flex-shrink-0 border-b bg-white px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
           <div className="flex items-center gap-2">
@@ -507,9 +507,9 @@ export default function EditorCitas({
       {/* Main Content - Two Panels */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel */}
-        <div className="flex w-1/2 flex-col border-r bg-white">
+        <div className="flex w-1/2 flex-col overflow-hidden border-r bg-white">
           {/* Especie Selector con Buscador */}
-          <div className="space-y-3 border-b p-4">
+          <div className="flex-shrink-0 space-y-3 border-b p-4">
             <div>
               <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
               <EditorCitasSearch />
@@ -569,7 +569,7 @@ export default function EditorCitas({
                 };
 
                 return (
-                  <div className="h-full space-y-4 overflow-y-auto">
+                  <div className="flex h-full flex-col space-y-4">
                     <div className="text-sm font-medium text-gray-700">{campo.label}</div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -636,7 +636,7 @@ export default function EditorCitas({
                 const valor = valoresNumericos[campoSeleccionado]?.valor ?? null;
 
                 return (
-                  <div className="h-full overflow-y-auto">
+                  <div className="flex h-full flex-col">
                     <label
                       className="mb-2 block text-sm font-medium text-gray-700"
                       htmlFor={`${campo.key}-valor`}
@@ -672,11 +672,11 @@ export default function EditorCitas({
                 const seleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
 
                 return (
-                  <div className="h-full overflow-y-auto">
+                  <div className="flex h-full flex-col overflow-hidden">
                     <div className="mb-2 block text-sm font-medium text-gray-700">
                       Seleccionar Opciones
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex-1 space-y-2 overflow-y-auto">
                       {opciones.length === 0 ? (
                         <p className="text-sm text-gray-500">No hay opciones disponibles</p>
                       ) : (
@@ -715,7 +715,7 @@ export default function EditorCitas({
               }
 
               return (
-                <>
+                <div className="flex h-full flex-col">
                   <label
                     className="mb-2 block text-sm font-medium text-gray-700"
                     htmlFor="texto-editor"
@@ -723,22 +723,22 @@ export default function EditorCitas({
                     Editor de Texto
                   </label>
                   <Textarea
-                    className="h-full min-h-[400px] resize-none font-mono text-sm"
+                    className="flex-1 resize-none font-mono text-sm"
                     id="texto-editor"
                     placeholder="Escribe el texto aquí. Usa el botón 'Insertar' para añadir citas con {{id_publicacion}}."
                     value={textoEditor}
                     onChange={(e) => setTextoEditor(e.target.value)}
                   />
-                </>
+                </div>
               );
             })()}
           </div>
         </div>
 
         {/* Right Panel */}
-        <div className="flex w-1/2 flex-col bg-white">
+        <div className="flex w-1/2 flex-col overflow-hidden bg-white">
           {/* Campo Selector */}
-          <div className="border-b p-4">
+          <div className="flex-shrink-0 border-b p-4">
             <label
               className="mb-2 block text-sm font-medium text-gray-700"
               htmlFor="campo-selector"
@@ -763,21 +763,25 @@ export default function EditorCitas({
           </div>
 
           {/* Referencias Disponibles */}
-          <div className="flex-1 overflow-y-auto border-b p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
-              <Button className="flex items-center gap-1" size="sm" variant="outline">
-                <Plus className="h-4 w-4" />
-                Nueva
-              </Button>
+          <div className="flex flex-1 flex-col overflow-hidden border-b">
+            <div className="flex-shrink-0 border-b bg-white p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
+                <Button className="flex items-center gap-1" size="sm" variant="outline">
+                  <Plus className="h-4 w-4" />
+                  Nueva
+                </Button>
+              </div>
             </div>
 
             {publicaciones.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                No hay referencias disponibles para esta especie.
-              </p>
+              <div className="flex flex-1 items-center justify-center p-4">
+                <p className="text-sm text-gray-500">
+                  No hay referencias disponibles para esta especie.
+                </p>
+              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="flex-1 space-y-2 overflow-y-auto p-4 pb-6">
                 {publicaciones.map((pub, index) => {
                   const numero = index + 1;
 
@@ -823,15 +827,15 @@ export default function EditorCitas({
           </div>
 
           {/* Vista Previa */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex flex-1 flex-col overflow-hidden p-4">
             <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
             {mostrarVistaPrevia ? (
-              <div className="rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
+              <div className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
                 {vistaPrevia ||
                   "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
               </div>
             ) : (
-              <div className="flex h-full items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
+              <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
                 Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas formateadas
               </div>
             )}
@@ -840,30 +844,44 @@ export default function EditorCitas({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t bg-white px-6 py-4">
+      <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-white px-6 py-4 shadow-lg">
         <div className="flex items-center gap-4">
           {saveMessage && (
             <span
-              className={`text-sm ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
+              className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
             >
               {saveMessage}
             </span>
           )}
-          <Button className="flex items-center gap-2" disabled={isSaving} onClick={handleSave}>
-            <Save className="h-4 w-4" />
-            Guardar
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            className="flex items-center gap-2"
+            variant="outline"
+            onClick={() => {
+              generarVistaPrevia();
+            }}
+          >
+            <Eye className="h-4 w-4" />
+            Ver Vista Previa
+          </Button>
+          <Button
+            className="!bg-blue-600 !text-white hover:!bg-blue-700 disabled:!opacity-50"
+            disabled={isSaving}
+            size="lg"
+            style={{
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+            }}
+            type="button"
+            onClick={() => {
+              void handleSave();
+            }}
+          >
+            <Save className="h-5 w-5" />
+            {isSaving ? "Guardando..." : "Guardar"}
           </Button>
         </div>
-        <Button
-          className="flex items-center gap-2"
-          variant="outline"
-          onClick={() => {
-            generarVistaPrevia();
-          }}
-        >
-          <Eye className="h-4 w-4" />
-          Ver Vista Previa
-        </Button>
       </div>
     </div>
   );

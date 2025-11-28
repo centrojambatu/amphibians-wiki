@@ -20,7 +20,12 @@ export async function getCatalogoAweOpciones(
     .order("nombre", {ascending: true});
 
   if (error) {
-    console.error(`Error al obtener catálogo AWE tipo ${tipoCatalogoId}:`, error);
+    console.error(`Error al obtener catálogo AWE tipo ${tipoCatalogoId}:`, {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
     return [];
   }
 
