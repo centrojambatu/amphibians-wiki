@@ -47,7 +47,7 @@ interface FiltersPanelProps {
 }
 
 interface SearchResult {
-  id: number;
+  id: number | string;
   name: string;
   type: "order" | "family" | "genus" | "species";
   path: string;
@@ -79,18 +79,23 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
   const searchData = (query: string): SearchResult[] => {
     if (!query || query.length < 2) return [];
 
-    const results: SearchResult[] = [];
     const lowerQuery = query.toLowerCase();
     const seenOrders = new Set<string>();
     const seenFamilies = new Set<string>();
     const seenGenera = new Set<string>();
+
+    // Separar resultados por tipo para priorizar niveles superiores
+    const orderResults: SearchResult[] = [];
+    const familyResults: SearchResult[] = [];
+    const genusResults: SearchResult[] = [];
+    const speciesResults: SearchResult[] = [];
 
     for (const especie of especies) {
       // Buscar en órdenes
       if (especie.orden && !seenOrders.has(especie.orden)) {
         if (especie.orden.toLowerCase().includes(lowerQuery)) {
           seenOrders.add(especie.orden);
-          results.push({
+          orderResults.push({
             id: 0,
             name: especie.orden,
             type: "order",
@@ -103,7 +108,7 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
       if (especie.familia && !seenFamilies.has(especie.familia)) {
         if (especie.familia.toLowerCase().includes(lowerQuery)) {
           seenFamilies.add(especie.familia);
-          results.push({
+          familyResults.push({
             id: 0,
             name: especie.familia,
             type: "family",
@@ -116,7 +121,7 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
       if (especie.genero && !seenGenera.has(especie.genero)) {
         if (especie.genero.toLowerCase().includes(lowerQuery)) {
           seenGenera.add(especie.genero);
-          results.push({
+          genusResults.push({
             id: 0,
             name: especie.genero,
             type: "genus",
@@ -130,17 +135,40 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
         especie.nombre_cientifico.toLowerCase().includes(lowerQuery) ||
         especie.nombre_comun?.toLowerCase().includes(lowerQuery)
       ) {
-        results.push({
-          id: especie.id_taxon,
+        // Usar el mismo formato que el acordeón: reemplazar espacios por guiones
+        const path = `/sapopedia/species/${especie.nombre_cientifico.replaceAll(" ", "-")}`;
+
+        speciesResults.push({
+          id: especie.id_ficha_especie || especie.nombre_cientifico,
           name: especie.nombre_cientifico,
           type: "species",
-          path: `/sapopedia/species/${especie.id_taxon}`,
+          path,
           commonName: especie.nombre_comun,
         });
       }
     }
 
-    return results.slice(0, 10);
+    // Combinar resultados priorizando niveles superiores
+    // Máximo 2 órdenes, 3 familias, 3 géneros, y el resto especies (hasta 10 total)
+    const maxOrders = 2;
+    const maxFamilies = 3;
+    const maxGenera = 3;
+    const maxTotal = 10;
+
+    const selectedOrders = orderResults.slice(0, maxOrders);
+    const selectedFamilies = familyResults.slice(0, maxFamilies);
+    const selectedGenera = genusResults.slice(0, maxGenera);
+    const usedSlots = selectedOrders.length + selectedFamilies.length + selectedGenera.length;
+    const remainingSlots = Math.max(0, maxTotal - usedSlots);
+
+    const combinedResults: SearchResult[] = [
+      ...selectedOrders,
+      ...selectedFamilies,
+      ...selectedGenera,
+      ...speciesResults.slice(0, remainingSlots),
+    ];
+
+    return combinedResults;
   };
 
   const searchResults = searchData(searchQuery);
@@ -299,7 +327,7 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <CommandGroup>
                     {searchResults.map((result) => (
                       <CommandItem
-                        key={`${result.type}-${result.id}-${result.name}`}
+                        key={`${result.type}-${String(result.id)}-${result.name}`}
                         className="cursor-pointer"
                         onSelect={() => handleSelectResult(result.path)}
                       >
@@ -463,7 +491,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Área de distribución</span>
-                {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
+                {(filters.areaDistribucion.min !== 1 ||
+                  filters.areaDistribucion.max !== 100000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
                     {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
                   </span>
@@ -514,7 +543,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Regiones biogeográficas</span>
                   {filters.regionesBiogeograficas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.regionesBiogeograficas, "regionesBiogeograficas").join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.regionesBiogeograficas,
+                        "regionesBiogeograficas",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
@@ -533,7 +565,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Reservas de la biosfera</span>
                   {filters.reservasBiosfera.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(", ")}
+                      {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(
+                        ", ",
+                      )}
                     </span>
                   )}
                 </div>
@@ -552,7 +586,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Bosques protegidos</span>
                   {filters.bosquesProtegidos.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(", ")}
+                      {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(
+                        ", ",
+                      )}
                     </span>
                   )}
                 </div>
@@ -571,7 +607,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Áreas protegidas del Estado</span>
                   {filters.areasProtegidasEstado.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.areasProtegidasEstado, "areasProtegidasEstado").join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.areasProtegidasEstado,
+                        "areasProtegidasEstado",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
@@ -590,7 +629,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Áreas protegidas privadas</span>
                   {filters.areasProtegidasPrivadas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas").join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.areasProtegidasPrivadas,
+                        "areasProtegidasPrivadas",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>

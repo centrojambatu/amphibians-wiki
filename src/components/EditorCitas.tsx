@@ -11,6 +11,8 @@ import {FichaEspecieEditor} from "@/app/sapopedia/editor-citas/get-ficha-especie
 import {Publicacion} from "@/app/sapopedia/editor-citas/get-publicaciones-taxon";
 import {EspecieNavegacion, toSlug} from "@/app/sapopedia/editor-citas/get-especies-navegacion";
 
+import EditorCitasSearch from "./EditorCitasSearch";
+
 interface EditorCitasProps {
   readonly fichaEspecie: FichaEspecieEditor;
   readonly publicaciones: Publicacion[];
@@ -67,51 +69,27 @@ export default function EditorCitas({
 
   // Actualizar el texto del editor cuando cambia el campo seleccionado
   useEffect(() => {
-    const valor = fichaEspecie[campoSeleccionado as keyof FichaEspecieEditor] as string || "";
+    const valor = (fichaEspecie[campoSeleccionado as keyof FichaEspecieEditor] as string) || "";
+
     setTextoEditor(valor);
     setVistaPrevia("");
     setMostrarVistaPrevia(false);
   }, [campoSeleccionado, fichaEspecie]);
 
-  // Generar vista previa reemplazando {{n}} con las citas
+  // Generar vista previa reemplazando {{id_publicacion}} con cita_corta
   const generarVistaPrevia = () => {
     let preview = textoEditor;
+    // Buscar patrones como {{123}} donde 123 es id_publicacion
     const citasEncontradas = textoEditor.match(/\{\{(\d+)\}\}/g) || [];
 
     citasEncontradas.forEach((match) => {
-      const numero = parseInt(match.replace(/\{\{|\}\}/g, ""), 10);
-      const publicacion = publicaciones[numero - 1];
+      const idPublicacion = Number.parseInt(match.replaceAll(/\{\{|\}\}/g, ""), 10);
+      // Buscar la publicación por id_publicacion
+      const publicacion = publicaciones.find((pub) => pub.id_publicacion === idPublicacion);
 
-      if (publicacion) {
-        // Extraer autor del título (primera palabra antes de la coma o paréntesis)
-        let autor = "";
-        if (publicacion.cita_corta) {
-          // Intentar extraer autor de cita_corta (formato: "Autor, Año")
-          const matchAutor = publicacion.cita_corta.match(/^([^,]+)/);
-          autor = matchAutor ? matchAutor[1].trim() : publicacion.titulo.split(" ")[0] || "";
-        } else {
-          autor = publicacion.titulo.split(" ")[0] || "";
-        }
-
-        // Obtener año
-        const año = publicacion.numero_publicacion_ano || new Date(publicacion.fecha).getFullYear();
-
-        // Formatear la cita completa
-        let citaFormateada = "";
-        if (publicacion.cita_corta) {
-          citaFormateada = publicacion.cita_corta;
-        } else if (publicacion.cita) {
-          citaFormateada = publicacion.cita;
-        } else {
-          // Construir cita básica desde los datos disponibles
-          const partes: string[] = [];
-          if (autor) partes.push(autor);
-          if (año) partes.push(año.toString());
-          citaFormateada = partes.join(", ");
-        }
-
-        // Reemplazar {{n}} con: Autor Autor, Año (como en la imagen)
-        preview = preview.replace(match, `${autor} ${citaFormateada}`);
+      if (publicacion?.cita_corta) {
+        // Reemplazar {{id_publicacion}} con cita_corta en la vista previa
+        preview = preview.replace(match, publicacion.cita_corta);
       }
     });
 
@@ -119,10 +97,10 @@ export default function EditorCitas({
     setMostrarVistaPrevia(true);
   };
 
-  // Insertar cita en el editor
-  const insertarCita = (numero: number) => {
-    const posicion = textoEditor.length;
-    const nuevaCita = `{{${numero}}}`;
+  // Insertar cita en el editor usando id_publicacion
+  const insertarCita = (idPublicacion: number) => {
+    const nuevaCita = `{{${String(idPublicacion)}}}`;
+
     setTextoEditor((prev) => prev + (prev ? " " : "") + nuevaCita);
   };
 
@@ -132,11 +110,21 @@ export default function EditorCitas({
     setSaveMessage(null);
 
     try {
+      // Guardar el texto tal cual, con {{id_publicacion}} ya insertado
+      const textoConCitas = textoEditor;
+
       // Actualizar el campo en la ficha
       const fichaActualizada = {
         ...fichaEspecie,
-        [campoSeleccionado]: textoEditor,
+        [campoSeleccionado]: textoConCitas,
       };
+
+      // Logs solo en desarrollo
+      if (process.env.NODE_ENV === "development") {
+        console.log("Guardando campo:", campoSeleccionado);
+        console.log("Valor original:", textoEditor);
+        console.log("Valor con citas convertidas:", textoConCitas);
+      }
 
       const response = await fetch(`/api/ficha-especie/${taxonId}`, {
         method: "PUT",
@@ -147,15 +135,25 @@ export default function EditorCitas({
       });
 
       if (!response.ok) {
-        throw new Error("Error al guardar");
+        const errorData = await response.json().catch(() => ({}));
+
+        console.error("Error al guardar:", errorData);
+        throw new Error(errorData.error || "Error al guardar");
       }
+
+      const data = await response.json();
+
+      console.log("Guardado exitoso:", data);
 
       setFichaEspecie(fichaActualizada);
       setSaveMessage("Guardado exitosamente");
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error("Error al guardar:", error);
-      setSaveMessage("Error al guardar. Por favor, intenta de nuevo.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al guardar. Por favor, intenta de nuevo.";
+
+      setSaveMessage(`Error: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -171,21 +169,27 @@ export default function EditorCitas({
           <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => anteriorEspecie && router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`)}
-              disabled={!anteriorEspecie}
               className="flex items-center gap-1"
+              disabled={!anteriorEspecie}
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                anteriorEspecie &&
+                router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`)
+              }
             >
               <ChevronLeft className="h-4 w-4" />
               Anterior
             </Button>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => siguienteEspecie && router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`)}
-              disabled={!siguienteEspecie}
               className="flex items-center gap-1"
+              disabled={!siguienteEspecie}
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                siguienteEspecie &&
+                router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`)
+              }
             >
               Siguiente
               <ChevronRight className="h-4 w-4" />
@@ -198,28 +202,33 @@ export default function EditorCitas({
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel */}
         <div className="flex w-1/2 flex-col border-r bg-white">
-          {/* Especie Selector */}
-          <div className="border-b p-4 space-y-3">
+          {/* Especie Selector con Buscador */}
+          <div className="space-y-3 border-b p-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">Especie</label>
-              <div className="relative">
+              <label className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</label>
+              <EditorCitasSearch />
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Especie Actual
+                </label>
                 <Input
+                  readOnly
+                  className="bg-gray-50 text-gray-600"
                   type="text"
                   value={nombreCientifico}
-                  readOnly
-                  className="pr-8"
                 />
-                <ChevronDown className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               </div>
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">Taxon ID</label>
-              <Input
-                type="text"
-                value={taxonId.toString()}
-                readOnly
-                className="bg-gray-50 text-gray-600"
-              />
+              <div className="flex-1">
+                <label className="mb-2 block text-sm font-medium text-gray-700">Taxon ID</label>
+                <Input
+                  readOnly
+                  className="bg-gray-50 text-gray-600"
+                  type="text"
+                  value={taxonId.toString()}
+                />
+              </div>
             </div>
           </div>
 
@@ -227,10 +236,10 @@ export default function EditorCitas({
           <div className="flex-1 overflow-hidden p-4">
             <label className="mb-2 block text-sm font-medium text-gray-700">Editor de Texto</label>
             <Textarea
+              className="h-full min-h-[400px] resize-none font-mono text-sm"
+              placeholder="Escribe el texto aquí. Usa el botón 'Insertar' para añadir citas con {{id_publicacion}}."
               value={textoEditor}
               onChange={(e) => setTextoEditor(e.target.value)}
-              className="h-full min-h-[400px] resize-none font-mono text-sm"
-              placeholder="Escribe el texto aquí. Usa {{1}}, {{2}}, etc. para insertar citas."
             />
           </div>
         </div>
@@ -242,9 +251,9 @@ export default function EditorCitas({
             <label className="mb-2 block text-sm font-medium text-gray-700">Campo</label>
             <div className="relative">
               <select
+                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
                 value={campoSeleccionado}
                 onChange={(e) => setCampoSeleccionado(e.target.value)}
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {CAMPOS_FICHA.map((campo) => (
                   <option key={campo.key} value={campo.key}>
@@ -252,7 +261,7 @@ export default function EditorCitas({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
@@ -260,32 +269,41 @@ export default function EditorCitas({
           <div className="flex-1 overflow-y-auto border-b p-4">
             <div className="mb-4 flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">Referencias Disponibles</label>
-              <Button size="sm" variant="outline" className="flex items-center gap-1">
+              <Button className="flex items-center gap-1" size="sm" variant="outline">
                 <Plus className="h-4 w-4" />
                 Nueva
               </Button>
             </div>
 
             {publicaciones.length === 0 ? (
-              <p className="text-sm text-gray-500">No hay referencias disponibles para esta especie.</p>
+              <p className="text-sm text-gray-500">
+                No hay referencias disponibles para esta especie.
+              </p>
             ) : (
               <div className="space-y-3">
                 {publicaciones.map((pub, index) => {
                   const numero = index + 1;
-                  
+
                   // Extraer autor del título o cita_corta
                   let autor = "";
+
                   if (pub.cita_corta) {
-                    const matchAutor = pub.cita_corta.match(/^([^,]+)/);
-                    autor = matchAutor ? matchAutor[1].trim() : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                    const matchAutor = /^([^,]+)/.exec(pub.cita_corta);
+
+                    autor = matchAutor
+                      ? matchAutor[1].trim()
+                      : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
                   } else {
                     autor = pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
                   }
-                  
+
                   const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
 
                   return (
-                    <div key={pub.id_publicacion} className="flex items-start justify-between gap-4 rounded border border-gray-200 bg-white p-4">
+                    <div
+                      key={pub.id_publicacion}
+                      className="flex items-start justify-between gap-4 rounded border border-gray-200 bg-white p-4"
+                    >
                       <div className="flex-1">
                         <div className="mb-1 text-sm font-semibold text-gray-900">
                           <span className="text-gray-500">[{numero}]</span> {autor} ({año})
@@ -293,10 +311,10 @@ export default function EditorCitas({
                         <div className="text-sm text-gray-700">{pub.titulo}</div>
                       </div>
                       <Button
+                        className="flex-shrink-0"
                         size="sm"
                         variant="default"
-                        onClick={() => insertarCita(numero)}
-                        className="flex-shrink-0"
+                        onClick={() => insertarCita(pub.id_publicacion)}
                       >
                         Insertar
                       </Button>
@@ -312,7 +330,8 @@ export default function EditorCitas({
             <label className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</label>
             {mostrarVistaPrevia ? (
               <div className="rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
-                {vistaPrevia || "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
+                {vistaPrevia ||
+                  "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
               </div>
             ) : (
               <div className="flex h-full items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
@@ -327,16 +346,18 @@ export default function EditorCitas({
       <div className="flex items-center justify-between border-t bg-white px-6 py-4">
         <div className="flex items-center gap-4">
           {saveMessage && (
-            <span className={`text-sm ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}>
+            <span
+              className={`text-sm ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
+            >
               {saveMessage}
             </span>
           )}
-          <Button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" disabled={isSaving} onClick={handleSave}>
             <Save className="h-4 w-4" />
             Guardar
           </Button>
         </div>
-        <Button onClick={generarVistaPrevia} variant="outline" className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" variant="outline" onClick={generarVistaPrevia}>
           <Eye className="h-4 w-4" />
           Ver Vista Previa
         </Button>

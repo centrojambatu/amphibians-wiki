@@ -2,6 +2,7 @@ import {createServiceClient} from "@/utils/supabase/server";
 
 export interface SpeciesListItem {
   id_taxon: number;
+  id_ficha_especie: number | null;
   nombre_cientifico: string;
   nombre_comun: string | null;
   descubridor: string | null;
@@ -77,8 +78,10 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     return [];
   }
 
-  // Obtener los catálogos que NO están en la vista (ecosistemas, reservas biosfera, bosques protegidos)
-  const taxonIds: number[] = especies.map((e: any) => e.especie_taxon_id as number);
+  // Obtener los taxon_ids de la vista (especie_taxon_id se usa con taxon_id para lo general a lo particular)
+  const taxonIds: number[] = especies
+    .map((e: any) => e.especie_taxon_id as number)
+    .filter((id): id is number => id != null);
 
   // IDs de tipos de catálogo que necesitamos obtener por separado
   const TIPO_LISTA_ROJA = 10;
@@ -128,7 +131,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     }
   >();
 
-  // Inicializar el mapa para cada especie
+  // Inicializar el mapa para cada taxon_id
   for (const taxonId of taxonIds) {
     catalogosExtraMap.set(taxonId, {
       ecosistemas: [],
@@ -202,7 +205,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     const hasOriental = distribucionAltitudinal.includes("oriental");
     const taxonId = especie.especie_taxon_id as number;
 
-    // Obtener catálogos extra (los que no están en la vista)
+    // Obtener catálogos extra (los que no están en la vista) usando taxon_id
     const catalogosExtra = catalogosExtraMap.get(taxonId) || {
       ecosistemas: [],
       reservas_biosfera: [],
@@ -215,8 +218,11 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     const areasProtegidasEstado = parseCatalogString(especie.awe_areas_protegidas_estado);
     const areasProtegidasPrivadas = parseCatalogString(especie.awe_areas_protegidas_privadas);
 
+    const fichaEspecieId = especie.especie_ficha_especie_id ?? null;
+
     return {
       id_taxon: taxonId,
+      id_ficha_especie: fichaEspecieId,
       nombre_cientifico: especie.nombre_cientifico,
       nombre_comun: especie.nombre_comun,
       descubridor: especie.especie_autor,

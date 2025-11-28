@@ -35,12 +35,14 @@ export default function EditorCitasSearch() {
     }
   };
 
-  const handleSelect = (taxonId: number) => {
-    router.push(`/sapopedia/editor-citas/${taxonId}`);
+  const handleSelect = (result: {id_taxon: number; taxon: string}) => {
+    // Convertir nombre científico a slug (reemplazar espacios por guiones)
+    const slug = result.taxon.replace(/ /g, "-");
+    router.push(`/sapopedia/editor-citas/${slug}`);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex gap-2">
         <Input
           type="text"
@@ -57,15 +59,15 @@ export default function EditorCitasSearch() {
 
       {results.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm text-gray-600">Resultados ({results.length}):</p>
-          <div className="max-h-60 space-y-1 overflow-y-auto">
+          <p className="text-sm font-medium text-gray-700">Resultados ({results.length}):</p>
+          <div className="max-h-60 space-y-1 overflow-y-auto rounded border border-gray-200 bg-white">
             {results.map((result) => (
               <button
                 key={result.id_taxon}
-                onClick={() => handleSelect(result.id_taxon)}
-                className="w-full rounded border border-gray-200 bg-white p-3 text-left hover:bg-gray-50"
+                onClick={() => handleSelect(result)}
+                className="w-full border-b border-gray-100 p-3 text-left transition-colors hover:bg-gray-50 last:border-b-0"
               >
-                <div className="font-medium">{result.taxon}</div>
+                <div className="font-medium text-gray-900">{result.taxon}</div>
                 <div className="text-xs text-gray-500">ID: {result.id_taxon}</div>
               </button>
             ))}

@@ -1,9 +1,5 @@
-import Link from "next/link";
 import {notFound} from "next/navigation";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
 import {CardSpecies} from "@/components/card-species";
 
 import getFichaEspecie from "./get-ficha-especie";
@@ -17,8 +13,13 @@ interface PageProps {
 export default async function SpeciesPage({params}: PageProps) {
   const {id} = await params;
 
-  // Sanitizar el id: decodificar URL y reemplazar guiones/guiones bajos por espacios
-  const sanitizedId = decodeURIComponent(id).replace(/[-_]/g, " ");
+  // Decodificar el id de la URL
+  const decodedId = decodeURIComponent(id);
+
+  // Si es un número (id_ficha_especie), usarlo directamente
+  // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
+  // Esto coincide con el formato usado en el acordeón: nombre_cientifico.replaceAll(" ", "-")
+  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 

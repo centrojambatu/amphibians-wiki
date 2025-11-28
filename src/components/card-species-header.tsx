@@ -49,21 +49,25 @@ export const CardSpeciesHeader = ({fichaEspecie}) => {
           </span>
 
           {/* Especie - GRANDE, destacado, en cursiva (no clicable) */}
-          <span className="text-foreground text-4xl font-bold italic">{`${fichaEspecie.taxones[0]?.taxonPadre?.taxon} ${fichaEspecie.taxones[0]?.taxon}`}</span>
+          <span className="text-foreground text-4xl font-bold italic">{`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`}</span>
 
           {/* Descriptor y año - MEDIANO */}
-          <span
-            dangerouslySetInnerHTML={{
-              __html: processHTMLLinks(fichaEspecie.taxones[0]?.autor_ano),
-            }}
-            className="autor-ano-links"
-          />
+          {fichaEspecie.taxones?.[0]?.autor_ano && (
+            <span
+              dangerouslySetInnerHTML={{
+                __html: processHTMLLinks(fichaEspecie.taxones[0].autor_ano),
+              }}
+              className="autor-ano-links"
+            />
+          )}
         </div>
 
         {/* Nombre común */}
-        <p className="text-foreground text-xl font-semibold">
-          {fichaEspecie.taxones[0].nombre_comun}
-        </p>
+        {fichaEspecie.taxones?.[0]?.nombre_comun && (
+          <p className="text-foreground text-xl font-semibold">
+            {fichaEspecie.taxones[0].nombre_comun}
+          </p>
+        )}
       </div>
     </CardHeader>
   );

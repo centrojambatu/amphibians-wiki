@@ -59,19 +59,40 @@ export interface FichaEspecieEditor {
 }
 
 // Función para obtener la ficha de especie por taxon_id
-export default async function getFichaEspecieEditor(taxonId: number): Promise<FichaEspecieEditor | null> {
+// Si se proporciona idFichaEspecie, se usa para validación adicional
+export default async function getFichaEspecieEditor(
+  taxonId: number,
+  idFichaEspecie?: number | null,
+): Promise<FichaEspecieEditor | null> {
   const supabaseClient = createServiceClient();
 
-  const {data, error} = await supabaseClient
-    .from("ficha_especie")
-    .select("*")
-    .eq("taxon_id", taxonId)
-    .single();
+  // Si se proporciona id_ficha_especie, usar ambos campos para asegurar que sea el registro correcto
+  let query = supabaseClient.from("ficha_especie").select("*").eq("taxon_id", taxonId);
+
+  if (idFichaEspecie) {
+    query = query.eq("id_ficha_especie", idFichaEspecie);
+  }
+
+  const {data, error} = await query.single();
 
   if (error) {
     console.error("Error al obtener ficha de especie:", error);
+    console.error("taxon_id:", taxonId, "id_ficha_especie:", idFichaEspecie);
 
     return null;
+  }
+
+  // Validar que el taxon_id coincida
+  if (data && data.taxon_id !== taxonId) {
+    console.error(
+      "⚠️ ADVERTENCIA: El taxon_id de ficha_especie no coincide con el esperado:",
+      "Esperado:",
+      taxonId,
+      "Obtenido:",
+      data.taxon_id,
+    );
+  } else if (data) {
+    console.log("✅ Validación exitosa: taxon_id coincide en ficha_especie");
   }
 
   return data;
