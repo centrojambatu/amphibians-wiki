@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from "react";
 import {useRouter} from "next/navigation";
-import {Save, Eye, Plus, ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
+import {Save, Eye, ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -466,421 +466,428 @@ export default function EditorCitas({
   };
 
   return (
-    <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-gray-50">
-      {/* Header */}
-      <div className="flex-shrink-0 border-b bg-white px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
-          <div className="flex items-center gap-2">
-            <Button
-              className="flex items-center gap-1"
-              disabled={!anteriorEspecie}
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                if (anteriorEspecie) {
-                  router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`);
-                }
-              }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-            <Button
-              className="flex items-center gap-1"
-              disabled={!siguienteEspecie}
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                if (siguienteEspecie) {
-                  router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`);
-                }
-              }}
-            >
-              Siguiente
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Two Panels */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel */}
-        <div className="flex w-1/2 flex-col overflow-hidden border-r bg-white">
-          {/* Especie Selector con Buscador */}
-          <div className="flex-shrink-0 space-y-3 border-b p-4">
-            <div>
-              <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
-              <EditorCitasSearch />
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                  htmlFor="especie-actual"
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto max-w-7xl px-4 py-4">
+        <div className="flex h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+          {/* Header */}
+          <div className="flex-shrink-0 border-b bg-white px-6 py-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  className="flex items-center gap-1"
+                  disabled={!anteriorEspecie}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (anteriorEspecie) {
+                      router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`);
+                    }
+                  }}
                 >
-                  Especie Actual
-                </label>
-                <div
-                  className="border-input flex h-9 items-center rounded-md border bg-gray-50 px-3 text-sm text-gray-600"
-                  id="especie-actual"
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  className="flex items-center gap-1"
+                  disabled={!siguienteEspecie}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (siguienteEspecie) {
+                      router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`);
+                    }
+                  }}
                 >
-                  {(() => {
-                    console.log("🔍 nombreCientifico recibido:", nombreCientifico);
-                    console.log("🔍 tipo:", typeof nombreCientifico);
-                    console.log("🔍 longitud:", nombreCientifico?.length);
-                    console.log("🔍 partes al dividir por espacio:", nombreCientifico?.split(" "));
-
-                    return (
-                      <span className="italic" style={{fontStyle: "italic"}}>
-                        {nombreCientifico}
-                      </span>
-                    );
-                  })()}
-                </div>
-              </div>
-              <div className="flex-1">
-                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="taxon-id">
-                  Taxon ID
-                </label>
-                <Input
-                  readOnly
-                  className="bg-gray-50 text-gray-600"
-                  id="taxon-id"
-                  type="text"
-                  value={taxonId.toString()}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Text Editor, Selector de Catálogo AWE o Campos Numéricos */}
-          <div className="flex-1 overflow-hidden p-4">
-            {(() => {
-              const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
-
-              if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
-                // Campos de rango (min y max)
-                const valores = valoresNumericos[campoSeleccionado] || {
-                  min: null,
-                  max: null,
-                  valor: null,
-                };
-
-                return (
-                  <div className="flex h-full flex-col space-y-4">
-                    <div className="text-sm font-medium text-gray-700">{campo.label}</div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          className="mb-2 block text-sm font-medium text-gray-700"
-                          htmlFor={`${campo.key}-min`}
-                        >
-                          Mínimo
-                        </label>
-                        <Input
-                          className="w-full"
-                          id={`${campo.key}-min`}
-                          placeholder="Mínimo"
-                          type="number"
-                          value={valores.min ?? ""}
-                          onChange={(e) => {
-                            const nuevoValor =
-                              e.target.value === "" ? null : Number.parseFloat(e.target.value);
-
-                            setValoresNumericos({
-                              ...valoresNumericos,
-                              [campoSeleccionado]: {
-                                ...valores,
-                                min: Number.isNaN(nuevoValor) ? null : nuevoValor,
-                              },
-                            });
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          className="mb-2 block text-sm font-medium text-gray-700"
-                          htmlFor={`${campo.key}-max`}
-                        >
-                          Máximo
-                        </label>
-                        <Input
-                          className="w-full"
-                          id={`${campo.key}-max`}
-                          placeholder="Máximo"
-                          type="number"
-                          value={valores.max ?? ""}
-                          onChange={(e) => {
-                            const nuevoValor =
-                              e.target.value === "" ? null : Number.parseFloat(e.target.value);
-
-                            setValoresNumericos({
-                              ...valoresNumericos,
-                              [campoSeleccionado]: {
-                                ...valores,
-                                max: Number.isNaN(nuevoValor) ? null : nuevoValor,
-                              },
-                            });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              if (campo?.tipo === "numero") {
-                // Campo numérico simple
-                const valor = valoresNumericos[campoSeleccionado]?.valor ?? null;
-
-                return (
-                  <div className="flex h-full flex-col">
-                    <label
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                      htmlFor={`${campo.key}-valor`}
-                    >
-                      {campo.label}
-                    </label>
-                    <Input
-                      className="w-full"
-                      id={`${campo.key}-valor`}
-                      placeholder="Valor"
-                      type="number"
-                      value={valor ?? ""}
-                      onChange={(e) => {
-                        const nuevoValor =
-                          e.target.value === "" ? null : Number.parseFloat(e.target.value);
-
-                        setValoresNumericos({
-                          ...valoresNumericos,
-                          [campoSeleccionado]: {
-                            min: null,
-                            max: null,
-                            valor: Number.isNaN(nuevoValor) ? null : nuevoValor,
-                          },
-                        });
-                      }}
-                    />
-                  </div>
-                );
-              }
-
-              if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
-                const opciones = catalogoAweOpciones[campo.tipoCatalogoId] || [];
-                const seleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
-
-                return (
-                  <div className="flex h-full flex-col overflow-hidden">
-                    <div className="mb-2 block text-sm font-medium text-gray-700">
-                      Seleccionar Opciones
-                    </div>
-                    <div className="flex-1 space-y-2 overflow-y-auto">
-                      {opciones.length === 0 ? (
-                        <p className="text-sm text-gray-500">No hay opciones disponibles</p>
-                      ) : (
-                        opciones.map((opcion) => (
-                          <label
-                            key={opcion.id_catalogo_awe}
-                            className="flex items-center gap-2 rounded border border-gray-200 bg-white p-3 hover:bg-gray-50"
-                          >
-                            <input
-                              checked={seleccionados.includes(opcion.id_catalogo_awe)}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                              type="checkbox"
-                              onChange={(e) => {
-                                const nuevosSeleccionados = e.target.checked
-                                  ? [...seleccionados, opcion.id_catalogo_awe]
-                                  : seleccionados.filter((id) => id !== opcion.id_catalogo_awe);
-
-                                setCatalogoAweSeleccionados({
-                                  ...catalogoAweSeleccionados,
-                                  [campoSeleccionado]: nuevosSeleccionados,
-                                });
-                              }}
-                            />
-                            <span className="text-sm text-gray-700">{opcion.nombre}</span>
-                            {opcion.sigla && (
-                              <span className="ml-auto text-xs text-gray-500">
-                                ({opcion.sigla})
-                              </span>
-                            )}
-                          </label>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="flex h-full flex-col">
-                  <label
-                    className="mb-2 block text-sm font-medium text-gray-700"
-                    htmlFor="texto-editor"
-                  >
-                    Editor de Texto
-                  </label>
-                  <Textarea
-                    className="flex-1 resize-none font-mono text-sm"
-                    id="texto-editor"
-                    placeholder="Escribe el texto aquí. Usa el botón 'Insertar' para añadir citas con {{id_publicacion}}."
-                    value={textoEditor}
-                    onChange={(e) => setTextoEditor(e.target.value)}
-                  />
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-
-        {/* Right Panel */}
-        <div className="flex w-1/2 flex-col overflow-hidden bg-white">
-          {/* Campo Selector */}
-          <div className="flex-shrink-0 border-b p-4">
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-              htmlFor="campo-selector"
-            >
-              Campo
-            </label>
-            <div className="relative">
-              <select
-                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
-                id="campo-selector"
-                value={campoSeleccionado}
-                onChange={(e) => setCampoSeleccionado(e.target.value)}
-              >
-                {CAMPOS_FICHA.map((campo) => (
-                  <option key={campo.key} value={campo.key}>
-                    {campo.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Referencias Disponibles */}
-          <div className="flex flex-1 flex-col overflow-hidden border-b">
-            <div className="flex-shrink-0 border-b bg-white p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
-                <Button className="flex items-center gap-1" size="sm" variant="outline">
-                  <Plus className="h-4 w-4" />
-                  Nueva
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+          </div>
 
-            {publicaciones.length === 0 ? (
-              <div className="flex flex-1 items-center justify-center p-4">
-                <p className="text-sm text-gray-500">
-                  No hay referencias disponibles para esta especie.
-                </p>
+          {/* Main Content - Two Panels */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Left Panel */}
+            <div className="flex w-1/2 flex-col overflow-hidden border-r bg-white">
+              {/* Especie Selector con Buscador */}
+              <div className="flex-shrink-0 space-y-3 border-b p-4">
+                <div>
+                  <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
+                  <EditorCitasSearch />
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                      htmlFor="especie-actual"
+                    >
+                      Especie Actual
+                    </label>
+                    <div
+                      className="border-input flex h-9 items-center rounded-md border bg-gray-50 px-3 text-sm text-gray-600"
+                      id="especie-actual"
+                    >
+                      {(() => {
+                        console.log("🔍 nombreCientifico recibido:", nombreCientifico);
+                        console.log("🔍 tipo:", typeof nombreCientifico);
+                        console.log("🔍 longitud:", nombreCientifico?.length);
+                        console.log(
+                          "🔍 partes al dividir por espacio:",
+                          nombreCientifico?.split(" "),
+                        );
+
+                        return (
+                          <span className="italic" style={{fontStyle: "italic"}}>
+                            {nombreCientifico}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                      htmlFor="taxon-id"
+                    >
+                      Taxon ID
+                    </label>
+                    <Input
+                      readOnly
+                      className="bg-gray-50 text-gray-600"
+                      id="taxon-id"
+                      type="text"
+                      value={taxonId.toString()}
+                    />
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="flex-1 space-y-2 overflow-y-auto p-4 pb-6">
-                {publicaciones.map((pub, index) => {
-                  const numero = index + 1;
 
-                  // Extraer autor del título o cita_corta
-                  let autor = "";
+              {/* Text Editor, Selector de Catálogo AWE o Campos Numéricos */}
+              <div className="flex-1 overflow-hidden p-4">
+                {(() => {
+                  const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-                  if (pub.cita_corta) {
-                    const matchAutor = /^([^,]+)/.exec(pub.cita_corta);
+                  if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
+                    // Campos de rango (min y max)
+                    const valores = valoresNumericos[campoSeleccionado] || {
+                      min: null,
+                      max: null,
+                      valor: null,
+                    };
 
-                    autor = matchAutor
-                      ? matchAutor[1].trim()
-                      : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
-                  } else {
-                    autor = pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                    return (
+                      <div className="flex h-full flex-col space-y-4">
+                        <div className="text-sm font-medium text-gray-700">{campo.label}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label
+                              className="mb-2 block text-sm font-medium text-gray-700"
+                              htmlFor={`${campo.key}-min`}
+                            >
+                              Mínimo
+                            </label>
+                            <Input
+                              className="w-full"
+                              id={`${campo.key}-min`}
+                              placeholder="Mínimo"
+                              type="number"
+                              value={valores.min ?? ""}
+                              onChange={(e) => {
+                                const nuevoValor =
+                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
+
+                                setValoresNumericos({
+                                  ...valoresNumericos,
+                                  [campoSeleccionado]: {
+                                    ...valores,
+                                    min: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                                  },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="mb-2 block text-sm font-medium text-gray-700"
+                              htmlFor={`${campo.key}-max`}
+                            >
+                              Máximo
+                            </label>
+                            <Input
+                              className="w-full"
+                              id={`${campo.key}-max`}
+                              placeholder="Máximo"
+                              type="number"
+                              value={valores.max ?? ""}
+                              onChange={(e) => {
+                                const nuevoValor =
+                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
+
+                                setValoresNumericos({
+                                  ...valoresNumericos,
+                                  [campoSeleccionado]: {
+                                    ...valores,
+                                    max: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                                  },
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
                   }
 
-                  const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
+                  if (campo?.tipo === "numero") {
+                    // Campo numérico simple
+                    const valor = valoresNumericos[campoSeleccionado]?.valor ?? null;
+
+                    return (
+                      <div className="flex h-full flex-col">
+                        <label
+                          className="mb-2 block text-sm font-medium text-gray-700"
+                          htmlFor={`${campo.key}-valor`}
+                        >
+                          {campo.label}
+                        </label>
+                        <Input
+                          className="w-full"
+                          id={`${campo.key}-valor`}
+                          placeholder="Valor"
+                          type="number"
+                          value={valor ?? ""}
+                          onChange={(e) => {
+                            const nuevoValor =
+                              e.target.value === "" ? null : Number.parseFloat(e.target.value);
+
+                            setValoresNumericos({
+                              ...valoresNumericos,
+                              [campoSeleccionado]: {
+                                min: null,
+                                max: null,
+                                valor: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                              },
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
+                  if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
+                    const opciones = catalogoAweOpciones[campo.tipoCatalogoId] || [];
+                    const seleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
+
+                    return (
+                      <div className="flex h-full flex-col overflow-hidden">
+                        <div className="mb-2 block text-sm font-medium text-gray-700">
+                          Seleccionar Opciones
+                        </div>
+                        <div className="flex-1 space-y-2 overflow-y-auto">
+                          {opciones.length === 0 ? (
+                            <p className="text-sm text-gray-500">No hay opciones disponibles</p>
+                          ) : (
+                            opciones.map((opcion) => (
+                              <label
+                                key={opcion.id_catalogo_awe}
+                                className="flex items-center gap-2 rounded border border-gray-200 bg-white p-3 hover:bg-gray-50"
+                              >
+                                <input
+                                  checked={seleccionados.includes(opcion.id_catalogo_awe)}
+                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  type="checkbox"
+                                  onChange={(e) => {
+                                    const nuevosSeleccionados = e.target.checked
+                                      ? [...seleccionados, opcion.id_catalogo_awe]
+                                      : seleccionados.filter((id) => id !== opcion.id_catalogo_awe);
+
+                                    setCatalogoAweSeleccionados({
+                                      ...catalogoAweSeleccionados,
+                                      [campoSeleccionado]: nuevosSeleccionados,
+                                    });
+                                  }}
+                                />
+                                <span className="text-sm text-gray-700">{opcion.nombre}</span>
+                                {opcion.sigla && (
+                                  <span className="ml-auto text-xs text-gray-500">
+                                    ({opcion.sigla})
+                                  </span>
+                                )}
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
 
                   return (
-                    <div
-                      key={pub.id_publicacion}
-                      className="flex items-start justify-between gap-2 rounded border border-gray-200 bg-white p-2"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-0.5 text-xs font-semibold text-gray-900">
-                          <span className="text-gray-500">[{numero}]</span> {autor} ({año})
-                        </div>
-                        <div className="line-clamp-2 text-xs text-gray-700">{pub.titulo}</div>
-                      </div>
-                      <Button
-                        className="flex-shrink-0"
-                        size="sm"
-                        variant="default"
-                        onClick={() => insertarCita(pub.id_publicacion)}
+                    <div className="flex h-full flex-col">
+                      <label
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                        htmlFor="texto-editor"
                       >
-                        Insertar
-                      </Button>
+                        Editor de Texto
+                      </label>
+                      <Textarea
+                        className="flex-1 resize-none font-mono text-sm"
+                        id="texto-editor"
+                        placeholder="Escribe el texto aquí. Usa el botón 'Insertar' para añadir citas con {{id_publicacion}}."
+                        value={textoEditor}
+                        onChange={(e) => setTextoEditor(e.target.value)}
+                      />
                     </div>
                   );
-                })}
+                })()}
               </div>
-            )}
+            </div>
+
+            {/* Right Panel */}
+            <div className="flex w-1/2 flex-col overflow-hidden bg-white">
+              {/* Campo Selector */}
+              <div className="flex-shrink-0 border-b p-4">
+                <label
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                  htmlFor="campo-selector"
+                >
+                  Campo
+                </label>
+                <div className="relative">
+                  <select
+                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                    id="campo-selector"
+                    value={campoSeleccionado}
+                    onChange={(e) => setCampoSeleccionado(e.target.value)}
+                  >
+                    {CAMPOS_FICHA.map((campo) => (
+                      <option key={campo.key} value={campo.key}>
+                        {campo.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Referencias Disponibles */}
+              <div className="flex flex-1 flex-col overflow-hidden border-b">
+                <div className="flex-shrink-0 border-b bg-white p-4">
+                  <div className="mb-4">
+                    <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
+                  </div>
+                </div>
+
+                {publicaciones.length === 0 ? (
+                  <div className="flex flex-1 items-center justify-center p-4">
+                    <p className="text-sm text-gray-500">
+                      No hay referencias disponibles para esta especie.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-2 overflow-y-auto p-4 pb-6">
+                    {publicaciones.map((pub, index) => {
+                      const numero = index + 1;
+
+                      // Extraer autor del título o cita_corta
+                      let autor = "";
+
+                      if (pub.cita_corta) {
+                        const matchAutor = /^([^,]+)/.exec(pub.cita_corta);
+
+                        autor = matchAutor
+                          ? matchAutor[1].trim()
+                          : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                      } else {
+                        autor = pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                      }
+
+                      const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
+
+                      return (
+                        <div
+                          key={pub.id_publicacion}
+                          className="flex items-start justify-between gap-2 rounded border border-gray-200 bg-white p-2"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-0.5 text-xs font-semibold text-gray-900">
+                              <span className="text-gray-500">[{numero}]</span> {autor} ({año})
+                            </div>
+                            <div className="line-clamp-2 text-xs text-gray-700">{pub.titulo}</div>
+                          </div>
+                          <Button
+                            className="flex-shrink-0"
+                            size="sm"
+                            variant="default"
+                            onClick={() => insertarCita(pub.id_publicacion)}
+                          >
+                            Insertar
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Vista Previa */}
+              <div className="flex flex-1 flex-col overflow-hidden p-4">
+                <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
+                {mostrarVistaPrevia ? (
+                  <div className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
+                    {vistaPrevia ||
+                      "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
+                  </div>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                    Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas
+                    formateadas
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Vista Previa */}
-          <div className="flex flex-1 flex-col overflow-hidden p-4">
-            <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
-            {mostrarVistaPrevia ? (
-              <div className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
-                {vistaPrevia ||
-                  "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
-              </div>
-            ) : (
-              <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
-                Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas formateadas
-              </div>
-            )}
+          {/* Footer */}
+          <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-white px-6 py-4 shadow-lg">
+            <div className="flex items-center gap-4">
+              {saveMessage && (
+                <span
+                  className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
+                >
+                  {saveMessage}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                className="flex items-center gap-2"
+                variant="outline"
+                onClick={() => {
+                  generarVistaPrevia();
+                }}
+              >
+                <Eye className="h-4 w-4" />
+                Ver Vista Previa
+              </Button>
+              <Button
+                className="!bg-blue-600 !text-white hover:!bg-blue-700 disabled:!opacity-50"
+                disabled={isSaving}
+                size="lg"
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "#ffffff",
+                }}
+                type="button"
+                onClick={() => {
+                  void handleSave();
+                }}
+              >
+                <Save className="h-5 w-5" />
+                {isSaving ? "Guardando..." : "Guardar"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-white px-6 py-4 shadow-lg">
-        <div className="flex items-center gap-4">
-          {saveMessage && (
-            <span
-              className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
-            >
-              {saveMessage}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            className="flex items-center gap-2"
-            variant="outline"
-            onClick={() => {
-              generarVistaPrevia();
-            }}
-          >
-            <Eye className="h-4 w-4" />
-            Ver Vista Previa
-          </Button>
-          <Button
-            className="!bg-blue-600 !text-white hover:!bg-blue-700 disabled:!opacity-50"
-            disabled={isSaving}
-            size="lg"
-            style={{
-              backgroundColor: "#2563eb",
-              color: "#ffffff",
-            }}
-            type="button"
-            onClick={() => {
-              void handleSave();
-            }}
-          >
-            <Save className="h-5 w-5" />
-            {isSaving ? "Guardando..." : "Guardar"}
-          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import {notFound} from "next/navigation";
 
 import EditorCitas from "@/components/EditorCitas";
+import EditorAuthWrapper from "@/components/EditorAuthWrapper";
 
 import getFichaEspecieEditor from "../get-ficha-especie-editor";
 import getPublicacionesTaxon from "../get-publicaciones-taxon";
@@ -95,15 +96,17 @@ export default async function EditorCitasPage({params}: PageProps) {
   }
 
   return (
-    <EditorCitas
-      anteriorEspecie={anteriorEspecie}
-      catalogoAweOpciones={catalogoAweOpciones}
-      fichaEspecie={fichaEspecie}
-      nombreCientifico={nombreCientificoCompleto}
-      publicaciones={publicaciones}
-      siguienteEspecie={siguienteEspecie}
-      taxonCatalogoAwe={taxonCatalogoAwe}
-      taxonId={taxonId}
-    />
+    <EditorAuthWrapper>
+      <EditorCitas
+        anteriorEspecie={anteriorEspecie}
+        catalogoAweOpciones={catalogoAweOpciones}
+        fichaEspecie={fichaEspecie}
+        nombreCientifico={nombreCientificoCompleto}
+        publicaciones={publicaciones}
+        siguienteEspecie={siguienteEspecie}
+        taxonCatalogoAwe={taxonCatalogoAwe}
+        taxonId={taxonId}
+      />
+    </EditorAuthWrapper>
   );
 }

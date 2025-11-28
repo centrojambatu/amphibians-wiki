@@ -21,11 +21,16 @@ export async function getCatalogoAweOpciones(
 
   if (error) {
     console.error(`Error al obtener catálogo AWE tipo ${tipoCatalogoId}:`, {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
+      message: error.message || "Sin mensaje",
+      details: error.details || "Sin detalles",
+      hint: error.hint || "Sin hint",
+      code: error.code || "Sin código",
+      error: error,
     });
+    // Si el error es porque no hay registros, retornar array vacío sin error
+    if (error.code === "PGRST116" || error.message?.includes("No rows")) {
+      return [];
+    }
     return [];
   }
 

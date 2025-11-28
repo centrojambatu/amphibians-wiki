@@ -1,5 +1,7 @@
 import {redirect} from "next/navigation";
 
+import EditorAuthWrapper from "@/components/EditorAuthWrapper";
+
 import getEspeciesNavegacion, {toSlug} from "./get-especies-navegacion";
 
 export default async function EditorCitasPage() {
