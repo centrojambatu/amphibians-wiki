@@ -51,8 +51,8 @@ export default async function Page({params}: {params: Promise<{id: string}>}) {
   return (
     <main>
       {/* <h1>Sapopedia</h1> */}
-      <h1>{taxons?.[0].nombre_comun}</h1>
-      <p>{taxons?.[0].taxon_id}</p>
+      {/* <h1>{taxons?.[0].nombre_comun}</h1> */}
+      <p>{taxons?.[0]?.taxon_id}</p>
     </main>
   );
 }

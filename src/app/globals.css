@@ -255,6 +255,23 @@ span[class~="autor-ano-links"] a[href]:hover {
   background-color: #9ca3af;
 }
 
+/* Estilos para enlaces procesados (procesados por processHTMLLinks) */
+.processed-link {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  transition: color 0.3s ease, text-decoration 0.3s ease !important;
+}
+
+.processed-link:hover,
+.processed-link:active {
+  color: #004d13 !important;
+  text-decoration: underline !important;
+}
+
 /* Estilos para Leaflet */
 .region-tooltip {
   background: rgba(255, 255, 255, 0.95) !important;

@@ -28,24 +28,46 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     }
 
     vistaData = data;
-    console.log("✅ Datos encontrados por id:", vistaData?.nombre_cientifico);
+    console.log("✅ Datos encontrados por id:", (vistaData as any)?.nombre_cientifico);
   } else {
-    // Buscar por nombre científico (búsqueda exacta primero)
+    // Buscar por nombre científico (búsqueda exacta primero, luego flexible)
     console.log("📝 Buscando por nombre científico:", idFichaEspecie);
-    const {data, error} = await supabaseClient
+
+    // Normalizar el nombre científico: trim y normalizar espacios
+    const nombreNormalizado = idFichaEspecie.trim().replaceAll(/\s+/g, " ");
+
+    // Primero intentar búsqueda exacta
+    let {data, error} = await supabaseClient
       .from("vw_ficha_especie_completa" as any)
       .select("*")
-      .eq("nombre_cientifico", idFichaEspecie)
+      .eq("nombre_cientifico", nombreNormalizado)
       .single();
 
+    // Si no se encuentra, intentar búsqueda case-insensitive
     if (error) {
-      console.error("❌ Error al obtener datos de la vista por nombre:", error);
+      console.log("⚠️ Búsqueda exacta falló, intentando case-insensitive...");
+      const {data: dataCaseInsensitive, error: errorCaseInsensitive} = await supabaseClient
+        .from("vw_ficha_especie_completa" as any)
+        .select("*")
+        .ilike("nombre_cientifico", nombreNormalizado)
+        .single();
 
-      return null;
+      if (!errorCaseInsensitive && dataCaseInsensitive) {
+        data = dataCaseInsensitive;
+        error = null;
+        console.log("✅ Datos encontrados con búsqueda case-insensitive");
+      } else {
+        console.error(
+          "❌ Error al obtener datos de la vista por nombre:",
+          errorCaseInsensitive || error,
+        );
+
+        return null;
+      }
     }
 
     vistaData = data;
-    console.log("✅ Datos encontrados por nombre:", vistaData?.nombre_cientifico);
+    console.log("✅ Datos encontrados por nombre:", (vistaData as any)?.nombre_cientifico);
   }
 
   if (!vistaData) {
@@ -184,8 +206,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   );
   // Eliminar duplicados usando un Map basado en catalogo_awe_id (mantener solo el primero encontrado)
   const distributionsMap = new Map();
+
   distributionsSinDuplicados?.forEach((item) => {
     const key = item.catalogo_awe_id;
+
     if (!distributionsMap.has(key)) {
       distributionsMap.set(key, item);
     }
@@ -377,12 +401,15 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       // Eliminar duplicados basándose en catalogo_awe_id (combinación única de taxon_id + catalogo_awe_id)
       // Mantener solo el primer registro encontrado para cada catalogo_awe_id
       const uniqueMap = new Map();
+
       taxon_catalogo_awe_results.forEach((item) => {
         const key = item.catalogo_awe_id;
+
         if (!uniqueMap.has(key)) {
           uniqueMap.set(key, item);
         }
       });
+
       return Array.from(uniqueMap.values());
     })(),
     dataRegionBio: Array.isArray(dataRegionBio) ? dataRegionBio : [],

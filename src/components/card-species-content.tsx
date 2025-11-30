@@ -1,9 +1,11 @@
 "use client";
 
 import {useMemo} from "react";
+import Link from "next/link";
 import {Camera, MapPin, Volume2} from "lucide-react";
 
 import {processHTMLLinks, processCitationReferences} from "@/lib/process-html-links";
+import {getBibliographyUrl} from "@/lib/get-bibliography-url";
 
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
@@ -844,14 +846,31 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                         pub.publicacion?.cita_corta ||
                         "Cita no disponible";
 
+                      // Generar URL de la bibliografía
+                      const año =
+                        pub.publicacion?.numero_publicacion_ano ||
+                        (pub.publicacion?.fecha
+                          ? new Date(pub.publicacion.fecha).getFullYear()
+                          : null);
+                      const bibliographyUrl = getBibliographyUrl(
+                        pub.publicacion?.cita_corta || null,
+                        año,
+                        pub.publicacion?.titulo || null,
+                        pub.publicacion?.id_publicacion || 0,
+                      );
+
                       return (
-                        <div key={pub.id_taxon_publicacion} className="flex flex-col gap-2">
+                        <Link
+                          key={pub.id_taxon_publicacion}
+                          className="hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
+                          href={bibliographyUrl}
+                        >
                           {pub.publicacion?.titulo && (
                             <div
                               dangerouslySetInnerHTML={{
                                 __html: processHTMLLinks(pub.publicacion.titulo),
                               }}
-                              className="text-sm font-medium"
+                              className="hover:text-primary text-sm font-medium"
                             />
                           )}
                           <div
@@ -860,7 +879,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                             }}
                             className="text-muted-foreground text-xs"
                           />
-                        </div>
+                        </Link>
                       );
                     })}
                   </div>
