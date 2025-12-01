@@ -110,10 +110,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                     <Button variant="ghost">Nombres</Button>
                   </Link>
                   <Link href="/sapopedia/editor-citas">
-                    <Button variant="ghost">Editor Citas</Button>
-                  </Link>
-                  <Link href="/blog">
-                    <Button variant="ghost">Blog</Button>
+                    <Button variant="ghost">Editor Ficha Especie</Button>
                   </Link>
                   <ThemeSwitcher />
                 </nav>
