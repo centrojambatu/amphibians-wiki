@@ -67,10 +67,13 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
       return NextResponse.json({error: "taxon_id inválido"}, {status: 400});
     }
 
-    console.log("🔍 Validación antes de actualizar:", {
-      taxon_id: taxonIdNum,
-      campos_a_actualizar: Object.keys(datosActualizar),
-    });
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.log("🔍 Validación antes de actualizar:", {
+        taxon_id: taxonIdNum,
+        campos_a_actualizar: Object.keys(datosActualizar),
+      });
+    }
 
     // Verificar que existe un registro con ese taxon_id antes de actualizar
     const {data: registroExistente, error: errorVerificacion} = await supabaseClient
@@ -88,10 +91,13 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
       );
     }
 
-    console.log("✅ Registro encontrado:", {
-      id_ficha_especie: registroExistente.id_ficha_especie,
-      taxon_id: registroExistente.taxon_id,
-    });
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.log("✅ Registro encontrado:", {
+        id_ficha_especie: registroExistente.id_ficha_especie,
+        taxon_id: registroExistente.taxon_id,
+      });
+    }
 
     // Actualizar la ficha de especie usando taxon_id (hay un índice único en taxon_id)
     const {data, error} = await supabaseClient
@@ -117,7 +123,8 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
         "Obtenido:",
         data.taxon_id,
       );
-    } else {
+    } else if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
       console.log("✅ Ficha actualizada exitosamente:", {
         id_ficha_especie: data?.id_ficha_especie,
         taxon_id: data?.taxon_id,

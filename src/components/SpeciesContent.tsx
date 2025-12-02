@@ -2,13 +2,13 @@
 
 import SpeciesTechnicalSheet from "./SpeciesTechnicalSheet";
 
-import {FrogSpecies, FrogOrder, FrogFamily, FrogGenus} from "@/data/frogsData";
+// import {FrogSpecies, FrogOrder, FrogFamily, FrogGenus} from "@/data/frogsData";
 
 interface SpeciesContentProps {
-  readonly species: FrogSpecies;
-  readonly order: FrogOrder;
-  readonly family: FrogFamily;
-  readonly genus: FrogGenus;
+  readonly species: any; // FrogSpecies;
+  readonly order: any; // FrogOrder;
+  readonly family: any; // FrogFamily;
+  readonly genus: any; // FrogGenus;
 }
 
 export default function SpeciesContent({species, order, family, genus}: SpeciesContentProps) {

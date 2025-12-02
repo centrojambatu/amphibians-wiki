@@ -1915,6 +1915,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "manejo_ex_situ_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       mapa: {
@@ -2294,6 +2301,13 @@ export type Database = {
             referencedColumns: ["id_publicacion"]
           },
           {
+            foreignKeyName: "nombre_comun_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
             foreignKeyName: "nombre_comun_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
@@ -2652,6 +2666,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "personal_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       publicacion: {
@@ -2747,6 +2768,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "publicacion_ano_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       publicacion_autor: {
@@ -2790,6 +2818,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "publicacion_autor_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       publicacion_catalogo_awe: {
@@ -2823,6 +2858,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       publicacion_enlace: {
@@ -2853,6 +2895,13 @@ export type Database = {
             columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "publicacion_enlace_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
             referencedColumns: ["id_publicacion"]
           },
         ]
@@ -3844,6 +3893,13 @@ export type Database = {
             referencedColumns: ["id_publicacion"]
           },
           {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
@@ -4039,6 +4095,13 @@ export type Database = {
             columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "tipo_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
             referencedColumns: ["id_publicacion"]
           },
           {
@@ -5549,6 +5612,13 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
       }
       vw_publicacion_sec_despliegue: {
@@ -5572,7 +5642,41 @@ export type Database = {
             referencedRelation: "publicacion"
             referencedColumns: ["id_publicacion"]
           },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
         ]
+      }
+      vw_publicacion_slug: {
+        Row: {
+          cita_corta: string | null
+          fecha: string | null
+          id_publicacion: number | null
+          numero_publicacion_ano: number | null
+          slug: string | null
+          titulo: string | null
+        }
+        Insert: {
+          cita_corta?: string | null
+          fecha?: string | null
+          id_publicacion?: number | null
+          numero_publicacion_ano?: number | null
+          slug?: never
+          titulo?: string | null
+        }
+        Update: {
+          cita_corta?: string | null
+          fecha?: string | null
+          id_publicacion?: number | null
+          numero_publicacion_ano?: number | null
+          slug?: never
+          titulo?: string | null
+        }
+        Relationships: []
       }
       vw_publicacion_tipo: {
         Row: {
@@ -5593,6 +5697,13 @@ export type Database = {
             columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
             referencedColumns: ["id_publicacion"]
           },
         ]
@@ -6509,6 +6620,13 @@ export type Database = {
             referencedColumns: ["id_publicacion"]
           },
           {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
@@ -6813,6 +6931,15 @@ export type Database = {
       }
     }
     Functions: {
+      generate_publicacion_slug: {
+        Args: {
+          año_num: number
+          cita_corta_text: string
+          id_publicacion_num: number
+          titulo_text: string
+        }
+        Returns: string
+      }
       get_taxon_geopolitica_hierarchy: {
         Args: { _taxon_id: number }
         Returns: {

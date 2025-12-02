@@ -87,13 +87,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getSpeciesByOrder:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
@@ -127,13 +132,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getEndemicSpecies:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
@@ -166,13 +176,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getAllSpecies:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",

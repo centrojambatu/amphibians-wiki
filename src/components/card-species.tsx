@@ -2,7 +2,11 @@ import {Card} from "./ui/card";
 import {CardSpeciesHeader} from "./card-species-header";
 import {CardSpeciesContent} from "./card-species-content";
 
-export const CardSpecies = ({fichaEspecie}) => {
+interface CardSpeciesProps {
+  fichaEspecie: any;
+}
+
+export const CardSpecies = ({fichaEspecie}: CardSpeciesProps) => {
   return (
     <Card
       className="flex flex-col gap-0 overflow-hidden rounded-none border-0 p-0"

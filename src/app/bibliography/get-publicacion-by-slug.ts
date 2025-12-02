@@ -56,20 +56,20 @@ export default async function getPublicacionBySlug(
 
   // Búsqueda exacta
   const {data: exactMatch, error: exactError} = await supabaseClient
-    .from("vw_publicacion_slug" as any)
+    .from("vw_publicacion_slug")
     .select("id_publicacion")
     .eq("slug", slug)
     .single();
 
-  if (!exactError && exactMatch) {
-    pubSlugData = exactMatch;
+  if (!exactError && exactMatch && exactMatch.id_publicacion !== null) {
+    pubSlugData = {id_publicacion: exactMatch.id_publicacion};
     if (process.env.NODE_ENV === "development") {
       console.log(`✅ Encontrada publicación en vista por slug exacto: ${pubSlugData.id_publicacion}`);
     }
   } else {
     // Búsqueda flexible (ILIKE)
     const {data: flexibleMatch, error: flexibleError} = await supabaseClient
-      .from("vw_publicacion_slug" as any)
+      .from("vw_publicacion_slug")
       .select("id_publicacion, slug")
       .ilike("slug", `%${slug}%`)
       .limit(5);
@@ -97,8 +97,8 @@ export default async function getPublicacionBySlug(
         }
       }
 
-      if (bestScore > 0.7) {
-        pubSlugData = {id_publicacion: bestMatch.id_publicacion as number};
+      if (bestScore > 0.7 && bestMatch.id_publicacion !== null) {
+        pubSlugData = {id_publicacion: bestMatch.id_publicacion};
         if (process.env.NODE_ENV === "development") {
           console.log(`✅ Encontrada publicación en vista por slug flexible: ${pubSlugData.id_publicacion} (similitud: ${bestScore.toFixed(2)})`);
         }

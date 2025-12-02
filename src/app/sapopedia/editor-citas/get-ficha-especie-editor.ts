@@ -99,6 +99,6 @@ export default async function getFichaEspecieEditor(
     console.log("✅ Validación exitosa: taxon_id coincide en ficha_especie");
   }
 
-  return data;
+  return data as FichaEspecieEditor | null;
 }
 

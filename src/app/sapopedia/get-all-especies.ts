@@ -81,7 +81,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   // Obtener los taxon_ids de la vista (especie_taxon_id se usa con taxon_id para lo general a lo particular)
   const taxonIds: number[] = especies
     .map((e: any) => e.especie_taxon_id as number)
-    .filter((id): id is number => id != null);
+    .filter((id: number | null): id is number => id != null);
 
   // IDs de tipos de catálogo que necesitamos obtener por separado
   const TIPO_LISTA_ROJA = 10;

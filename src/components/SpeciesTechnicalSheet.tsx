@@ -440,7 +440,6 @@ export default function SpeciesTechnicalSheet({
                   >
                     <ClimaticFloorChart
                       altitudinalRange={altitudinalRange}
-                      climaticFloors={climaticFloors}
                     />
                   </div>
                 </section>

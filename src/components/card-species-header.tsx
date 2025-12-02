@@ -6,7 +6,11 @@ import {processHTMLLinks} from "@/lib/process-html-links";
 
 import {CardHeader} from "./ui/card";
 
-export const CardSpeciesHeader = ({fichaEspecie}) => {
+interface CardSpeciesHeaderProps {
+  fichaEspecie: any;
+}
+
+export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
   return (
     <CardHeader className="sticky top-0 z-30 text-center">
       <div className="space-y-4" style={{padding: "20px 30px 30px"}}>

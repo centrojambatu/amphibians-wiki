@@ -25,7 +25,7 @@ const groupGeoPoliticalData = (geoPolitica: any[]) => {
   let currentContinente: string | null = null;
   let currentPais: string | null = null;
 
-  sortedData.forEach((item) => {
+  sortedData.forEach((item: any) => {
     const {rank_nombre, nombre} = item;
     const normalizedRankNombre = rank_nombre?.toLowerCase();
 
@@ -61,7 +61,11 @@ const groupGeoPoliticalData = (geoPolitica: any[]) => {
   return grouped;
 };
 
-export const CardSpeciesContent = ({fichaEspecie}) => {
+interface CardSpeciesContentProps {
+  fichaEspecie: any;
+}
+
+export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
   // Validar que fichaEspecie existe
   if (!fichaEspecie) {
     console.error("❌ CardSpeciesContent: fichaEspecie es null o undefined");
@@ -455,7 +459,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {(() => {
                     const areasProtegidas =
                       fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria) =>
+                        (categoria: any) =>
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
                             "Áreas protegidas Privadas" ||
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
@@ -465,7 +469,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     // Eliminar duplicados basándose en catalogo_awe_id
                     const uniqueMap = new Map();
 
-                    areasProtegidas.forEach((categoria) => {
+                    areasProtegidas.forEach((categoria: any) => {
                       const key = categoria.catalogo_awe_id;
 
                       if (!uniqueMap.has(key)) {
@@ -492,7 +496,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Áreas protegidas del Estado
                                 </p>
                                 <div className="space-y-1">
-                                  {areasEstado.map((categoria) => (
+                                  {areasEstado.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -522,7 +526,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Áreas protegidas Privadas
                                 </p>
                                 <div className="space-y-1">
-                                  {areasPrivadas.map((categoria) => (
+                                  {areasPrivadas.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -546,7 +550,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {(() => {
                     const categoriasConservacion =
                       fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria) =>
+                        (categoria: any) =>
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
                             "Lista Roja Coloma" ||
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Lista Roja UICN" ||
@@ -556,7 +560,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     // Eliminar duplicados basándose en catalogo_awe_id
                     const uniqueMap = new Map();
 
-                    categoriasConservacion.forEach((categoria) => {
+                    categoriasConservacion.forEach((categoria: any) => {
                       const key = categoria.catalogo_awe_id;
 
                       if (!uniqueMap.has(key)) {
@@ -583,7 +587,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Lista Roja Coloma
                                 </p>
                                 <div className="space-y-1">
-                                  {listaRojaColoma.map((categoria) => (
+                                  {listaRojaColoma.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -613,7 +617,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Lista Roja UICN
                                 </p>
                                 <div className="space-y-1">
-                                  {listaRojaUICN.map((categoria) => (
+                                  {listaRojaUICN.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -640,7 +644,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                               <div className="ml-4">
                                 <p className="mb-2 text-xs font-semibold text-gray-600">CITES</p>
                                 <div className="space-y-1">
-                                  {cites.map((categoria) => (
+                                  {cites.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -664,7 +668,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                   {(() => {
                     const ecosistemasYAreas =
                       fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria) =>
+                        (categoria: any) =>
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas" ||
                           categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
                             "Reservas de la Biósfera" ||
@@ -674,7 +678,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                     // Eliminar duplicados basándose en catalogo_awe_id
                     const uniqueMap = new Map();
 
-                    ecosistemasYAreas.forEach((categoria) => {
+                    ecosistemasYAreas.forEach((categoria: any) => {
                       const key = categoria.catalogo_awe_id;
 
                       if (!uniqueMap.has(key)) {
@@ -702,7 +706,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Ecosistemas
                                 </p>
                                 <div className="space-y-1">
-                                  {ecosistemas.map((categoria) => (
+                                  {ecosistemas.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -732,7 +736,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Reservas de la Biósfera
                                 </p>
                                 <div className="space-y-1">
-                                  {reservasBiosfera.map((categoria) => (
+                                  {reservasBiosfera.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -762,7 +766,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
                                   Bosques Protegidos
                                 </p>
                                 <div className="space-y-1">
-                                  {bosquesProtegidos.map((categoria) => (
+                                  {bosquesProtegidos.map((categoria: any) => (
                                     <div
                                       key={categoria.id_taxon_catalogo_awe}
                                       className="flex items-start gap-2"
@@ -792,7 +796,7 @@ export const CardSpeciesContent = ({fichaEspecie}) => {
               <CardContent>
                 {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
-                    {fichaEspecie.publicaciones.map((pub) => {
+                    {fichaEspecie.publicaciones.map((pub: any) => {
                       // Construir cita_larga desde cita_corta y otros campos de la tabla publicacion
                       let citaLarga = pub.publicacion?.cita_larga || null;
 
