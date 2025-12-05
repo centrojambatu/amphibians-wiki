@@ -367,6 +367,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     taxon_id: taxonId,
     fotografia_ficha: fichaEspecie?.fotografia_ficha ?? null,
     descubridor: (vistaDataTyped?.especie_autor || fichaEspecie?.descubridor) ?? null,
+    colector: fichaEspecie?.colector ?? null,
     etimologia: fichaEspecie?.etimologia ?? null,
     taxonomia: fichaEspecie?.taxonomia ?? null,
     svl_macho: fichaEspecie?.svl_macho ?? null,

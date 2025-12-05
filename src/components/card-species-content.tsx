@@ -138,15 +138,15 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.descubridor ? (
+                {fichaEspecie.colector ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.descubridor),
+                      __html: procesarHTML(fichaEspecie.colector),
                     }}
                     className="text-muted-foreground text-sm italic"
                   />
                 ) : (
-                  <p className="text-muted-foreground text-sm italic">No disponible</p>
+                  <p className="text-muted-foreground text-sm italic">{fichaEspecie.colector}</p>
                 )}
               </CardContent>
             </Card>
