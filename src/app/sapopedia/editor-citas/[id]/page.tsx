@@ -1,13 +1,17 @@
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 
 import EditorCitas from "@/components/EditorCitas";
 import EditorAuthWrapper from "@/components/EditorAuthWrapper";
 
 import getFichaEspecieEditor from "../get-ficha-especie-editor";
 import getPublicacionesTaxon from "../get-publicaciones-taxon";
-import {getSiguienteEspecie, getAnteriorEspecie, fromSlug} from "../get-especies-navegacion";
-import {getAllCatalogoAweOpciones} from "../get-catalogo-awe-opciones";
-import {getAllTaxonCatalogoAwe} from "../get-taxon-catalogo-awe";
+import {
+  getSiguienteEspecie,
+  getAnteriorEspecie,
+  fromSlug,
+} from "../get-especies-navegacion";
+import { getAllCatalogoAweOpciones } from "../get-catalogo-awe-opciones";
+import { getAllTaxonCatalogoAwe } from "../get-taxon-catalogo-awe";
 
 interface PageProps {
   params: Promise<{
@@ -15,8 +19,8 @@ interface PageProps {
   }>;
 }
 
-export default async function EditorCitasPage({params}: PageProps) {
-  const {id} = await params;
+export default async function EditorCitasPage({ params }: PageProps) {
+  const { id } = await params;
 
   // El id viene como slug del nombre científico (con guiones)
   // Convertir de slug a nombre científico
@@ -24,15 +28,19 @@ export default async function EditorCitasPage({params}: PageProps) {
 
   // Buscar el taxon_id desde el nombre científico usando la vista vw_ficha_especie_completa
   // para asegurar consistencia con el visor de especies
-  const {createServiceClient} = await import("@/utils/supabase/server");
+  const { createServiceClient } = await import("@/utils/supabase/server");
   const supabaseClient = createServiceClient();
 
   // Primero intentar buscar en la vista vw_ficha_especie_completa por nombre científico
   // Buscar tanto por nombre completo como por solo especie (por si el slug solo tiene la especie)
-  const {data: vistaData, error: errorVista} = await (supabaseClient as any)
+  const { data: vistaData, error: errorVista } = await (supabaseClient as any)
     .from("vw_ficha_especie_completa")
-    .select("especie_taxon_id, id_ficha_especie, nombre_cientifico, genero, especie")
-    .or(`nombre_cientifico.eq.${nombreCientifico},especie.eq.${nombreCientifico}`)
+    .select(
+      "especie_taxon_id, id_ficha_especie, nombre_cientifico, genero, especie",
+    )
+    .or(
+      `nombre_cientifico.eq.${nombreCientifico},especie.eq.${nombreCientifico}`,
+    )
     .single();
 
   let taxonId: number | null = null;
@@ -54,7 +62,7 @@ export default async function EditorCitasPage({params}: PageProps) {
   } else {
     // Fallback: buscar en la tabla taxon directamente
     console.warn("⚠️ No se encontró en vista, buscando en taxon directamente");
-    const {data: taxonData} = await supabaseClient
+    const { data: taxonData } = await supabaseClient
       .from("taxon")
       .select("id_taxon, taxon")
       .eq("taxon", nombreCientifico)

@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface TaxonNombre {
   id_taxon: number;
@@ -23,14 +23,16 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
   const supabaseClient = createServiceClient();
 
   // Obtener todos los taxones con nombres comunes desde la vista
-  const {data: taxones, error} = await supabaseClient
+  const { data: taxones, error } = await supabaseClient
     .from("vw_nombres_comunes")
-    .select("id_taxon, orden, familia, genero, especie, nombre_comun_especie, nombre_comun_familia, nombre_comun_genero, nombre_cientifico")
+    .select(
+      "id_taxon, orden, familia, genero, especie, nombre_comun_especie, nombre_comun_familia, nombre_comun_genero, nombre_cientifico",
+    )
     .not("nombre_comun_especie", "is", null)
-    .order("orden", {ascending: true})
-    .order("familia", {ascending: true})
-    .order("genero", {ascending: true})
-    .order("especie", {ascending: true});
+    .order("orden", { ascending: true })
+    .order("familia", { ascending: true })
+    .order("genero", { ascending: true })
+    .order("especie", { ascending: true });
 
   if (error) {
     console.error("Error al obtener nombres comunes:", error);
@@ -44,7 +46,9 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
 
   // Convertir los datos de la vista a la estructura TaxonNombre
   const taxonesValidos: TaxonNombre[] = taxones
-    .filter((t: any) => t.orden && t.familia && t.genero && t.nombre_comun_especie)
+    .filter(
+      (t: any) => t.orden && t.familia && t.genero && t.nombre_comun_especie,
+    )
     .map((t: any) => ({
       id_taxon: t.id_taxon,
       taxon: t.especie || "",
@@ -57,13 +61,27 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
 
   // Agrupar por orden > familia > género
   // Usar Maps para almacenar también los nombres comunes de familia y género
-  const ordenesMap = new Map<string, Map<string, {nombre_comun: string | null; generos: Map<string, {nombre_comun: string | null; nombres: TaxonNombre[]}>}>>();
+  const ordenesMap = new Map<
+    string,
+    Map<
+      string,
+      {
+        nombre_comun: string | null;
+        generos: Map<
+          string,
+          { nombre_comun: string | null; nombres: TaxonNombre[] }
+        >;
+      }
+    >
+  >();
 
   taxonesValidos.forEach((taxon) => {
     if (!taxon.orden || !taxon.familia || !taxon.genero) return;
 
     // Obtener el nombre común de familia y género del taxón original
-    const taxonOriginal = taxones.find((t: any) => t.id_taxon === taxon.id_taxon) as any;
+    const taxonOriginal = taxones.find(
+      (t: any) => t.id_taxon === taxon.id_taxon,
+    ) as any;
     const nombreComunFamilia = taxonOriginal?.nombre_comun_familia || null;
     const nombreComunGenero = taxonOriginal?.nombre_comun_genero || null;
 
@@ -106,7 +124,9 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
           id: `genero-${generoName}`,
           name: generoName,
           nombre_comun: generoData.nombre_comun,
-          nombres: generoData.nombres.sort((a, b) => (a.nombre_comun || "").localeCompare(b.nombre_comun || "")),
+          nombres: generoData.nombres.sort((a, b) =>
+            (a.nombre_comun || "").localeCompare(b.nombre_comun || ""),
+          ),
         });
       });
 
@@ -129,4 +149,3 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
 
   return ordenes.sort((a, b) => a.name.localeCompare(b.name));
 }
-

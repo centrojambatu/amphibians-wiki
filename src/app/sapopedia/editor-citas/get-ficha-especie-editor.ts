@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface FichaEspecieEditor {
   id_ficha_especie: number;
@@ -71,13 +71,16 @@ export default async function getFichaEspecieEditor(
   const supabaseClient = createServiceClient();
 
   // Si se proporciona id_ficha_especie, usar ambos campos para asegurar que sea el registro correcto
-  let query = supabaseClient.from("ficha_especie").select("*").eq("taxon_id", taxonId);
+  let query = supabaseClient
+    .from("ficha_especie")
+    .select("*")
+    .eq("taxon_id", taxonId);
 
   if (idFichaEspecie) {
     query = query.eq("id_ficha_especie", idFichaEspecie);
   }
 
-  const {data, error} = await query.single();
+  const { data, error } = await query.single();
 
   if (error) {
     console.error("Error al obtener ficha de especie:", error);
@@ -101,4 +104,3 @@ export default async function getFichaEspecieEditor(
 
   return data as FichaEspecieEditor | null;
 }
-

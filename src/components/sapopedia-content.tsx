@@ -1,15 +1,15 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
 import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
-import FiltersPanel, {FiltersState} from "@/components/FiltersPanel";
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
-import {organizeTaxonomyData} from "@/lib/organize-taxonomy";
-import {SpeciesData} from "@/types/taxonomy";
+import FiltersPanel, { FiltersState } from "@/components/FiltersPanel";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import { FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
+import { organizeTaxonomyData } from "@/lib/organize-taxonomy";
+import { SpeciesData } from "@/types/taxonomy";
 
 interface SapopediaContentProps {
   readonly especies: SpeciesListItem[];
@@ -18,30 +18,33 @@ interface SapopediaContentProps {
 
 const TAB_STORAGE_KEY = "sapopedia-selected-tab";
 
-export function SapopediaContent({especies, filterCatalogs}: SapopediaContentProps) {
+export function SapopediaContent({
+  especies,
+  filterCatalogs,
+}: SapopediaContentProps) {
   const [filters, setFilters] = useState<FiltersState | null>(null);
-  
+
   // Cargar pestaña seleccionada desde localStorage
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     if (typeof globalThis.window === "undefined") return "accordion";
-    
+
     try {
       const saved = globalThis.window.localStorage.getItem(TAB_STORAGE_KEY);
-      
+
       if (saved && (saved === "accordion" || saved === "tree")) {
         return saved;
       }
     } catch {
       // Ignorar errores
     }
-    
+
     return "accordion";
   });
-  
+
   // Guardar pestaña cuando cambie
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
-    
+
     try {
       globalThis.window.localStorage.setItem(TAB_STORAGE_KEY, value);
     } catch {
@@ -50,13 +53,18 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
   };
 
   // Función para filtrar especies basado en los filtros seleccionados
-  const filterEspecies = (especiesList: SpeciesListItem[]): SpeciesListItem[] => {
+  const filterEspecies = (
+    especiesList: SpeciesListItem[],
+  ): SpeciesListItem[] => {
     if (!filters) return especiesList;
 
     return especiesList.filter((especie) => {
       // Filtro por Lista Roja
       if (filters.listaRoja.length > 0) {
-        if (!especie.lista_roja_iucn || !filters.listaRoja.includes(especie.lista_roja_iucn)) {
+        if (
+          !especie.lista_roja_iucn ||
+          !filters.listaRoja.includes(especie.lista_roja_iucn)
+        ) {
           return false;
         }
       }
@@ -75,7 +83,8 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
       // Filtro por rango altitudinal
       // Solo aplicar si el rango no es el valor por defecto (0-4800)
       const isDefaultRange =
-        filters.rangoAltitudinal.min === 0 && filters.rangoAltitudinal.max === 4800;
+        filters.rangoAltitudinal.min === 0 &&
+        filters.rangoAltitudinal.max === 4800;
 
       if (!isDefaultRange) {
         const speciesMinAlt = especie.rango_altitudinal_min || 0;
@@ -84,14 +93,17 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
         const filterMax = filters.rangoAltitudinal.max;
 
         // Verificar si hay solapamiento entre el rango de la especie y el rango del filtro
-        const hasOverlap = speciesMinAlt <= filterMax && speciesMaxAlt >= filterMin;
+        const hasOverlap =
+          speciesMinAlt <= filterMax && speciesMaxAlt >= filterMin;
 
         if (!hasOverlap) return false;
       }
 
       // Filtro por provincias
       if (filters.provincia.length > 0) {
-        const hasMatch = filters.provincia.some((p) => especie.catalogos.provincias.includes(p));
+        const hasMatch = filters.provincia.some((p) =>
+          especie.catalogos.provincias.includes(p),
+        );
 
         if (!hasMatch) return false;
       }
@@ -107,7 +119,9 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
 
       // Filtro por ecosistemas
       if (filters.ecosistemas.length > 0) {
-        const hasMatch = filters.ecosistemas.some((e) => especie.catalogos.ecosistemas.includes(e));
+        const hasMatch = filters.ecosistemas.some((e) =>
+          especie.catalogos.ecosistemas.includes(e),
+        );
 
         if (!hasMatch) return false;
       }
@@ -181,7 +195,11 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
 
       {/* Contenido principal */}
       <div className="min-w-0 flex-1">
-        <Tabs className="w-full" onValueChange={handleTabChange} value={selectedTab}>
+        <Tabs
+          className="w-full"
+          onValueChange={handleTabChange}
+          value={selectedTab}
+        >
           <TabsList className="mb-6 inline-flex h-12 w-auto gap-1 rounded-lg bg-gray-100 p-1">
             <TabsTrigger
               className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
@@ -201,7 +219,8 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
             {/* Contador de resultados */}
             {filters && (
               <p className="text-muted-foreground mb-4 text-sm">
-                Mostrando {especiesFiltradas.length} de {especies.length} especies
+                Mostrando {especiesFiltradas.length} de {especies.length}{" "}
+                especies
               </p>
             )}
             {/* Vista de accordion */}

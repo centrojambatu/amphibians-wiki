@@ -1,11 +1,13 @@
 import Link from "next/link";
-import {ExternalLink, BookOpen, Users, Link2, Calendar} from "lucide-react";
+import { ExternalLink, BookOpen, Users, Link2, Calendar } from "lucide-react";
 
-import getAllPublicaciones, {getAñosPublicaciones} from "./get-all-publicaciones";
-import {getBibliographyUrl} from "@/lib/get-bibliography-url";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
+import getAllPublicaciones, {
+  getAñosPublicaciones,
+} from "./get-all-publicaciones";
+import { getBibliographyUrl } from "@/lib/get-bibliography-url";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SearchParams {
   año?: string;
@@ -19,16 +21,27 @@ interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default async function BibliographyIndexPage({searchParams}: PageProps) {
+export default async function BibliographyIndexPage({
+  searchParams,
+}: PageProps) {
   const params = await searchParams;
 
   // Convertir searchParams a filtros
   const filtros = {
     año: params.año ? Number.parseInt(params.año, 10) : undefined,
     autor: params.autor,
-    categoria: params.categoria === "true" ? true : params.categoria === "false" ? false : undefined,
+    categoria:
+      params.categoria === "true"
+        ? true
+        : params.categoria === "false"
+          ? false
+          : undefined,
     publicacion_cj:
-      params.publicacion_cj === "true" ? true : params.publicacion_cj === "false" ? false : undefined,
+      params.publicacion_cj === "true"
+        ? true
+        : params.publicacion_cj === "false"
+          ? false
+          : undefined,
     search: params.search,
   };
 
@@ -42,7 +55,8 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Bibliografía</h1>
           <p className="text-muted-foreground">
-            Catálogo completo de publicaciones relacionadas con anfibios de Ecuador
+            Catálogo completo de publicaciones relacionadas con anfibios de
+            Ecuador
           </p>
         </div>
 
@@ -52,7 +66,10 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
             <CardTitle>Filtros de búsqueda</CardTitle>
           </CardHeader>
           <CardContent>
-            <form method="GET" className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <form
+              method="GET"
+              className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+            >
               <div>
                 <label className="text-sm font-medium mb-2 block">Buscar</label>
                 <Input
@@ -79,7 +96,9 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Categoría</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Categoría
+                </label>
                 <select
                   name="categoria"
                   defaultValue={params.categoria}
@@ -92,7 +111,9 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Publicación CJ</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Publicación CJ
+                </label>
                 <select
                   name="publicacion_cj"
                   defaultValue={params.publicacion_cj}
@@ -134,9 +155,17 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {new Set(publicaciones.flatMap((p) => p.autores.map((a) => a.id_autor))).size}
+                    {
+                      new Set(
+                        publicaciones.flatMap((p) =>
+                          p.autores.map((a) => a.id_autor),
+                        ),
+                      ).size
+                    }
                   </p>
-                  <p className="text-xs text-muted-foreground">Autores únicos</p>
+                  <p className="text-xs text-muted-foreground">
+                    Autores únicos
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -150,7 +179,9 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                   <p className="text-2xl font-bold">
                     {publicaciones.reduce((sum, p) => sum + p.num_enlaces, 0)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Enlaces externos</p>
+                  <p className="text-xs text-muted-foreground">
+                    Enlaces externos
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -162,7 +193,9 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-2xl font-bold">{años.length}</p>
-                  <p className="text-xs text-muted-foreground">Años diferentes</p>
+                  <p className="text-xs text-muted-foreground">
+                    Años diferentes
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -185,7 +218,10 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                 pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
 
               return (
-                <Card key={pub.id_publicacion} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={pub.id_publicacion}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="pt-6">
                     <div className="flex flex-col gap-4">
                       {/* Título y enlace */}
@@ -195,12 +231,18 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                           className="text-lg font-semibold hover:text-primary transition-colors"
                         >
                           {pub.titulo && (
-                            <span dangerouslySetInnerHTML={{__html: pub.titulo}} />
+                            <span
+                              dangerouslySetInnerHTML={{ __html: pub.titulo }}
+                            />
                           )}
                         </Link>
                         {pub.titulo_secundario && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            <span dangerouslySetInnerHTML={{__html: pub.titulo_secundario}} />
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: pub.titulo_secundario,
+                              }}
+                            />
                           </p>
                         )}
                       </div>
@@ -217,7 +259,10 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-medium">Autores:</span>
                           {pub.autores.map((autor, idx) => (
-                            <span key={autor.id_autor} className="text-sm text-muted-foreground">
+                            <span
+                              key={autor.id_autor}
+                              className="text-sm text-muted-foreground"
+                            >
                               {autor.nombres} {autor.apellidos}
                               {idx < pub.autores.length - 1 && ","}
                             </span>
@@ -258,7 +303,9 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                               <ExternalLink className="h-3 w-3" />
                               {enlace.texto_enlace || "Enlace externo"}
                               {enlace.exclusivo_cj && (
-                                <span className="text-xs text-muted-foreground">(CJ)</span>
+                                <span className="text-xs text-muted-foreground">
+                                  (CJ)
+                                </span>
                               )}
                             </a>
                           ))}
@@ -270,26 +317,33 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
                         {pub.num_taxones > 0 && (
                           <span>
                             <BookOpen className="inline h-3 w-3 mr-1" />
-                            {pub.num_taxones} {pub.num_taxones === 1 ? "taxón" : "taxones"}
+                            {pub.num_taxones}{" "}
+                            {pub.num_taxones === 1 ? "taxón" : "taxones"}
                           </span>
                         )}
                         {pub.num_autores > 0 && (
                           <span>
                             <Users className="inline h-3 w-3 mr-1" />
-                            {pub.num_autores} {pub.num_autores === 1 ? "autor" : "autores"}
+                            {pub.num_autores}{" "}
+                            {pub.num_autores === 1 ? "autor" : "autores"}
                           </span>
                         )}
                         {pub.num_enlaces > 0 && (
                           <span>
                             <Link2 className="inline h-3 w-3 mr-1" />
-                            {pub.num_enlaces} {pub.num_enlaces === 1 ? "enlace" : "enlaces"}
+                            {pub.num_enlaces}{" "}
+                            {pub.num_enlaces === 1 ? "enlace" : "enlaces"}
                           </span>
                         )}
                         {pub.publicacion_cj && (
-                          <span className="text-primary font-medium">Publicación CJ</span>
+                          <span className="text-primary font-medium">
+                            Publicación CJ
+                          </span>
                         )}
                         {pub.categoria && (
-                          <span className="text-primary font-medium">Científica</span>
+                          <span className="text-primary font-medium">
+                            Científica
+                          </span>
                         )}
                       </div>
                     </div>
@@ -303,4 +357,3 @@ export default async function BibliographyIndexPage({searchParams}: PageProps) {
     </div>
   );
 }
-

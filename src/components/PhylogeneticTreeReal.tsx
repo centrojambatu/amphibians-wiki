@@ -1,9 +1,16 @@
 "use client";
 
-import {useState, useCallback, useMemo, useRef, useEffect, type ReactNode} from "react";
-import {useRouter} from "next/navigation";
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
 
-import {OrderGroup} from "@/types/taxonomy";
+import { OrderGroup } from "@/types/taxonomy";
 
 interface PhylogeneticTreeRealProps {
   readonly orders: OrderGroup[];
@@ -29,7 +36,9 @@ const LEVEL_WIDTH = 140;
 const STORAGE_KEY = "phylo-tree-expanded-nodes";
 const STORAGE_SCROLL_KEY = "phylo-tree-scroll-position";
 
-export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps) {
+export default function PhylogeneticTreeReal({
+  orders,
+}: PhylogeneticTreeRealProps) {
   const router = useRouter();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +62,7 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
     return new Set(["root"]);
   });
 
-  const [dimensions, setDimensions] = useState({width: 1200, height: 400});
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 400 });
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -74,7 +83,10 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
 
       // Guardar en localStorage
       try {
-        globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+        globalThis.window.localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(Array.from(next)),
+        );
       } catch {
         // Ignorar errores de localStorage
       }
@@ -122,10 +134,13 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
   );
 
   // Calcular posiciones de los nodos
-  const {positionedTree, totalHeight} = useMemo(() => {
-    const yCounter = {value: 0};
+  const { positionedTree, totalHeight } = useMemo(() => {
+    const yCounter = { value: 0 };
 
-    const positionNode = (node: TreeNodeData, level: number): PositionedNode => {
+    const positionNode = (
+      node: TreeNodeData,
+      level: number,
+    ): PositionedNode => {
       const isExpanded = expandedNodes.has(node.id);
       const hasChildren = node.children && node.children.length > 0;
 
@@ -146,7 +161,9 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
       }
 
       // Posicionar hijos primero
-      const positionedChildren = node.children!.map((child) => positionNode(child, level + 1));
+      const positionedChildren = node.children!.map((child) =>
+        positionNode(child, level + 1),
+      );
 
       // El nodo padre se posiciona en el centro vertical de sus hijos
       const firstChildY = positionedChildren[0].y;
@@ -171,7 +188,7 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
 
     const positioned = positionNode(treeData, 0);
 
-    return {positionedTree: positioned, totalHeight: yCounter.value};
+    return { positionedTree: positioned, totalHeight: yCounter.value };
   }, [treeData, expandedNodes]);
 
   // Actualizar dimensiones
@@ -188,7 +205,8 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
   useEffect(() => {
     if (containerRef.current) {
       try {
-        const saved = globalThis.window.localStorage.getItem(STORAGE_SCROLL_KEY);
+        const saved =
+          globalThis.window.localStorage.getItem(STORAGE_SCROLL_KEY);
 
         if (saved) {
           const parsed = JSON.parse(saved) as {
@@ -232,7 +250,7 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
       }
     };
 
-    container.addEventListener("scroll", handleScroll, {passive: true});
+    container.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
@@ -240,7 +258,12 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
   }, []);
 
   // Generar curva bezier entre dos puntos
-  const generatePath = (x1: number, y1: number, x2: number, y2: number): string => {
+  const generatePath = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): string => {
     const midX = (x1 + x2) / 2;
 
     return `M ${String(x1)} ${String(y1)} C ${String(midX)} ${String(y1)}, ${String(midX)} ${String(y2)}, ${String(x2)} ${String(y2)}`;
@@ -303,7 +326,10 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
     const isItalic = node.type === "genus" || node.type === "species";
 
     const handleClick = () => {
-      if (hasChildren || (node.children === undefined && node.type !== "species")) {
+      if (
+        hasChildren ||
+        (node.children === undefined && node.type !== "species")
+      ) {
         handleToggle(node.id);
       } else if (node.href) {
         handleNavigate(node.href);
@@ -319,7 +345,7 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
       <g
         key={node.id}
         className="tree-node-group"
-        style={{cursor: "pointer"}}
+        style={{ cursor: "pointer" }}
         transform={`translate(${String(node.x)}, ${String(node.y)})`}
         onClick={handleClick}
       >
@@ -387,7 +413,10 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
 
     // Guardar en localStorage
     try {
-      globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newExpanded)));
+      globalThis.window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(Array.from(newExpanded)),
+      );
     } catch {
       // Ignorar errores de localStorage
     }
@@ -400,7 +429,10 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
 
     // Guardar en localStorage
     try {
-      globalThis.window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newExpanded)));
+      globalThis.window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(Array.from(newExpanded)),
+      );
     } catch {
       // Ignorar errores de localStorage
     }
@@ -410,9 +442,12 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
     <div className="phylo-tree">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="mb-1 text-lg font-medium text-gray-700">Árbol Filogenético</h2>
+        <h2 className="mb-1 text-lg font-medium text-gray-700">
+          Árbol Filogenético
+        </h2>
         <p className="text-xs text-gray-400">
-          Clic en los nodos para expandir/colapsar. Clic en especies para ver detalles.
+          Clic en los nodos para expandir/colapsar. Clic en especies para ver
+          detalles.
         </p>
       </div>
 
@@ -447,7 +482,8 @@ export default function PhylogeneticTreeReal({orders}: PhylogeneticTreeRealProps
             ref={svgRef}
             height={dimensions.height}
             style={{
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              fontFamily:
+                "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             }}
             width={dimensions.width}
           >

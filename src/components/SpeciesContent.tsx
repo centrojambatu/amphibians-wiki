@@ -11,7 +11,12 @@ interface SpeciesContentProps {
   readonly genus: any; // FrogGenus;
 }
 
-export default function SpeciesContent({species, order, family, genus}: SpeciesContentProps) {
+export default function SpeciesContent({
+  species,
+  order,
+  family,
+  genus,
+}: SpeciesContentProps) {
   // Extraer solo el nombre del orden sin el texto entre paréntesis
   const orderName = order.name.split(" (")[0];
 

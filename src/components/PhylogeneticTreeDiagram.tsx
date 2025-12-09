@@ -1,18 +1,27 @@
 "use client";
 
-import {useState} from "react";
+import { useState } from "react";
 import Link from "next/link";
-import {ChevronDown, ChevronRight} from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
+import {
+  OrderGroup,
+  FamilyGroup,
+  GenusGroup,
+  SpeciesData,
+} from "@/types/taxonomy";
 
 interface PhylogeneticTreeDiagramProps {
   readonly orders: OrderGroup[];
 }
 
-export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagramProps) {
+export default function PhylogeneticTreeDiagram({
+  orders,
+}: PhylogeneticTreeDiagramProps) {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-  const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set());
+  const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(
+    new Set(),
+  );
   const [expandedGenera, setExpandedGenera] = useState<Set<string>>(new Set());
 
   const toggleOrder = (orderId: string) => {
@@ -57,7 +66,11 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
         <div className="node-circle bg-purple-400"></div>
         <div className="node-label">
           <span className="text-xs italic">{species.nombre_cientifico}</span>
-          {species.nombre_comun && <span className="text-xs text-gray-500">({species.nombre_comun})</span>}
+          {species.nombre_comun && (
+            <span className="text-xs text-gray-500">
+              ({species.nombre_comun})
+            </span>
+          )}
         </div>
       </Link>
     </div>
@@ -78,15 +91,24 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
           >
             <div className="node-circle bg-blue-500"></div>
             <div className="node-label">
-              <Link className="font-medium italic hover:underline" href={`/sapopedia/genus/${genus.id}`}>
+              <Link
+                className="font-medium italic hover:underline"
+                href={`/sapopedia/genus/${genus.id}`}
+              >
                 {genus.name}
               </Link>
               {hasSpecies && (
                 <span className="ml-2">
-                  {isExpanded ? <ChevronDown className="inline h-3 w-3" /> : <ChevronRight className="inline h-3 w-3" />}
+                  {isExpanded ? (
+                    <ChevronDown className="inline h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="inline h-3 w-3" />
+                  )}
                 </span>
               )}
-              <span className="text-xs text-gray-500">({genus.species.length} sp.)</span>
+              <span className="text-xs text-gray-500">
+                ({genus.species.length} sp.)
+              </span>
             </div>
           </div>
         </div>
@@ -116,12 +138,19 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
           >
             <div className="node-circle bg-green-600"></div>
             <div className="node-label">
-              <Link className="font-semibold hover:underline" href={`/sapopedia/family/${family.id}`}>
+              <Link
+                className="font-semibold hover:underline"
+                href={`/sapopedia/family/${family.id}`}
+              >
                 {family.name}
               </Link>
               {hasGenera && (
                 <span className="ml-2">
-                  {isExpanded ? <ChevronDown className="inline h-4 w-4" /> : <ChevronRight className="inline h-4 w-4" />}
+                  {isExpanded ? (
+                    <ChevronDown className="inline h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="inline h-4 w-4" />
+                  )}
                 </span>
               )}
               <span className="text-xs text-gray-500">
@@ -156,17 +185,24 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
           >
             <div className="node-circle bg-red-600"></div>
             <div className="node-label">
-              <Link className="text-lg font-bold hover:underline" href={`/sapopedia/order/${order.id}`}>
+              <Link
+                className="text-lg font-bold hover:underline"
+                href={`/sapopedia/order/${order.id}`}
+              >
                 {order.name}
               </Link>
               {hasFamilies && (
                 <span className="ml-2">
-                  {isExpanded ? <ChevronDown className="inline h-5 w-5" /> : <ChevronRight className="inline h-5 w-5" />}
+                  {isExpanded ? (
+                    <ChevronDown className="inline h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="inline h-5 w-5" />
+                  )}
                 </span>
               )}
               <div className="text-xs text-gray-600">
-                {order.families.length} familias | {order.summary.totalSpecies} especies |{" "}
-                {order.summary.endemicSpecies} endémicas
+                {order.families.length} familias | {order.summary.totalSpecies}{" "}
+                especies | {order.summary.endemicSpecies} endémicas
               </div>
             </div>
           </div>
@@ -185,7 +221,9 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
   if (!orders || orders.length === 0) {
     return (
       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-600">No hay datos disponibles para mostrar el árbol filogenético.</p>
+        <p className="text-gray-600">
+          No hay datos disponibles para mostrar el árbol filogenético.
+        </p>
       </div>
     );
   }
@@ -319,9 +357,12 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
 
       {/* Título */}
       <div className="mb-6">
-        <h2 className="mb-2 text-xl font-bold text-gray-800">Árbol Taxonómico</h2>
+        <h2 className="mb-2 text-xl font-bold text-gray-800">
+          Árbol Taxonómico
+        </h2>
         <p className="text-sm text-gray-600">
-          Diagrama jerárquico de la clasificación taxonómica ({orders.length} órdenes)
+          Diagrama jerárquico de la clasificación taxonómica ({orders.length}{" "}
+          órdenes)
         </p>
       </div>
 
@@ -370,8 +411,9 @@ export default function PhylogeneticTreeDiagram({orders}: PhylogeneticTreeDiagra
       </div>
 
       {/* Árbol */}
-      <div className="space-y-6">{orders.map((order) => renderOrder(order))}</div>
+      <div className="space-y-6">
+        {orders.map((order) => renderOrder(order))}
+      </div>
     </div>
   );
 }
-

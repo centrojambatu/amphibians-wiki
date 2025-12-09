@@ -1,9 +1,11 @@
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {ExternalLink, BookOpen, Users} from "lucide-react";
+import { ExternalLink, BookOpen, Users } from "lucide-react";
 
-import getPublicacionBySlug, {getAllPublicacionesWithSlugs} from "../get-publicacion-by-slug";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import getPublicacionBySlug, {
+  getAllPublicacionesWithSlugs,
+} from "../get-publicacion-by-slug";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PageProps {
   params: Promise<{
@@ -22,7 +24,9 @@ export async function generateStaticParams() {
 
     // Limitar a las primeras 100 en desarrollo para evitar builds lentos
     const limit = process.env.NODE_ENV === "development" ? 100 : undefined;
-    const publicacionesLimitadas = limit ? publicaciones.slice(0, limit) : publicaciones;
+    const publicacionesLimitadas = limit
+      ? publicaciones.slice(0, limit)
+      : publicaciones;
 
     return publicacionesLimitadas.map((pub) => ({
       slug: pub.slug,
@@ -33,8 +37,8 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function BibliographyPage({params}: PageProps) {
-  const {slug} = await params;
+export default async function BibliographyPage({ params }: PageProps) {
+  const { slug } = await params;
 
   const publicacion = await getPublicacionBySlug(slug);
 
@@ -54,9 +58,7 @@ export default async function BibliographyPage({params}: PageProps) {
           {/* Título principal */}
           <h1 className="text-3xl font-bold mb-4">
             {publicacion.titulo && (
-              <span
-                dangerouslySetInnerHTML={{__html: publicacion.titulo}}
-              />
+              <span dangerouslySetInnerHTML={{ __html: publicacion.titulo }} />
             )}
           </h1>
 
@@ -76,12 +78,12 @@ export default async function BibliographyPage({params}: PageProps) {
             {publicacion.cita_larga ? (
               <div
                 className="text-base leading-relaxed"
-                dangerouslySetInnerHTML={{__html: publicacion.cita_larga}}
+                dangerouslySetInnerHTML={{ __html: publicacion.cita_larga }}
               />
             ) : publicacion.cita ? (
               <div
                 className="text-base leading-relaxed"
-                dangerouslySetInnerHTML={{__html: publicacion.cita}}
+                dangerouslySetInnerHTML={{ __html: publicacion.cita }}
               />
             ) : (
               <p className="text-muted-foreground">Cita no disponible</p>
@@ -206,7 +208,7 @@ export default async function BibliographyPage({params}: PageProps) {
               <h3 className="text-xl font-semibold mb-4">Resumen</h3>
               <div
                 className="prose dark:prose-invert"
-                dangerouslySetInnerHTML={{__html: publicacion.resumen}}
+                dangerouslySetInnerHTML={{ __html: publicacion.resumen }}
               />
             </div>
           )}
@@ -217,7 +219,7 @@ export default async function BibliographyPage({params}: PageProps) {
               <h3 className="text-xl font-semibold mb-4">Observaciones</h3>
               <div
                 className="prose dark:prose-invert"
-                dangerouslySetInnerHTML={{__html: publicacion.observaciones}}
+                dangerouslySetInnerHTML={{ __html: publicacion.observaciones }}
               />
             </div>
           )}
@@ -241,7 +243,9 @@ export default async function BibliographyPage({params}: PageProps) {
                       <ExternalLink className="h-4 w-4" />
                       <span>{enlace.texto_enlace || "Enlace externo"}</span>
                       {enlace.exclusivo_cj && (
-                        <span className="text-xs text-muted-foreground">(CJ)</span>
+                        <span className="text-xs text-muted-foreground">
+                          (CJ)
+                        </span>
                       )}
                     </a>
                   ))}
@@ -292,7 +296,8 @@ export default async function BibliographyPage({params}: PageProps) {
                       href = `/sapopedia/species/${taxon.nombre_cientifico_completo.replaceAll(" ", "-")}`;
                     }
 
-                    const displayName = taxon.nombre_cientifico_completo || taxon.taxon;
+                    const displayName =
+                      taxon.nombre_cientifico_completo || taxon.taxon;
 
                     return (
                       <Link
@@ -318,4 +323,3 @@ export default async function BibliographyPage({params}: PageProps) {
     </div>
   );
 }
-

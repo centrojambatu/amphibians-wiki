@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface TaxonCatalogoAwe {
   id_taxon_catalogo_awe: number;
@@ -19,7 +19,7 @@ export async function getTaxonCatalogoAwe(
 ): Promise<TaxonCatalogoAwe[]> {
   const supabaseClient = createServiceClient();
 
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("taxon_catalogo_awe")
     .select(
       `
@@ -58,16 +58,15 @@ export async function getAllTaxonCatalogoAwe(
     tiposCatalogo.map(async (tipoId) => {
       const taxonCatalogos = await getTaxonCatalogoAwe(taxonId, tipoId);
       const ids = taxonCatalogos.map((tc) => tc.catalogo_awe_id);
-      return {tipoId, ids};
+      return { tipoId, ids };
     }),
   );
 
   const catalogosPorTipo: Record<number, number[]> = {};
 
-  resultados.forEach(({tipoId, ids}) => {
+  resultados.forEach(({ tipoId, ids }) => {
     catalogosPorTipo[tipoId] = ids;
   });
 
   return catalogosPorTipo;
 }
-

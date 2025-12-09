@@ -1,11 +1,11 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
-import {Lock, User} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Lock, User } from "lucide-react";
 
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const VALID_USERNAME = "admin";
 const VALID_PASSWORD = "jambatu2024";
@@ -19,7 +19,8 @@ export default function EditorLogin() {
 
   useEffect(() => {
     // Verificar si ya está autenticado
-    const isAuthenticated = localStorage.getItem("editor_authenticated") === "true";
+    const isAuthenticated =
+      localStorage.getItem("editor_authenticated") === "true";
 
     if (isAuthenticated) {
       router.refresh();
@@ -56,7 +57,9 @@ export default function EditorLogin() {
             <Lock className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-black">Editor de Citas</h1>
-          <p className="mt-2 text-sm text-gray-700">Ingresa tus credenciales para continuar</p>
+          <p className="mt-2 text-sm text-gray-700">
+            Ingresa tus credenciales para continuar
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +108,9 @@ export default function EditorLogin() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 border-2 border-red-500 p-3 text-sm text-red-700">{error}</div>
+            <div className="rounded-md bg-red-50 border-2 border-red-500 p-3 text-sm text-red-700">
+              {error}
+            </div>
           )}
 
           <Button
@@ -126,4 +131,3 @@ export default function EditorLogin() {
     </div>
   );
 }
-

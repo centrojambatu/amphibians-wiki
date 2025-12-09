@@ -1,4 +1,9 @@
-import {SpeciesData, GenusGroup, FamilyGroup, OrderGroup} from "@/types/taxonomy";
+import {
+  SpeciesData,
+  GenusGroup,
+  FamilyGroup,
+  OrderGroup,
+} from "@/types/taxonomy";
 
 /**
  * Organiza un array plano de especies en una estructura jerárquica
@@ -53,7 +58,9 @@ export function organizeTaxonomyData(especies: SpeciesData[]): OrderGroup[] {
       const generos: GenusGroup[] = [];
 
       generosMap.forEach((especiesDelGenero, generoNombre) => {
-        const endemicSpecies = especiesDelGenero.filter((e) => e.endemica).length;
+        const endemicSpecies = especiesDelGenero.filter(
+          (e) => e.endemica,
+        ).length;
         const redListSpecies = especiesDelGenero.filter(
           (e) => e.lista_roja_iucn && e.lista_roja_iucn !== "LC",
         ).length;
@@ -76,7 +83,9 @@ export function organizeTaxonomyData(especies: SpeciesData[]): OrderGroup[] {
 
       // Calcular resumen de la familia
       const totalSpecies = especiesDeLaFamilia.length;
-      const endemicSpecies = especiesDeLaFamilia.filter((e) => e.endemica).length;
+      const endemicSpecies = especiesDeLaFamilia.filter(
+        (e) => e.endemica,
+      ).length;
       const redListSpecies = especiesDeLaFamilia.filter(
         (e) => e.lista_roja_iucn && e.lista_roja_iucn !== "LC",
       ).length;

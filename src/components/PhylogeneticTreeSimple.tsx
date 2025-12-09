@@ -1,18 +1,27 @@
 "use client";
 
-import {useState} from "react";
+import { useState } from "react";
 import Link from "next/link";
-import {ChevronRight, ChevronDown} from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 
-import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
+import {
+  OrderGroup,
+  FamilyGroup,
+  GenusGroup,
+  SpeciesData,
+} from "@/types/taxonomy";
 
 interface PhylogeneticTreeSimpleProps {
   readonly orders: OrderGroup[];
 }
 
-export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleProps) {
+export default function PhylogeneticTreeSimple({
+  orders,
+}: PhylogeneticTreeSimpleProps) {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-  const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set());
+  const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(
+    new Set(),
+  );
   const [expandedGenera, setExpandedGenera] = useState<Set<string>>(new Set());
 
   const toggleOrder = (orderId: string) => {
@@ -60,7 +69,9 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
           {species.nombre_cientifico}
         </Link>
         {species.nombre_comun && (
-          <span className="text-xs text-gray-500">({species.nombre_comun})</span>
+          <span className="text-xs text-gray-500">
+            ({species.nombre_comun})
+          </span>
         )}
       </div>
     </div>
@@ -95,7 +106,9 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
             >
               {genus.name}
             </Link>
-            <span className="text-xs text-gray-500">({genus.species.length} especies)</span>
+            <span className="text-xs text-gray-500">
+              ({genus.species.length} especies)
+            </span>
           </div>
         </div>
         {isExpanded && (
@@ -137,7 +150,8 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
               {family.name}
             </Link>
             <span className="text-xs text-gray-500">
-              ({family.genera.length} géneros, {family.summary.totalSpecies} especies)
+              ({family.genera.length} géneros, {family.summary.totalSpecies}{" "}
+              especies)
             </span>
           </div>
         </div>
@@ -154,7 +168,10 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
     const isExpanded = expandedOrders.has(order.id);
 
     return (
-      <div key={order.id} className="mb-6 rounded-lg border border-gray-200 bg-white">
+      <div
+        key={order.id}
+        className="mb-6 rounded-lg border border-gray-200 bg-white"
+      >
         <div
           className="flex cursor-pointer items-center gap-3 p-4 hover:bg-gray-50"
           onClick={() => toggleOrder(order.id)}
@@ -164,7 +181,11 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
           <div className="h-4 w-4 flex-shrink-0 rounded-full bg-gray-800"></div>
           {order.families.length > 0 && (
             <span className="text-gray-400">
-              {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+              {isExpanded ? (
+                <ChevronDown className="h-5 w-5" />
+              ) : (
+                <ChevronRight className="h-5 w-5" />
+              )}
             </span>
           )}
           <div className="flex-1">
@@ -175,8 +196,8 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
               {order.name}
             </Link>
             <p className="mt-1 text-xs text-gray-600">
-              {order.families.length} familias | {order.summary.totalSpecies} especies |{" "}
-              {order.summary.endemicSpecies} endémicas
+              {order.families.length} familias | {order.summary.totalSpecies}{" "}
+              especies | {order.summary.endemicSpecies} endémicas
             </p>
           </div>
         </div>
@@ -192,7 +213,9 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
   if (!orders || orders.length === 0) {
     return (
       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-600">No hay datos disponibles para mostrar el árbol filogenético.</p>
+        <p className="text-gray-600">
+          No hay datos disponibles para mostrar el árbol filogenético.
+        </p>
       </div>
     );
   }
@@ -201,9 +224,12 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
     <div className="relative">
       {/* Título */}
       <div className="mb-6">
-        <h2 className="mb-2 text-xl font-bold text-gray-800">Árbol Taxonómico</h2>
+        <h2 className="mb-2 text-xl font-bold text-gray-800">
+          Árbol Taxonómico
+        </h2>
         <p className="text-sm text-gray-600">
-          Navegación jerárquica por órdenes, familias, géneros y especies ({orders.length} órdenes)
+          Navegación jerárquica por órdenes, familias, géneros y especies (
+          {orders.length} órdenes)
         </p>
       </div>
 
@@ -252,8 +278,9 @@ export default function PhylogeneticTreeSimple({orders}: PhylogeneticTreeSimpleP
       </div>
 
       {/* Árbol */}
-      <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
+      <div className="space-y-4">
+        {orders.map((order) => renderOrder(order))}
+      </div>
     </div>
   );
 }
-

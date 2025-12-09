@@ -1,19 +1,22 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import EditorLogin from "./EditorLogin";
 
 interface EditorAuthWrapperProps {
   children: React.ReactNode;
 }
 
-export default function EditorAuthWrapper({children}: EditorAuthWrapperProps) {
+export default function EditorAuthWrapper({
+  children,
+}: EditorAuthWrapperProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Verificar autenticación en localStorage
     const checkAuth = () => {
-      const authStatus = localStorage.getItem("editor_authenticated") === "true";
+      const authStatus =
+        localStorage.getItem("editor_authenticated") === "true";
       setIsAuthenticated(authStatus);
     };
 
@@ -47,4 +50,3 @@ export default function EditorAuthWrapper({children}: EditorAuthWrapperProps) {
   // Si está autenticado, mostrar el contenido
   return <>{children}</>;
 }
-

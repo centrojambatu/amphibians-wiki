@@ -1,11 +1,16 @@
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ClimaticFloorChartProps {
   readonly altitudinalRange: {
     readonly min: number;
     readonly max: number;
-    readonly occidente?: {min: number; max: number};
-    readonly oriente?: {min: number; max: number};
+    readonly occidente?: { min: number; max: number };
+    readonly oriente?: { min: number; max: number };
   };
   // readonly climaticFloors: readonly string[];
 }
@@ -29,7 +34,13 @@ export default function ClimaticFloorChart({
 
   const allClimaticFloors = [
     // Occidente (ascendente)
-    {name: "Tropical Occidental", min: 0, max: 1000, colorIndex: 0, region: "Costa del Pacífico"},
+    {
+      name: "Tropical Occidental",
+      min: 0,
+      max: 1000,
+      colorIndex: 0,
+      region: "Costa del Pacífico",
+    },
     {
       name: "Subtropical Occidental",
       min: 1000,
@@ -73,13 +84,20 @@ export default function ClimaticFloorChart({
       colorIndex: 1,
       region: "Amazonía alta",
     },
-    {name: "Tropical Oriental", min: 1000, max: 0, colorIndex: 0, region: "Amazonía baja"},
+    {
+      name: "Tropical Oriental",
+      min: 1000,
+      max: 0,
+      colorIndex: 0,
+      region: "Amazonía baja",
+    },
   ];
 
   // Calcular el rango total altitudinal sumando todos los pisos
   // Tropical Occ: 1000m + Subtropical Occ: 1300m + Templada Occ: 1100m + Altoandina Occ: 1400m +
   // Altoandina Or: 1400m + Templada Or: 1100m + Subtropical Or: 1300m + Tropical Or: 1000m = 9600m total
-  const totalAltitudeRange = 1000 + 1300 + 1100 + 1400 + 1400 + 1100 + 1300 + 1000; // = 9600m total
+  const totalAltitudeRange =
+    1000 + 1300 + 1100 + 1400 + 1400 + 1100 + 1300 + 1000; // = 9600m total
 
   // Color plomo por defecto
   const defaultColor = "#9CA3AF"; // Gris plomo
@@ -123,10 +141,16 @@ export default function ClimaticFloorChart({
       if (altitudinalRange.occidente || altitudinalRange.oriente) {
         const occidenteHigh =
           altitudinalRange.occidente &&
-          Math.max(altitudinalRange.occidente.min, altitudinalRange.occidente.max) >= 3400;
+          Math.max(
+            altitudinalRange.occidente.min,
+            altitudinalRange.occidente.max,
+          ) >= 3400;
         const orienteHigh =
           altitudinalRange.oriente &&
-          Math.max(altitudinalRange.oriente.min, altitudinalRange.oriente.max) >= 3400;
+          Math.max(
+            altitudinalRange.oriente.min,
+            altitudinalRange.oriente.max,
+          ) >= 3400;
 
         return (occidenteHigh || orienteHigh) && floorIsAscending;
       }
@@ -178,12 +202,24 @@ export default function ClimaticFloorChart({
 
     if (isOccidental && altitudinalRange.occidente) {
       // Usar rango específico de occidente
-      speciesMin = Math.min(altitudinalRange.occidente.min, altitudinalRange.occidente.max);
-      speciesMax = Math.max(altitudinalRange.occidente.min, altitudinalRange.occidente.max);
+      speciesMin = Math.min(
+        altitudinalRange.occidente.min,
+        altitudinalRange.occidente.max,
+      );
+      speciesMax = Math.max(
+        altitudinalRange.occidente.min,
+        altitudinalRange.occidente.max,
+      );
     } else if (isOriental && altitudinalRange.oriente) {
       // Usar rango específico de oriente
-      speciesMin = Math.min(altitudinalRange.oriente.min, altitudinalRange.oriente.max);
-      speciesMax = Math.max(altitudinalRange.oriente.min, altitudinalRange.oriente.max);
+      speciesMin = Math.min(
+        altitudinalRange.oriente.min,
+        altitudinalRange.oriente.max,
+      );
+      speciesMax = Math.max(
+        altitudinalRange.oriente.min,
+        altitudinalRange.oriente.max,
+      );
     } else {
       // Usar rango general
       speciesMin = Math.min(altitudinalRange.min, altitudinalRange.max);
@@ -214,14 +250,16 @@ export default function ClimaticFloorChart({
       positionInFloorEnd = ((floorMax - intersectionStart) / floorRange) * 100;
     } else {
       // Para pisos ascendentes (occidentales): el piso va de min a max visualmente
-      positionInFloorStart = ((intersectionStart - floorMin) / floorRange) * 100;
+      positionInFloorStart =
+        ((intersectionStart - floorMin) / floorRange) * 100;
       positionInFloorEnd = ((intersectionEnd - floorMin) / floorRange) * 100;
     }
 
     const widthInFloor = positionInFloorEnd - positionInFloorStart;
 
     // Calcular la posición absoluta en la barra completa
-    const absoluteLeft = floorStartPosition + (positionInFloorStart / 100) * floorWidthPercentage;
+    const absoluteLeft =
+      floorStartPosition + (positionInFloorStart / 100) * floorWidthPercentage;
     const absoluteWidth = (widthInFloor / 100) * floorWidthPercentage;
 
     return {
@@ -233,9 +271,9 @@ export default function ClimaticFloorChart({
 
   // Etiquetas principales de altitud (sin la "m")
   const altitudeMarkers = [
-    {altitude: 0, position: 0},
-    {altitude: 4800, position: (4800 / totalAltitudeRange) * 100},
-    {altitude: 0, position: 100},
+    { altitude: 0, position: 0 },
+    { altitude: 4800, position: (4800 / totalAltitudeRange) * 100 },
+    { altitude: 0, position: 100 },
   ];
 
   return (
@@ -254,7 +292,9 @@ export default function ClimaticFloorChart({
 
           // Calcular la posición acumulada del piso
           for (let i = 0; i < index; i++) {
-            const prevFloorRange = Math.abs(allClimaticFloors[i].max - allClimaticFloors[i].min);
+            const prevFloorRange = Math.abs(
+              allClimaticFloors[i].max - allClimaticFloors[i].min,
+            );
 
             cumulativeWidth += (prevFloorRange / totalAltitudeRange) * 100;
           }
@@ -283,29 +323,49 @@ export default function ClimaticFloorChart({
 
           // Calcular la posición acumulada del piso
           for (let i = 0; i < index; i++) {
-            const prevFloorRange = Math.abs(allClimaticFloors[i].max - allClimaticFloors[i].min);
+            const prevFloorRange = Math.abs(
+              allClimaticFloors[i].max - allClimaticFloors[i].min,
+            );
 
             cumulativeWidth += (prevFloorRange / totalAltitudeRange) * 100;
           }
 
-          const activeSegment = getFloorActiveSegment(floor, cumulativeWidth, widthPercentage);
+          const activeSegment = getFloorActiveSegment(
+            floor,
+            cumulativeWidth,
+            widthPercentage,
+          );
 
           if (activeSegment) {
             // Calcular el rango específico que se está mostrando
             const floorMin = Math.min(floor.min, floor.max);
             const floorMax = Math.max(floor.min, floor.max);
 
-            const isOccidental = floor.name.toLowerCase().includes("occidental");
+            const isOccidental = floor.name
+              .toLowerCase()
+              .includes("occidental");
             const isOriental = floor.name.toLowerCase().includes("oriental");
 
             let speciesMin, speciesMax;
 
             if (isOccidental && altitudinalRange.occidente) {
-              speciesMin = Math.min(altitudinalRange.occidente.min, altitudinalRange.occidente.max);
-              speciesMax = Math.max(altitudinalRange.occidente.min, altitudinalRange.occidente.max);
+              speciesMin = Math.min(
+                altitudinalRange.occidente.min,
+                altitudinalRange.occidente.max,
+              );
+              speciesMax = Math.max(
+                altitudinalRange.occidente.min,
+                altitudinalRange.occidente.max,
+              );
             } else if (isOriental && altitudinalRange.oriente) {
-              speciesMin = Math.min(altitudinalRange.oriente.min, altitudinalRange.oriente.max);
-              speciesMax = Math.max(altitudinalRange.oriente.min, altitudinalRange.oriente.max);
+              speciesMin = Math.min(
+                altitudinalRange.oriente.min,
+                altitudinalRange.oriente.max,
+              );
+              speciesMax = Math.max(
+                altitudinalRange.oriente.min,
+                altitudinalRange.oriente.max,
+              );
             } else {
               speciesMin = Math.min(altitudinalRange.min, altitudinalRange.max);
               speciesMax = Math.max(altitudinalRange.min, altitudinalRange.max);
@@ -334,7 +394,9 @@ export default function ClimaticFloorChart({
                       <p>
                         {intersectionStart}-{intersectionEnd}m
                       </p>
-                      <p className="text-[10px] text-gray-400">{floor.region}</p>
+                      <p className="text-[10px] text-gray-400">
+                        {floor.region}
+                      </p>
                     </div>
                   </TooltipContent>
                 </Tooltip>

@@ -1,8 +1,13 @@
 "use client";
 
-import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import { CatalogOption } from "@/app/sapopedia/get-filter-catalogs";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import RedListStatus from "./RedListStatus";
 
 interface RedListBarChartProps {
@@ -10,16 +15,25 @@ interface RedListBarChartProps {
   readonly categorias: CatalogOption[];
 }
 
-export default function RedListBarChart({especies, categorias}: RedListBarChartProps) {
+export default function RedListBarChart({
+  especies,
+  categorias,
+}: RedListBarChartProps) {
   // Calcular datos para el gráfico
   const datos = categorias
     .map((categoria) => {
-      const especiesEnCategoria = especies.filter((e) => e.lista_roja_iucn === categoria.sigla);
+      const especiesEnCategoria = especies.filter(
+        (e) => e.lista_roja_iucn === categoria.sigla,
+      );
       const count = especiesEnCategoria.length;
 
       // Calcular familias y géneros únicos
-      const familias = new Set(especiesEnCategoria.map((e) => e.familia).filter(Boolean));
-      const generos = new Set(especiesEnCategoria.map((e) => e.genero).filter(Boolean));
+      const familias = new Set(
+        especiesEnCategoria.map((e) => e.familia).filter(Boolean),
+      );
+      const generos = new Set(
+        especiesEnCategoria.map((e) => e.genero).filter(Boolean),
+      );
 
       return {
         categoria,
@@ -74,7 +88,9 @@ export default function RedListBarChart({especies, categorias}: RedListBarChartP
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Distribución por Categorías</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          Distribución por Categorías
+        </h3>
         <p className="text-muted-foreground text-sm">
           Total: {totalEspecies} especies con categoría UICN
         </p>
@@ -108,7 +124,9 @@ export default function RedListBarChart({especies, categorias}: RedListBarChartP
 
               {/* Nombre de categoría */}
               <div className="w-48 flex-shrink-0">
-                <p className="text-sm font-medium text-gray-800">{dato.categoria.nombre}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {dato.categoria.nombre}
+                </p>
                 <p className="text-xs text-gray-500">{dato.categoria.sigla}</p>
               </div>
 
@@ -126,7 +144,9 @@ export default function RedListBarChart({especies, categorias}: RedListBarChartP
                           }}
                         />
                         <div className="absolute inset-0 flex items-center justify-end pr-2">
-                          <span className="text-xs font-semibold text-gray-700">{dato.count}</span>
+                          <span className="text-xs font-semibold text-gray-700">
+                            {dato.count}
+                          </span>
                         </div>
                       </div>
                     </TooltipTrigger>
@@ -147,7 +167,10 @@ export default function RedListBarChart({especies, categorias}: RedListBarChartP
               {/* Porcentaje del total */}
               <div className="w-16 text-right">
                 <p className="text-sm font-medium text-gray-600">
-                  {totalEspecies > 0 ? ((dato.count / totalEspecies) * 100).toFixed(1) : 0}%
+                  {totalEspecies > 0
+                    ? ((dato.count / totalEspecies) * 100).toFixed(1)
+                    : 0}
+                  %
                 </p>
               </div>
             </div>
@@ -157,4 +180,3 @@ export default function RedListBarChart({especies, categorias}: RedListBarChartP
     </div>
   );
 }
-

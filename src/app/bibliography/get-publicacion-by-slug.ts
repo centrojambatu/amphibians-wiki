@@ -1,5 +1,5 @@
-import {createServiceClient} from "@/utils/supabase/server";
-import {generatePublicacionSlug} from "@/lib/generate-publicacion-slug";
+import { createServiceClient } from "@/utils/supabase/server";
+import { generatePublicacionSlug } from "@/lib/generate-publicacion-slug";
 
 export interface PublicacionCompleta {
   id_publicacion: number;
@@ -52,23 +52,25 @@ export default async function getPublicacionBySlug(
   const supabaseClient = createServiceClient();
 
   // Primero intentar buscar directamente en la vista por slug (exacto y flexible)
-  let pubSlugData: {id_publicacion: number} | null = null;
+  let pubSlugData: { id_publicacion: number } | null = null;
 
   // Búsqueda exacta
-  const {data: exactMatch, error: exactError} = await supabaseClient
+  const { data: exactMatch, error: exactError } = await supabaseClient
     .from("vw_publicacion_slug")
     .select("id_publicacion")
     .eq("slug", slug)
     .single();
 
   if (!exactError && exactMatch && exactMatch.id_publicacion !== null) {
-    pubSlugData = {id_publicacion: exactMatch.id_publicacion};
+    pubSlugData = { id_publicacion: exactMatch.id_publicacion };
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ Encontrada publicación en vista por slug exacto: ${pubSlugData.id_publicacion}`);
+      console.log(
+        `✅ Encontrada publicación en vista por slug exacto: ${pubSlugData.id_publicacion}`,
+      );
     }
   } else {
     // Búsqueda flexible (ILIKE)
-    const {data: flexibleMatch, error: flexibleError} = await supabaseClient
+    const { data: flexibleMatch, error: flexibleError } = await supabaseClient
       .from("vw_publicacion_slug")
       .select("id_publicacion, slug")
       .ilike("slug", `%${slug}%`)
@@ -76,12 +78,18 @@ export default async function getPublicacionBySlug(
 
     if (!flexibleError && flexibleMatch && flexibleMatch.length > 0) {
       // Buscar la mejor coincidencia
-      const normalizedSlug = slug.toLowerCase().normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "");
+      const normalizedSlug = slug
+        .toLowerCase()
+        .normalize("NFD")
+        .replaceAll(/[\u0300-\u036f]/g, "");
       let bestMatch = flexibleMatch[0];
       let bestScore = 0;
 
       for (const match of flexibleMatch) {
-        const matchSlug = (match.slug as string).toLowerCase().normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "");
+        const matchSlug = (match.slug as string)
+          .toLowerCase()
+          .normalize("NFD")
+          .replaceAll(/[\u0300-\u036f]/g, "");
         // Calcular similitud simple
         const minLen = Math.min(normalizedSlug.length, matchSlug.length);
         const maxLen = Math.max(normalizedSlug.length, matchSlug.length);
@@ -98,9 +106,11 @@ export default async function getPublicacionBySlug(
       }
 
       if (bestScore > 0.7 && bestMatch.id_publicacion !== null) {
-        pubSlugData = {id_publicacion: bestMatch.id_publicacion};
+        pubSlugData = { id_publicacion: bestMatch.id_publicacion };
         if (process.env.NODE_ENV === "development") {
-          console.log(`✅ Encontrada publicación en vista por slug flexible: ${pubSlugData.id_publicacion} (similitud: ${bestScore.toFixed(2)})`);
+          console.log(
+            `✅ Encontrada publicación en vista por slug flexible: ${pubSlugData.id_publicacion} (similitud: ${bestScore.toFixed(2)})`,
+          );
         }
       }
     }
@@ -108,11 +118,13 @@ export default async function getPublicacionBySlug(
 
   if (pubSlugData) {
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ Encontrada publicación en vista por slug: ${pubSlugData.id_publicacion}`);
+      console.log(
+        `✅ Encontrada publicación en vista por slug: ${pubSlugData.id_publicacion}`,
+      );
     }
 
     // Buscar la publicación completa por ID
-    const {data: pub, error} = await supabaseClient
+    const { data: pub, error } = await supabaseClient
       .from("publicacion")
       .select(
         `
@@ -151,7 +163,8 @@ export default async function getPublicacionBySlug(
     if (!error && pub) {
       // Transformar los datos (mismo código que abajo)
       const enlaces =
-        Array.isArray(pub.publicacion_enlace) && pub.publicacion_enlace.length > 0
+        Array.isArray(pub.publicacion_enlace) &&
+        pub.publicacion_enlace.length > 0
           ? pub.publicacion_enlace.map((pe: any) => ({
               id_publicacion_enlace: pe.id_publicacion_enlace,
               enlace: pe.enlace,
@@ -179,7 +192,7 @@ export default async function getPublicacionBySlug(
                 const taxonId = tp.taxon?.id_taxon || 0;
                 if (taxonId === 0) return null;
 
-                const {data: taxonData} = await supabaseClient
+                const { data: taxonData } = await supabaseClient
                   .from("taxon")
                   .select(
                     `
@@ -199,7 +212,7 @@ export default async function getPublicacionBySlug(
 
                 let nombreCompleto = taxonData.taxon || "";
                 if (taxonData.taxon_id) {
-                  const {data: generoData} = await supabaseClient
+                  const { data: generoData } = await supabaseClient
                     .from("taxon")
                     .select("taxon")
                     .eq("id_taxon", taxonData.taxon_id)
@@ -211,7 +224,8 @@ export default async function getPublicacionBySlug(
                 }
 
                 const idFichaEspecie =
-                  Array.isArray(taxonData.ficha_especie) && taxonData.ficha_especie.length > 0
+                  Array.isArray(taxonData.ficha_especie) &&
+                  taxonData.ficha_especie.length > 0
                     ? taxonData.ficha_especie[0]?.id_ficha_especie || null
                     : null;
 
@@ -252,7 +266,7 @@ export default async function getPublicacionBySlug(
   if (slug.startsWith("publicacion-")) {
     const id = Number.parseInt(slug.replace("publicacion-", ""), 10);
     if (!Number.isNaN(id) && id > 0) {
-      const {data: pub, error} = await supabaseClient
+      const { data: pub, error } = await supabaseClient
         .from("publicacion")
         .select(
           `
@@ -291,7 +305,8 @@ export default async function getPublicacionBySlug(
       if (!error && pub) {
         // Transformar los datos (mismo código que abajo)
         const enlaces =
-          Array.isArray(pub.publicacion_enlace) && pub.publicacion_enlace.length > 0
+          Array.isArray(pub.publicacion_enlace) &&
+          pub.publicacion_enlace.length > 0
             ? pub.publicacion_enlace.map((pe: any) => ({
                 id_publicacion_enlace: pe.id_publicacion_enlace,
                 enlace: pe.enlace,
@@ -301,7 +316,8 @@ export default async function getPublicacionBySlug(
             : [];
 
         const autores =
-          Array.isArray(pub.publicacion_autor) && pub.publicacion_autor.length > 0
+          Array.isArray(pub.publicacion_autor) &&
+          pub.publicacion_autor.length > 0
             ? pub.publicacion_autor
                 .map((pa: any) => ({
                   id_autor: pa.autor?.id_autor || 0,
@@ -313,13 +329,14 @@ export default async function getPublicacionBySlug(
             : [];
 
         const taxones =
-          Array.isArray(pub.taxon_publicacion) && pub.taxon_publicacion.length > 0
+          Array.isArray(pub.taxon_publicacion) &&
+          pub.taxon_publicacion.length > 0
             ? await Promise.all(
                 pub.taxon_publicacion.map(async (tp: any) => {
                   const taxonId = tp.taxon?.id_taxon || 0;
                   if (taxonId === 0) return null;
 
-                  const {data: taxonData} = await supabaseClient
+                  const { data: taxonData } = await supabaseClient
                     .from("taxon")
                     .select(
                       `
@@ -339,7 +356,7 @@ export default async function getPublicacionBySlug(
 
                   let nombreCompleto = taxonData.taxon || "";
                   if (taxonData.taxon_id) {
-                    const {data: generoData} = await supabaseClient
+                    const { data: generoData } = await supabaseClient
                       .from("taxon")
                       .select("taxon")
                       .eq("id_taxon", taxonData.taxon_id)
@@ -351,7 +368,8 @@ export default async function getPublicacionBySlug(
                   }
 
                   const idFichaEspecie =
-                    Array.isArray(taxonData.ficha_especie) && taxonData.ficha_especie.length > 0
+                    Array.isArray(taxonData.ficha_especie) &&
+                    taxonData.ficha_especie.length > 0
                       ? taxonData.ficha_especie[0]?.id_ficha_especie || null
                       : null;
 
@@ -385,7 +403,7 @@ export default async function getPublicacionBySlug(
   }
 
   // Buscar todas las publicaciones con relaciones y comparar slugs
-  const {data: publicaciones, error} = await supabaseClient
+  const { data: publicaciones, error } = await supabaseClient
     .from("publicacion")
     .select(
       `
@@ -418,13 +436,14 @@ export default async function getPublicacionBySlug(
       )
     `,
     )
-    .order("id_publicacion", {ascending: true});
+    .order("id_publicacion", { ascending: true });
 
   if (process.env.NODE_ENV === "development") {
     // Verificar si la publicación 1333 está en la lista
     const pub1333 = publicaciones?.find((p: any) => p.id_publicacion === 1333);
     if (pub1333) {
-      const año = pub1333.numero_publicacion_ano || new Date(pub1333.fecha).getFullYear();
+      const año =
+        pub1333.numero_publicacion_ano || new Date(pub1333.fecha).getFullYear();
       const slug1333 = generatePublicacionSlug(
         pub1333.cita_corta,
         año,
@@ -439,7 +458,9 @@ export default async function getPublicacionBySlug(
       console.log(`   Slug buscado: ${slug}`);
       console.log(`   ¿Coinciden exactamente? ${slug1333 === slug}`);
     } else {
-      console.warn(`⚠️ Publicación 1333 NO encontrada en la lista de ${publicaciones?.length || 0} publicaciones`);
+      console.warn(
+        `⚠️ Publicación 1333 NO encontrada en la lista de ${publicaciones?.length || 0} publicaciones`,
+      );
     }
   }
 
@@ -476,9 +497,13 @@ export default async function getPublicacionBySlug(
     console.log(`📋 Total de publicaciones a revisar: ${publicaciones.length}`);
 
     // Verificar si la publicación 1333 está en la lista
-    const index1333 = publicaciones.findIndex((p: any) => p.id_publicacion === 1333);
+    const index1333 = publicaciones.findIndex(
+      (p: any) => p.id_publicacion === 1333,
+    );
     if (index1333 >= 0) {
-      console.log(`✅ Publicación 1333 encontrada en índice ${index1333} de ${publicaciones.length}`);
+      console.log(
+        `✅ Publicación 1333 encontrada en índice ${index1333} de ${publicaciones.length}`,
+      );
     } else {
       console.warn(`⚠️ Publicación 1333 NO está en la lista de publicaciones`);
     }
@@ -499,12 +524,16 @@ export default async function getPublicacionBySlug(
       console.log(`   Slug generado: "${pubSlug}"`);
       console.log(`   Slug buscado: "${slug}"`);
       console.log(`   ¿Coinciden exactamente? ${pubSlug === slug}`);
-      console.log(`   Longitud generado: ${pubSlug.length}, Longitud buscado: ${slug.length}`);
+      console.log(
+        `   Longitud generado: ${pubSlug.length}, Longitud buscado: ${slug.length}`,
+      );
       if (pubSlug !== slug) {
         console.log(`   ⚠️ DIFERENCIA DETECTADA - Comparando caracteres:`);
         for (let i = 0; i < Math.max(pubSlug.length, slug.length); i++) {
           if (pubSlug[i] !== slug[i]) {
-            console.log(`     Pos ${i}: generado="${pubSlug[i] || 'EOF'}" (${pubSlug.charCodeAt(i)}), buscado="${slug[i] || 'EOF'}" (${slug.charCodeAt(i)})`);
+            console.log(
+              `     Pos ${i}: generado="${pubSlug[i] || "EOF"}" (${pubSlug.charCodeAt(i)}), buscado="${slug[i] || "EOF"}" (${slug.charCodeAt(i)})`,
+            );
             break;
           }
         }
@@ -514,15 +543,20 @@ export default async function getPublicacionBySlug(
     // Comparación exacta primero
     if (pubSlug === slug) {
       if (process.env.NODE_ENV === "development") {
-        console.log(`✅✅✅ ENCONTRADA publicación por comparación exacta: ${pub.id_publicacion}`);
+        console.log(
+          `✅✅✅ ENCONTRADA publicación por comparación exacta: ${pub.id_publicacion}`,
+        );
         console.log(`   Slug generado: "${pubSlug}"`);
         console.log(`   Slug buscado: "${slug}"`);
         console.log(`   ¿Son iguales? ${pubSlug === slug}`);
-        console.log(`   Longitud generado: ${pubSlug.length}, Longitud buscado: ${slug.length}`);
+        console.log(
+          `   Longitud generado: ${pubSlug.length}, Longitud buscado: ${slug.length}`,
+        );
       }
       // Transformar los datos
       const enlaces =
-        Array.isArray(pub.publicacion_enlace) && pub.publicacion_enlace.length > 0
+        Array.isArray(pub.publicacion_enlace) &&
+        pub.publicacion_enlace.length > 0
           ? pub.publicacion_enlace.map((pe: any) => ({
               id_publicacion_enlace: pe.id_publicacion_enlace,
               enlace: pe.enlace,
@@ -551,7 +585,7 @@ export default async function getPublicacionBySlug(
                 if (taxonId === 0) return null;
 
                 // Obtener el nombre científico completo y id_ficha_especie
-                const {data: taxonData} = await supabaseClient
+                const { data: taxonData } = await supabaseClient
                   .from("taxon")
                   .select(
                     `
@@ -572,7 +606,7 @@ export default async function getPublicacionBySlug(
                 // Obtener el género (taxon padre)
                 let nombreCompleto = taxonData.taxon || "";
                 if (taxonData.taxon_id) {
-                  const {data: generoData} = await supabaseClient
+                  const { data: generoData } = await supabaseClient
                     .from("taxon")
                     .select("taxon")
                     .eq("id_taxon", taxonData.taxon_id)
@@ -584,7 +618,8 @@ export default async function getPublicacionBySlug(
                 }
 
                 const idFichaEspecie =
-                  Array.isArray(taxonData.ficha_especie) && taxonData.ficha_especie.length > 0
+                  Array.isArray(taxonData.ficha_especie) &&
+                  taxonData.ficha_especie.length > 0
                     ? taxonData.ficha_especie[0]?.id_ficha_especie || null
                     : null;
 
@@ -621,15 +656,20 @@ export default async function getPublicacionBySlug(
 
     if (normalizedSearchSlug === normalizedPubSlug) {
       if (process.env.NODE_ENV === "development") {
-        console.log(`✅ Encontrada publicación por comparación flexible: ${pub.id_publicacion}`);
+        console.log(
+          `✅ Encontrada publicación por comparación flexible: ${pub.id_publicacion}`,
+        );
         console.log(`   Slug original: ${pubSlug}`);
         console.log(`   Slug normalizado: ${normalizedPubSlug}`);
         console.log(`   Slug buscado normalizado: ${normalizedSearchSlug}`);
-        console.log(`   ¿Por qué no coincidió exactamente? Original: "${pubSlug}" vs Buscado: "${slug}"`);
+        console.log(
+          `   ¿Por qué no coincidió exactamente? Original: "${pubSlug}" vs Buscado: "${slug}"`,
+        );
       }
       // Transformar los datos (mismo código que arriba)
       const enlaces =
-        Array.isArray(pub.publicacion_enlace) && pub.publicacion_enlace.length > 0
+        Array.isArray(pub.publicacion_enlace) &&
+        pub.publicacion_enlace.length > 0
           ? pub.publicacion_enlace.map((pe: any) => ({
               id_publicacion_enlace: pe.id_publicacion_enlace,
               enlace: pe.enlace,
@@ -657,7 +697,7 @@ export default async function getPublicacionBySlug(
                 const taxonId = tp.taxon?.id_taxon || 0;
                 if (taxonId === 0) return null;
 
-                const {data: taxonData} = await supabaseClient
+                const { data: taxonData } = await supabaseClient
                   .from("taxon")
                   .select(
                     `
@@ -677,7 +717,7 @@ export default async function getPublicacionBySlug(
 
                 let nombreCompleto = taxonData.taxon || "";
                 if (taxonData.taxon_id) {
-                  const {data: generoData} = await supabaseClient
+                  const { data: generoData } = await supabaseClient
                     .from("taxon")
                     .select("taxon")
                     .eq("id_taxon", taxonData.taxon_id)
@@ -689,7 +729,8 @@ export default async function getPublicacionBySlug(
                 }
 
                 const idFichaEspecie =
-                  Array.isArray(taxonData.ficha_especie) && taxonData.ficha_especie.length > 0
+                  Array.isArray(taxonData.ficha_especie) &&
+                  taxonData.ficha_especie.length > 0
                     ? taxonData.ficha_especie[0]?.id_ficha_especie || null
                     : null;
 
@@ -723,7 +764,7 @@ export default async function getPublicacionBySlug(
 
   // Si no se encontró, intentar búsqueda más flexible: buscar por similitud de slug
   // Esto ayuda cuando hay pequeñas diferencias en el slug (por ejemplo, año diferente)
-  let mejorCoincidencia: {pub: any; similitud: number} | null = null;
+  let mejorCoincidencia: { pub: any; similitud: number } | null = null;
 
   if (process.env.NODE_ENV === "development") {
     console.log(`🔍 Iniciando búsqueda por similitud para: ${slug}`);
@@ -739,13 +780,18 @@ export default async function getPublicacionBySlug(
     );
     const normalizedPubSlug = normalizeSlug(pubSlug);
 
-    if (process.env.NODE_ENV === "development" && (pub.id_publicacion === 1333 || pub.id_publicacion === 1335)) {
+    if (
+      process.env.NODE_ENV === "development" &&
+      (pub.id_publicacion === 1333 || pub.id_publicacion === 1335)
+    ) {
       console.log(`📝 Publicación ${pub.id_publicacion}:`);
       console.log(`   Slug original: ${pubSlug}`);
       console.log(`   Slug normalizado: ${normalizedPubSlug}`);
       console.log(`   Slug buscado normalizado: ${normalizedSearchSlug}`);
       console.log(`   ¿Coinciden exactamente? ${pubSlug === slug}`);
-      console.log(`   ¿Coinciden normalizados? ${normalizedPubSlug === normalizedSearchSlug}`);
+      console.log(
+        `   ¿Coinciden normalizados? ${normalizedPubSlug === normalizedSearchSlug}`,
+      );
     }
 
     // Calcular similitud usando comparación de componentes del slug
@@ -759,7 +805,10 @@ export default async function getPublicacionBySlug(
 
     // Verificar si hay algún año que coincida (o esté cerca)
     const añosCoinciden = searchAños.some((sa) =>
-      pubAños.some((pa) => Math.abs(Number.parseInt(sa, 10) - Number.parseInt(pa, 10)) <= 1),
+      pubAños.some(
+        (pa) =>
+          Math.abs(Number.parseInt(sa, 10) - Number.parseInt(pa, 10)) <= 1,
+      ),
     );
 
     // Si los años coinciden (o están cerca), calcular similitud
@@ -768,9 +817,10 @@ export default async function getPublicacionBySlug(
       // Comparar autor (primer componente)
       const searchAutor = searchParts[0];
       const pubAutor = pubParts[0];
-      const autorMatch = searchAutor === pubAutor ||
-                        searchAutor.startsWith(pubAutor) ||
-                        pubAutor.startsWith(searchAutor);
+      const autorMatch =
+        searchAutor === pubAutor ||
+        searchAutor.startsWith(pubAutor) ||
+        pubAutor.startsWith(searchAutor);
 
       if (autorMatch) {
         // Comparar resto del slug (título) - remover años duplicados
@@ -782,9 +832,10 @@ export default async function getPublicacionBySlug(
             break;
           }
         }
-        const searchTitulo = lastSearchAñoIndex >= 0
-          ? searchParts.slice(lastSearchAñoIndex + 1).join("-")
-          : searchParts.slice(1).join("-");
+        const searchTitulo =
+          lastSearchAñoIndex >= 0
+            ? searchParts.slice(lastSearchAñoIndex + 1).join("-")
+            : searchParts.slice(1).join("-");
 
         // Para el generado, tomar todo después del año
         let lastPubAñoIndex = -1;
@@ -794,16 +845,26 @@ export default async function getPublicacionBySlug(
             break;
           }
         }
-        const pubTitulo = lastPubAñoIndex >= 0
-          ? pubParts.slice(lastPubAñoIndex + 1).join("-")
-          : pubParts.slice(1).join("-");
+        const pubTitulo =
+          lastPubAñoIndex >= 0
+            ? pubParts.slice(lastPubAñoIndex + 1).join("-")
+            : pubParts.slice(1).join("-");
 
         // Remover palabras comunes que pueden variar ("ano", "actual", etc.)
-        const searchTituloClean = searchTitulo.replaceAll(/\b(ano|actual|the|of|a|an)\b/g, "");
-        const pubTituloClean = pubTitulo.replaceAll(/\b(ano|actual|the|of|a|an)\b/g, "");
+        const searchTituloClean = searchTitulo.replaceAll(
+          /\b(ano|actual|the|of|a|an)\b/g,
+          "",
+        );
+        const pubTituloClean = pubTitulo.replaceAll(
+          /\b(ano|actual|the|of|a|an)\b/g,
+          "",
+        );
 
         // Calcular similitud del título usando prefijo común
-        const minTituloLength = Math.min(searchTituloClean.length, pubTituloClean.length);
+        const minTituloLength = Math.min(
+          searchTituloClean.length,
+          pubTituloClean.length,
+        );
         let prefijoComun = 0;
         for (let i = 0; i < minTituloLength; i++) {
           if (searchTituloClean[i] === pubTituloClean[i]) {
@@ -814,16 +875,21 @@ export default async function getPublicacionBySlug(
         }
 
         // También verificar si uno contiene al otro
-        const contiene = searchTituloClean.includes(pubTituloClean) ||
-                        pubTituloClean.includes(searchTituloClean);
+        const contiene =
+          searchTituloClean.includes(pubTituloClean) ||
+          pubTituloClean.includes(searchTituloClean);
         const similitudTitulo = contiene
           ? 0.9
-          : prefijoComun / Math.max(searchTituloClean.length, pubTituloClean.length, 1);
+          : prefijoComun /
+            Math.max(searchTituloClean.length, pubTituloClean.length, 1);
 
         // Similitud total: 0.3 autor + 0.2 año + 0.5 título
-        similitud = 0.3 + 0.2 + (similitudTitulo * 0.5);
+        similitud = 0.3 + 0.2 + similitudTitulo * 0.5;
 
-        if (process.env.NODE_ENV === "development" && pub.id_publicacion === 1335) {
+        if (
+          process.env.NODE_ENV === "development" &&
+          pub.id_publicacion === 1335
+        ) {
           console.log(`   Similitud calculada: ${similitud.toFixed(2)}`);
           console.log(`   Autor match: ${autorMatch}`);
           console.log(`   Título buscado: ${searchTitulo}`);
@@ -835,10 +901,15 @@ export default async function getPublicacionBySlug(
     }
 
     // Si la similitud es alta (>0.3) y es mejor que la anterior, guardarla
-    if (similitud > 0.3 && (!mejorCoincidencia || similitud > mejorCoincidencia.similitud)) {
-      mejorCoincidencia = {pub, similitud};
+    if (
+      similitud > 0.3 &&
+      (!mejorCoincidencia || similitud > mejorCoincidencia.similitud)
+    ) {
+      mejorCoincidencia = { pub, similitud };
       if (process.env.NODE_ENV === "development") {
-        console.log(`✅ Nueva mejor coincidencia: id=${pub.id_publicacion}, similitud=${similitud.toFixed(2)}`);
+        console.log(
+          `✅ Nueva mejor coincidencia: id=${pub.id_publicacion}, similitud=${similitud.toFixed(2)}`,
+        );
       }
     }
 
@@ -846,23 +917,45 @@ export default async function getPublicacionBySlug(
     // Esto ayuda cuando la lógica de similitud no captura bien el match
     {
       // Normalizar variaciones comunes como "2002ano" -> "2002-ano"
-      const searchNormalized = normalizedSearchSlug.replaceAll(/(\d{4})([a-z])/g, "$1-$2");
-      const pubNormalized = normalizedPubSlug.replaceAll(/(\d{4})([a-z])/g, "$1-$2");
+      const searchNormalized = normalizedSearchSlug.replaceAll(
+        /(\d{4})([a-z])/g,
+        "$1-$2",
+      );
+      const pubNormalized = normalizedPubSlug.replaceAll(
+        /(\d{4})([a-z])/g,
+        "$1-$2",
+      );
 
       // Comparar si son muy similares después de normalizar
       if (searchNormalized === pubNormalized) {
-        mejorCoincidencia = {pub, similitud: 0.9};
+        mejorCoincidencia = { pub, similitud: 0.9 };
         if (process.env.NODE_ENV === "development") {
-          console.log(`✅ Coincidencia por normalización: id=${pub.id_publicacion}`);
+          console.log(
+            `✅ Coincidencia por normalización: id=${pub.id_publicacion}`,
+          );
         }
-      } else if (searchNormalized.includes(pubNormalized) || pubNormalized.includes(searchNormalized)) {
-        const lenMatch = Math.min(searchNormalized.length, pubNormalized.length);
-        const lenTotal = Math.max(searchNormalized.length, pubNormalized.length);
+      } else if (
+        searchNormalized.includes(pubNormalized) ||
+        pubNormalized.includes(searchNormalized)
+      ) {
+        const lenMatch = Math.min(
+          searchNormalized.length,
+          pubNormalized.length,
+        );
+        const lenTotal = Math.max(
+          searchNormalized.length,
+          pubNormalized.length,
+        );
         const similitudFlex = lenMatch / lenTotal;
-        if (similitudFlex > 0.7 && (!mejorCoincidencia || similitudFlex > mejorCoincidencia.similitud)) {
-          mejorCoincidencia = {pub, similitud: similitudFlex};
+        if (
+          similitudFlex > 0.7 &&
+          (!mejorCoincidencia || similitudFlex > mejorCoincidencia.similitud)
+        ) {
+          mejorCoincidencia = { pub, similitud: similitudFlex };
           if (process.env.NODE_ENV === "development") {
-            console.log(`✅ Coincidencia por inclusión: id=${pub.id_publicacion}, similitud=${similitudFlex.toFixed(2)}`);
+            console.log(
+              `✅ Coincidencia por inclusión: id=${pub.id_publicacion}, similitud=${similitudFlex.toFixed(2)}`,
+            );
           }
         }
       }
@@ -880,12 +973,15 @@ export default async function getPublicacionBySlug(
       const añoBuscado = Number.parseInt(searchAños[0], 10);
 
       if (process.env.NODE_ENV === "development") {
-        console.log(`🔍 Intentando búsqueda directa: autor=${searchAutor}, año=${añoBuscado}`);
+        console.log(
+          `🔍 Intentando búsqueda directa: autor=${searchAutor}, año=${añoBuscado}`,
+        );
       }
 
       // Buscar publicación que coincida con autor y año
       for (const pub of publicaciones) {
-        const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
+        const año =
+          pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
 
         if (Math.abs(año - añoBuscado) <= 1 && pub.cita_corta) {
           // Extraer autor de la cita corta
@@ -904,12 +1000,16 @@ export default async function getPublicacionBySlug(
             .replaceAll(/-+/g, "-")
             .replaceAll(/^[-]+|[-]+$/g, "");
 
-          if (autorNormalizado === searchAutor ||
-              autorNormalizado.startsWith(searchAutor) ||
-              searchAutor.startsWith(autorNormalizado)) {
-            mejorCoincidencia = {pub, similitud: 0.7};
+          if (
+            autorNormalizado === searchAutor ||
+            autorNormalizado.startsWith(searchAutor) ||
+            searchAutor.startsWith(autorNormalizado)
+          ) {
+            mejorCoincidencia = { pub, similitud: 0.7 };
             if (process.env.NODE_ENV === "development") {
-              console.log(`✅ Coincidencia por autor y año: id=${pub.id_publicacion}, autor=${autorNormalizado}`);
+              console.log(
+                `✅ Coincidencia por autor y año: id=${pub.id_publicacion}, autor=${autorNormalizado}`,
+              );
             }
             break;
           }
@@ -921,10 +1021,14 @@ export default async function getPublicacionBySlug(
   // Si encontramos una buena coincidencia, usarla (bajar el umbral a 0.3 para ser más flexible)
   if (mejorCoincidencia && mejorCoincidencia.similitud > 0.3) {
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ Usando mejor coincidencia: id=${mejorCoincidencia.pub.id_publicacion}, similitud=${mejorCoincidencia.similitud.toFixed(2)}`);
+      console.log(
+        `✅ Usando mejor coincidencia: id=${mejorCoincidencia.pub.id_publicacion}, similitud=${mejorCoincidencia.similitud.toFixed(2)}`,
+      );
     }
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ Coincidencia por similitud encontrada: id=${mejorCoincidencia.pub.id_publicacion}, similitud=${mejorCoincidencia.similitud.toFixed(2)}`);
+      console.log(
+        `✅ Coincidencia por similitud encontrada: id=${mejorCoincidencia.pub.id_publicacion}, similitud=${mejorCoincidencia.similitud.toFixed(2)}`,
+      );
     }
 
     const pub = mejorCoincidencia.pub;
@@ -958,7 +1062,7 @@ export default async function getPublicacionBySlug(
               const taxonId = tp.taxon?.id_taxon || 0;
               if (taxonId === 0) return null;
 
-              const {data: taxonData} = await supabaseClient
+              const { data: taxonData } = await supabaseClient
                 .from("taxon")
                 .select(
                   `
@@ -978,7 +1082,7 @@ export default async function getPublicacionBySlug(
 
               let nombreCompleto = taxonData.taxon || "";
               if (taxonData.taxon_id) {
-                const {data: generoData} = await supabaseClient
+                const { data: generoData } = await supabaseClient
                   .from("taxon")
                   .select("taxon")
                   .eq("id_taxon", taxonData.taxon_id)
@@ -990,7 +1094,8 @@ export default async function getPublicacionBySlug(
               }
 
               const idFichaEspecie =
-                Array.isArray(taxonData.ficha_especie) && taxonData.ficha_especie.length > 0
+                Array.isArray(taxonData.ficha_especie) &&
+                taxonData.ficha_especie.length > 0
                   ? taxonData.ficha_especie[0]?.id_ficha_especie || null
                   : null;
 
@@ -1030,7 +1135,12 @@ export default async function getPublicacionBySlug(
     // Mostrar algunos slugs generados para comparar
     const primerosSlugs = publicaciones.slice(0, 10).map((p) => {
       const año = p.numero_publicacion_ano || new Date(p.fecha).getFullYear();
-      const genSlug = generatePublicacionSlug(p.cita_corta, año, p.titulo, p.id_publicacion);
+      const genSlug = generatePublicacionSlug(
+        p.cita_corta,
+        año,
+        p.titulo,
+        p.id_publicacion,
+      );
       const normSlug = normalizeSlug(genSlug);
       return {
         id: p.id_publicacion,
@@ -1049,14 +1159,14 @@ export default async function getPublicacionBySlug(
  * Obtiene todas las publicaciones con sus slugs para generateStaticParams
  */
 export async function getAllPublicacionesWithSlugs(): Promise<
-  Array<{slug: string; id_publicacion: number}>
+  Array<{ slug: string; id_publicacion: number }>
 > {
   const supabaseClient = createServiceClient();
 
-  const {data: publicaciones, error} = await supabaseClient
+  const { data: publicaciones, error } = await supabaseClient
     .from("publicacion")
     .select("id_publicacion, cita_corta, numero_publicacion_ano, fecha, titulo")
-    .order("id_publicacion", {ascending: true});
+    .order("id_publicacion", { ascending: true });
 
   if (error || !publicaciones) {
     console.error("Error al obtener publicaciones:", error);
@@ -1073,4 +1183,3 @@ export async function getAllPublicacionesWithSlugs(): Promise<
     id_publicacion: pub.id_publicacion,
   }));
 }
-

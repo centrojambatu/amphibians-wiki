@@ -57,7 +57,11 @@ export function generatePublicacionSlug(
     }
 
     // Tomar primeras 5 palabras (después de limpiar)
-    const palabras = tituloSinHtml.trim().split(/\s+/).filter((p) => p.length > 0).slice(0, 5);
+    const palabras = tituloSinHtml
+      .trim()
+      .split(/\s+/)
+      .filter((p) => p.length > 0)
+      .slice(0, 5);
     tituloSlug = palabras
       .join("-")
       .normalize("NFD") // Normalizar a NFD (descomponer acentos)
@@ -93,4 +97,3 @@ export function parsePublicacionSlug(slug: string): {
     titulo: partes.slice(añoMatch ? partes.indexOf(añoMatch) + 1 : 1).join("-"),
   };
 }
-

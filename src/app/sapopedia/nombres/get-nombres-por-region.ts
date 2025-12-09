@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface NombrePorRegion {
   region: string;
@@ -7,11 +7,13 @@ export interface NombrePorRegion {
 }
 
 // Función para obtener nombres comunes agrupados por región geográfica
-export default async function getNombresPorRegion(): Promise<NombrePorRegion[]> {
+export default async function getNombresPorRegion(): Promise<
+  NombrePorRegion[]
+> {
   const supabaseClient = createServiceClient();
 
   // Obtener todos los taxones con nombres comunes y su distribución geopolítica
-  const {data: taxones, error} = await supabaseClient
+  const { data: taxones, error } = await supabaseClient
     .from("vw_nombres_comunes")
     .select("id_taxon, nombre_comun_especie, nombre_cientifico")
     .not("nombre_comun_especie", "is", null);
@@ -30,11 +32,14 @@ export default async function getNombresPorRegion(): Promise<NombrePorRegion[]> 
   const taxonIds = taxones.map((t: any) => t.id_taxon);
   const RANK_PROVINCIAS = 3;
 
-  const {data: geopoliticaData, error: errorGeopolitica} = await supabaseClient
-    .from("taxon_geopolitica")
-    .select("taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)")
-    .in("taxon_id", taxonIds)
-    .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
+  const { data: geopoliticaData, error: errorGeopolitica } =
+    await supabaseClient
+      .from("taxon_geopolitica")
+      .select(
+        "taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)",
+      )
+      .in("taxon_id", taxonIds)
+      .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
 
   if (errorGeopolitica) {
     console.error("Error al obtener geopolítica:", errorGeopolitica);
@@ -49,9 +54,12 @@ export default async function getNombresPorRegion(): Promise<NombrePorRegion[]> 
     if (!nombreComun) return;
 
     // Obtener las provincias para este taxón
-    const provincias = geopoliticaData?.filter(
-      (g: any) => g.taxon_id === taxon.id_taxon && g.geopolitica?.rank_geopolitica_id === RANK_PROVINCIAS,
-    ) || [];
+    const provincias =
+      geopoliticaData?.filter(
+        (g: any) =>
+          g.taxon_id === taxon.id_taxon &&
+          g.geopolitica?.rank_geopolitica_id === RANK_PROVINCIAS,
+      ) || [];
 
     if (provincias.length === 0) {
       // Si no tiene provincia específica, agregar a "Sin región específica"
@@ -62,7 +70,8 @@ export default async function getNombresPorRegion(): Promise<NombrePorRegion[]> 
     } else {
       // Agregar el nombre común a cada provincia donde se encuentra
       provincias.forEach((provincia: any) => {
-        const nombreRegion = provincia.geopolitica?.nombre || "Sin región específica";
+        const nombreRegion =
+          provincia.geopolitica?.nombre || "Sin región específica";
 
         if (!regionesMap.has(nombreRegion)) {
           regionesMap.set(nombreRegion, new Set());
@@ -82,4 +91,3 @@ export default async function getNombresPorRegion(): Promise<NombrePorRegion[]> 
 
   return regiones;
 }
-

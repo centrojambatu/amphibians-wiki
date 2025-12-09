@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export default async function getFichaEspecie(idFichaEspecie: string) {
   const supabaseClient = createServiceClient();
@@ -6,7 +6,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   console.log("🔍 getFichaEspecie llamado con:", idFichaEspecie);
 
   // Buscar por id_ficha_especie o nombre científico en la vista vw_ficha_especie_completa
-  const isNumber = typeof idFichaEspecie === "number" || /^\d+$/.test(idFichaEspecie);
+  const isNumber =
+    typeof idFichaEspecie === "number" || /^\d+$/.test(idFichaEspecie);
 
   let vistaData;
 
@@ -15,7 +16,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     const idNum = Number(idFichaEspecie);
 
     console.log("🔢 Buscando por id_ficha_especie:", idNum);
-    const {data, error} = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("vw_ficha_especie_completa" as any)
       .select("*")
       .eq("id_ficha_especie", idNum)
@@ -28,7 +29,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     }
 
     vistaData = data;
-    console.log("✅ Datos encontrados por id:", (vistaData as any)?.nombre_cientifico);
+    console.log(
+      "✅ Datos encontrados por id:",
+      (vistaData as any)?.nombre_cientifico,
+    );
   } else {
     // Buscar por nombre científico (búsqueda exacta primero, luego flexible)
     console.log("📝 Buscando por nombre científico:", idFichaEspecie);
@@ -37,7 +41,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     const nombreNormalizado = idFichaEspecie.trim().replaceAll(/\s+/g, " ");
 
     // Primero intentar búsqueda exacta
-    let {data, error} = await supabaseClient
+    let { data, error } = await supabaseClient
       .from("vw_ficha_especie_completa" as any)
       .select("*")
       .eq("nombre_cientifico", nombreNormalizado)
@@ -46,11 +50,12 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     // Si no se encuentra, intentar búsqueda case-insensitive
     if (error) {
       console.log("⚠️ Búsqueda exacta falló, intentando case-insensitive...");
-      const {data: dataCaseInsensitive, error: errorCaseInsensitive} = await supabaseClient
-        .from("vw_ficha_especie_completa" as any)
-        .select("*")
-        .ilike("nombre_cientifico", nombreNormalizado)
-        .single();
+      const { data: dataCaseInsensitive, error: errorCaseInsensitive } =
+        await supabaseClient
+          .from("vw_ficha_especie_completa" as any)
+          .select("*")
+          .ilike("nombre_cientifico", nombreNormalizado)
+          .single();
 
       if (!errorCaseInsensitive && dataCaseInsensitive) {
         data = dataCaseInsensitive;
@@ -67,11 +72,17 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     }
 
     vistaData = data;
-    console.log("✅ Datos encontrados por nombre:", (vistaData as any)?.nombre_cientifico);
+    console.log(
+      "✅ Datos encontrados por nombre:",
+      (vistaData as any)?.nombre_cientifico,
+    );
   }
 
   if (!vistaData) {
-    console.error("❌ No se encontraron datos en la vista para:", idFichaEspecie);
+    console.error(
+      "❌ No se encontraron datos en la vista para:",
+      idFichaEspecie,
+    );
 
     return null;
   }
@@ -83,13 +94,19 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   const idFichaEspecieVista = vistaDataTyped.id_ficha_especie as number;
 
   if (!taxonId) {
-    console.error("No se encontró taxon_id en los datos de la vista:", vistaData);
+    console.error(
+      "No se encontró taxon_id en los datos de la vista:",
+      vistaData,
+    );
 
     return null;
   }
 
   if (!idFichaEspecieVista) {
-    console.error("No se encontró id_ficha_especie en los datos de la vista:", vistaData);
+    console.error(
+      "No se encontró id_ficha_especie en los datos de la vista:",
+      vistaData,
+    );
 
     return null;
   }
@@ -104,13 +121,13 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   // Ejecutar todas las queries en paralelo para mejor performance
   const [
-    {data: fichaEspecieData, error: errorFichaEspecie},
-    {data: taxon_catalogo_awe_results, error: taxon_catalogo_aweError},
-    {data: dataRegionBio, error: errorAweRegionBio},
-    {data: geoPolitica, error: errorGeoPolitica},
-    {data: publicaciones, error: errorPublicaciones},
-    {data: taxones, error: errorTaxones},
-    {data: lineage, error: errorLineage},
+    { data: fichaEspecieData, error: errorFichaEspecie },
+    { data: taxon_catalogo_awe_results, error: taxon_catalogo_aweError },
+    { data: dataRegionBio, error: errorAweRegionBio },
+    { data: geoPolitica, error: errorGeoPolitica },
+    { data: publicaciones, error: errorPublicaciones },
+    { data: taxones, error: errorTaxones },
+    { data: lineage, error: errorLineage },
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
@@ -137,9 +154,15 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     supabaseClient.rpc("get_taxon_geopolitica_hierarchy", {
       _taxon_id: taxonId,
     }),
-    supabaseClient.from("taxon_publicacion").select("*, publicacion(*)").eq("taxon_id", taxonId),
-    supabaseClient.from("taxon").select("*, taxonPadre:taxon_id(*)").eq("id_taxon", taxonId),
-    supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: taxonId}),
+    supabaseClient
+      .from("taxon_publicacion")
+      .select("*, publicacion(*)")
+      .eq("taxon_id", taxonId),
+    supabaseClient
+      .from("taxon")
+      .select("*, taxonPadre:taxon_id(*)")
+      .eq("id_taxon", taxonId),
+    supabaseClient.rpc("get_taxon_lineage", { p_id_taxon: taxonId }),
   ]);
 
   // Manejar errores
@@ -189,15 +212,18 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
         vistaDataTyped.nombre_cientifico,
       );
     } else {
-      console.log("✅ Validación exitosa: taxon_id coincide entre vista y ficha_especie");
+      console.log(
+        "✅ Validación exitosa: taxon_id coincide entre vista y ficha_especie",
+      );
     }
   }
   const fichaEspecie = fichaEspecieData || ({} as any);
 
   // Buscar listaRojaIUCN una sola vez
   const listaRojaIUCN =
-    taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10) ||
-    null;
+    taxon_catalogo_awe_results?.find(
+      (item) => item.catalogo_awe.tipo_catalogo_awe_id === 10,
+    ) || null;
 
   // Filtrar solo las distribuciones altitudinales (tipo_catalogo_awe_id = 5)
   // Eliminar duplicados basándose en catalogo_awe_id (combinación única de taxon_id + catalogo_awe_id)
@@ -217,9 +243,12 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   const distributions = Array.from(distributionsMap.values());
 
   // Revisar si tiene distribución occidental/oriental basándose en awe_distribucion_altitudinal de la vista
-  const distribucionAltitudinal = (vistaDataTyped.awe_distribucion_altitudinal || "").toLowerCase();
+  const distribucionAltitudinal = (
+    vistaDataTyped.awe_distribucion_altitudinal || ""
+  ).toLowerCase();
   const hasOrientalDistribution = distribucionAltitudinal.includes("oriental");
-  const hasOccidentalDistribution = distribucionAltitudinal.includes("occidental");
+  const hasOccidentalDistribution =
+    distribucionAltitudinal.includes("occidental");
 
   const altitudinalRange = {
     // Usar valores de la vista
@@ -242,8 +271,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   };
 
   // Asegurar que taxones y lineage tengan al menos un elemento para evitar errores en card-species-header
-  const taxonesArray = Array.isArray(taxones) && taxones.length > 0 ? taxones : [];
-  const lineageArray = Array.isArray(lineage) && lineage.length > 0 ? lineage : [];
+  const taxonesArray =
+    Array.isArray(taxones) && taxones.length > 0 ? taxones : [];
+  const lineageArray =
+    Array.isArray(lineage) && lineage.length > 0 ? lineage : [];
 
   // Filtrar publicaciones que tienen el objeto publicacion válido
   const publicacionesValidas = Array.isArray(publicaciones)
@@ -336,17 +367,35 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   // Logs de depuración
   if (process.env.NODE_ENV === "development") {
-    console.log("🔍 Referencias encontradas en textos:", Array.from(referenciasEncontradas));
-    console.log("📚 Total de publicaciones ordenadas:", publicacionesOrdenadas.length);
-    console.log("✅ Publicaciones referenciadas encontradas:", publicacionesReferenciadas.length);
-    console.log("📖 Publicaciones que se mostrarán:", publicacionesParaMostrar.length);
+    console.log(
+      "🔍 Referencias encontradas en textos:",
+      Array.from(referenciasEncontradas),
+    );
+    console.log(
+      "📚 Total de publicaciones ordenadas:",
+      publicacionesOrdenadas.length,
+    );
+    console.log(
+      "✅ Publicaciones referenciadas encontradas:",
+      publicacionesReferenciadas.length,
+    );
+    console.log(
+      "📖 Publicaciones que se mostrarán:",
+      publicacionesParaMostrar.length,
+    );
 
     // Mostrar ejemplos de campos de texto para debug
     if (fichaEspecie?.etimologia) {
       const refsEnEtimologia = extractReferenceIds(fichaEspecie.etimologia);
 
-      console.log("📝 Etimología contiene referencias (id_publicacion):", refsEnEtimologia);
-      console.log("📝 Etimología (primeros 200 chars):", fichaEspecie.etimologia.substring(0, 200));
+      console.log(
+        "📝 Etimología contiene referencias (id_publicacion):",
+        refsEnEtimologia,
+      );
+      console.log(
+        "📝 Etimología (primeros 200 chars):",
+        fichaEspecie.etimologia.substring(0, 200),
+      );
     }
 
     if (publicacionesOrdenadas.length > 0) {
@@ -366,7 +415,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     id_ficha_especie: idFichaEspecieVista ?? null,
     taxon_id: taxonId,
     fotografia_ficha: fichaEspecie?.fotografia_ficha ?? null,
-    descubridor: (vistaDataTyped?.especie_autor || fichaEspecie?.descubridor) ?? null,
+    descubridor:
+      (vistaDataTyped?.especie_autor || fichaEspecie?.descubridor) ?? null,
     colector: fichaEspecie?.colector ?? null,
     etimologia: fichaEspecie?.etimologia ?? null,
     taxonomia: fichaEspecie?.taxonomia ?? null,
@@ -377,7 +427,9 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
     distribucion: fichaEspecie?.distribucion ?? null,
     distribucion_global:
-      (vistaDataTyped?.distribucion_global || fichaEspecie?.distribucion_global) ?? null,
+      (vistaDataTyped?.distribucion_global ||
+        fichaEspecie?.distribucion_global) ??
+      null,
     historial: fichaEspecie?.historial ?? null,
     fecha_actualizacion: fichaEspecie?.fecha_actualizacion ?? null,
     rango_altitudinal: fichaEspecie?.rango_altitudinal ?? null,
@@ -387,7 +439,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       (vistaDataTyped?.observacion_zona_altitudinal ||
         fichaEspecie?.observacion_zona_altitudinal) ??
       null,
-    comentario_estatus_poblacional: fichaEspecie?.comentario_estatus_poblacional ?? null,
+    comentario_estatus_poblacional:
+      fichaEspecie?.comentario_estatus_poblacional ?? null,
     // Links externos
     wikipedia: fichaEspecie?.wikipedia ?? null,
     aw: fichaEspecie?.aw ?? null,
@@ -428,7 +481,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   // Debug: verificar campos críticos
   if (!result.taxones || result.taxones.length === 0) {
-    console.warn("⚠️ taxones está vacío o undefined para id_ficha_especie:", idFichaEspecieVista);
+    console.warn(
+      "⚠️ taxones está vacío o undefined para id_ficha_especie:",
+      idFichaEspecieVista,
+    );
   }
   if (!result.lineage || result.lineage.length === 0) {
     console.warn("⚠️ lineage está vacío o undefined para taxon_id:", taxonId);

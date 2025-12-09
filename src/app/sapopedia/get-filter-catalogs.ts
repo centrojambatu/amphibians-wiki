@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface CatalogOption {
   id: number;
@@ -49,11 +49,11 @@ async function getCatalogByType(
   tipoId: number,
   useSiglaAsValue = false,
 ): Promise<CatalogOption[]> {
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("catalogo_awe")
     .select("id_catalogo_awe, nombre, sigla")
     .eq("tipo_catalogo_awe_id", tipoId)
-    .order("nombre", {ascending: true});
+    .order("nombre", { ascending: true });
 
   if (error) {
     console.error(`Error al obtener catálogo tipo ${tipoId}:`, error);
@@ -73,11 +73,11 @@ async function getCatalogByType(
 async function getProvincias(
   supabaseClient: ReturnType<typeof createServiceClient>,
 ): Promise<CatalogOption[]> {
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("geopolitica")
     .select("id_geopolitica, nombre")
     .eq("rank_geopolitica_id", RANK_PROVINCIAS)
-    .order("nombre", {ascending: true});
+    .order("nombre", { ascending: true });
 
   if (error) {
     console.error("Error al obtener provincias:", error);
@@ -114,7 +114,10 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.RESERVAS_BIOSFERA),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.BOSQUES_PROTEGIDOS),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.AREAS_PROTEGIDAS_ESTADO),
-    getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.AREAS_PROTEGIDAS_PRIVADAS),
+    getCatalogByType(
+      supabaseClient,
+      CATALOG_TYPE_IDS.AREAS_PROTEGIDAS_PRIVADAS,
+    ),
   ]);
 
   return {

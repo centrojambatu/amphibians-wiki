@@ -1,6 +1,6 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,19 +33,21 @@ export async function GET(request: NextRequest) {
         .limit(10);
     }
 
-    const {data, error} = await dataQuery;
+    const { data, error } = await dataQuery;
 
     if (error) {
       console.error("Error al buscar taxón:", error);
 
-      return NextResponse.json({error: error.message}, {status: 500});
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data || []);
   } catch (error) {
     console.error("Error en la API:", error);
 
-    return NextResponse.json({error: "Error interno del servidor"}, {status: 500});
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }
-

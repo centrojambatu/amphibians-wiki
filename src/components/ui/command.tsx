@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import {type DialogProps} from "@radix-ui/react-dialog";
-import {Command as CommandPrimitive} from "cmdk";
-import {Search} from "lucide-react";
+import { type DialogProps } from "@radix-ui/react-dialog";
+import { Command as CommandPrimitive } from "cmdk";
+import { Search } from "lucide-react";
 
-import {cn} from "@/lib/utils";
-import {Dialog, DialogContent} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Command = ({
   ref,
@@ -29,7 +29,7 @@ Command.displayName = CommandPrimitive.displayName;
 
 interface CommandDialogProps extends DialogProps {}
 
-const CommandDialog = ({children, ...props}: CommandDialogProps) => {
+const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
       <DialogContent className="overflow-hidden p-0 shadow-lg">
@@ -84,7 +84,13 @@ const CommandEmpty = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty> & {
   ref?: React.RefObject<React.ElementRef<typeof CommandPrimitive.Empty> | null>;
-}) => <CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />;
+}) => (
+  <CommandPrimitive.Empty
+    ref={ref}
+    className="py-6 text-center text-sm"
+    {...props}
+  />
+);
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
@@ -112,7 +118,9 @@ const CommandSeparator = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Separator> & {
-  ref?: React.RefObject<React.ElementRef<typeof CommandPrimitive.Separator> | null>;
+  ref?: React.RefObject<React.ElementRef<
+    typeof CommandPrimitive.Separator
+  > | null>;
 }) => (
   <CommandPrimitive.Separator
     ref={ref}
@@ -142,10 +150,16 @@ const CommandItem = ({
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
-const CommandShortcut = ({className, ...props}: React.HTMLAttributes<HTMLSpanElement>) => {
+const CommandShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
+      className={cn(
+        "text-muted-foreground ml-auto text-xs tracking-widest",
+        className,
+      )}
       {...props}
     />
   );

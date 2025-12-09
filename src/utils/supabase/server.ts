@@ -1,11 +1,11 @@
-import {createServerClient} from "@supabase/ssr";
-import {createClient as createSupabaseClient} from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-import {Database} from "@/types/supabase";
+import { Database } from "@/types/supabase";
 
 export async function createClient() {
   // Importación dinámica de cookies para evitar problemas con Turbopack
-  const {cookies} = await import("next/headers");
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -18,7 +18,9 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({name, value, options}) => cookieStore.set(name, value, options));
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

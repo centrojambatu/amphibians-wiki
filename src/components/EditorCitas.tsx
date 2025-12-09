@@ -1,16 +1,25 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
-import {Save, Eye, ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Save,
+  Eye,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
-import {FichaEspecieEditor} from "@/app/sapopedia/editor-citas/get-ficha-especie-editor";
-import {Publicacion} from "@/app/sapopedia/editor-citas/get-publicaciones-taxon";
-import {EspecieNavegacion, toSlug} from "@/app/sapopedia/editor-citas/get-especies-navegacion";
-import {CatalogoAweOpcion} from "@/app/sapopedia/editor-citas/get-catalogo-awe-opciones";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FichaEspecieEditor } from "@/app/sapopedia/editor-citas/get-ficha-especie-editor";
+import { Publicacion } from "@/app/sapopedia/editor-citas/get-publicaciones-taxon";
+import {
+  EspecieNavegacion,
+  toSlug,
+} from "@/app/sapopedia/editor-citas/get-especies-navegacion";
+import { CatalogoAweOpcion } from "@/app/sapopedia/editor-citas/get-catalogo-awe-opciones";
 
 import EditorCitasSearch from "./EditorCitasSearch";
 
@@ -27,23 +36,55 @@ interface EditorCitasProps {
 
 // Campos editables de ficha_especie
 const CAMPOS_FICHA = [
-  {key: "informacion_adicional" as const, label: "Información Adicional", tipo: "texto" as const},
-  {key: "colector" as const, label: "Colector", tipo: "texto" as const},
-  {key: "etimologia" as const, label: "Etimología", tipo: "texto" as const},
-  {key: "taxonomia" as const, label: "Taxonomía", tipo: "texto" as const},
-  {key: "habitat_biologia" as const, label: "Hábitat y Biología", tipo: "texto" as const},
-  {key: "dieta" as const, label: "Dieta", tipo: "texto" as const},
-  {key: "reproduccion" as const, label: "Reproducción", tipo: "texto" as const},
-  {key: "identificacion" as const, label: "Identificación", tipo: "texto" as const},
-  {key: "descripcion" as const, label: "Descripción", tipo: "texto" as const},
-  {key: "diagnosis" as const, label: "Diagnosis", tipo: "texto" as const},
-  {key: "morfometria" as const, label: "Morfometría", tipo: "texto" as const},
-  {key: "color_en_vida" as const, label: "Color en Vida", tipo: "texto" as const},
-  {key: "color_en_preservacion" as const, label: "Color en Preservación", tipo: "texto" as const},
-  {key: "larva" as const, label: "Larva", tipo: "texto" as const},
-  {key: "canto" as const, label: "Canto", tipo: "texto" as const},
-  {key: "distribucion" as const, label: "Distribución", tipo: "texto" as const},
-  {key: "distribucion_global" as const, label: "Distribución Global", tipo: "texto" as const},
+  {
+    key: "informacion_adicional" as const,
+    label: "Información Adicional",
+    tipo: "texto" as const,
+  },
+  { key: "colector" as const, label: "Colector", tipo: "texto" as const },
+  { key: "etimologia" as const, label: "Etimología", tipo: "texto" as const },
+  { key: "taxonomia" as const, label: "Taxonomía", tipo: "texto" as const },
+  {
+    key: "habitat_biologia" as const,
+    label: "Hábitat y Biología",
+    tipo: "texto" as const,
+  },
+  { key: "dieta" as const, label: "Dieta", tipo: "texto" as const },
+  {
+    key: "reproduccion" as const,
+    label: "Reproducción",
+    tipo: "texto" as const,
+  },
+  {
+    key: "identificacion" as const,
+    label: "Identificación",
+    tipo: "texto" as const,
+  },
+  { key: "descripcion" as const, label: "Descripción", tipo: "texto" as const },
+  { key: "diagnosis" as const, label: "Diagnosis", tipo: "texto" as const },
+  { key: "morfometria" as const, label: "Morfometría", tipo: "texto" as const },
+  {
+    key: "color_en_vida" as const,
+    label: "Color en Vida",
+    tipo: "texto" as const,
+  },
+  {
+    key: "color_en_preservacion" as const,
+    label: "Color en Preservación",
+    tipo: "texto" as const,
+  },
+  { key: "larva" as const, label: "Larva", tipo: "texto" as const },
+  { key: "canto" as const, label: "Canto", tipo: "texto" as const },
+  {
+    key: "distribucion" as const,
+    label: "Distribución",
+    tipo: "texto" as const,
+  },
+  {
+    key: "distribucion_global" as const,
+    label: "Distribución Global",
+    tipo: "texto" as const,
+  },
   {
     key: "observacion_zona_altitudinal" as const,
     label: "Observación Zona Altitudinal",
@@ -59,9 +100,13 @@ const CAMPOS_FICHA = [
     label: "Comentario Estatus Poblacional",
     tipo: "texto" as const,
   },
-  {key: "sinonimia" as const, label: "Sinonimia", tipo: "texto" as const},
-  {key: "agradecimiento" as const, label: "Agradecimiento", tipo: "texto" as const},
-  {key: "usos" as const, label: "Usos", tipo: "texto" as const},
+  { key: "sinonimia" as const, label: "Sinonimia", tipo: "texto" as const },
+  {
+    key: "agradecimiento" as const,
+    label: "Agradecimiento",
+    tipo: "texto" as const,
+  },
+  { key: "usos" as const, label: "Usos", tipo: "texto" as const },
   // Campos numéricos con min y max
   {
     key: "rango_altitudinal" as const,
@@ -85,7 +130,11 @@ const CAMPOS_FICHA = [
     campoMax: "temperatura_max" as const,
   },
   // Campo numérico simple
-  {key: "area_distribucion" as const, label: "Área de Distribución", tipo: "numero" as const},
+  {
+    key: "area_distribucion" as const,
+    label: "Área de Distribución",
+    tipo: "numero" as const,
+  },
   // Campos de catálogo AWE
   {
     key: "awe_distribucion_altitudinal" as const,
@@ -154,9 +203,14 @@ export default function EditorCitas({
   taxonCatalogoAwe,
 }: EditorCitasProps) {
   const router = useRouter();
-  const [fichaEspecie, setFichaEspecie] = useState<FichaEspecieEditor>(initialFicha);
-  const [campoSeleccionado, setCampoSeleccionado] = useState<string>("informacion_adicional");
-  const [textoEditor, setTextoEditor] = useState<string>(initialFicha.informacion_adicional || "");
+  const [fichaEspecie, setFichaEspecie] =
+    useState<FichaEspecieEditor>(initialFicha);
+  const [campoSeleccionado, setCampoSeleccionado] = useState<string>(
+    "informacion_adicional",
+  );
+  const [textoEditor, setTextoEditor] = useState<string>(
+    initialFicha.informacion_adicional || "",
+  );
   const [vistaPrevia, setVistaPrevia] = useState<string>("");
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -167,7 +221,10 @@ export default function EditorCitas({
   >({});
   // Estado para campos numéricos
   const [valoresNumericos, setValoresNumericos] = useState<
-    Record<string, {min: number | null; max: number | null; valor: number | null}>
+    Record<
+      string,
+      { min: number | null; max: number | null; valor: number | null }
+    >
   >({});
 
   // Inicializar valores de catálogo AWE desde props
@@ -176,7 +233,8 @@ export default function EditorCitas({
 
     CAMPOS_FICHA.forEach((campo) => {
       if (campo.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
-        valoresIniciales[campo.key] = taxonCatalogoAwe[campo.tipoCatalogoId] || [];
+        valoresIniciales[campo.key] =
+          taxonCatalogoAwe[campo.tipoCatalogoId] || [];
       }
     });
 
@@ -187,21 +245,33 @@ export default function EditorCitas({
   useEffect(() => {
     const valoresIniciales: Record<
       string,
-      {min: number | null; max: number | null; valor: number | null}
+      { min: number | null; max: number | null; valor: number | null }
     > = {};
 
     CAMPOS_FICHA.forEach((campo) => {
-      if (campo.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
+      if (
+        campo.tipo === "rango" &&
+        "campoMin" in campo &&
+        "campoMax" in campo
+      ) {
         valoresIniciales[campo.key] = {
-          min: (fichaEspecie[campo.campoMin as keyof FichaEspecieEditor] as number) || null,
-          max: (fichaEspecie[campo.campoMax as keyof FichaEspecieEditor] as number) || null,
+          min:
+            (fichaEspecie[
+              campo.campoMin as keyof FichaEspecieEditor
+            ] as number) || null,
+          max:
+            (fichaEspecie[
+              campo.campoMax as keyof FichaEspecieEditor
+            ] as number) || null,
           valor: null,
         };
       } else if (campo.tipo === "numero") {
         valoresIniciales[campo.key] = {
           min: null,
           max: null,
-          valor: (fichaEspecie[campo.key as keyof FichaEspecieEditor] as number) || null,
+          valor:
+            (fichaEspecie[campo.key as keyof FichaEspecieEditor] as number) ||
+            null,
         };
       }
     });
@@ -213,11 +283,18 @@ export default function EditorCitas({
   useEffect(() => {
     const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-    if (campo?.tipo === "catalogo_awe" || campo?.tipo === "rango" || campo?.tipo === "numero") {
+    if (
+      campo?.tipo === "catalogo_awe" ||
+      campo?.tipo === "rango" ||
+      campo?.tipo === "numero"
+    ) {
       // Para campos de catálogo AWE, rango o número, no hay texto editor
       setTextoEditor("");
     } else {
-      const valor = (fichaEspecie[campoSeleccionado as keyof FichaEspecieEditor] as string) || "";
+      const valor =
+        (fichaEspecie[
+          campoSeleccionado as keyof FichaEspecieEditor
+        ] as string) || "";
 
       setTextoEditor(valor);
     }
@@ -251,7 +328,11 @@ export default function EditorCitas({
 
     if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
       // Para campos de rango, mostrar min y max
-      const valores = valoresNumericos[campoSeleccionado] || {min: null, max: null, valor: null};
+      const valores = valoresNumericos[campoSeleccionado] || {
+        min: null,
+        max: null,
+        valor: null,
+      };
 
       const minStr = valores.min !== null ? String(valores.min) : "No definido";
       const maxStr = valores.max !== null ? String(valores.max) : "No definido";
@@ -279,9 +360,14 @@ export default function EditorCitas({
     const citasEncontradas = textoEditor.match(/\{\{(\d+)\}\}/g) || [];
 
     citasEncontradas.forEach((match) => {
-      const idPublicacion = Number.parseInt(match.replaceAll(/\{\{|\}\}/g, ""), 10);
+      const idPublicacion = Number.parseInt(
+        match.replaceAll(/\{\{|\}\}/g, ""),
+        10,
+      );
       // Buscar la publicación por id_publicacion
-      const publicacion = publicaciones.find((pub) => pub.id_publicacion === idPublicacion);
+      const publicacion = publicaciones.find(
+        (pub) => pub.id_publicacion === idPublicacion,
+      );
 
       if (publicacion?.cita_corta) {
         // Reemplazar {{id_publicacion}} con cita_corta en la vista previa
@@ -308,9 +394,17 @@ export default function EditorCitas({
     try {
       const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-      if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
+      if (
+        campo?.tipo === "rango" &&
+        "campoMin" in campo &&
+        "campoMax" in campo
+      ) {
         // Guardar campos de rango (min y max)
-        const valores = valoresNumericos[campoSeleccionado] || {min: null, max: null, valor: null};
+        const valores = valoresNumericos[campoSeleccionado] || {
+          min: null,
+          max: null,
+          valor: null,
+        };
 
         const fichaActualizada = {
           ...fichaEspecie,
@@ -330,7 +424,9 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" && errorData !== null && "error" in errorData
+            typeof errorData === "object" &&
+            errorData !== null &&
+            "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -365,7 +461,9 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" && errorData !== null && "error" in errorData
+            typeof errorData === "object" &&
+            errorData !== null &&
+            "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -381,24 +479,30 @@ export default function EditorCitas({
         setTimeout(() => setSaveMessage(null), 3000);
       } else if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
         // Guardar catálogo AWE
-        const idsSeleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
+        const idsSeleccionados =
+          catalogoAweSeleccionados[campoSeleccionado] || [];
 
-        const response = await fetch(`/api/taxon-catalogo-awe/${String(taxonId)}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `/api/taxon-catalogo-awe/${String(taxonId)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tipo_catalogo_awe_id: campo.tipoCatalogoId,
+              catalogo_awe_ids: idsSeleccionados,
+            }),
           },
-          body: JSON.stringify({
-            tipo_catalogo_awe_id: campo.tipoCatalogoId,
-            catalogo_awe_ids: idsSeleccionados,
-          }),
-        });
+        );
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" && errorData !== null && "error" in errorData
+            typeof errorData === "object" &&
+            errorData !== null &&
+            "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -439,7 +543,9 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" && errorData !== null && "error" in errorData
+            typeof errorData === "object" &&
+            errorData !== null &&
+            "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -457,7 +563,9 @@ export default function EditorCitas({
     } catch (error) {
       console.error("Error al guardar:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Error al guardar. Por favor, intenta de nuevo.";
+        error instanceof Error
+          ? error.message
+          : "Error al guardar. Por favor, intenta de nuevo.";
 
       setSaveMessage(`Error: ${errorMessage}`);
     } finally {
@@ -472,7 +580,9 @@ export default function EditorCitas({
           {/* Header */}
           <div className="flex-shrink-0 border-b bg-white px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Editor de Textos con Citas
+              </h1>
               <div className="flex items-center gap-2">
                 <Button
                   className="flex items-center gap-1"
@@ -481,7 +591,9 @@ export default function EditorCitas({
                   variant="outline"
                   onClick={() => {
                     if (anteriorEspecie) {
-                      router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`);
+                      router.push(
+                        `/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`,
+                      );
                     }
                   }}
                 >
@@ -495,7 +607,9 @@ export default function EditorCitas({
                   variant="outline"
                   onClick={() => {
                     if (siguienteEspecie) {
-                      router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`);
+                      router.push(
+                        `/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`,
+                      );
                     }
                   }}
                 >
@@ -513,7 +627,9 @@ export default function EditorCitas({
               {/* Especie Selector con Buscador */}
               <div className="flex-shrink-0 space-y-3 border-b p-4">
                 <div>
-                  <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
+                  <div className="mb-2 block text-sm font-medium text-gray-700">
+                    Buscar Especie
+                  </div>
                   <EditorCitasSearch />
                 </div>
                 <div className="flex gap-3">
@@ -529,7 +645,10 @@ export default function EditorCitas({
                       id="especie-actual"
                     >
                       {(() => {
-                        console.log("🔍 nombreCientifico recibido:", nombreCientifico);
+                        console.log(
+                          "🔍 nombreCientifico recibido:",
+                          nombreCientifico,
+                        );
                         console.log("🔍 tipo:", typeof nombreCientifico);
                         console.log("🔍 longitud:", nombreCientifico?.length);
                         console.log(
@@ -538,7 +657,10 @@ export default function EditorCitas({
                         );
 
                         return (
-                          <span className="italic" style={{fontStyle: "italic"}}>
+                          <span
+                            className="italic"
+                            style={{ fontStyle: "italic" }}
+                          >
                             {nombreCientifico}
                           </span>
                         );
@@ -566,9 +688,15 @@ export default function EditorCitas({
               {/* Text Editor, Selector de Catálogo AWE o Campos Numéricos */}
               <div className="flex-1 overflow-hidden p-4">
                 {(() => {
-                  const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
+                  const campo = CAMPOS_FICHA.find(
+                    (c) => c.key === campoSeleccionado,
+                  );
 
-                  if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
+                  if (
+                    campo?.tipo === "rango" &&
+                    "campoMin" in campo &&
+                    "campoMax" in campo
+                  ) {
                     // Campos de rango (min y max)
                     const valores = valoresNumericos[campoSeleccionado] || {
                       min: null,
@@ -578,7 +706,9 @@ export default function EditorCitas({
 
                     return (
                       <div className="flex h-full flex-col space-y-4">
-                        <div className="text-sm font-medium text-gray-700">{campo.label}</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          {campo.label}
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label
@@ -595,13 +725,17 @@ export default function EditorCitas({
                               value={valores.min ?? ""}
                               onChange={(e) => {
                                 const nuevoValor =
-                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
+                                  e.target.value === ""
+                                    ? null
+                                    : Number.parseFloat(e.target.value);
 
                                 setValoresNumericos({
                                   ...valoresNumericos,
                                   [campoSeleccionado]: {
                                     ...valores,
-                                    min: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                                    min: Number.isNaN(nuevoValor)
+                                      ? null
+                                      : nuevoValor,
                                   },
                                 });
                               }}
@@ -622,13 +756,17 @@ export default function EditorCitas({
                               value={valores.max ?? ""}
                               onChange={(e) => {
                                 const nuevoValor =
-                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
+                                  e.target.value === ""
+                                    ? null
+                                    : Number.parseFloat(e.target.value);
 
                                 setValoresNumericos({
                                   ...valoresNumericos,
                                   [campoSeleccionado]: {
                                     ...valores,
-                                    max: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                                    max: Number.isNaN(nuevoValor)
+                                      ? null
+                                      : nuevoValor,
                                   },
                                 });
                               }}
@@ -641,7 +779,8 @@ export default function EditorCitas({
 
                   if (campo?.tipo === "numero") {
                     // Campo numérico simple
-                    const valor = valoresNumericos[campoSeleccionado]?.valor ?? null;
+                    const valor =
+                      valoresNumericos[campoSeleccionado]?.valor ?? null;
 
                     return (
                       <div className="flex h-full flex-col">
@@ -659,14 +798,18 @@ export default function EditorCitas({
                           value={valor ?? ""}
                           onChange={(e) => {
                             const nuevoValor =
-                              e.target.value === "" ? null : Number.parseFloat(e.target.value);
+                              e.target.value === ""
+                                ? null
+                                : Number.parseFloat(e.target.value);
 
                             setValoresNumericos({
                               ...valoresNumericos,
                               [campoSeleccionado]: {
                                 min: null,
                                 max: null,
-                                valor: Number.isNaN(nuevoValor) ? null : nuevoValor,
+                                valor: Number.isNaN(nuevoValor)
+                                  ? null
+                                  : nuevoValor,
                               },
                             });
                           }}
@@ -676,8 +819,10 @@ export default function EditorCitas({
                   }
 
                   if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
-                    const opciones = catalogoAweOpciones[campo.tipoCatalogoId] || [];
-                    const seleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
+                    const opciones =
+                      catalogoAweOpciones[campo.tipoCatalogoId] || [];
+                    const seleccionados =
+                      catalogoAweSeleccionados[campoSeleccionado] || [];
 
                     return (
                       <div className="flex h-full flex-col overflow-hidden">
@@ -686,7 +831,9 @@ export default function EditorCitas({
                         </div>
                         <div className="flex-1 space-y-2 overflow-y-auto">
                           {opciones.length === 0 ? (
-                            <p className="text-sm text-gray-500">No hay opciones disponibles</p>
+                            <p className="text-sm text-gray-500">
+                              No hay opciones disponibles
+                            </p>
                           ) : (
                             opciones.map((opcion) => (
                               <label
@@ -694,13 +841,20 @@ export default function EditorCitas({
                                 className="flex items-center gap-2 rounded border border-gray-200 bg-white p-3 hover:bg-gray-50"
                               >
                                 <input
-                                  checked={seleccionados.includes(opcion.id_catalogo_awe)}
+                                  checked={seleccionados.includes(
+                                    opcion.id_catalogo_awe,
+                                  )}
                                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                   type="checkbox"
                                   onChange={(e) => {
                                     const nuevosSeleccionados = e.target.checked
-                                      ? [...seleccionados, opcion.id_catalogo_awe]
-                                      : seleccionados.filter((id) => id !== opcion.id_catalogo_awe);
+                                      ? [
+                                          ...seleccionados,
+                                          opcion.id_catalogo_awe,
+                                        ]
+                                      : seleccionados.filter(
+                                          (id) => id !== opcion.id_catalogo_awe,
+                                        );
 
                                     setCatalogoAweSeleccionados({
                                       ...catalogoAweSeleccionados,
@@ -708,7 +862,9 @@ export default function EditorCitas({
                                     });
                                   }}
                                 />
-                                <span className="text-sm text-gray-700">{opcion.nombre}</span>
+                                <span className="text-sm text-gray-700">
+                                  {opcion.nombre}
+                                </span>
                                 {opcion.sigla && (
                                   <span className="ml-auto text-xs text-gray-500">
                                     ({opcion.sigla})
@@ -774,7 +930,9 @@ export default function EditorCitas({
               <div className="flex flex-1 flex-col overflow-hidden border-b">
                 <div className="flex-shrink-0 border-b bg-white p-4">
                   <div className="mb-4">
-                    <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
+                    <div className="text-sm font-medium text-gray-700">
+                      Referencias Disponibles
+                    </div>
                   </div>
                 </div>
 
@@ -797,12 +955,19 @@ export default function EditorCitas({
 
                         autor = matchAutor
                           ? matchAutor[1].trim()
-                          : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                          : pub.titulo.split(",")[0]?.trim() ||
+                            pub.titulo.split(" ")[0] ||
+                            "";
                       } else {
-                        autor = pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
+                        autor =
+                          pub.titulo.split(",")[0]?.trim() ||
+                          pub.titulo.split(" ")[0] ||
+                          "";
                       }
 
-                      const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
+                      const año =
+                        pub.numero_publicacion_ano ||
+                        new Date(pub.fecha).getFullYear();
 
                       return (
                         <div
@@ -811,9 +976,12 @@ export default function EditorCitas({
                         >
                           <div className="min-w-0 flex-1">
                             <div className="mb-0.5 text-xs font-semibold text-gray-900">
-                              <span className="text-gray-500">[{numero}]</span> {autor} ({año})
+                              <span className="text-gray-500">[{numero}]</span>{" "}
+                              {autor} ({año})
                             </div>
-                            <div className="line-clamp-2 text-xs text-gray-700">{pub.titulo}</div>
+                            <div className="line-clamp-2 text-xs text-gray-700">
+                              {pub.titulo}
+                            </div>
                           </div>
                           <Button
                             className="flex-shrink-0"
@@ -832,7 +1000,9 @@ export default function EditorCitas({
 
               {/* Vista Previa */}
               <div className="flex flex-1 flex-col overflow-hidden p-4">
-                <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
+                <div className="mb-2 block text-sm font-medium text-gray-700">
+                  Vista Previa
+                </div>
                 {mostrarVistaPrevia ? (
                   <div className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
                     {vistaPrevia ||
@@ -840,8 +1010,8 @@ export default function EditorCitas({
                   </div>
                 ) : (
                   <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
-                    Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas
-                    formateadas
+                    Haz clic en &quot;Ver Vista Previa&quot; para ver el texto
+                    con las citas formateadas
                   </div>
                 )}
               </div>

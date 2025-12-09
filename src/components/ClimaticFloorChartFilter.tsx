@@ -1,4 +1,9 @@
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ClimaticFloorChartFilterProps {
   readonly altitudinalRange: {
@@ -20,17 +25,20 @@ export default function ClimaticFloorChartFilter({
 
   // Pisos climáticos (solo occidental para simplificar el filtro)
   const climaticFloors = [
-    {name: "Tropical", min: 0, max: 1000, colorIndex: 0},
-    {name: "Subtropical", min: 1000, max: 2300, colorIndex: 1},
-    {name: "Templado", min: 2300, max: 3400, colorIndex: 2},
-    {name: "Altoandino", min: 3400, max: 4800, colorIndex: 3},
+    { name: "Tropical", min: 0, max: 1000, colorIndex: 0 },
+    { name: "Subtropical", min: 1000, max: 2300, colorIndex: 1 },
+    { name: "Templado", min: 2300, max: 3400, colorIndex: 2 },
+    { name: "Altoandino", min: 3400, max: 4800, colorIndex: 3 },
   ];
 
   const totalAltitudeRange = 4800;
   const defaultColor = "#9CA3AF";
 
   // Calcular si un piso está activo según el rango seleccionado
-  const getFloorActiveSegment = (floor: (typeof climaticFloors)[0], floorStartPosition: number) => {
+  const getFloorActiveSegment = (
+    floor: (typeof climaticFloors)[0],
+    floorStartPosition: number,
+  ) => {
     const speciesMin = Math.min(altitudinalRange.min, altitudinalRange.max);
     const speciesMax = Math.max(altitudinalRange.min, altitudinalRange.max);
 
@@ -57,12 +65,15 @@ export default function ClimaticFloorChartFilter({
     }
 
     const floorRange = floor.max - floor.min;
-    const positionInFloorStart = ((intersectionStart - floor.min) / floorRange) * 100;
-    const positionInFloorEnd = ((intersectionEnd - floor.min) / floorRange) * 100;
+    const positionInFloorStart =
+      ((intersectionStart - floor.min) / floorRange) * 100;
+    const positionInFloorEnd =
+      ((intersectionEnd - floor.min) / floorRange) * 100;
     const widthInFloor = positionInFloorEnd - positionInFloorStart;
 
     const floorWidthPercentage = (floorRange / totalAltitudeRange) * 100;
-    const absoluteLeft = floorStartPosition + (positionInFloorStart / 100) * floorWidthPercentage;
+    const absoluteLeft =
+      floorStartPosition + (positionInFloorStart / 100) * floorWidthPercentage;
     const absoluteWidth = (widthInFloor / 100) * floorWidthPercentage;
 
     return {
@@ -88,7 +99,10 @@ export default function ClimaticFloorChartFilter({
               style={{
                 backgroundColor: defaultColor,
                 width: `${widthPercentage}%`,
-                borderRight: index < climaticFloors.length - 1 ? "1px solid white" : "none",
+                borderRight:
+                  index < climaticFloors.length - 1
+                    ? "1px solid white"
+                    : "none",
               }}
             />
           );
@@ -100,7 +114,8 @@ export default function ClimaticFloorChartFilter({
           let cumulativeWidth = 0;
 
           for (let i = 0; i < index; i++) {
-            const prevFloorRange = climaticFloors[i].max - climaticFloors[i].min;
+            const prevFloorRange =
+              climaticFloors[i].max - climaticFloors[i].min;
 
             cumulativeWidth += (prevFloorRange / totalAltitudeRange) * 100;
           }
@@ -108,8 +123,14 @@ export default function ClimaticFloorChartFilter({
           const activeSegment = getFloorActiveSegment(floor, cumulativeWidth);
 
           if (activeSegment) {
-            const speciesMin = Math.min(altitudinalRange.min, altitudinalRange.max);
-            const speciesMax = Math.max(altitudinalRange.min, altitudinalRange.max);
+            const speciesMin = Math.min(
+              altitudinalRange.min,
+              altitudinalRange.max,
+            );
+            const speciesMax = Math.max(
+              altitudinalRange.min,
+              altitudinalRange.max,
+            );
             const intersectionStart = Math.max(speciesMin, floor.min);
             const intersectionEnd = Math.min(speciesMax, floor.max);
 
@@ -153,7 +174,7 @@ export default function ClimaticFloorChartFilter({
             <div
               key={`label-${floor.name}`}
               className="overflow-hidden text-center text-[8px] text-gray-500"
-              style={{width: `${widthPercentage}%`}}
+              style={{ width: `${widthPercentage}%` }}
             >
               {floor.name}
             </div>

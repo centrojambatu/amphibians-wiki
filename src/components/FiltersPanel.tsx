@@ -1,16 +1,16 @@
 "use client";
 
-import {useState} from "react";
-import {useRouter} from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {Slider} from "@/components/ui/slider";
+import { Slider } from "@/components/ui/slider";
 import {
   Command,
   CommandEmpty,
@@ -18,26 +18,30 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {Input} from "@/components/ui/input";
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import { FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
 
 export interface FiltersState {
   provincia: string[];
   listaRoja: string[];
   endemismo: string[];
-  rangoAltitudinal: {min: number; max: number};
-  areaDistribucion: {min: number; max: number};
+  rangoAltitudinal: { min: number; max: number };
+  areaDistribucion: { min: number; max: number };
   ecosistemas: string[];
   regionesBiogeograficas: string[];
   reservasBiosfera: string[];
   bosquesProtegidos: string[];
   areasProtegidasEstado: string[];
   areasProtegidasPrivadas: string[];
-  pluviocidad: {min: number; max: number};
-  temperatura: {min: number; max: number};
+  pluviocidad: { min: number; max: number };
+  temperatura: { min: number; max: number };
 }
 
 interface FiltersPanelProps {
@@ -54,7 +58,11 @@ interface SearchResult {
   commonName?: string | null;
 }
 
-export default function FiltersPanel({especies, catalogs, onFiltersChange}: FiltersPanelProps) {
+export default function FiltersPanel({
+  especies,
+  catalogs,
+  onFiltersChange,
+}: FiltersPanelProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -63,16 +71,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
     provincia: [],
     listaRoja: [],
     endemismo: [],
-    rangoAltitudinal: {min: 0, max: 4800},
-    areaDistribucion: {min: 1, max: 100000},
+    rangoAltitudinal: { min: 0, max: 4800 },
+    areaDistribucion: { min: 1, max: 100000 },
     ecosistemas: [],
     regionesBiogeograficas: [],
     reservasBiosfera: [],
     bosquesProtegidos: [],
     areasProtegidasEstado: [],
     areasProtegidasPrivadas: [],
-    pluviocidad: {min: 640, max: 4000},
-    temperatura: {min: 5, max: 25},
+    pluviocidad: { min: 640, max: 4000 },
+    temperatura: { min: 5, max: 25 },
   });
 
   // Función para buscar en los datos de especies
@@ -158,7 +166,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
     const selectedOrders = orderResults.slice(0, maxOrders);
     const selectedFamilies = familyResults.slice(0, maxFamilies);
     const selectedGenera = genusResults.slice(0, maxGenera);
-    const usedSlots = selectedOrders.length + selectedFamilies.length + selectedGenera.length;
+    const usedSlots =
+      selectedOrders.length + selectedFamilies.length + selectedGenera.length;
     const remainingSlots = Math.max(0, maxTotal - usedSlots);
 
     const combinedResults: SearchResult[] = [
@@ -183,14 +192,17 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
       newValues = [...currentValues, value];
     }
 
-    const newFilters = {...filters, [key]: newValues};
+    const newFilters = { ...filters, [key]: newValues };
 
     setFilters(newFilters);
     onFiltersChange(newFilters);
   };
 
   const handleSliderChange = (key: keyof FiltersState, values: number[]) => {
-    const newFilters = {...filters, [key]: {min: values[0], max: values[1]}};
+    const newFilters = {
+      ...filters,
+      [key]: { min: values[0], max: values[1] },
+    };
 
     setFilters(newFilters);
     onFiltersChange(newFilters);
@@ -201,16 +213,16 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
       provincia: [],
       listaRoja: [],
       endemismo: [],
-      rangoAltitudinal: {min: 0, max: 4800},
-      areaDistribucion: {min: 1, max: 100000},
+      rangoAltitudinal: { min: 0, max: 4800 },
+      areaDistribucion: { min: 1, max: 100000 },
       ecosistemas: [],
       regionesBiogeograficas: [],
       reservasBiosfera: [],
       bosquesProtegidos: [],
       areasProtegidasEstado: [],
       areasProtegidasPrivadas: [],
-      pluviocidad: {min: 640, max: 4000},
-      temperatura: {min: 5, max: 25},
+      pluviocidad: { min: 640, max: 4000 },
+      temperatura: { min: 5, max: 25 },
     };
 
     setFilters(resetFiltersState);
@@ -250,7 +262,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
 
     return catalogItems
       .filter((item) => activeValues.includes(item.value))
-      .map((item) => (useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre));
+      .map((item) =>
+        useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre,
+      );
   };
 
   // Componente reutilizable para renderizar opciones de catálogo
@@ -260,15 +274,23 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
     useSigla = false,
   ) => {
     if (!catalogItems || catalogItems.length === 0) {
-      return <p className="py-2 text-xs text-gray-500">No hay opciones disponibles</p>;
+      return (
+        <p className="py-2 text-xs text-gray-500">
+          No hay opciones disponibles
+        </p>
+      );
     }
 
     return (
       <div className="flex flex-col gap-2">
         {catalogItems.map((item) => {
-          const isSelected = (filters[filterKey] as string[]).includes(item.value);
+          const isSelected = (filters[filterKey] as string[]).includes(
+            item.value,
+          );
           const displayLabel =
-            useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre;
+            useSigla && item.sigla
+              ? `${item.nombre} (${item.sigla})`
+              : item.nombre;
 
           return (
             <Button
@@ -321,7 +343,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <Command>
               <CommandList>
                 {searchResults.length === 0 && searchQuery.length >= 2 && (
-                  <CommandEmpty className="px-4 py-6">No se encontraron resultados.</CommandEmpty>
+                  <CommandEmpty className="px-4 py-6">
+                    No se encontraron resultados.
+                  </CommandEmpty>
                 )}
                 {searchResults.length > 0 && (
                   <CommandGroup>
@@ -336,7 +360,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                             <span className="text-muted-foreground text-xs">
                               {getTypeLabel(result.type)}
                             </span>
-                            <span className="font-medium italic">{result.name}</span>
+                            <span className="font-medium italic">
+                              {result.name}
+                            </span>
                           </div>
                           {result.commonName && (
                             <span className="text-muted-foreground text-xs">
@@ -374,7 +400,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Provincia</span>
                   {filters.provincia.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.provincias, "provincia").join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.provincias,
+                        "provincia",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
@@ -393,7 +422,11 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Lista Roja UICN</span>
                   {filters.listaRoja.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.listaRoja, "listaRoja", true).join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.listaRoja,
+                        "listaRoja",
+                        true,
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
@@ -412,7 +445,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                 {filters.endemismo.length > 0 && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
                     {filters.endemismo
-                      .map((val) => (val === "endemic" ? "Endémicas" : "No endémicas"))
+                      .map((val) =>
+                        val === "endemic" ? "Endémicas" : "No endémicas",
+                      )
                       .join(", ")}
                   </span>
                 )}
@@ -421,8 +456,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionContent>
               <div className="flex flex-col gap-2">
                 {[
-                  {value: "endemic", label: "Endémicas"},
-                  {value: "non-endemic", label: "No endémicas"},
+                  { value: "endemic", label: "Endémicas" },
+                  { value: "non-endemic", label: "No endémicas" },
                 ].map((option) => {
                   const isSelected = filters.endemismo.includes(option.value);
 
@@ -436,7 +471,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                         color: isSelected ? undefined : "#454545",
                       }}
                       variant={isSelected ? "default" : "outline"}
-                      onClick={() => handleCategoricalChange("endemismo", option.value)}
+                      onClick={() =>
+                        handleCategoricalChange("endemismo", option.value)
+                      }
                     >
                       {option.label}
                     </Button>
@@ -451,9 +488,11 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Pisos altitudinales</span>
-                {(filters.rangoAltitudinal.min !== 0 || filters.rangoAltitudinal.max !== 4800) && (
+                {(filters.rangoAltitudinal.min !== 0 ||
+                  filters.rangoAltitudinal.max !== 4800) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                    {filters.rangoAltitudinal.min}m -{" "}
+                    {filters.rangoAltitudinal.max}m
                   </span>
                 )}
               </div>
@@ -478,8 +517,13 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                     max={4800}
                     min={0}
                     step={100}
-                    value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
-                    onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
+                    value={[
+                      filters.rangoAltitudinal.min,
+                      filters.rangoAltitudinal.max,
+                    ]}
+                    onValueChange={(values) =>
+                      handleSliderChange("rangoAltitudinal", values)
+                    }
                   />
                 </div>
               </div>
@@ -494,7 +538,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                    {filters.areaDistribucion.min} km² -{" "}
+                    {filters.areaDistribucion.max} km²
                   </span>
                 )}
               </div>
@@ -509,8 +554,13 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   max={100000}
                   min={1}
                   step={100}
-                  value={[filters.areaDistribucion.min, filters.areaDistribucion.max]}
-                  onValueChange={(values) => handleSliderChange("areaDistribucion", values)}
+                  value={[
+                    filters.areaDistribucion.min,
+                    filters.areaDistribucion.max,
+                  ]}
+                  onValueChange={(values) =>
+                    handleSliderChange("areaDistribucion", values)
+                  }
                 />
               </div>
             </AccordionContent>
@@ -524,7 +574,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Ecosistemas</span>
                   {filters.ecosistemas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.ecosistemas, "ecosistemas").join(", ")}
+                      {getActiveFilterNames(
+                        catalogs.ecosistemas,
+                        "ecosistemas",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
@@ -552,7 +605,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(catalogs.regionesBiogeograficas, "regionesBiogeograficas")}
+                {renderCatalogOptions(
+                  catalogs.regionesBiogeograficas,
+                  "regionesBiogeograficas",
+                )}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -565,15 +621,19 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Reservas de la biosfera</span>
                   {filters.reservasBiosfera.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(
-                        ", ",
-                      )}
+                      {getActiveFilterNames(
+                        catalogs.reservasBiosfera,
+                        "reservasBiosfera",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(catalogs.reservasBiosfera, "reservasBiosfera")}
+                {renderCatalogOptions(
+                  catalogs.reservasBiosfera,
+                  "reservasBiosfera",
+                )}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -586,15 +646,19 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   <span className="font-semibold">Bosques protegidos</span>
                   {filters.bosquesProtegidos.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(
-                        ", ",
-                      )}
+                      {getActiveFilterNames(
+                        catalogs.bosquesProtegidos,
+                        "bosquesProtegidos",
+                      ).join(", ")}
                     </span>
                   )}
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(catalogs.bosquesProtegidos, "bosquesProtegidos")}
+                {renderCatalogOptions(
+                  catalogs.bosquesProtegidos,
+                  "bosquesProtegidos",
+                )}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -604,7 +668,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionItem value="areasProtegidasEstado">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Áreas protegidas del Estado</span>
+                  <span className="font-semibold">
+                    Áreas protegidas del Estado
+                  </span>
                   {filters.areasProtegidasEstado.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
@@ -616,7 +682,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(catalogs.areasProtegidasEstado, "areasProtegidasEstado")}
+                {renderCatalogOptions(
+                  catalogs.areasProtegidasEstado,
+                  "areasProtegidasEstado",
+                )}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -626,7 +695,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionItem value="areasProtegidasPrivadas">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Áreas protegidas privadas</span>
+                  <span className="font-semibold">
+                    Áreas protegidas privadas
+                  </span>
                   {filters.areasProtegidasPrivadas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
@@ -638,7 +709,10 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas")}
+                {renderCatalogOptions(
+                  catalogs.areasProtegidasPrivadas,
+                  "areasProtegidasPrivadas",
+                )}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -648,7 +722,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Pluviocidad</span>
-                {(filters.pluviocidad.min !== 640 || filters.pluviocidad.max !== 4000) && (
+                {(filters.pluviocidad.min !== 640 ||
+                  filters.pluviocidad.max !== 4000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
                     {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
                   </span>
@@ -666,7 +741,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   min={640}
                   step={50}
                   value={[filters.pluviocidad.min, filters.pluviocidad.max]}
-                  onValueChange={(values) => handleSliderChange("pluviocidad", values)}
+                  onValueChange={(values) =>
+                    handleSliderChange("pluviocidad", values)
+                  }
                 />
               </div>
             </AccordionContent>
@@ -677,7 +754,8 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Temperatura</span>
-                {(filters.temperatura.min !== 5 || filters.temperatura.max !== 25) && (
+                {(filters.temperatura.min !== 5 ||
+                  filters.temperatura.max !== 25) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
                     {filters.temperatura.min} - {filters.temperatura.max} °C
                   </span>
@@ -695,7 +773,9 @@ export default function FiltersPanel({especies, catalogs, onFiltersChange}: Filt
                   min={5}
                   step={1}
                   value={[filters.temperatura.min, filters.temperatura.max]}
-                  onValueChange={(values) => handleSliderChange("temperatura", values)}
+                  onValueChange={(values) =>
+                    handleSliderChange("temperatura", values)
+                  }
                 />
               </div>
             </AccordionContent>

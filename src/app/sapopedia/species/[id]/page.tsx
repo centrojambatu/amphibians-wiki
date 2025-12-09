@@ -1,17 +1,17 @@
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 
-import {CardSpecies} from "@/components/card-species";
+import { CardSpecies } from "@/components/card-species";
 
 import getFichaEspecie from "./get-ficha-especie";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function SpeciesPage({params}: PageProps) {
-  const {id} = await params;
+export default async function SpeciesPage({ params }: PageProps) {
+  const { id } = await params;
 
   // Decodificar el id de la URL
   const decodedId = decodeURIComponent(id);
@@ -19,7 +19,9 @@ export default async function SpeciesPage({params}: PageProps) {
   // Si es un número (id_ficha_especie), usarlo directamente
   // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
   // Esto coincide con el formato usado en el acordeón: nombre_cientifico.replaceAll(" ", "-")
-  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+  const sanitizedId = /^\d+$/.test(decodedId)
+    ? decodedId
+    : decodedId.replaceAll("-", " ");
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 

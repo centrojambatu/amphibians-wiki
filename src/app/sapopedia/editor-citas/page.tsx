@@ -1,8 +1,8 @@
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
 
 import EditorAuthWrapper from "@/components/EditorAuthWrapper";
 
-import getEspeciesNavegacion, {toSlug} from "./get-especies-navegacion";
+import getEspeciesNavegacion, { toSlug } from "./get-especies-navegacion";
 
 export default async function EditorCitasPage() {
   // Obtener la primera especie para redirigir
@@ -13,7 +13,9 @@ export default async function EditorCitasPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900">Editor de Citas</h1>
-          <p className="mt-4 text-gray-600">No hay especies disponibles para editar.</p>
+          <p className="mt-4 text-gray-600">
+            No hay especies disponibles para editar.
+          </p>
         </div>
       </div>
     );
@@ -22,4 +24,3 @@ export default async function EditorCitasPage() {
   // Redirigir a la primera especie usando el nombre científico
   redirect(`/sapopedia/editor-citas/${toSlug(especies[0].taxon)}`);
 }
-

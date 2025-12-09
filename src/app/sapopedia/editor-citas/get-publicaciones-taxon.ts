@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface Publicacion {
   id_publicacion: number;
@@ -27,11 +27,13 @@ export interface Publicacion {
 }
 
 // Función para obtener todas las publicaciones relacionadas con un taxon
-export default async function getPublicacionesTaxon(taxonId: number): Promise<Publicacion[]> {
+export default async function getPublicacionesTaxon(
+  taxonId: number,
+): Promise<Publicacion[]> {
   const supabaseClient = createServiceClient();
 
   // Usar el mismo enfoque que en get-ficha-especie.ts
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("taxon_publicacion")
     .select("*, publicacion(*)")
     .eq("taxon_id", taxonId);
@@ -75,4 +77,3 @@ export default async function getPublicacionesTaxon(taxonId: number): Promise<Pu
     return fechaB - fechaA;
   });
 }
-

@@ -1,19 +1,19 @@
 import Link from "next/link";
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {mockTaxonomy} from "@/lib/mock-taxonomy";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { mockTaxonomy } from "@/lib/mock-taxonomy";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function OrderPage({params}: PageProps) {
-  const {id} = await params;
+export default async function OrderPage({ params }: PageProps) {
+  const { id } = await params;
 
   // Obtener información del orden (mock)
   const order = mockTaxonomy.getOrderById(id);
@@ -46,8 +46,12 @@ export default async function OrderPage({params}: PageProps) {
       <div className="mb-8 text-center">
         <div className="mb-4 text-6xl">{getOrderIcon(order.name)}</div>
         <h1 className="text-primary mb-2 text-4xl font-bold">{order.name}</h1>
-        <p className="text-muted-foreground mb-4 text-lg italic">{order.scientific_name}</p>
-        <p className="text-muted-foreground mx-auto mb-4 max-w-2xl text-sm">{order.description}</p>
+        <p className="text-muted-foreground mb-4 text-lg italic">
+          {order.scientific_name}
+        </p>
+        <p className="text-muted-foreground mx-auto mb-4 max-w-2xl text-sm">
+          {order.description}
+        </p>
         <Badge className="px-4 py-2 text-lg" variant="outline">
           {families.length} familias
         </Badge>
@@ -71,7 +75,9 @@ export default async function OrderPage({params}: PageProps) {
                 <Card className="cursor-pointer transition-shadow hover:shadow-md">
                   <CardHeader>
                     <CardTitle className="text-lg">{family.name}</CardTitle>
-                    <p className="text-muted-foreground text-sm italic">{family.scientific_name}</p>
+                    <p className="text-muted-foreground text-sm italic">
+                      {family.scientific_name}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
@@ -79,7 +85,8 @@ export default async function OrderPage({params}: PageProps) {
                         {family.description || "Familia de anfibios"}
                       </span>
                       <Badge variant="outline">
-                        {mockTaxonomy.getGeneraByFamily(family.id).length} géneros
+                        {mockTaxonomy.getGeneraByFamily(family.id).length}{" "}
+                        géneros
                       </Badge>
                     </div>
                   </CardContent>
@@ -90,7 +97,9 @@ export default async function OrderPage({params}: PageProps) {
         ) : (
           <Card>
             <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground">No hay familias disponibles para este orden.</p>
+              <p className="text-muted-foreground">
+                No hay familias disponibles para este orden.
+              </p>
             </CardContent>
           </Card>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -8,9 +8,12 @@ import "leaflet/dist/leaflet.css";
 if (globalThis.window !== undefined) {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
   L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    iconRetinaUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+    iconUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
   });
 }
 
@@ -221,7 +224,8 @@ export default function EcuadorMap() {
 
     // Agregar capa de tiles (OpenStreetMap)
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(map);
 
@@ -238,11 +242,14 @@ export default function EcuadorMap() {
       // Tooltip con nombres comunes
       const nombresTexto = area.nombres.join(", ");
 
-      polygon.bindTooltip(`<strong>${area.region}</strong><br/>${nombresTexto}`, {
-        permanent: false,
-        direction: "center",
-        className: "region-tooltip",
-      });
+      polygon.bindTooltip(
+        `<strong>${area.region}</strong><br/>${nombresTexto}`,
+        {
+          permanent: false,
+          direction: "center",
+          className: "region-tooltip",
+        },
+      );
 
       // Popup con más información
       polygon.bindPopup(
@@ -270,9 +277,12 @@ export default function EcuadorMap() {
 
       // Agregar etiqueta de texto en el centro
       const nombrePrincipal = area.nombres[0] || "";
-      const cantidadRestante = area.nombres.length > 1 ? area.nombres.length - 1 : 0;
+      const cantidadRestante =
+        area.nombres.length > 1 ? area.nombres.length - 1 : 0;
       const textoEtiqueta =
-        cantidadRestante > 0 ? `${nombrePrincipal} +${String(cantidadRestante)}` : nombrePrincipal;
+        cantidadRestante > 0
+          ? `${nombrePrincipal} +${String(cantidadRestante)}`
+          : nombrePrincipal;
 
       L.marker(area.center, {
         icon: L.divIcon({
@@ -307,15 +317,18 @@ export default function EcuadorMap() {
 
   return (
     <div className="w-full rounded-lg border border-gray-200 bg-white p-6">
-      <h3 className="mb-4 text-lg font-semibold text-gray-800">Distribución de Nombres Comunes</h3>
+      <h3 className="mb-4 text-lg font-semibold text-gray-800">
+        Distribución de Nombres Comunes
+      </h3>
       <div
         ref={mapContainerRef}
         className="w-full overflow-hidden rounded-lg"
-        style={{height: "600px", minHeight: "500px"}}
+        style={{ height: "600px", minHeight: "500px" }}
       />
       <div className="mt-4 text-xs text-gray-600">
         <p>
-          Haz clic en las áreas para ver los nombres comunes. Usa el zoom para navegar por el mapa.
+          Haz clic en las áreas para ver los nombres comunes. Usa el zoom para
+          navegar por el mapa.
         </p>
       </div>
     </div>

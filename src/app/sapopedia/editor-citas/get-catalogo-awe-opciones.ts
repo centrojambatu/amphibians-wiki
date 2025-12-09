@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface CatalogoAweOpcion {
   id_catalogo_awe: number;
@@ -13,11 +13,11 @@ export async function getCatalogoAweOpciones(
 ): Promise<CatalogoAweOpcion[]> {
   const supabaseClient = createServiceClient();
 
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("catalogo_awe")
     .select("id_catalogo_awe, nombre, sigla, tipo_catalogo_awe_id")
     .eq("tipo_catalogo_awe_id", tipoCatalogoId)
-    .order("nombre", {ascending: true});
+    .order("nombre", { ascending: true });
 
   if (error) {
     console.error(`Error al obtener catálogo AWE tipo ${tipoCatalogoId}:`, {
@@ -46,16 +46,15 @@ export async function getAllCatalogoAweOpciones(): Promise<
   const resultados = await Promise.all(
     tiposCatalogo.map(async (tipoId) => {
       const opciones = await getCatalogoAweOpciones(tipoId);
-      return {tipoId, opciones};
+      return { tipoId, opciones };
     }),
   );
 
   const opcionesPorTipo: Record<number, CatalogoAweOpcion[]> = {};
 
-  resultados.forEach(({tipoId, opciones}) => {
+  resultados.forEach(({ tipoId, opciones }) => {
     opcionesPorTipo[tipoId] = opciones;
   });
 
   return opcionesPorTipo;
 }
-

@@ -1,9 +1,9 @@
 "use client";
 
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import {OrderGroup} from "@/types/taxonomy";
+import { OrderGroup } from "@/types/taxonomy";
 
 interface PhylogeneticTreeProps {
   readonly orders: OrderGroup[];
@@ -17,7 +17,7 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
+export default function PhylogeneticTree({ orders }: PhylogeneticTreeProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   console.log("PhylogeneticTree - orders:", orders);
@@ -54,7 +54,7 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
   useEffect(() => {
     console.log("useEffect ejecutado - svgRef.current:", svgRef.current);
     console.log("useEffect - orders recibidos:", orders);
-    
+
     if (!svgRef.current) return;
     if (!orders || orders.length === 0) {
       console.log("No hay datos de orders");
@@ -63,7 +63,7 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
 
     const data = createHierarchy(orders);
     console.log("Datos jerarquizados:", data);
-    
+
     const rootData = {
       name: "Anfibios de Ecuador",
       id: "anfibios",
@@ -106,7 +106,7 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
           maxY: Math.max(bounds.maxY, d.y),
         };
       },
-      {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity},
+      { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity },
     );
 
     const treeWidth = treeBounds.maxY - treeBounds.minY;
@@ -116,8 +116,8 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
 
     // Función para crear líneas con ángulos rectos
     const createStepLink = (d: {
-      source: {x: number; y: number};
-      target: {x: number; y: number};
+      source: { x: number; y: number };
+      target: { x: number; y: number };
     }) => {
       const sourceX = d.source.y + centerX; // Centrar horizontalmente
       const sourceY = d.source.x + centerY; // Centrar verticalmente
@@ -209,33 +209,34 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
         }
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .style("font-weight", (d) => ((d as any).data.type === "order" ? "bold" : "normal"))
-      .style(
-        "font-style",
-        (d) =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (d as any).data.type === "genus" || (d as any).data.type === "species"
-            ? "italic"
-            : "normal",
+      .style("font-weight", (d) =>
+        (d as any).data.type === "order" ? "bold" : "normal",
+      )
+      .style("font-style", (d) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (d as any).data.type === "genus" || (d as any).data.type === "species"
+          ? "italic"
+          : "normal",
       )
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .text((d) => (d as any).data.name);
 
     // Hacer los nodos clicables
-    nodes
-      .style("cursor", "pointer")
-      .on("click", (event, d) => {
+    nodes.style("cursor", "pointer").on("click", (event, d) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((d as any).data.href) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((d as any).data.href) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          window.location.href = (d as any).data.href;
-        }
-      });
+        window.location.href = (d as any).data.href;
+      }
+    });
 
     // Efecto hover
     nodes
       .on("mouseover", function () {
-        d3.select(this).select("circle").style("stroke-width", 3).style("stroke", "#374151");
+        d3.select(this)
+          .select("circle")
+          .style("stroke-width", 3)
+          .style("stroke", "#374151");
 
         d3.select(this)
           .select("text")
@@ -243,16 +244,24 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
           .style("text-decoration", "underline");
       })
       .on("mouseout", function () {
-        d3.select(this).select("circle").style("stroke-width", 2).style("stroke", "#fff");
+        d3.select(this)
+          .select("circle")
+          .style("stroke-width", 2)
+          .style("stroke", "#fff");
 
-        d3.select(this).select("text").style("fill", "#000").style("text-decoration", "none");
+        d3.select(this)
+          .select("text")
+          .style("fill", "#000")
+          .style("text-decoration", "none");
       });
   }, [orders]);
 
   if (!orders || orders.length === 0) {
     return (
       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-600">No hay datos disponibles para mostrar el árbol filogenético.</p>
+        <p className="text-gray-600">
+          No hay datos disponibles para mostrar el árbol filogenético.
+        </p>
       </div>
     );
   }
@@ -261,28 +270,43 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
     <div className="relative">
       {/* Título */}
       <div className="mb-6">
-        <h2 className="mb-2 text-xl font-bold text-gray-800">Árbol Filogenético</h2>
+        <h2 className="mb-2 text-xl font-bold text-gray-800">
+          Árbol Filogenético
+        </h2>
         <p className="text-sm text-gray-600">
-          Relaciones evolutivas entre los grupos taxonómicos ({orders.length} órdenes)
+          Relaciones evolutivas entre los grupos taxonómicos ({orders.length}{" "}
+          órdenes)
         </p>
       </div>
 
       {/* Leyenda */}
       <div className="mb-4 flex gap-6 text-xs">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full" style={{backgroundColor: "#1f2937"}}></div>
+          <div
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: "#1f2937" }}
+          ></div>
           <span>Orden</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full" style={{backgroundColor: "#4b5563"}}></div>
+          <div
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: "#4b5563" }}
+          ></div>
           <span>Familia</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full" style={{backgroundColor: "#6b7280"}}></div>
+          <div
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: "#6b7280" }}
+          ></div>
           <span>Género</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full" style={{backgroundColor: "#9ca3af"}}></div>
+          <div
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: "#9ca3af" }}
+          ></div>
           <span>Especie</span>
         </div>
       </div>
@@ -302,4 +326,3 @@ export default function PhylogeneticTree({orders}: PhylogeneticTreeProps) {
     </div>
   );
 }
-

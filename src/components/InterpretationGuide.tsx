@@ -7,15 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {Badge} from "@/components/ui/badge";
-import {Separator} from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface InterpretationGuideProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
 
-export default function InterpretationGuide({isOpen, onClose}: InterpretationGuideProps) {
+export default function InterpretationGuide({
+  isOpen,
+  onClose,
+}: InterpretationGuideProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] max-w-md overflow-y-auto">
@@ -33,11 +36,15 @@ export default function InterpretationGuide({isOpen, onClose}: InterpretationGui
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-black">✓</span>
-                <span className="text-muted-foreground text-sm">Especie endémica</span>
+                <span className="text-muted-foreground text-sm">
+                  Especie endémica
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground text-lg">-</span>
-                <span className="text-muted-foreground text-sm">Especie no endémica</span>
+                <span className="text-muted-foreground text-sm">
+                  Especie no endémica
+                </span>
               </div>
             </div>
           </div>
@@ -52,37 +59,49 @@ export default function InterpretationGuide({isOpen, onClose}: InterpretationGui
                 <Badge className="bg-gray-50 text-gray-600" variant="outline">
                   LC
                 </Badge>
-                <span className="text-muted-foreground text-sm">Preocupación Menor</span>
+                <span className="text-muted-foreground text-sm">
+                  Preocupación Menor
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-100 text-gray-700" variant="outline">
                   NT
                 </Badge>
-                <span className="text-muted-foreground text-sm">Casi Amenazado</span>
+                <span className="text-muted-foreground text-sm">
+                  Casi Amenazado
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-200 text-gray-800" variant="outline">
                   VU
                 </Badge>
-                <span className="text-muted-foreground text-sm">Vulnerable</span>
+                <span className="text-muted-foreground text-sm">
+                  Vulnerable
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-300 text-gray-900" variant="outline">
                   EN
                 </Badge>
-                <span className="text-muted-foreground text-sm">En Peligro</span>
+                <span className="text-muted-foreground text-sm">
+                  En Peligro
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-400 text-gray-950" variant="outline">
                   CR
                 </Badge>
-                <span className="text-muted-foreground text-sm">En Peligro Crítico</span>
+                <span className="text-muted-foreground text-sm">
+                  En Peligro Crítico
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-500 text-white" variant="outline">
                   EW
                 </Badge>
-                <span className="text-muted-foreground text-sm">Extinto en Estado Silvestre</span>
+                <span className="text-muted-foreground text-sm">
+                  Extinto en Estado Silvestre
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-gray-700 text-white" variant="outline">
@@ -94,7 +113,9 @@ export default function InterpretationGuide({isOpen, onClose}: InterpretationGui
                 <Badge className="bg-gray-100 text-gray-400" variant="outline">
                   DD
                 </Badge>
-                <span className="text-muted-foreground text-sm">Datos Insuficientes</span>
+                <span className="text-muted-foreground text-sm">
+                  Datos Insuficientes
+                </span>
               </div>
             </div>
           </div>
@@ -106,31 +127,58 @@ export default function InterpretationGuide({isOpen, onClose}: InterpretationGui
             <h3 className="mb-3 text-lg font-semibold">Pisos Climáticos</h3>
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <div className="h-4 w-6 rounded border" style={{backgroundColor: "#90EE90"}} />
-                <span className="text-muted-foreground text-sm">Tropical (0-1000m)</span>
+                <div
+                  className="h-4 w-6 rounded border"
+                  style={{ backgroundColor: "#90EE90" }}
+                />
+                <span className="text-muted-foreground text-sm">
+                  Tropical (0-1000m)
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-4 w-6 rounded border" style={{backgroundColor: "#D2B48C"}} />
-                <span className="text-muted-foreground text-sm">Subtropical (1000-2000m)</span>
+                <div
+                  className="h-4 w-6 rounded border"
+                  style={{ backgroundColor: "#D2B48C" }}
+                />
+                <span className="text-muted-foreground text-sm">
+                  Subtropical (1000-2000m)
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-4 w-6 rounded border" style={{backgroundColor: "#CD853F"}} />
-                <span className="text-muted-foreground text-sm">Templado (2000-3000m)</span>
+                <div
+                  className="h-4 w-6 rounded border"
+                  style={{ backgroundColor: "#CD853F" }}
+                />
+                <span className="text-muted-foreground text-sm">
+                  Templado (2000-3000m)
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-4 w-6 rounded border" style={{backgroundColor: "#8B4513"}} />
-                <span className="text-muted-foreground text-sm">Frío (3000-4000m)</span>
+                <div
+                  className="h-4 w-6 rounded border"
+                  style={{ backgroundColor: "#8B4513" }}
+                />
+                <span className="text-muted-foreground text-sm">
+                  Frío (3000-4000m)
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-4 w-6 rounded border" style={{backgroundColor: "#A0522D"}} />
-                <span className="text-muted-foreground text-sm">Páramo (4000-5000m)</span>
+                <div
+                  className="h-4 w-6 rounded border"
+                  style={{ backgroundColor: "#A0522D" }}
+                />
+                <span className="text-muted-foreground text-sm">
+                  Páramo (4000-5000m)
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <div
                   className="h-4 w-6 rounded border border-gray-300"
-                  style={{backgroundColor: "#FFFFFF"}}
+                  style={{ backgroundColor: "#FFFFFF" }}
                 />
-                <span className="text-muted-foreground text-sm">Nival (&gt;5000m)</span>
+                <span className="text-muted-foreground text-sm">
+                  Nival (&gt;5000m)
+                </span>
               </div>
             </div>
           </div>

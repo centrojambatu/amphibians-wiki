@@ -1,10 +1,13 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
-export async function PUT(request: NextRequest, {params}: {params: Promise<{taxonId: string}>}) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ taxonId: string }> },
+) {
   try {
-    const {taxonId} = await params;
+    const { taxonId } = await params;
     const body = await request.json();
 
     const supabaseClient = createServiceClient();
@@ -57,14 +60,16 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
     });
 
     // Agregar fecha de actualización
-    datosActualizar.fecha_actualizacion = new Date().toISOString().split("T")[0]; // Formato YYYY-MM-DD para date
+    datosActualizar.fecha_actualizacion = new Date()
+      .toISOString()
+      .split("T")[0]; // Formato YYYY-MM-DD para date
 
     const taxonIdNum = Number(taxonId);
 
     if (Number.isNaN(taxonIdNum)) {
       console.error("❌ taxon_id inválido:", taxonId);
 
-      return NextResponse.json({error: "taxon_id inválido"}, {status: 400});
+      return NextResponse.json({ error: "taxon_id inválido" }, { status: 400 });
     }
 
     if (process.env.NODE_ENV === "development") {
@@ -76,18 +81,24 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
     }
 
     // Verificar que existe un registro con ese taxon_id antes de actualizar
-    const {data: registroExistente, error: errorVerificacion} = await supabaseClient
-      .from("ficha_especie")
-      .select("id_ficha_especie, taxon_id")
-      .eq("taxon_id", taxonIdNum)
-      .single();
+    const { data: registroExistente, error: errorVerificacion } =
+      await supabaseClient
+        .from("ficha_especie")
+        .select("id_ficha_especie, taxon_id")
+        .eq("taxon_id", taxonIdNum)
+        .single();
 
     if (errorVerificacion || !registroExistente) {
-      console.error("❌ No se encontró ficha_especie con taxon_id:", taxonIdNum);
+      console.error(
+        "❌ No se encontró ficha_especie con taxon_id:",
+        taxonIdNum,
+      );
 
       return NextResponse.json(
-        {error: `No se encontró ficha de especie con taxon_id: ${String(taxonIdNum)}`},
-        {status: 404},
+        {
+          error: `No se encontró ficha de especie con taxon_id: ${String(taxonIdNum)}`,
+        },
+        { status: 404 },
       );
     }
 
@@ -100,7 +111,7 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
     }
 
     // Actualizar la ficha de especie usando taxon_id (hay un índice único en taxon_id)
-    const {data, error} = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("ficha_especie")
       .update(datosActualizar)
       .eq("taxon_id", taxonIdNum)
@@ -111,7 +122,7 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
       console.error("❌ Error al actualizar ficha de especie:", error);
       console.error("Detalles del error:", JSON.stringify(error, null, 2));
 
-      return NextResponse.json({error: error.message}, {status: 500});
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     // Validar que el registro actualizado corresponde al taxon_id correcto
@@ -135,6 +146,9 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{taxo
   } catch (error) {
     console.error("Error en la API:", error);
 
-    return NextResponse.json({error: "Error interno del servidor"}, {status: 500});
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }

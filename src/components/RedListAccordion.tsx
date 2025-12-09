@@ -1,12 +1,12 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {Menu} from "lucide-react";
+import { Menu } from "lucide-react";
 
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
-import {processHTMLLinks} from "@/lib/process-html-links";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import { CatalogOption } from "@/app/sapopedia/get-filter-catalogs";
+import { processHTMLLinks } from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -16,7 +16,10 @@ interface RedListAccordionProps {
   readonly categorias: CatalogOption[];
 }
 
-export default function RedListAccordion({especies, categorias}: RedListAccordionProps) {
+export default function RedListAccordion({
+  especies,
+  categorias,
+}: RedListAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
   // Cargar el estado del acordeón desde localStorage al montar
@@ -37,7 +40,10 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
   // Guardar el estado del acordeón en localStorage cuando cambia
   useEffect(() => {
     if (openItems.size > 0) {
-      localStorage.setItem("redListAccordionOpenItems", JSON.stringify(Array.from(openItems)));
+      localStorage.setItem(
+        "redListAccordionOpenItems",
+        JSON.stringify(Array.from(openItems)),
+      );
     } else {
       localStorage.removeItem("redListAccordionOpenItems");
     }
@@ -107,7 +113,9 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-gray-600">{species.nombre_comun}</div>
+          <div className="mt-1 text-xs text-gray-600">
+            {species.nombre_comun}
+          </div>
         )}
       </div>
 
@@ -126,7 +134,15 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
           <RedListStatus
             showTooltip={false}
             status={
-              species.lista_roja_iucn as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
+              species.lista_roja_iucn as
+                | "LC"
+                | "NT"
+                | "VU"
+                | "EN"
+                | "CR"
+                | "EW"
+                | "EX"
+                | "DD"
             }
           />
         ) : (
@@ -136,16 +152,23 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
 
       {/* Pisos Climáticos */}
       <div className="flex w-80 items-center justify-center">
-        {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
+        {species.rango_altitudinal_min !== null &&
+        species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
               min: species.rango_altitudinal_min,
               max: species.rango_altitudinal_max,
               occidente: species.has_distribucion_occidental
-                ? {min: species.rango_altitudinal_min, max: species.rango_altitudinal_max}
+                ? {
+                    min: species.rango_altitudinal_min,
+                    max: species.rango_altitudinal_max,
+                  }
                 : undefined,
               oriente: species.has_distribucion_oriental
-                ? {min: species.rango_altitudinal_min, max: species.rango_altitudinal_max}
+                ? {
+                    min: species.rango_altitudinal_min,
+                    max: species.rango_altitudinal_max,
+                  }
                 : undefined,
             }}
           />
@@ -156,7 +179,10 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     </div>
   );
 
-  const renderCategoria = (grupo: {categoria: CatalogOption; especies: SpeciesListItem[]}) => {
+  const renderCategoria = (grupo: {
+    categoria: CatalogOption;
+    especies: SpeciesListItem[];
+  }) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
 
@@ -176,11 +202,14 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
         >
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-800">{grupo.categoria.nombre}</span>
+              <span className="text-sm font-semibold text-gray-800">
+                {grupo.categoria.nombre}
+              </span>
             </div>
             <p className="text-xs text-gray-400">
-              {grupo.especies.length} especie{grupo.especies.length !== 1 ? "s" : ""} (
-              {especiesEndemicas} endémica{especiesEndemicas !== 1 ? "s" : ""})
+              {grupo.especies.length} especie
+              {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas}{" "}
+              endémica{especiesEndemicas !== 1 ? "s" : ""})
             </p>
           </div>
 
@@ -215,7 +244,9 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
   if (especiesPorCategoria.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-500">No hay especies con categoría de Lista Roja asignada.</p>
+        <p className="text-gray-500">
+          No hay especies con categoría de Lista Roja asignada.
+        </p>
       </div>
     );
   }
@@ -226,4 +257,3 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     </div>
   );
 }
-

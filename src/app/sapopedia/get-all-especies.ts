@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 export interface SpeciesListItem {
   id_taxon: number;
@@ -51,7 +51,9 @@ function parseCatalogString(catalogString: string | null): string[] {
     .filter((slug) => slug.length > 0);
 }
 
-export default async function getAllEspecies(familia?: string): Promise<SpeciesListItem[]> {
+export default async function getAllEspecies(
+  familia?: string,
+): Promise<SpeciesListItem[]> {
   const supabaseClient = createServiceClient();
 
   // Obtener todas las especies publicadas desde la vista completa
@@ -59,14 +61,14 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     .from("vw_ficha_especie_completa")
     .select("*")
     // .eq("publicar", true) // ⚠️ Filtro comentado temporalmente para ver todas las especies
-    .order("nombre_cientifico", {ascending: true});
+    .order("nombre_cientifico", { ascending: true });
 
   // Filtrar por familia si se proporciona
   if (familia) {
     query = query.eq("familia", familia);
   }
 
-  const {data: especies, error: errorEspecies} = await query;
+  const { data: especies, error: errorEspecies } = await query;
 
   if (errorEspecies) {
     console.error("Error al obtener especies:", errorEspecies);
@@ -93,7 +95,7 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   const RANK_PROVINCIAS = 3;
 
   // Obtener catálogos que faltan en la vista (sin provincias, que vienen de geopolitica)
-  const {data: catalogosData, error: errorCatalogos} = await supabaseClient
+  const { data: catalogosData, error: errorCatalogos } = await supabaseClient
     .from("taxon_catalogo_awe")
     .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
     .in("taxon_id", taxonIds)
@@ -105,9 +107,11 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
     ]);
 
   // Obtener provincias desde taxon_geopolitica
-  const {data: provinciasData, error: errorProvincias} = await supabaseClient
+  const { data: provinciasData, error: errorProvincias } = await supabaseClient
     .from("taxon_geopolitica")
-    .select("taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)")
+    .select(
+      "taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)",
+    )
     .in("taxon_id", taxonIds)
     .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
 
@@ -198,58 +202,68 @@ export default async function getAllEspecies(familia?: string): Promise<SpeciesL
   }
 
   // Mapear los datos de la vista a nuestro tipo SpeciesListItem
-  const especiesFormateadas: SpeciesListItem[] = especies.map((especie: any) => {
-    // Usar el campo awe_distribucion_altitudinal de la vista para determinar occidental/oriental
-    const distribucionAltitudinal = (especie.awe_distribucion_altitudinal || "").toLowerCase();
-    const hasOccidental = distribucionAltitudinal.includes("occidental");
-    const hasOriental = distribucionAltitudinal.includes("oriental");
-    const taxonId = especie.especie_taxon_id as number;
+  const especiesFormateadas: SpeciesListItem[] = especies.map(
+    (especie: any) => {
+      // Usar el campo awe_distribucion_altitudinal de la vista para determinar occidental/oriental
+      const distribucionAltitudinal = (
+        especie.awe_distribucion_altitudinal || ""
+      ).toLowerCase();
+      const hasOccidental = distribucionAltitudinal.includes("occidental");
+      const hasOriental = distribucionAltitudinal.includes("oriental");
+      const taxonId = especie.especie_taxon_id as number;
 
-    // Obtener catálogos extra (los que no están en la vista) usando taxon_id
-    const catalogosExtra = catalogosExtraMap.get(taxonId) || {
-      ecosistemas: [],
-      reservas_biosfera: [],
-      bosques_protegidos: [],
-      provincias: [],
-    };
+      // Obtener catálogos extra (los que no están en la vista) usando taxon_id
+      const catalogosExtra = catalogosExtraMap.get(taxonId) || {
+        ecosistemas: [],
+        reservas_biosfera: [],
+        bosques_protegidos: [],
+        provincias: [],
+      };
 
-    // Parsear catálogos que SÍ vienen en la vista como strings
-    const regionesBiogeograficas = parseCatalogString(especie.awe_regiones_biogeograficas);
-    const areasProtegidasEstado = parseCatalogString(especie.awe_areas_protegidas_estado);
-    const areasProtegidasPrivadas = parseCatalogString(especie.awe_areas_protegidas_privadas);
+      // Parsear catálogos que SÍ vienen en la vista como strings
+      const regionesBiogeograficas = parseCatalogString(
+        especie.awe_regiones_biogeograficas,
+      );
+      const areasProtegidasEstado = parseCatalogString(
+        especie.awe_areas_protegidas_estado,
+      );
+      const areasProtegidasPrivadas = parseCatalogString(
+        especie.awe_areas_protegidas_privadas,
+      );
 
-    const fichaEspecieId = especie.especie_ficha_especie_id ?? null;
+      const fichaEspecieId = especie.especie_ficha_especie_id ?? null;
 
-    return {
-      id_taxon: taxonId,
-      id_ficha_especie: fichaEspecieId,
-      nombre_cientifico: especie.nombre_cientifico,
-      nombre_comun: especie.nombre_comun,
-      descubridor: especie.especie_autor,
-      orden: especie.orden,
-      familia: especie.familia,
-      genero: especie.genero,
-      fotografia_ficha: especie.fotografia_ficha,
-      en_ecuador: especie.en_ecuador,
-      endemica: especie.endemica,
-      rango_altitudinal_min: especie.rango_altitudinal_min,
-      rango_altitudinal_max: especie.rango_altitudinal_max,
-      lista_roja_iucn: listaRojaMap.get(taxonId) || null,
-      has_distribucion_occidental: hasOccidental,
-      has_distribucion_oriental: hasOriental,
-      catalogos: {
-        // Catálogos que vienen de la vista (parseados de string a array)
-        regiones_biogeograficas: regionesBiogeograficas,
-        areas_protegidas_estado: areasProtegidasEstado,
-        areas_protegidas_privadas: areasProtegidasPrivadas,
-        // Catálogos que vienen de la query extra
-        ecosistemas: catalogosExtra.ecosistemas,
-        reservas_biosfera: catalogosExtra.reservas_biosfera,
-        bosques_protegidos: catalogosExtra.bosques_protegidos,
-        provincias: catalogosExtra.provincias,
-      },
-    };
-  });
+      return {
+        id_taxon: taxonId,
+        id_ficha_especie: fichaEspecieId,
+        nombre_cientifico: especie.nombre_cientifico,
+        nombre_comun: especie.nombre_comun,
+        descubridor: especie.especie_autor,
+        orden: especie.orden,
+        familia: especie.familia,
+        genero: especie.genero,
+        fotografia_ficha: especie.fotografia_ficha,
+        en_ecuador: especie.en_ecuador,
+        endemica: especie.endemica,
+        rango_altitudinal_min: especie.rango_altitudinal_min,
+        rango_altitudinal_max: especie.rango_altitudinal_max,
+        lista_roja_iucn: listaRojaMap.get(taxonId) || null,
+        has_distribucion_occidental: hasOccidental,
+        has_distribucion_oriental: hasOriental,
+        catalogos: {
+          // Catálogos que vienen de la vista (parseados de string a array)
+          regiones_biogeograficas: regionesBiogeograficas,
+          areas_protegidas_estado: areasProtegidasEstado,
+          areas_protegidas_privadas: areasProtegidasPrivadas,
+          // Catálogos que vienen de la query extra
+          ecosistemas: catalogosExtra.ecosistemas,
+          reservas_biosfera: catalogosExtra.reservas_biosfera,
+          bosques_protegidos: catalogosExtra.bosques_protegidos,
+          provincias: catalogosExtra.provincias,
+        },
+      };
+    },
+  );
 
   return especiesFormateadas;
 }

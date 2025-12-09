@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import {X} from "lucide-react";
+import { X } from "lucide-react";
 
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -19,7 +19,9 @@ const DialogOverlay = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
-  ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Overlay> | null>;
+  ref?: React.RefObject<React.ElementRef<
+    typeof DialogPrimitive.Overlay
+  > | null>;
 }) => (
   <DialogPrimitive.Overlay
     ref={ref}
@@ -39,7 +41,9 @@ const DialogContent = ({
   children,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-  ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Content> | null>;
+  ref?: React.RefObject<React.ElementRef<
+    typeof DialogPrimitive.Content
+  > | null>;
 }) => (
   <DialogPortal>
     <DialogOverlay />
@@ -62,15 +66,30 @@ const DialogContent = ({
 
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({className, ...props}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className,
+    )}
+    {...props}
+  />
 );
 
 DialogHeader.displayName = "DialogHeader";
 
-const DialogFooter = ({className, ...props}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className,
+    )}
     {...props}
   />
 );
@@ -86,7 +105,10 @@ const DialogTitle = ({
 }) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg leading-none font-semibold tracking-tight", className)}
+    className={cn(
+      "text-lg leading-none font-semibold tracking-tight",
+      className,
+    )}
     {...props}
   />
 );
@@ -98,7 +120,9 @@ const DialogDescription = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description> & {
-  ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Description> | null>;
+  ref?: React.RefObject<React.ElementRef<
+    typeof DialogPrimitive.Description
+  > | null>;
 }) => (
   <DialogPrimitive.Description
     ref={ref}

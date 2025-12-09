@@ -1,5 +1,5 @@
-import {createServiceClient} from "@/utils/supabase/server";
-import {generatePublicacionSlug} from "@/lib/generate-publicacion-slug";
+import { createServiceClient } from "@/utils/supabase/server";
+import { generatePublicacionSlug } from "@/lib/generate-publicacion-slug";
 
 export interface PublicacionConRelaciones {
   id_publicacion: number;
@@ -39,15 +39,13 @@ export interface PublicacionConRelaciones {
 /**
  * Obtiene todas las publicaciones con sus relaciones
  */
-export default async function getAllPublicaciones(
-  filtros?: {
-    año?: number;
-    autor?: string;
-    categoria?: boolean;
-    publicacion_cj?: boolean;
-    search?: string;
-  },
-): Promise<PublicacionConRelaciones[]> {
+export default async function getAllPublicaciones(filtros?: {
+  año?: number;
+  autor?: string;
+  categoria?: boolean;
+  publicacion_cj?: boolean;
+  search?: string;
+}): Promise<PublicacionConRelaciones[]> {
   const supabaseClient = createServiceClient();
 
   // Construir query base
@@ -73,8 +71,8 @@ export default async function getAllPublicaciones(
       )
     `,
     )
-    .order("numero_publicacion_ano", {ascending: false, nullsFirst: false})
-    .order("fecha", {ascending: false});
+    .order("numero_publicacion_ano", { ascending: false, nullsFirst: false })
+    .order("fecha", { ascending: false });
 
   // Aplicar filtros
   if (filtros?.año) {
@@ -95,7 +93,7 @@ export default async function getAllPublicaciones(
     );
   }
 
-  const {data: publicaciones, error} = await query;
+  const { data: publicaciones, error } = await query;
 
   if (error) {
     console.error("Error al obtener publicaciones:", error);
@@ -108,14 +106,14 @@ export default async function getAllPublicaciones(
 
   // Transformar los datos
   const publicacionesTransformadas = publicaciones.map((pub: any) => {
-    const año =
-      pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
+    const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
 
     // Contar taxones
     const numTaxones =
       Array.isArray(pub.taxon_publicacion) && pub.taxon_publicacion.length > 0
         ? pub.taxon_publicacion.length
-        : typeof pub.taxon_publicacion === "object" && pub.taxon_publicacion !== null
+        : typeof pub.taxon_publicacion === "object" &&
+            pub.taxon_publicacion !== null
           ? pub.taxon_publicacion[0]?.count || 0
           : 0;
 
@@ -148,7 +146,8 @@ export default async function getAllPublicaciones(
       const tieneAutor = autores.some(
         (a: any) =>
           a.apellidos.toLowerCase().includes(filtros.autor!.toLowerCase()) ||
-          (a.nombres && a.nombres.toLowerCase().includes(filtros.autor!.toLowerCase())),
+          (a.nombres &&
+            a.nombres.toLowerCase().includes(filtros.autor!.toLowerCase())),
       );
 
       if (!tieneAutor) {
@@ -173,7 +172,12 @@ export default async function getAllPublicaciones(
       publica_en_web: pub.publica_en_web,
       categoria: pub.categoria,
       noticia: pub.noticia,
-      slug: generatePublicacionSlug(pub.cita_corta, año, pub.titulo, pub.id_publicacion),
+      slug: generatePublicacionSlug(
+        pub.cita_corta,
+        año,
+        pub.titulo,
+        pub.id_publicacion,
+      ),
       num_taxones: numTaxones,
       num_autores: autores.length,
       num_enlaces: enlaces.length,
@@ -183,7 +187,9 @@ export default async function getAllPublicaciones(
   });
 
   // Filtrar nulls (de filtros de autor)
-  return publicacionesTransformadas.filter((p) => p !== null) as PublicacionConRelaciones[];
+  return publicacionesTransformadas.filter(
+    (p) => p !== null,
+  ) as PublicacionConRelaciones[];
 }
 
 /**
@@ -192,11 +198,11 @@ export default async function getAllPublicaciones(
 export async function getAñosPublicaciones(): Promise<number[]> {
   const supabaseClient = createServiceClient();
 
-  const {data, error} = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("publicacion")
     .select("numero_publicacion_ano, fecha")
     .not("numero_publicacion_ano", "is", null)
-    .order("numero_publicacion_ano", {ascending: false});
+    .order("numero_publicacion_ano", { ascending: false });
 
   if (error || !data) {
     return [];
@@ -212,4 +218,3 @@ export async function getAñosPublicaciones(): Promise<number[]> {
 
   return Array.from(años).sort((a, b) => b - a);
 }
-
