@@ -1,9 +1,10 @@
 import RedListAccordion from "@/components/RedListAccordion";
-import RedListChartSelector from "@/components/RedListChartSelector";
 import RedListSummaryCards from "@/components/RedListSummaryCards";
 
 import getAllEspecies from "../get-all-especies";
 import getFilterCatalogs from "../get-filter-catalogs";
+
+import RedListChartSelector from "@/components/RedListChartSelector";
 
 export default async function ListaRojaPage() {
   // Obtener especies y catálogos de filtros
