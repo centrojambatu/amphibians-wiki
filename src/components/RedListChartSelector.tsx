@@ -24,12 +24,14 @@ export default function RedListChartSelector({
             <TabsTrigger value="bar">Diagrama de Barras</TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="pie" className="mt-0">
-          <RedListPieChart categorias={categorias} especies={especies} />
-        </TabsContent>
-        <TabsContent value="bar" className="mt-0">
-          <RedListBarChart categorias={categorias} especies={especies} />
-        </TabsContent>
+        <div className="min-h-[650px]">
+          <TabsContent value="pie" className="mt-0 h-full">
+            <RedListPieChart categorias={categorias} especies={especies} />
+          </TabsContent>
+          <TabsContent value="bar" className="mt-0 h-full">
+            <RedListBarChart categorias={categorias} especies={especies} />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

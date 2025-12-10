@@ -146,7 +146,7 @@ export default function RedListBarChart({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-800">
           Distribución por Categorías
@@ -156,7 +156,7 @@ export default function RedListBarChart({
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 flex-1">
         {datos.map((dato) => {
           const porcentaje = (dato.count / maxCount) * 100;
 

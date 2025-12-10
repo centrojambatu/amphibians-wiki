@@ -94,13 +94,33 @@ export default async function getAllEspecies(
   // Rank de geopolitica para provincias
   const RANK_PROVINCIAS = 3;
 
-  // Obtener catálogos que faltan en la vista (sin provincias, que vienen de geopolitica)
+  // Obtener el mapeo de nombre -> sigla para categorías UICN
+  const { data: categoriasUICN, error: errorCategoriasUICN } = await supabaseClient
+    .from("catalogo_awe")
+    .select("nombre, sigla")
+    .eq("tipo_catalogo_awe_id", TIPO_LISTA_ROJA);
+
+  if (errorCategoriasUICN) {
+    console.error("Error al obtener categorías UICN:", errorCategoriasUICN);
+  }
+
+  // Crear mapa de nombre -> sigla para UICN
+  const nombreASiglaMap = new Map<string, string>();
+  if (categoriasUICN) {
+    for (const cat of categoriasUICN) {
+      if (cat.nombre && cat.sigla) {
+        nombreASiglaMap.set(cat.nombre, cat.sigla);
+      }
+    }
+  }
+  console.log(`📊 Mapeo UICN creado: ${nombreASiglaMap.size} categorías`);
+
+  // Obtener catálogos que faltan en la vista (sin provincias y sin Lista Roja, que viene de awe_lista_roja_uicn)
   const { data: catalogosData, error: errorCatalogos } = await supabaseClient
     .from("taxon_catalogo_awe")
     .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
     .in("taxon_id", taxonIds)
     .in("catalogo_awe.tipo_catalogo_awe_id", [
-      TIPO_LISTA_ROJA,
       TIPO_ECOSISTEMAS,
       TIPO_RESERVAS_BIOSFERA,
       TIPO_BOSQUES_PROTEGIDOS,
@@ -145,7 +165,26 @@ export default async function getAllEspecies(
     });
   }
 
-  // Procesar catálogos desde taxon_catalogo_awe
+  // Procesar Lista Roja UICN directamente desde la vista (awe_lista_roja_uicn)
+  // Esto es más eficiente y evita problemas con límites de .in()
+  let especiesConUICN = 0;
+  for (const especie of especies as any[]) {
+    const taxonId = especie.especie_taxon_id as number;
+    const nombreUICN = especie.awe_lista_roja_uicn as string | null;
+
+    if (taxonId && nombreUICN) {
+      const sigla = nombreASiglaMap.get(nombreUICN);
+      if (sigla) {
+        listaRojaMap.set(taxonId, sigla);
+        especiesConUICN++;
+      } else {
+        console.warn(`⚠️ No se encontró sigla para categoría UICN: "${nombreUICN}"`);
+      }
+    }
+  }
+  console.log(`📊 Especies con categoría UICN mapeadas desde la vista: ${especiesConUICN}`);
+
+  // Procesar otros catálogos desde taxon_catalogo_awe
   if (catalogosData) {
     for (const item of catalogosData as any[]) {
       const taxonId = item.taxon_id as number;
@@ -155,15 +194,9 @@ export default async function getAllEspecies(
 
       const tipoId = catalogo.tipo_catalogo_awe_id;
       const nombre = catalogo.nombre as string;
-      const sigla = catalogo.sigla as string | null;
       const slug = toSlug(nombre);
 
-      // Lista Roja usa sigla
-      if (tipoId === TIPO_LISTA_ROJA && sigla) {
-        listaRojaMap.set(taxonId, sigla);
-      }
-
-      // Otros catálogos usan slug
+      // Otros catálogos usan slug (Lista Roja ya se procesó desde la vista)
       const especieCatalogos = catalogosExtraMap.get(taxonId);
 
       if (especieCatalogos) {
@@ -264,6 +297,12 @@ export default async function getAllEspecies(
       };
     },
   );
+
+  // Debug: Verificar cuántas especies tienen categoría UICN
+  const especiesConUICNFinal = especiesFormateadas.filter((e) => e.lista_roja_iucn).length;
+  console.log(`📊 Total especies formateadas: ${especiesFormateadas.length}`);
+  console.log(`📊 Especies con categoría UICN final: ${especiesConUICNFinal}`);
+  console.log(`📊 Tamaño del mapa listaRojaMap: ${listaRojaMap.size}`);
 
   return especiesFormateadas;
 }

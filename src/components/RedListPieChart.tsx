@@ -184,13 +184,13 @@ export default function RedListPieChart({especies, categorias}: RedListPieChartP
   });
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Distribución por Categorías</h3>
         <p className="text-muted-foreground text-sm">Total: {totalEspecies} especies</p>
       </div>
 
-      <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
+      <div className="flex flex-col items-center gap-8 md:flex-row md:items-start flex-1">
         {/* Diagrama de pastel */}
         <div className="flex-shrink-0">
           <TooltipProvider>
