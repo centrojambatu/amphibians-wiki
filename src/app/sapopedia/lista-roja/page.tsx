@@ -1,5 +1,6 @@
 import RedListAccordion from "@/components/RedListAccordion";
 import RedListChartSelector from "@/components/RedListChartSelector";
+import RedListSummaryCards from "@/components/RedListSummaryCards";
 
 import getAllEspecies from "../get-all-especies";
 import getFilterCatalogs from "../get-filter-catalogs";
@@ -18,6 +19,9 @@ export default async function ListaRojaPage() {
           UICN.
         </p>
       </div>
+
+      {/* Cards de resumen */}
+      <RedListSummaryCards especies={especies} />
 
       {/* Selector de gráficos */}
       <RedListChartSelector categorias={filterCatalogs.listaRoja} especies={especies} />
