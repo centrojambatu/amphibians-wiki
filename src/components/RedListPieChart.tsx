@@ -12,11 +12,48 @@ interface RedListPieChartProps {
 }
 
 export default function RedListPieChart({especies, categorias}: RedListPieChartProps) {
+  // Debug: Verificar datos recibidos
+  console.log("🔍 RedListPieChart - Total especies recibidas:", especies.length);
+  console.log("🔍 RedListPieChart - Especies con categoría UICN:", especies.filter((e) => e.lista_roja_iucn).length);
+  console.log("🔍 RedListPieChart - Categorías recibidas de getFilterCatalogs:", categorias.length);
+
+  // Obtener todas las categorías únicas de las especies (no solo las de getFilterCatalogs)
+  const categoriasUnicas = new Set(
+    especies
+      .map((e) => e.lista_roja_iucn)
+      .filter((sigla): sigla is string => sigla !== null && sigla !== undefined),
+  );
+
+  console.log("🔍 RedListPieChart - Categorías únicas encontradas en especies:", Array.from(categoriasUnicas));
+
+  // Combinar categorías de getFilterCatalogs con las que realmente tienen especies
+  const todasLasCategorias = Array.from(categoriasUnicas)
+    .map((sigla) => {
+      // Buscar la categoría en el listado de getFilterCatalogs
+      const categoriaEncontrada = categorias.find((c) => c.sigla === sigla);
+      if (categoriaEncontrada) {
+        return categoriaEncontrada;
+      }
+      // Si no se encuentra, crear una categoría temporal con el nombre de la sigla
+      return {
+        id: 0,
+        nombre: sigla,
+        sigla: sigla,
+        value: sigla,
+      };
+    })
+    .filter((c) => c.sigla !== null);
+
   // Calcular datos para el gráfico
-  const datos = categorias
+  const datos = todasLasCategorias
     .map((categoria) => {
       const especiesEnCategoria = especies.filter((e) => e.lista_roja_iucn === categoria.sigla);
       const count = especiesEnCategoria.length;
+
+      // Debug por categoría
+      if (count > 0) {
+        console.log(`🔍 Categoría ${categoria.sigla} (${categoria.nombre}): ${count} especies`);
+      }
 
       // Calcular familias y géneros únicos
       const familias = new Set(especiesEnCategoria.map((e) => e.familia).filter(Boolean));
@@ -30,8 +67,12 @@ export default function RedListPieChart({especies, categorias}: RedListPieChartP
         especies: count,
       };
     })
-    .filter((d) => d.count > 0)
-    .sort((a, b) => {
+    .filter((d) => d.count > 0);
+
+  console.log("🔍 RedListPieChart - Total de datos después de filtrar:", datos.length);
+  console.log("🔍 RedListPieChart - Suma total de especies en datos:", datos.reduce((sum, d) => sum + d.count, 0));
+
+  const datosOrdenados = datos.sort((a, b) => {
       // Ordenar por orden de importancia de las categorías
       // PE (Posiblemente extinta) debe ser la primera, siempre
       const siglaA = a.categoria.sigla || "";
@@ -104,7 +145,7 @@ export default function RedListPieChart({especies, categorias}: RedListPieChartP
 
   let currentAngle = -90; // Empezar desde arriba
 
-  const paths = datos.map((dato) => {
+  const paths = datosOrdenados.map((dato) => {
     const percentage = especiesConCategoria > 0 ? (dato.count / especiesConCategoria) * 100 : 0;
     const angle = especiesConCategoria > 0 ? (dato.count / especiesConCategoria) * 360 : 0;
 
@@ -184,7 +225,7 @@ export default function RedListPieChart({especies, categorias}: RedListPieChartP
 
         {/* Leyenda */}
         <div className="flex-1 space-y-3">
-          {datos.map((dato, index) => {
+          {datosOrdenados.map((dato, index) => {
             const percentage =
               especiesConCategoria > 0
                 ? ((dato.count / especiesConCategoria) * 100).toFixed(1)

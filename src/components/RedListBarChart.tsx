@@ -19,13 +19,49 @@ export default function RedListBarChart({
   especies,
   categorias,
 }: RedListBarChartProps) {
+  // Debug: Verificar datos recibidos
+  console.log("🔍 RedListBarChart - Total especies recibidas:", especies.length);
+  console.log("🔍 RedListBarChart - Especies con categoría UICN:", especies.filter((e) => e.lista_roja_iucn).length);
+
+  // Obtener todas las categorías únicas de las especies (no solo las de getFilterCatalogs)
+  const categoriasUnicas = new Set(
+    especies
+      .map((e) => e.lista_roja_iucn)
+      .filter((sigla): sigla is string => sigla !== null && sigla !== undefined),
+  );
+
+  console.log("🔍 RedListBarChart - Categorías únicas encontradas:", Array.from(categoriasUnicas));
+
+  // Combinar categorías de getFilterCatalogs con las que realmente tienen especies
+  const todasLasCategorias = Array.from(categoriasUnicas)
+    .map((sigla) => {
+      // Buscar la categoría en el listado de getFilterCatalogs
+      const categoriaEncontrada = categorias.find((c) => c.sigla === sigla);
+      if (categoriaEncontrada) {
+        return categoriaEncontrada;
+      }
+      // Si no se encuentra, crear una categoría temporal con el nombre de la sigla
+      return {
+        id: 0,
+        nombre: sigla,
+        sigla: sigla,
+        value: sigla,
+      };
+    })
+    .filter((c) => c.sigla !== null);
+
   // Calcular datos para el gráfico
-  const datos = categorias
+  const datos = todasLasCategorias
     .map((categoria) => {
       const especiesEnCategoria = especies.filter(
         (e) => e.lista_roja_iucn === categoria.sigla,
       );
       const count = especiesEnCategoria.length;
+
+      // Debug por categoría
+      if (count > 0) {
+        console.log(`🔍 BarChart - Categoría ${categoria.sigla} (${categoria.nombre}): ${count} especies`);
+      }
 
       // Calcular familias y géneros únicos
       const familias = new Set(
