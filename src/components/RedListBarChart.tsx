@@ -46,10 +46,23 @@ export default function RedListBarChart({
     .filter((d) => d.count > 0)
     .sort((a, b) => {
       // Ordenar por orden de importancia de las categorías
+      // PE (Posiblemente extinta) debe ser la primera, siempre
+      const siglaA = a.categoria.sigla || "";
+      const siglaB = b.categoria.sigla || "";
+
+      // Función helper para detectar si es PE
+      const isPE = (sigla: string) => {
+        return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
+      };
+
+      // PE siempre primero
+      if (isPE(siglaA) && !isPE(siglaB)) return -1;
+      if (!isPE(siglaA) && isPE(siglaB)) return 1;
+
       const orden = ["CR", "EN", "VU", "NT", "LC", "DD", "EW", "EX"];
 
-      const indexA = orden.indexOf(a.categoria.sigla || "");
-      const indexB = orden.indexOf(b.categoria.sigla || "");
+      const indexA = orden.indexOf(siglaA);
+      const indexB = orden.indexOf(siglaB);
 
       if (indexA === -1 && indexB === -1) return 0;
       if (indexA === -1) return 1;
@@ -59,10 +72,21 @@ export default function RedListBarChart({
     });
 
   const maxCount = Math.max(...datos.map((d) => d.count), 1);
-  const totalEspecies = especies.filter((e) => e.lista_roja_iucn).length;
+  const totalEspecies = especies.length;
+  const especiesConCategoria = especies.filter((e) => e.lista_roja_iucn).length;
+
+  // Función helper para detectar si es PE
+  const isPE = (sigla: string | null) => {
+    if (!sigla) return false;
+    return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
+  };
 
   // Colores para cada categoría
   const getColor = (sigla: string | null) => {
+    if (isPE(sigla)) {
+      return "#b71c1c"; // Rojo intenso para Posiblemente extinta
+    }
+
     switch (sigla) {
       case "EX":
         return "#000000";
@@ -92,7 +116,7 @@ export default function RedListBarChart({
           Distribución por Categorías
         </h3>
         <p className="text-muted-foreground text-sm">
-          Total: {totalEspecies} especies con categoría UICN
+          Total: {totalEspecies} especies
         </p>
       </div>
 
@@ -105,20 +129,38 @@ export default function RedListBarChart({
               {/* Badge de categoría */}
               <div className="flex w-20 items-center justify-center">
                 {dato.categoria.sigla && (
-                  <RedListStatus
-                    showTooltip={false}
-                    status={
-                      dato.categoria.sigla as
-                        | "LC"
-                        | "NT"
-                        | "VU"
-                        | "EN"
-                        | "CR"
-                        | "EW"
-                        | "EX"
-                        | "DD"
-                    }
-                  />
+                  <>
+                    {isPE(dato.categoria.sigla) ? (
+                      <div
+                        className="inline-flex items-center justify-center font-semibold text-[10px] px-2 py-1"
+                        style={{
+                          backgroundColor: getColor(dato.categoria.sigla),
+                          color: "#ffffff",
+                          borderRadius: "100% 0% 100% 100%",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                        }}
+                      >
+                        PE
+                      </div>
+                    ) : (
+                      <RedListStatus
+                        showTooltip={false}
+                        status={
+                          dato.categoria.sigla as
+                            | "LC"
+                            | "NT"
+                            | "VU"
+                            | "EN"
+                            | "CR"
+                            | "EW"
+                            | "EX"
+                            | "DD"
+                        }
+                      />
+                    )}
+                  </>
                 )}
               </div>
 
@@ -127,7 +169,9 @@ export default function RedListBarChart({
                 <p className="text-sm font-medium text-gray-800">
                   {dato.categoria.nombre}
                 </p>
-                <p className="text-xs text-gray-500">{dato.categoria.sigla}</p>
+                <p className="text-xs text-gray-500">
+                  {isPE(dato.categoria.sigla) ? "CR (PE)" : dato.categoria.sigla}
+                </p>
               </div>
 
               {/* Barra */}
@@ -167,8 +211,8 @@ export default function RedListBarChart({
               {/* Porcentaje del total */}
               <div className="w-16 text-right">
                 <p className="text-sm font-medium text-gray-600">
-                  {totalEspecies > 0
-                    ? ((dato.count / totalEspecies) * 100).toFixed(1)
+                  {especiesConCategoria > 0
+                    ? ((dato.count / especiesConCategoria) * 100).toFixed(1)
                     : 0}
                   %
                 </p>

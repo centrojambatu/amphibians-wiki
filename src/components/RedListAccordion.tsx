@@ -62,6 +62,12 @@ export default function RedListAccordion({
 
   const isOpen = (itemId: string) => openItems.has(itemId);
 
+  // Función helper para detectar si es PE
+  const isPE = (sigla: string | null) => {
+    if (!sigla) return false;
+    return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
+  };
+
   // Agrupar especies por categoría de lista roja
   const especiesPorCategoria = categorias
     .map((categoria) => {
@@ -77,10 +83,18 @@ export default function RedListAccordion({
     .filter((grupo) => grupo.especies.length > 0)
     .sort((a, b) => {
       // Ordenar por orden de importancia de las categorías
+      // PE (Posiblemente extinta) debe ser la primera, siempre
+      const siglaA = a.categoria.sigla || "";
+      const siglaB = b.categoria.sigla || "";
+
+      // PE siempre primero
+      if (isPE(siglaA) && !isPE(siglaB)) return -1;
+      if (!isPE(siglaA) && isPE(siglaB)) return 1;
+
       const orden = ["CR", "EN", "VU", "NT", "LC", "DD", "EW", "EX"];
 
-      const indexA = orden.indexOf(a.categoria.sigla || "");
-      const indexB = orden.indexOf(b.categoria.sigla || "");
+      const indexA = orden.indexOf(siglaA);
+      const indexB = orden.indexOf(siglaB);
 
       if (indexA === -1 && indexB === -1) return 0;
       if (indexA === -1) return 1;
@@ -131,20 +145,36 @@ export default function RedListAccordion({
       {/* Lista Roja */}
       <div className="w-16 text-center">
         {species.lista_roja_iucn ? (
-          <RedListStatus
-            showTooltip={false}
-            status={
-              species.lista_roja_iucn as
-                | "LC"
-                | "NT"
-                | "VU"
-                | "EN"
-                | "CR"
-                | "EW"
-                | "EX"
-                | "DD"
-            }
-          />
+          isPE(species.lista_roja_iucn) ? (
+            <div
+              className="inline-flex items-center justify-center font-semibold text-[10px] px-2 py-1"
+              style={{
+                backgroundColor: "#b71c1c",
+                color: "#ffffff",
+                borderRadius: "100% 0% 100% 100%",
+                minWidth: "32px",
+                minHeight: "32px",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+              }}
+            >
+              PE
+            </div>
+          ) : (
+            <RedListStatus
+              showTooltip={false}
+              status={
+                species.lista_roja_iucn as
+                  | "LC"
+                  | "NT"
+                  | "VU"
+                  | "EN"
+                  | "CR"
+                  | "EW"
+                  | "EX"
+                  | "DD"
+              }
+            />
+          )
         ) : (
           <span className="text-gray-400">-</span>
         )}
