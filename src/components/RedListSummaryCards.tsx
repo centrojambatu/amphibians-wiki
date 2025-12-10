@@ -1,17 +1,16 @@
 "use client";
 
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 
 interface RedListSummaryCardsProps {
   readonly especies: SpeciesListItem[];
 }
 
-export default function RedListSummaryCards({
-  especies,
-}: RedListSummaryCardsProps) {
+export default function RedListSummaryCards({especies}: RedListSummaryCardsProps) {
   // Función helper para detectar si es PE
   const isPE = (sigla: string | null): boolean => {
     if (!sigla) return false;
+
     return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
   };
 
@@ -19,9 +18,11 @@ export default function RedListSummaryCards({
   const categoriasAmenazadas = ["CR", "EN", "VU"];
   const especiesAmenazadas = especies.filter((e) => {
     const sigla = e.lista_roja_iucn;
+
     if (!sigla) return false;
     // Incluir CR (PE) también
     if (isPE(sigla)) return true;
+
     return categoriasAmenazadas.includes(sigla);
   });
 
@@ -29,7 +30,9 @@ export default function RedListSummaryCards({
   const categoriasNoAmenazadas = ["NT", "LC"];
   const especiesNoAmenazadas = especies.filter((e) => {
     const sigla = e.lista_roja_iucn;
+
     if (!sigla) return false;
+
     return categoriasNoAmenazadas.includes(sigla);
   });
 
@@ -38,15 +41,11 @@ export default function RedListSummaryCards({
 
   const totalAmenazadas = especiesAmenazadas.length;
   const porcentajeAmenazadas =
-    especiesConCategoria > 0
-      ? ((totalAmenazadas / especiesConCategoria) * 100).toFixed(1)
-      : "0";
+    especiesConCategoria > 0 ? ((totalAmenazadas / especiesConCategoria) * 100).toFixed(1) : "0";
 
   const totalNoAmenazadas = especiesNoAmenazadas.length;
   const porcentajeNoAmenazadas =
-    especiesConCategoria > 0
-      ? ((totalNoAmenazadas / especiesConCategoria) * 100).toFixed(1)
-      : "0";
+    especiesConCategoria > 0 ? ((totalNoAmenazadas / especiesConCategoria) * 100).toFixed(1) : "0";
 
   // Función para obtener el color de cada categoría
   const getColor = (sigla: string) => {
@@ -74,6 +73,7 @@ export default function RedListSummaryCards({
     if (isPE(sigla) || sigla === "CR" || sigla === "EN") {
       return "#ffffff";
     }
+
     return "#000000";
   };
 
@@ -82,7 +82,6 @@ export default function RedListSummaryCards({
       {/* Card de especies amenazadas */}
       <div className="rounded-lg border border-gray-300 bg-gray-50 p-6 shadow-sm">
         <div className="mb-2 flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-gray-700"></div>
           <h3 className="text-lg font-semibold text-gray-900">Especies Amenazadas</h3>
         </div>
         <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -123,16 +122,13 @@ export default function RedListSummaryCards({
             <span className="text-4xl font-bold text-gray-900">{totalAmenazadas}</span>
             <span className="text-lg text-gray-700">especies</span>
           </div>
-          <p className="mt-2 text-sm text-gray-600">
-            {porcentajeAmenazadas}% del total
-          </p>
+          <p className="mt-2 text-sm text-gray-600">{porcentajeAmenazadas}% del total</p>
         </div>
       </div>
 
       {/* Card de especies no amenazadas */}
       <div className="rounded-lg border border-gray-300 bg-gray-50 p-6 shadow-sm">
         <div className="mb-2 flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-gray-400"></div>
           <h3 className="text-lg font-semibold text-gray-900">Especies No Amenazadas</h3>
         </div>
         <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -159,9 +155,7 @@ export default function RedListSummaryCards({
             <span className="text-4xl font-bold text-gray-900">{totalNoAmenazadas}</span>
             <span className="text-lg text-gray-700">especies</span>
           </div>
-          <p className="mt-2 text-sm text-gray-600">
-            {porcentajeNoAmenazadas}% del total
-          </p>
+          <p className="mt-2 text-sm text-gray-600">{porcentajeNoAmenazadas}% del total</p>
         </div>
       </div>
     </div>
