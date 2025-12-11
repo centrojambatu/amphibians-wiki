@@ -42,6 +42,7 @@ export interface FiltersState {
   areasProtegidasPrivadas: string[];
   pluviocidad: { min: number; max: number };
   temperatura: { min: number; max: number };
+  distribucion: string[]; // "oriental" | "occidental"
 }
 
 interface FiltersPanelProps {
@@ -81,6 +82,7 @@ export default function FiltersPanel({
     areasProtegidasPrivadas: [],
     pluviocidad: { min: 640, max: 4000 },
     temperatura: { min: 5, max: 25 },
+    distribucion: [],
   });
 
   // Función para buscar en los datos de especies
@@ -223,6 +225,7 @@ export default function FiltersPanel({
       areasProtegidasPrivadas: [],
       pluviocidad: { min: 640, max: 4000 },
       temperatura: { min: 5, max: 25 },
+      distribucion: [],
     };
 
     setFilters(resetFiltersState);
@@ -488,13 +491,20 @@ export default function FiltersPanel({
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Pisos altitudinales</span>
-                {(filters.rangoAltitudinal.min !== 0 ||
-                  filters.rangoAltitudinal.max !== 4800) && (
-                  <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.rangoAltitudinal.min}m -{" "}
-                    {filters.rangoAltitudinal.max}m
-                  </span>
-                )}
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {(filters.rangoAltitudinal.min !== 0 ||
+                    filters.rangoAltitudinal.max !== 4800) && (
+                    <span className="text-xs font-normal text-gray-500">
+                      {filters.rangoAltitudinal.min}m -{" "}
+                      {filters.rangoAltitudinal.max}m
+                    </span>
+                  )}
+                  {filters.distribucion.length > 0 && (
+                    <span className="text-xs font-normal text-gray-500">
+                      {filters.distribucion.join(", ")}
+                    </span>
+                  )}
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -525,6 +535,37 @@ export default function FiltersPanel({
                       handleSliderChange("rangoAltitudinal", values)
                     }
                   />
+                </div>
+
+                {/* Checkboxes de distribución */}
+                <div className="space-y-2 border-t border-gray-200 pt-4">
+                  <label className="text-sm font-medium text-gray-700">
+                    Distribución
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={filters.distribucion.includes("occidental")}
+                        onChange={() =>
+                          handleCategoricalChange("distribucion", "occidental")
+                        }
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-700">Occidental</span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={filters.distribucion.includes("oriental")}
+                        onChange={() =>
+                          handleCategoricalChange("distribucion", "oriental")
+                        }
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-700">Oriental</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </AccordionContent>

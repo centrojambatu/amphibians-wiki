@@ -162,6 +162,21 @@ export function SapopediaContent({
         if (!hasMatch) return false;
       }
 
+      // Filtro por distribución (oriental/occidental)
+      if (filters.distribucion.length > 0) {
+        const matchesDistribucion = filters.distribucion.some((d) => {
+          if (d === "occidental") {
+            return especie.has_distribucion_occidental;
+          }
+          if (d === "oriental") {
+            return especie.has_distribucion_oriental;
+          }
+          return false;
+        });
+
+        if (!matchesDistribucion) return false;
+      }
+
       return true;
     });
   };
