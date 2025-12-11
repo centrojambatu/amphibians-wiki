@@ -1,16 +1,16 @@
-import {createClient} from "@/utils/supabase/server";
-import {Database} from "@/types/supabase";
+import { createClient } from "@/utils/supabase/server";
+import { Database } from "@/types/supabase";
 
 // Servicios para obtener datos de anfibios
 export const amphibianService = {
   // Obtener estadísticas generales
   async get_card_species() {
     const supabase = await createClient();
-    const {data, error} = await supabase
+    const { data, error } = await supabase
       // @ts-ignore
       .from("ficha_especie")
       .select("*")
-      .order("id_ficha_especie", {ascending: true});
+      .order("id_ficha_especie", { ascending: true });
 
     if (error) throw error;
 

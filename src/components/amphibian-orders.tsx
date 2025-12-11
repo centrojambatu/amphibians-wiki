@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface Order {
   id: string;
@@ -15,7 +15,7 @@ interface AmphibianOrdersProps {
   orders: Order[];
 }
 
-export function AmphibianOrders({orders}: AmphibianOrdersProps) {
+export function AmphibianOrders({ orders }: AmphibianOrdersProps) {
   const getOrderIcon = (name: string) => {
     switch (name.toLowerCase()) {
       case "anura":
@@ -45,7 +45,10 @@ export function AmphibianOrders({orders}: AmphibianOrdersProps) {
   return (
     <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
       {orders.map((order) => (
-        <Card key={order.id} className={`transition-colors ${getOrderColor(order.name)}`}>
+        <Card
+          key={order.id}
+          className={`transition-colors ${getOrderColor(order.name)}`}
+        >
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="text-4xl">{getOrderIcon(order.name)}</div>
@@ -56,8 +59,12 @@ export function AmphibianOrders({orders}: AmphibianOrdersProps) {
                 <div className="text-muted-foreground text-sm">especies</div>
               </div>
             </div>
-            <CardTitle className="text-xl dark:text-black">{order.name}</CardTitle>
-            <p className="text-muted-foreground text-sm italic">{order.scientific_name}</p>
+            <CardTitle className="text-xl dark:text-black">
+              {order.name}
+            </CardTitle>
+            <p className="text-muted-foreground text-sm italic">
+              {order.scientific_name}
+            </p>
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-sm">{order.description}</p>

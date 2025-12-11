@@ -10,7 +10,9 @@ interface Post {
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const posts: Post[] = await fetch("https://api.vercel.app/blog").then((res) => res.json());
+  const posts: Post[] = await fetch("https://api.vercel.app/blog").then((res) =>
+    res.json(),
+  );
 
   return posts.map((post) => ({
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
@@ -18,9 +20,15 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function Page({params}: {params: Promise<{id: string}>}) {
-  const {id} = await params;
-  const post: Post = await fetch(`https://api.vercel.app/blog/${id}`).then((res) => res.json());
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const post: Post = await fetch(`https://api.vercel.app/blog/${id}`).then(
+    (res) => res.json(),
+  );
 
   return (
     <main>

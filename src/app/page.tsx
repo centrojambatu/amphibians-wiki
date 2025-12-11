@@ -1,5 +1,4 @@
 import {AmphibianStats} from "@/components/amphibian-stats";
-import {AmphibianOrders} from "@/components/amphibian-orders";
 import {AmphibianHighlights} from "@/components/amphibian-highlights";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
@@ -7,7 +6,7 @@ import {amphibianService} from "@/lib/supabase-existing";
 
 export default async function HomePage() {
   // Obtener datos de Supabase
-  const [statistics] = await Promise.all([amphibianService.getStatistics()]);
+  const statistics = await amphibianService.getStatistics();
 
   return (
     <main className="container mx-auto px-4 py-8">

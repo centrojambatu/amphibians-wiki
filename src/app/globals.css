@@ -223,3 +223,71 @@ span[class~="autor-ano-links"] a[href]:hover {
   color: #004d13 !important;
   text-decoration: underline !important;
 }
+
+/* Estilos para el panel de filtros - sin hover de subrayado */
+.filters-panel-scroll button,
+.filters-panel-scroll button:hover,
+.filters-panel-scroll button:active,
+.filters-panel-scroll button:focus {
+  text-decoration: none !important;
+}
+
+/* Estilos para el scroll del panel de filtros */
+.filters-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.filters-panel-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters-panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filters-panel-scroll::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.filters-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Estilos para enlaces procesados (procesados por processHTMLLinks) */
+.processed-link {
+  color: #006d1b !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  transition: color 0.3s ease, text-decoration 0.3s ease !important;
+}
+
+.processed-link:hover,
+.processed-link:active {
+  color: #004d13 !important;
+  text-decoration: underline !important;
+}
+
+/* Estilos para Leaflet */
+.region-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.region-polygon {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.region-label {
+  background: transparent !important;
+  border: none !important;
+}

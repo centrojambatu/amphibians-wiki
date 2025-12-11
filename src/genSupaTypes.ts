@@ -1,5 +1,5 @@
-require("dotenv").config({path: ".env.local"});
-const {execSync} = require("child_process");
+require("dotenv").config({ path: ".env.local" });
+const { execSync } = require("child_process");
 
 try {
   execSync(

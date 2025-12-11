@@ -1,5 +1,5 @@
-import {createClient} from "@/utils/supabase/server";
-import {Database} from "@/types/supabase";
+import { createClient } from "@/utils/supabase/server";
+import { Database } from "@/types/supabase";
 
 // Servicios para obtener datos de anfibios usando las tablas existentes
 export const amphibianService = {
@@ -8,16 +8,16 @@ export const amphibianService = {
     const supabase = await createClient();
 
     // Obtener total de especies
-    const {count: totalSpecies} = await supabase
+    const { count: totalSpecies } = await supabase
       .from("taxon")
-      .select("*", {count: "exact", head: true})
+      .select("*", { count: "exact", head: true })
       .eq("en_ecuador", true)
       .eq("rank_id", 7); // especie
 
     // Obtener especies endémicas
-    const {count: endemicSpecies} = await supabase
+    const { count: endemicSpecies } = await supabase
       .from("taxon")
-      .select("*", {count: "exact", head: true})
+      .select("*", { count: "exact", head: true })
       .eq("en_ecuador", true)
       .eq("endemica", true)
       .eq("rank_id", 7); // especie
@@ -36,7 +36,7 @@ export const amphibianService = {
   async getOrders() {
     const supabase = await createClient();
 
-    const {data, error} = await supabase
+    const { data, error } = await supabase
       .from("taxon")
       .select(
         `
@@ -71,7 +71,7 @@ export const amphibianService = {
     // TODO: Implementar consulta SQL compleja con JOINs para filtrar por orden
     const supabase = await createClient();
 
-    const {data, error} = await supabase
+    const { data, error } = await supabase
       .from("taxon")
       .select(
         `
@@ -87,13 +87,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getSpeciesByOrder:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
@@ -111,7 +116,7 @@ export const amphibianService = {
   async getEndemicSpecies(limit = 10) {
     const supabase = await createClient();
 
-    const {data, error} = await supabase
+    const { data, error } = await supabase
       .from("taxon")
       .select(
         `
@@ -127,13 +132,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getEndemicSpecies:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",
@@ -151,7 +161,7 @@ export const amphibianService = {
   async getEndangeredSpecies(limit = 10) {
     const supabase = await createClient();
 
-    const {data, error} = await supabase
+    const { data, error } = await supabase
       .from("taxon")
       .select(
         `
@@ -166,13 +176,18 @@ export const amphibianService = {
       .eq("rank_id", 7) // especie
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error en getAllSpecies:", error);
+      throw error;
+    }
+
+    if (!data) return [];
 
     return (
-      data?.map((specie) => ({
-        id: specie.id_taxon.toString(),
-        scientific_name: specie.taxon,
-        common_name: specie.nombre_comun || specie.taxon,
+      data.map((specie: any) => ({
+        id: specie.id_taxon?.toString() || "",
+        scientific_name: specie.taxon || "",
+        common_name: specie.nombrecomun || specie.taxon || "",
         discoverers: "",
         discovery_year: this.extractYear(specie.autor_ano),
         first_collectors: "",

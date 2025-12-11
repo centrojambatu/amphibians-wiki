@@ -1,4 +1,4 @@
-import {createServiceClient} from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 
 // interface Post {
 //   id: string;
@@ -19,7 +19,9 @@ export async function generateStaticParams() {
 
   const supabaseClient = createServiceClient();
 
-  const {data: taxons, error} = await supabaseClient.from("taxon").select("id_taxon");
+  const { data: taxons, error } = await supabaseClient
+    .from("taxon")
+    .select("id_taxon");
 
   if (!taxons) {
     return [];
@@ -34,10 +36,14 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function Page({params}: {params: Promise<{id: string}>}) {
-  const {id} = await params;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const supabaseClient = createServiceClient();
-  const {data: taxons, error} = await supabaseClient
+  const { data: taxons, error } = await supabaseClient
     .from("ficha_especie")
     .select("*")
     .eq("id_taxon", Number(id));
@@ -51,8 +57,8 @@ export default async function Page({params}: {params: Promise<{id: string}>}) {
   return (
     <main>
       {/* <h1>Sapopedia</h1> */}
-      <h1>{taxons?.[0].nombre_comun}</h1>
-      <p>{taxons?.[0].taxon_id}</p>
+      {/* <h1>{taxons?.[0].nombre_comun}</h1> */}
+      <p>{taxons?.[0]?.taxon_id}</p>
     </main>
   );
 }

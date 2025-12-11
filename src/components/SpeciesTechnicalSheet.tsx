@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import {Camera, Volume2, MapPin} from "lucide-react";
+import { Camera, Volume2, MapPin } from "lucide-react";
 
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {Separator} from "@/components/ui/separator";
-import {processHTMLLinks} from "@/lib/process-html-links";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
+import { processHTMLLinks } from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 
@@ -64,14 +69,18 @@ export default function SpeciesTechnicalSheet({
   return (
     <Card
       className="flex flex-col gap-0 overflow-hidden rounded-none border-0 bg-white p-0"
-      style={{boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", borderRadius: 0, border: "none"}}
+      style={{
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        borderRadius: 0,
+        border: "none",
+      }}
     >
       {/* Encabezado */}
       <CardHeader
         className="sticky top-0 z-30 text-center text-gray-900"
-        style={{padding: "0", backgroundColor: "#ffffff"}}
+        style={{ padding: "0", backgroundColor: "#ffffff" }}
       >
-        <div className="space-y-4" style={{padding: "40px 30px 30px"}}>
+        <div className="space-y-4" style={{ padding: "40px 30px 30px" }}>
           {/* Título principal - Jerarquía taxonómica completa */}
           <div className="flex flex-wrap items-baseline justify-center gap-2">
             {/* Orden - PEQUEÑO con link */}
@@ -86,7 +95,10 @@ export default function SpeciesTechnicalSheet({
             >
               {order}
             </Link>
-            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
+            <span
+              className="text-sm"
+              style={{ color: "#cccccc", fontWeight: "300" }}
+            >
               |
             </span>
 
@@ -102,7 +114,10 @@ export default function SpeciesTechnicalSheet({
             >
               {family}
             </Link>
-            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
+            <span
+              className="text-sm"
+              style={{ color: "#cccccc", fontWeight: "300" }}
+            >
               |
             </span>
 
@@ -118,7 +133,10 @@ export default function SpeciesTechnicalSheet({
             >
               {genus}
             </Link>
-            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
+            <span
+              className="text-sm"
+              style={{ color: "#cccccc", fontWeight: "300" }}
+            >
               |
             </span>
 
@@ -163,7 +181,7 @@ export default function SpeciesTechnicalSheet({
         </div>
 
         {/* Línea divisoria horizontal - extremo a extremo */}
-        <Separator className="bg-gray-200" style={{margin: "0"}} />
+        <Separator className="bg-gray-200" style={{ margin: "0" }} />
       </CardHeader>
 
       {/* Cuerpo - Layout con sidebar fijo y contenido con scroll */}
@@ -198,7 +216,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(etymology)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(etymology),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -228,7 +250,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(identification)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(identification),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -258,7 +284,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(comparisons)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(comparisons),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -288,7 +318,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(naturalHistory)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(naturalHistory),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -318,7 +352,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(content)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(content),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -348,7 +386,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(distribution)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(distribution),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -378,7 +420,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(conservation)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(conservation),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -408,7 +454,11 @@ export default function SpeciesTechnicalSheet({
                       lineHeight: "1.6",
                     }}
                   >
-                    <div dangerouslySetInnerHTML={{__html: processHTMLLinks(references)}} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: processHTMLLinks(references),
+                      }}
+                    />
                   </div>
                 </section>
               )}
@@ -417,7 +467,7 @@ export default function SpeciesTechnicalSheet({
 
           {/* Columna derecha - Sidebar fijo */}
           <div className="sticky top-0 h-screen w-96 overflow-y-auto border-l">
-            <div className="space-y-8" style={{padding: "25px 30px"}}>
+            <div className="space-y-8" style={{ padding: "25px 30px" }}>
               {/* Distribución Altitudinal */}
               {altitudinalRange && climaticFloors && (
                 <section>
@@ -436,12 +486,12 @@ export default function SpeciesTechnicalSheet({
                   </h3>
                   <div
                     className="rounded-none border p-4"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
                   >
-                    <ClimaticFloorChart
-                      altitudinalRange={altitudinalRange}
-                      climaticFloors={climaticFloors}
-                    />
+                    <ClimaticFloorChart altitudinalRange={altitudinalRange} />
                   </div>
                 </section>
               )}
@@ -466,7 +516,10 @@ export default function SpeciesTechnicalSheet({
                   {/* Endemismo */}
                   <div
                     className="flex aspect-square flex-col items-center justify-center rounded-none border p-2"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
                   >
                     <h4
                       className="mb-2"
@@ -482,7 +535,7 @@ export default function SpeciesTechnicalSheet({
                     </h4>
                     <span
                       className="text-center text-sm font-semibold"
-                      style={{color: isEndemic ? "#16a34a" : "#6b7280"}}
+                      style={{ color: isEndemic ? "#16a34a" : "#6b7280" }}
                     >
                       {isEndemic ? "Endémica" : "No endémica"}
                     </span>
@@ -495,7 +548,10 @@ export default function SpeciesTechnicalSheet({
                         <TooltipTrigger asChild>
                           <div
                             className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-none border p-2"
-                            style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                            style={{
+                              backgroundColor: "#f9f9f9",
+                              borderColor: "#dddddd",
+                            }}
                           >
                             <h4
                               className="mb-2"
@@ -600,23 +656,32 @@ export default function SpeciesTechnicalSheet({
                 <div className="grid grid-cols-1 gap-2">
                   <div
                     className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
                   >
-                    <Camera className="h-8 w-8" style={{color: "#333333"}} />
+                    <Camera className="h-8 w-8" style={{ color: "#333333" }} />
                   </div>
 
                   <div
                     className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
                   >
-                    <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
+                    <Volume2 className="h-8 w-8" style={{ color: "#333333" }} />
                   </div>
 
                   <div
                     className="flex aspect-square cursor-pointer items-center justify-center rounded-none border p-2 transition-colors hover:bg-gray-50"
-                    style={{backgroundColor: "#f9f9f9", borderColor: "#dddddd"}}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
                   >
-                    <MapPin className="h-8 w-8" style={{color: "#333333"}} />
+                    <MapPin className="h-8 w-8" style={{ color: "#333333" }} />
                   </div>
                 </div>
               </section>
@@ -643,7 +708,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -651,7 +716,7 @@ export default function SpeciesTechnicalSheet({
                               alt="ASW Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/wikipedia.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>
@@ -668,7 +733,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -676,7 +741,7 @@ export default function SpeciesTechnicalSheet({
                               alt="AmphibiaWeb Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/amphibiaweb.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>
@@ -693,7 +758,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -701,13 +766,15 @@ export default function SpeciesTechnicalSheet({
                               alt="NCBI Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/ncbi.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>NCBI - National Center for Biotechnology Information</p>
+                        <p>
+                          NCBI - National Center for Biotechnology Information
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -718,7 +785,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -726,7 +793,7 @@ export default function SpeciesTechnicalSheet({
                               alt="VertNet Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/vertnet.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>
@@ -743,7 +810,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -751,7 +818,7 @@ export default function SpeciesTechnicalSheet({
                               alt="iNaturalist Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/iNaturalist.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>
@@ -768,7 +835,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{backgroundColor: "#f9f9f9"}}
+                          style={{ backgroundColor: "#f9f9f9" }}
                           variant="outline"
                         >
                           <a href="#">
@@ -776,7 +843,7 @@ export default function SpeciesTechnicalSheet({
                               alt="IUCN Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/redlist.png"
-                              style={{width: "100%", height: "auto"}}
+                              style={{ width: "100%", height: "auto" }}
                             />
                           </a>
                         </Button>

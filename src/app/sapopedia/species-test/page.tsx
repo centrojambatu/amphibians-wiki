@@ -1,6 +1,6 @@
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 
-import {CardSpecies} from "@/components/card-species";
+import { CardSpecies } from "@/components/card-species";
 
 import getFichaEspecie from "../species/[id]/get-ficha-especie";
 

@@ -85,14 +85,24 @@ const families: MockFamily[] = [
 ];
 
 const genera: MockGenus[] = [
-  {id: "hypsiboas", familyId: "hylidae", name: "Hypsiboas", scientific_name: "Hypsiboas"},
+  {
+    id: "hypsiboas",
+    familyId: "hylidae",
+    name: "Hypsiboas",
+    scientific_name: "Hypsiboas",
+  },
   {
     id: "dendropsophus",
     familyId: "hylidae",
     name: "Dendropsophus",
     scientific_name: "Dendropsophus",
   },
-  {id: "rhinella", familyId: "bufonidae", name: "Rhinella", scientific_name: "Rhinella"},
+  {
+    id: "rhinella",
+    familyId: "bufonidae",
+    name: "Rhinella",
+    scientific_name: "Rhinella",
+  },
   {
     id: "bolitoglossa",
     familyId: "plethodontidae",

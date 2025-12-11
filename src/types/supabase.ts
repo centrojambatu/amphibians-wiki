@@ -1,6 +1,12 @@
-export type Json = string | number | boolean | null | {[key: string]: Json | undefined} | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
-export interface Database {
+export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
@@ -684,6 +690,7 @@ export interface Database {
       ficha_especie: {
         Row: {
           agradecimiento: string | null;
+          area_distribucion: number | null;
           asw: string | null;
           autor_foto_ficha: string | null;
           autoria_compilador: string | null;
@@ -720,6 +727,8 @@ export interface Database {
           larva: string | null;
           morfometria: string | null;
           observacion_zona_altitudinal: string | null;
+          pluviocidad_max: number | null;
+          pluviocidad_min: number | null;
           publicar: boolean;
           rango_altitudinal: string | null;
           rango_altitudinal_max: number | null;
@@ -731,6 +740,8 @@ export interface Database {
           svl_macho: string | null;
           taxon_id: number;
           taxonomia: string | null;
+          temperatura_max: number | null;
+          temperatura_min: number | null;
           traducciones: Json | null;
           uicn: string | null;
           usos: string | null;
@@ -738,6 +749,7 @@ export interface Database {
         };
         Insert: {
           agradecimiento?: string | null;
+          area_distribucion?: number | null;
           asw?: string | null;
           autor_foto_ficha?: string | null;
           autoria_compilador?: string | null;
@@ -774,6 +786,8 @@ export interface Database {
           larva?: string | null;
           morfometria?: string | null;
           observacion_zona_altitudinal?: string | null;
+          pluviocidad_max?: number | null;
+          pluviocidad_min?: number | null;
           publicar?: boolean;
           rango_altitudinal?: string | null;
           rango_altitudinal_max?: number | null;
@@ -785,6 +799,8 @@ export interface Database {
           svl_macho?: string | null;
           taxon_id: number;
           taxonomia?: string | null;
+          temperatura_max?: number | null;
+          temperatura_min?: number | null;
           traducciones?: Json | null;
           uicn?: string | null;
           usos?: string | null;
@@ -792,6 +808,7 @@ export interface Database {
         };
         Update: {
           agradecimiento?: string | null;
+          area_distribucion?: number | null;
           asw?: string | null;
           autor_foto_ficha?: string | null;
           autoria_compilador?: string | null;
@@ -828,6 +845,8 @@ export interface Database {
           larva?: string | null;
           morfometria?: string | null;
           observacion_zona_altitudinal?: string | null;
+          pluviocidad_max?: number | null;
+          pluviocidad_min?: number | null;
           publicar?: boolean;
           rango_altitudinal?: string | null;
           rango_altitudinal_max?: number | null;
@@ -839,6 +858,8 @@ export interface Database {
           svl_macho?: string | null;
           taxon_id?: number;
           taxonomia?: string | null;
+          temperatura_max?: number | null;
+          temperatura_min?: number | null;
           traducciones?: Json | null;
           uicn?: string | null;
           usos?: string | null;
@@ -1894,6 +1915,13 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "manejo_ex_situ_publicacion_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
       };
       mapa: {
@@ -2273,6 +2301,13 @@ export interface Database {
             referencedColumns: ["id_publicacion"];
           },
           {
+            foreignKeyName: "nombre_comun_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
             foreignKeyName: "nombre_comun_taxon_id_fkey";
             columns: ["taxon_id"];
             isOneToOne: false;
@@ -2631,6 +2666,13 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "personal_publicacion_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
       };
       publicacion: {
@@ -2726,6 +2768,13 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "publicacion_ano_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
       };
       publicacion_autor: {
@@ -2769,6 +2818,13 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "publicacion_autor_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
       };
       publicacion_catalogo_awe: {
@@ -2802,6 +2858,13 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
       };
       publicacion_enlace: {
@@ -2832,6 +2895,13 @@ export interface Database {
             columns: ["publicacion_id"];
             isOneToOne: false;
             referencedRelation: "publicacion";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
+            foreignKeyName: "publicacion_enlace_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
             referencedColumns: ["id_publicacion"];
           },
         ];
@@ -3823,6 +3893,13 @@ export interface Database {
             referencedColumns: ["id_publicacion"];
           },
           {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey";
             columns: ["taxon_id"];
             isOneToOne: false;
@@ -4018,6 +4095,13 @@ export interface Database {
             columns: ["publicacion_id"];
             isOneToOne: false;
             referencedRelation: "publicacion";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
+            foreignKeyName: "tipo_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
             referencedColumns: ["id_publicacion"];
           },
           {
@@ -4508,6 +4592,190 @@ export interface Database {
           nombres?: string | null;
         };
         Relationships: [];
+      };
+      vw_ficha_especie_completa: {
+        Row: {
+          area_distribucion: number | null;
+          awe_areas_protegidas_estado: string | null;
+          awe_areas_protegidas_privadas: string | null;
+          awe_bosques_protegidos: string | null;
+          awe_cites: string | null;
+          awe_distribucion_altitudinal: string | null;
+          awe_ecosistemas: string | null;
+          awe_estadio_animal: string | null;
+          awe_estatus_nombre_cientifico: string | null;
+          awe_estatus_tipologico: string | null;
+          awe_etnia: string | null;
+          awe_idioma: string | null;
+          awe_lista_roja_coloma: string | null;
+          awe_lista_roja_uicn: string | null;
+          awe_regiones_biogeograficas: string | null;
+          awe_regiones_biogeograficas_detalle: string | null;
+          awe_reservas_biosfera: string | null;
+          awe_tipo_generacional: string | null;
+          clase: string | null;
+          distribucion: string | null;
+          distribucion_global: string | null;
+          en_ecuador: boolean | null;
+          endemica: boolean | null;
+          especie: string | null;
+          especie_autor: string | null;
+          especie_taxon_id: number | null;
+          familia: string | null;
+          fuente_lista_roja: string | null;
+          genero: string | null;
+          id_ficha_especie: number | null;
+          nombre_cientifico: string | null;
+          nombre_comun: string | null;
+          observacion_zona_altitudinal: string | null;
+          orden: string | null;
+          phylum: string | null;
+          pluviocidad: number | null;
+          publicar: boolean | null;
+          rango_altitudinal: string | null;
+          rango_altitudinal_max: number | null;
+          rango_altitudinal_min: number | null;
+          referencia_area_protegida: string | null;
+          reino: string | null;
+          temperatura: number | null;
+          ubicaciones_geopoliticas: string | null;
+          ubicaciones_principales: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "taxon";
+            referencedColumns: ["id_taxon"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_especies";
+            referencedColumns: ["id_genero"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_especies";
+            referencedColumns: ["id_taxon"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_especies_alejandro_arteaga";
+            referencedColumns: ["id_taxon"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_especies_george_fletcher";
+            referencedColumns: ["id_taxon"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_especies_jmg";
+            referencedColumns: ["id_taxon"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_familias";
+            referencedColumns: ["id_familia"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_familias";
+            referencedColumns: ["id_orden"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_generos";
+            referencedColumns: ["id_familia"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_generos";
+            referencedColumns: ["id_genero"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_generos";
+            referencedColumns: ["id_orden"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp";
+            referencedColumns: ["id_especie"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp";
+            referencedColumns: ["id_familia"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp";
+            referencedColumns: ["id_genero"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp";
+            referencedColumns: ["id_orden"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp_lrc";
+            referencedColumns: ["id_especie"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp_lrc";
+            referencedColumns: ["id_familia"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp_lrc";
+            referencedColumns: ["id_genero"];
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey";
+            columns: ["especie_taxon_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_lista_spp_lrc";
+            referencedColumns: ["id_orden"];
+          },
+        ];
       };
       vw_lista_especies: {
         Row: {
@@ -5302,6 +5570,27 @@ export interface Database {
         };
         Relationships: [];
       };
+      vw_nombres_comunes: {
+        Row: {
+          clase: string | null;
+          especie: string | null;
+          familia: string | null;
+          genero: string | null;
+          id_taxon: number | null;
+          nombre_cientifico: string | null;
+          nombre_comun_clase: string | null;
+          nombre_comun_especie: string | null;
+          nombre_comun_familia: string | null;
+          nombre_comun_genero: string | null;
+          nombre_comun_orden: string | null;
+          nombre_comun_phylum: string | null;
+          nombre_comun_reino: string | null;
+          orden: string | null;
+          phylum: string | null;
+          reino: string | null;
+        };
+        Relationships: [];
+      };
       vw_publicacion_categoria: {
         Row: {
           catalogo_awe_id: number | null;
@@ -5321,6 +5610,13 @@ export interface Database {
             columns: ["publicacion_id"];
             isOneToOne: false;
             referencedRelation: "publicacion";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
             referencedColumns: ["id_publicacion"];
           },
         ];
@@ -5346,7 +5642,41 @@ export interface Database {
             referencedRelation: "publicacion";
             referencedColumns: ["id_publicacion"];
           },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
         ];
+      };
+      vw_publicacion_slug: {
+        Row: {
+          cita_corta: string | null;
+          fecha: string | null;
+          id_publicacion: number | null;
+          numero_publicacion_ano: number | null;
+          slug: string | null;
+          titulo: string | null;
+        };
+        Insert: {
+          cita_corta?: string | null;
+          fecha?: string | null;
+          id_publicacion?: number | null;
+          numero_publicacion_ano?: number | null;
+          slug?: never;
+          titulo?: string | null;
+        };
+        Update: {
+          cita_corta?: string | null;
+          fecha?: string | null;
+          id_publicacion?: number | null;
+          numero_publicacion_ano?: number | null;
+          slug?: never;
+          titulo?: string | null;
+        };
+        Relationships: [];
       };
       vw_publicacion_tipo: {
         Row: {
@@ -5367,6 +5697,13 @@ export interface Database {
             columns: ["publicacion_id"];
             isOneToOne: false;
             referencedRelation: "publicacion";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
+            foreignKeyName: "publicacion_catalogo_awe_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
             referencedColumns: ["id_publicacion"];
           },
         ];
@@ -6283,6 +6620,13 @@ export interface Database {
             referencedColumns: ["id_publicacion"];
           },
           {
+            foreignKeyName: "taxon_publicacion_publicacion_id_fkey";
+            columns: ["publicacion_id"];
+            isOneToOne: false;
+            referencedRelation: "vw_publicacion_slug";
+            referencedColumns: ["id_publicacion"];
+          },
+          {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey";
             columns: ["taxon_id"];
             isOneToOne: false;
@@ -6587,8 +6931,17 @@ export interface Database {
       };
     };
     Functions: {
+      generate_publicacion_slug: {
+        Args: {
+          año_num: number;
+          cita_corta_text: string;
+          id_publicacion_num: number;
+          titulo_text: string;
+        };
+        Returns: string;
+      };
       get_taxon_geopolitica_hierarchy: {
-        Args: {_taxon_id: number};
+        Args: { _taxon_id: number };
         Returns: {
           depth: number;
           id_geopolitica: number;
@@ -6600,7 +6953,7 @@ export interface Database {
         }[];
       };
       get_taxon_lineage: {
-        Args: {p_id_taxon: number};
+        Args: { p_id_taxon: number };
         Returns: {
           depth: number;
           id_taxon: number;
@@ -6618,16 +6971,19 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
@@ -6643,8 +6999,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R;
       }
       ? R
@@ -6654,7 +7012,7 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
@@ -6679,7 +7037,7 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
@@ -6704,7 +7062,7 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
@@ -6721,7 +7079,7 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | {schema: keyof DatabaseWithoutInternals},
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
