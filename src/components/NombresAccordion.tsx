@@ -2,8 +2,10 @@
 
 import {useState, useEffect} from "react";
 import {Menu} from "lucide-react";
+import Link from "next/link";
 
 import {NombreGroup, TaxonNombre} from "@/app/sapopedia/nombres/get-taxon-nombres";
+import {Badge} from "@/components/ui/badge";
 
 interface NombresAccordionProps {
   readonly ordenes: NombreGroup[];
@@ -49,24 +51,42 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
 
   const isOpen = (itemId: string) => openItems.has(itemId);
 
-  const renderNombre = (taxon: TaxonNombre) => (
-    <div
-      key={taxon.id_taxon}
-      className="relative flex items-center gap-4 rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
-    >
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium text-gray-800">
-          {taxon.nombre_comun_completo || taxon.nombre_comun}
+  const renderNombre = (taxon: TaxonNombre) => {
+    // Determinar la URL: usar nombre científico si está disponible, sino usar id_taxon
+    const href = taxon.nombre_cientifico
+      ? `/sapopedia/species/${taxon.nombre_cientifico.replace(/ /g, "-")}`
+      : `/sapopedia/species/${taxon.id_taxon}`;
+
+    return (
+      <div
+        key={taxon.id_taxon}
+        className="relative flex items-center gap-4 rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+      >
+        <div className="min-w-0 flex-1">
+          <Link
+            className="cursor-pointer text-sm font-medium text-gray-800 hover:text-blue-600 hover:underline"
+            href={href}
+          >
+            {taxon.nombre_comun_completo || taxon.nombre_comun}
+          </Link>
+          {taxon.nombre_comun_ingles && (
+            <div className="mt-1 flex items-center gap-1.5">
+              <Badge
+                className="px-1.5 py-0 text-[10px] leading-tight font-medium"
+                variant="outline"
+              >
+                EN
+              </Badge>
+              <span className="text-xs text-gray-500">{taxon.nombre_comun_ingles}</span>
+            </div>
+          )}
+          {taxon.nombre_cientifico && (
+            <div className="mt-1 text-xs text-gray-600 italic">{taxon.nombre_cientifico}</div>
+          )}
         </div>
-        {taxon.nombre_comun_ingles && (
-          <div className="mt-1 text-xs text-gray-500">{taxon.nombre_comun_ingles}</div>
-        )}
-        {taxon.nombre_cientifico && (
-          <div className="mt-1 text-xs text-gray-600 italic">{taxon.nombre_cientifico}</div>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderGenero = (genero: NombreGroup) => (
     <div key={genero.id} className="relative">

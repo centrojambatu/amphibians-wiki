@@ -36,3 +36,11 @@ next-env.d.ts
 
 .cursor/mcp.json
 .env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
