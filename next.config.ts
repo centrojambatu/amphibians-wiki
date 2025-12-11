@@ -22,15 +22,6 @@ const nextConfig: NextConfig = {
     // Desactivar verificación de tipos durante el build (temporalmente)
     ignoreBuildErrors: true,
   },
-  // Excluir directorios de Python del monitoreo de Turbopack
-  watchOptions: {
-    ignored: [
-      "**/venv/**",
-      "**/__pycache__/**",
-      "**/*.pyc",
-      "**/node_modules/**",
-    ],
-  },
 };
 
 export default nextConfig;
