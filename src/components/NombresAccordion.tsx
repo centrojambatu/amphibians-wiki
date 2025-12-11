@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Menu } from "lucide-react";
+import {useState, useEffect} from "react";
+import {Menu} from "lucide-react";
 
-import {
-  NombreGroup,
-  TaxonNombre,
-} from "@/app/sapopedia/nombres/get-taxon-nombres";
+import {NombreGroup, TaxonNombre} from "@/app/sapopedia/nombres/get-taxon-nombres";
 
 interface NombresAccordionProps {
   readonly ordenes: NombreGroup[];
 }
 
-export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
+export default function NombresAccordion({ordenes}: NombresAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(() => new Set());
 
   // Cargar el estado del acordeón desde localStorage al montar
@@ -33,10 +30,7 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
   // Guardar el estado del acordeón en localStorage cuando cambia
   useEffect(() => {
     if (openItems.size > 0) {
-      localStorage.setItem(
-        "nombresAccordionOpenItems",
-        JSON.stringify(Array.from(openItems)),
-      );
+      localStorage.setItem("nombresAccordionOpenItems", JSON.stringify(Array.from(openItems)));
     } else {
       localStorage.removeItem("nombresAccordionOpenItems");
     }
@@ -62,12 +56,13 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
     >
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium text-gray-800">
-          {taxon.nombre_comun}
+          {taxon.nombre_comun_completo || taxon.nombre_comun}
         </div>
+        {taxon.nombre_comun_ingles && (
+          <div className="mt-1 text-xs text-gray-500">{taxon.nombre_comun_ingles}</div>
+        )}
         {taxon.nombre_cientifico && (
-          <div className="mt-1 text-xs text-gray-600 italic">
-            {taxon.nombre_cientifico}
-          </div>
+          <div className="mt-1 text-xs text-gray-600 italic">{taxon.nombre_cientifico}</div>
         )}
       </div>
     </div>
@@ -91,9 +86,7 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 italic">{genero.name}</span>
             {genero.nombre_comun && (
-              <span className="text-xs text-gray-500">
-                {genero.nombre_comun}
-              </span>
+              <span className="text-xs text-gray-500">{genero.nombre_comun}</span>
             )}
           </div>
         </div>
@@ -106,14 +99,11 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
 
       {isOpen(genero.id) && (
         <div className="mt-3 rounded-lg bg-gray-50 p-4">
-          {/* Header */}
+          {/* Mostrar especies directamente, sin agrupamiento por nombre base */}
           <div className="mb-3 px-4 py-2">
             <div className="mb-2 text-xs text-gray-400">Especies</div>
           </div>
-          {/* Lista de nombres */}
-          <div className="space-y-2">
-            {genero.nombres.map((taxon) => renderNombre(taxon))}
-          </div>
+          <div className="space-y-2">{genero.nombres.map((taxon) => renderNombre(taxon))}</div>
         </div>
       )}
     </div>
@@ -137,9 +127,7 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{familia.name}</span>
             {familia.nombre_comun && (
-              <span className="text-xs text-gray-500">
-                {familia.nombre_comun}
-              </span>
+              <span className="text-xs text-gray-500">{familia.nombre_comun}</span>
             )}
           </div>
         </div>
@@ -157,9 +145,7 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
             <div className="text-xs text-gray-400">Géneros</div>
           </div>
           {/* Lista de géneros */}
-          <div className="space-y-2">
-            {familia.children?.map((genero) => renderGenero(genero))}
-          </div>
+          <div className="space-y-2">{familia.children?.map((genero) => renderGenero(genero))}</div>
         </div>
       )}
     </div>
@@ -180,12 +166,8 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
         }}
       >
         <div className="flex-1">
-          <span className="inline-block text-sm text-gray-600">
-            {orden.name}
-          </span>
-          <p className="text-xs text-gray-400">
-            {orden.children?.length || 0} familias
-          </p>
+          <span className="inline-block text-sm text-gray-600">{orden.name}</span>
+          <p className="text-xs text-gray-400">{orden.children?.length || 0} familias</p>
         </div>
 
         {/* Icono de barras */}
@@ -224,9 +206,7 @@ export default function NombresAccordion({ ordenes }: NombresAccordionProps) {
         <div className="text-xs text-gray-400">Órdenes</div>
       </div>
 
-      <div className="space-y-4">
-        {ordenes.map((orden) => renderOrden(orden))}
-      </div>
+      <div className="space-y-4">{ordenes.map((orden) => renderOrden(orden))}</div>
     </div>
   );
 }
