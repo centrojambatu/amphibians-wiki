@@ -1,16 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import {Menu} from "lucide-react";
 
-import {
-  OrderGroup,
-  FamilyGroup,
-  GenusGroup,
-  SpeciesData,
-} from "@/types/taxonomy";
-import { processHTMLLinks } from "@/lib/process-html-links";
+import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -20,7 +15,7 @@ interface SpeciesAccordionProps {
   readonly orders: OrderGroup[];
 }
 
-export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
+export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const [showGuide, setShowGuide] = useState(false);
 
@@ -42,10 +37,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
   // Guardar el estado del acordeón en localStorage cuando cambia
   useEffect(() => {
     if (openItems.size > 0) {
-      localStorage.setItem(
-        "accordionOpenItems",
-        JSON.stringify(Array.from(openItems)),
-      );
+      localStorage.setItem("accordionOpenItems", JSON.stringify(Array.from(openItems)));
     } else {
       localStorage.removeItem("accordionOpenItems");
     }
@@ -63,6 +55,13 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
   };
 
   const isOpen = (itemId: string) => openItems.has(itemId);
+
+  // Función helper para detectar si es PE
+  const isPE = (sigla: string | null) => {
+    if (!sigla) return false;
+
+    return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
+  };
 
   const renderSpecies = (species: SpeciesData) => (
     <div
@@ -88,9 +87,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-gray-600">
-            {species.nombre_comun}
-          </div>
+          <div className="mt-1 text-xs text-gray-600">{species.nombre_comun}</div>
         )}
       </div>
 
@@ -106,19 +103,72 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
       {/* Lista Roja */}
       <div className="w-16 text-center">
         {species.lista_roja_iucn ? (
-          <RedListStatus
-            status={
-              species.lista_roja_iucn as
-                | "LC"
-                | "NT"
-                | "VU"
-                | "EN"
-                | "CR"
-                | "EW"
-                | "EX"
-                | "DD"
-            }
-          />
+          <>
+            {isPE(species.lista_roja_iucn) ? (
+              <div
+                className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                style={{
+                  backgroundColor: "#b71c1c",
+                  color: "#ffffff",
+                  borderRadius: "100% 0% 100% 100%",
+                  minWidth: "32px",
+                  minHeight: "32px",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                }}
+              >
+                PE
+              </div>
+            ) : (
+              (() => {
+                // Normalizar el valor: trim y uppercase
+                const valorNormalizado = species.lista_roja_iucn.trim().toUpperCase();
+                // Lista de valores válidos
+                const valoresValidos: readonly string[] = [
+                  "LC",
+                  "NT",
+                  "VU",
+                  "EN",
+                  "CR",
+                  "EW",
+                  "EX",
+                  "DD",
+                ];
+
+                // Verificar si el valor está en la lista de válidos
+                if (valoresValidos.includes(valorNormalizado)) {
+                  return (
+                    <RedListStatus
+                      showTooltip={false}
+                      status={
+                        valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
+                      }
+                    />
+                  );
+                }
+
+                // Si no es válido, mostrar warning y badge con "?"
+                console.warn(
+                  `⚠️ Valor de lista roja no válido: "${species.lista_roja_iucn}" (normalizado: "${valorNormalizado}") para especie ${species.nombre_cientifico}`,
+                );
+
+                return (
+                  <div
+                    className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                    style={{
+                      backgroundColor: "#d1d1c6",
+                      color: "#666666",
+                      borderRadius: "100% 0% 100% 100%",
+                      minWidth: "32px",
+                      minHeight: "32px",
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    ?
+                  </div>
+                );
+              })()
+            )}
+          </>
         ) : (
           <span className="text-gray-400">-</span>
         )}
@@ -126,8 +176,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
 
       {/* Pisos Climáticos */}
       <div className="flex w-80 items-center justify-center">
-        {species.rango_altitudinal_min !== null &&
-        species.rango_altitudinal_max !== null ? (
+        {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
               min: species.rango_altitudinal_min,
@@ -171,17 +220,14 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 italic">{genus.name}</span>
             {genus.nombre_comun && (
-              <span className="text-xs text-gray-400">
-                {genus.nombre_comun}
-              </span>
+              <span className="text-xs text-gray-400">{genus.nombre_comun}</span>
             )}
           </div>
           <p className="text-xs text-gray-400">
             {genus.summary.totalSpecies} especie
-            {genus.summary.totalSpecies !== 1 ? "s" : ""} (
-            {genus.summary.endemicSpecies} endémica
-            {genus.summary.endemicSpecies !== 1 ? "s" : ""},{" "}
-            {genus.summary.redListSpecies} en Lista Roja)
+            {genus.summary.totalSpecies !== 1 ? "s" : ""} ({genus.summary.endemicSpecies} endémica
+            {genus.summary.endemicSpecies !== 1 ? "s" : ""}, {genus.summary.redListSpecies} en Lista
+            Roja)
           </p>
         </div>
 
@@ -204,9 +250,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
             </div>
           </div>
           {/* Lista de especies */}
-          <div className="space-y-2">
-            {genus.species.map((species) => renderSpecies(species))}
-          </div>
+          <div className="space-y-2">{genus.species.map((species) => renderSpecies(species))}</div>
         </div>
       )}
     </div>
@@ -231,9 +275,9 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
             <span className="text-sm text-gray-600">{family.name}</span>
           </div>
           <p className="text-xs text-gray-400">
-            {family.summary.totalSpecies} especies, {family.summary.totalGenera}{" "}
-            géneros ({family.summary.endemicSpecies} endémicas,{" "}
-            {family.summary.redListSpecies} en Lista Roja)
+            {family.summary.totalSpecies} especies, {family.summary.totalGenera} géneros (
+            {family.summary.endemicSpecies} endémicas, {family.summary.redListSpecies} en Lista
+            Roja)
           </p>
         </div>
 
@@ -250,9 +294,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
             <div className="text-xs text-gray-400">Géneros</div>
           </div>
           {/* Lista de géneros */}
-          <div className="space-y-2">
-            {family.genera.map((genus) => renderGenus(genus))}
-          </div>
+          <div className="space-y-2">{family.genera.map((genus) => renderGenus(genus))}</div>
         </div>
       )}
     </div>
@@ -273,13 +315,10 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
         }}
       >
         <div className="flex-1">
-          <span className="inline-block text-sm text-gray-600">
-            {order.name}
-          </span>
+          <span className="inline-block text-sm text-gray-600">{order.name}</span>
           <p className="text-xs text-gray-400">
-            {order.summary.totalSpecies} especies, {order.summary.totalFamilies}{" "}
-            familias ({order.summary.endemicSpecies} endémicas,{" "}
-            {order.summary.redListSpecies} en Lista Roja)
+            {order.summary.totalSpecies} especies, {order.summary.totalFamilies} familias (
+            {order.summary.endemicSpecies} endémicas, {order.summary.redListSpecies} en Lista Roja)
           </p>
         </div>
 
@@ -296,9 +335,7 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
             <div className="text-xs text-gray-400">Familias</div>
           </div>
           {/* Lista de familias */}
-          <div className="space-y-3">
-            {order.families.map((family) => renderFamily(family))}
-          </div>
+          <div className="space-y-3">{order.families.map((family) => renderFamily(family))}</div>
         </div>
       )}
     </div>
@@ -311,15 +348,10 @@ export default function SpeciesAccordion({ orders }: SpeciesAccordionProps) {
         <div className="text-xs text-gray-400">Órdenes</div>
       </div>
 
-      <div className="space-y-4">
-        {orders.map((order) => renderOrder(order))}
-      </div>
+      <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
 
       {/* Modal de Guía de Interpretación */}
-      <InterpretationGuide
-        isOpen={showGuide}
-        onClose={() => setShowGuide(false)}
-      />
+      <InterpretationGuide isOpen={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }
