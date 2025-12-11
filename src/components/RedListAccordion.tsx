@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import {Menu} from "lucide-react";
 
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
-import { CatalogOption } from "@/app/sapopedia/get-filter-catalogs";
-import { processHTMLLinks } from "@/lib/process-html-links";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -16,10 +16,7 @@ interface RedListAccordionProps {
   readonly categorias: CatalogOption[];
 }
 
-export default function RedListAccordion({
-  especies,
-  categorias,
-}: RedListAccordionProps) {
+export default function RedListAccordion({especies, categorias}: RedListAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
   // Cargar el estado del acordeón desde localStorage al montar
@@ -40,10 +37,7 @@ export default function RedListAccordion({
   // Guardar el estado del acordeón en localStorage cuando cambia
   useEffect(() => {
     if (openItems.size > 0) {
-      localStorage.setItem(
-        "redListAccordionOpenItems",
-        JSON.stringify(Array.from(openItems)),
-      );
+      localStorage.setItem("redListAccordionOpenItems", JSON.stringify(Array.from(openItems)));
     } else {
       localStorage.removeItem("redListAccordionOpenItems");
     }
@@ -65,15 +59,14 @@ export default function RedListAccordion({
   // Función helper para detectar si es PE
   const isPE = (sigla: string | null) => {
     if (!sigla) return false;
+
     return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
   };
 
   // Agrupar especies por categoría de lista roja
   const especiesPorCategoria = categorias
     .map((categoria) => {
-      const especiesEnCategoria = especies.filter(
-        (e) => e.lista_roja_iucn === categoria.sigla,
-      );
+      const especiesEnCategoria = especies.filter((e) => e.lista_roja_iucn === categoria.sigla);
 
       return {
         categoria,
@@ -127,9 +120,7 @@ export default function RedListAccordion({
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-gray-600">
-            {species.nombre_comun}
-          </div>
+          <div className="mt-1 text-xs text-gray-600">{species.nombre_comun}</div>
         )}
       </div>
 
@@ -145,36 +136,72 @@ export default function RedListAccordion({
       {/* Lista Roja */}
       <div className="w-16 text-center">
         {species.lista_roja_iucn ? (
-          isPE(species.lista_roja_iucn) ? (
-            <div
-              className="inline-flex items-center justify-center font-semibold text-[10px] px-2 py-1"
-              style={{
-                backgroundColor: "#b71c1c",
-                color: "#ffffff",
-                borderRadius: "100% 0% 100% 100%",
-                minWidth: "32px",
-                minHeight: "32px",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-              }}
-            >
-              PE
-            </div>
-          ) : (
-            <RedListStatus
-              showTooltip={false}
-              status={
-                species.lista_roja_iucn as
-                  | "LC"
-                  | "NT"
-                  | "VU"
-                  | "EN"
-                  | "CR"
-                  | "EW"
-                  | "EX"
-                  | "DD"
-              }
-            />
-          )
+          <>
+            {isPE(species.lista_roja_iucn) ? (
+              <div
+                className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                style={{
+                  backgroundColor: "#b71c1c",
+                  color: "#ffffff",
+                  borderRadius: "100% 0% 100% 100%",
+                  minWidth: "32px",
+                  minHeight: "32px",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                }}
+              >
+                PE
+              </div>
+            ) : (
+              (() => {
+                // Normalizar el valor: trim y uppercase
+                const valorNormalizado = species.lista_roja_iucn.trim().toUpperCase();
+                // Lista de valores válidos
+                const valoresValidos: readonly string[] = [
+                  "LC",
+                  "NT",
+                  "VU",
+                  "EN",
+                  "CR",
+                  "EW",
+                  "EX",
+                  "DD",
+                ];
+
+                // Verificar si el valor está en la lista de válidos
+                if (valoresValidos.includes(valorNormalizado)) {
+                  return (
+                    <RedListStatus
+                      showTooltip={false}
+                      status={
+                        valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
+                      }
+                    />
+                  );
+                }
+
+                // Si no es válido, mostrar warning y badge con "?"
+                console.warn(
+                  `⚠️ Valor de lista roja no válido: "${species.lista_roja_iucn}" (normalizado: "${valorNormalizado}") para especie ${species.nombre_cientifico}`,
+                );
+
+                return (
+                  <div
+                    className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                    style={{
+                      backgroundColor: "#d1d1c6",
+                      color: "#666666",
+                      borderRadius: "100% 0% 100% 100%",
+                      minWidth: "32px",
+                      minHeight: "32px",
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    ?
+                  </div>
+                );
+              })()
+            )}
+          </>
         ) : (
           <span className="text-gray-400">-</span>
         )}
@@ -182,8 +209,7 @@ export default function RedListAccordion({
 
       {/* Pisos Climáticos */}
       <div className="flex w-80 items-center justify-center">
-        {species.rango_altitudinal_min !== null &&
-        species.rango_altitudinal_max !== null ? (
+        {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
               min: species.rango_altitudinal_min,
@@ -209,10 +235,7 @@ export default function RedListAccordion({
     </div>
   );
 
-  const renderCategoria = (grupo: {
-    categoria: CatalogOption;
-    especies: SpeciesListItem[];
-  }) => {
+  const renderCategoria = (grupo: {categoria: CatalogOption; especies: SpeciesListItem[]}) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
 
@@ -232,14 +255,12 @@ export default function RedListAccordion({
         >
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-800">
-                {grupo.categoria.nombre}
-              </span>
+              <span className="text-sm font-semibold text-gray-800">{grupo.categoria.nombre}</span>
             </div>
             <p className="text-xs text-gray-400">
               {grupo.especies.length} especie
-              {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas}{" "}
-              endémica{especiesEndemicas !== 1 ? "s" : ""})
+              {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas} endémica
+              {especiesEndemicas !== 1 ? "s" : ""})
             </p>
           </div>
 
@@ -274,16 +295,12 @@ export default function RedListAccordion({
   if (especiesPorCategoria.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-500">
-          No hay especies con categoría de Lista Roja asignada.
-        </p>
+        <p className="text-gray-500">No hay especies con categoría de Lista Roja asignada.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
-    </div>
+    <div className="space-y-3">{especiesPorCategoria.map((grupo) => renderCategoria(grupo))}</div>
   );
 }
