@@ -60,11 +60,11 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
     return (
       <div
         key={taxon.id_taxon}
-        className="relative flex items-center gap-4 rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+        className="relative flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3 transition-all hover:border-border hover:bg-muted/50"
       >
         <div className="min-w-0 flex-1">
           <Link
-            className="cursor-pointer text-sm font-medium text-gray-800 hover:text-blue-600 hover:underline"
+            className="cursor-pointer text-sm font-medium text-foreground hover:text-primary hover:underline"
             href={href}
           >
             {taxon.nombre_comun_completo || taxon.nombre_comun}
@@ -81,7 +81,7 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
             </div>
           )}
           {taxon.nombre_cientifico && (
-            <div className="mt-1 text-xs text-gray-600 italic">{taxon.nombre_cientifico}</div>
+            <div className="mt-1 text-xs text-muted-foreground italic">{taxon.nombre_cientifico}</div>
           )}
         </div>
       </div>
@@ -104,24 +104,24 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
       >
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600 italic">{genero.name}</span>
+            <span className="text-sm text-foreground italic">{genero.name}</span>
             {genero.nombre_comun && (
-              <span className="text-xs text-gray-500">{genero.nombre_comun}</span>
+              <span className="text-xs text-muted-foreground">{genero.nombre_comun}</span>
             )}
           </div>
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-gray-300">
+        <div className="ml-3 flex-shrink-0 text-muted-foreground">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(genero.id) && (
-        <div className="mt-3 rounded-lg bg-gray-50 p-4">
+        <div className="mt-3 rounded-lg bg-muted p-4">
           {/* Mostrar especies directamente, sin agrupamiento por nombre base */}
           <div className="mb-3 px-4 py-2">
-            <div className="mb-2 text-xs text-gray-400">Especies</div>
+            <div className="mb-2 text-xs text-muted-foreground">Especies</div>
           </div>
           <div className="space-y-2">{genero.nombres.map((taxon) => renderNombre(taxon))}</div>
         </div>
@@ -145,24 +145,24 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
       >
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{familia.name}</span>
+            <span className="text-sm text-foreground">{familia.name}</span>
             {familia.nombre_comun && (
-              <span className="text-xs text-gray-500">{familia.nombre_comun}</span>
+              <span className="text-xs text-muted-foreground">{familia.nombre_comun}</span>
             )}
           </div>
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-gray-300">
+        <div className="ml-3 flex-shrink-0 text-muted-foreground">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(familia.id) && (
-        <div className="mt-3 rounded-lg bg-gray-50 p-4">
+        <div className="mt-3 rounded-lg bg-muted p-4">
           {/* Header de géneros */}
           <div className="mb-3 px-4 py-2">
-            <div className="text-xs text-gray-400">Géneros</div>
+            <div className="text-xs text-muted-foreground">Géneros</div>
           </div>
           {/* Lista de géneros */}
           <div className="space-y-2">{familia.children?.map((genero) => renderGenero(genero))}</div>
@@ -186,18 +186,18 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
         }}
       >
         <div className="flex-1">
-          <span className="inline-block text-sm text-gray-600">{orden.name}</span>
-          <p className="text-xs text-gray-400">{orden.children?.length || 0} familias</p>
+          <span className="inline-block text-sm text-foreground">{orden.name}</span>
+          <p className="text-xs text-muted-foreground">{orden.children?.length || 0} familias</p>
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-gray-300">
+        <div className="ml-3 flex-shrink-0 text-muted-foreground">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(orden.id) && (
-        <div className="mt-3 rounded-lg bg-gray-50 p-4">
+        <div className="mt-3 rounded-lg bg-muted p-4">
           {/* Header de familias */}
           <div className="mb-3 px-4 py-2">
             <div className="text-xs text-gray-400">Familias</div>
@@ -213,8 +213,8 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
 
   if (ordenes.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-500">No hay nombres comunes disponibles.</p>
+      <div className="rounded-lg border border-border bg-muted p-8 text-center">
+        <p className="text-muted-foreground">No hay nombres comunes disponibles.</p>
       </div>
     );
   }
@@ -223,7 +223,7 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
     <div className="relative w-full">
       {/* Header de órdenes */}
       <div className="mb-4 px-4 py-2">
-        <div className="text-xs text-gray-400">Órdenes</div>
+        <div className="text-xs text-muted-foreground">Órdenes</div>
       </div>
 
       <div className="space-y-4">{ordenes.map((orden) => renderOrden(orden))}</div>
