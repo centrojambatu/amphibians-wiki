@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {useRouter} from "next/navigation";
 import {Save, Eye, ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
 import {useEditor, EditorContent} from "@tiptap/react";
@@ -214,11 +214,30 @@ export default function EditorCitas({
   // Estado para el diálogo de enlace
   const [mostrarDialogoEnlace, setMostrarDialogoEnlace] = useState(false);
   const [urlEnlace, setUrlEnlace] = useState<string>("");
+  // Guardar la última posición del cursor para insertar citas
+  const ultimaPosicionCursor = useRef<{from: number; to: number} | null>(null);
 
   // Configuración del editor Tiptap solo para texto (sin imágenes ni multimedia)
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Asegurar que las listas estén habilitadas
+        bulletList: {
+          HTMLAttributes: {
+            class: "list-disc pl-6",
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: "list-decimal pl-6",
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: "my-1",
+          },
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -235,6 +254,13 @@ export default function EditorCitas({
       attributes: {
         class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
       },
+    },
+    onSelectionUpdate: ({editor: editorInstance}) => {
+      // Guardar la posición del cursor cada vez que cambia
+
+      const {from, to} = editorInstance.state.selection;
+
+      ultimaPosicionCursor.current = {from, to};
     },
   });
 
@@ -400,8 +426,31 @@ export default function EditorCitas({
     const nuevaCita = `{{${String(idPublicacion)}}}`;
 
     if (editor) {
-      // Insertar el texto en la posición del cursor
-      editor.chain().insertContent(nuevaCita).focus().run();
+      // Intentar obtener la posición actual del cursor
+      const seleccionActual = editor.state.selection;
+      const posicion = ultimaPosicionCursor.current || {
+        from: seleccionActual.from,
+        to: seleccionActual.to,
+      };
+      const tieneSeleccion = posicion.from !== posicion.to;
+
+      // Enfocar el editor primero
+      editor.chain().focus().run();
+
+      // Insertar la cita en la posición guardada del cursor
+      if (tieneSeleccion) {
+        // Hay texto seleccionado, reemplazarlo con la cita
+        editor
+          .chain()
+          .setTextSelection({from: posicion.from, to: posicion.to})
+          .deleteSelection()
+          .insertContent(nuevaCita)
+          .focus()
+          .run();
+      } else {
+        // No hay texto seleccionado, insertar en la posición del cursor
+        editor.chain().setTextSelection(posicion.from).insertContent(nuevaCita).focus().run();
+      }
     } else {
       // Fallback: agregar al final si no hay editor
       setTextoEditor((prev) => prev + (prev ? " " : "") + nuevaCita);
@@ -968,6 +1017,38 @@ export default function EditorCitas({
                         </div>
                         {/* Editor Content */}
                         <div className="flex-1 overflow-y-auto">
+                          <style>{`
+                            .ProseMirror ul,
+                            .ProseMirror ol {
+                              padding-left: 1.5rem;
+                              margin: 0.5rem 0;
+                            }
+                            .ProseMirror ul {
+                              list-style-type: disc;
+                            }
+                            .ProseMirror ol {
+                              list-style-type: decimal;
+                            }
+                            .ProseMirror li {
+                              margin: 0.25rem 0;
+                            }
+                            .ProseMirror ul[data-type="taskList"] {
+                              list-style: none;
+                              padding: 0;
+                            }
+                            .ProseMirror ul[data-type="taskList"] li {
+                              display: flex;
+                              align-items: flex-start;
+                            }
+                            .ProseMirror ul[data-type="taskList"] li > label {
+                              flex: 0 0 auto;
+                              margin-right: 0.5rem;
+                              user-select: none;
+                            }
+                            .ProseMirror ul[data-type="taskList"] li > div {
+                              flex: 1 1 auto;
+                            }
+                          `}</style>
                           {editor ? (
                             <EditorContent className="h-full" editor={editor} />
                           ) : (
