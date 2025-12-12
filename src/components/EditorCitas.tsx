@@ -1,25 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Save,
-  Eye,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation";
+import {Save, Eye, ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
+import {useEditor, EditorContent} from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { FichaEspecieEditor } from "@/app/sapopedia/editor-citas/get-ficha-especie-editor";
-import { Publicacion } from "@/app/sapopedia/editor-citas/get-publicaciones-taxon";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 import {
-  EspecieNavegacion,
-  toSlug,
-} from "@/app/sapopedia/editor-citas/get-especies-navegacion";
-import { CatalogoAweOpcion } from "@/app/sapopedia/editor-citas/get-catalogo-awe-opciones";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {FichaEspecieEditor} from "@/app/sapopedia/editor-citas/get-ficha-especie-editor";
+import {Publicacion} from "@/app/sapopedia/editor-citas/get-publicaciones-taxon";
+import {EspecieNavegacion, toSlug} from "@/app/sapopedia/editor-citas/get-especies-navegacion";
+import {CatalogoAweOpcion} from "@/app/sapopedia/editor-citas/get-catalogo-awe-opciones";
 
 import EditorCitasSearch from "./EditorCitasSearch";
 
@@ -41,15 +42,15 @@ const CAMPOS_FICHA = [
     label: "Información Adicional",
     tipo: "texto" as const,
   },
-  { key: "colector" as const, label: "Colector", tipo: "texto" as const },
-  { key: "etimologia" as const, label: "Etimología", tipo: "texto" as const },
-  { key: "taxonomia" as const, label: "Taxonomía", tipo: "texto" as const },
+  {key: "colector" as const, label: "Colector", tipo: "texto" as const},
+  {key: "etimologia" as const, label: "Etimología", tipo: "texto" as const},
+  {key: "taxonomia" as const, label: "Taxonomía", tipo: "texto" as const},
   {
     key: "habitat_biologia" as const,
     label: "Hábitat y Biología",
     tipo: "texto" as const,
   },
-  { key: "dieta" as const, label: "Dieta", tipo: "texto" as const },
+  {key: "dieta" as const, label: "Dieta", tipo: "texto" as const},
   {
     key: "reproduccion" as const,
     label: "Reproducción",
@@ -60,9 +61,9 @@ const CAMPOS_FICHA = [
     label: "Identificación",
     tipo: "texto" as const,
   },
-  { key: "descripcion" as const, label: "Descripción", tipo: "texto" as const },
-  { key: "diagnosis" as const, label: "Diagnosis", tipo: "texto" as const },
-  { key: "morfometria" as const, label: "Morfometría", tipo: "texto" as const },
+  {key: "descripcion" as const, label: "Descripción", tipo: "texto" as const},
+  {key: "diagnosis" as const, label: "Diagnosis", tipo: "texto" as const},
+  {key: "morfometria" as const, label: "Morfometría", tipo: "texto" as const},
   {
     key: "color_en_vida" as const,
     label: "Color en Vida",
@@ -73,8 +74,8 @@ const CAMPOS_FICHA = [
     label: "Color en Preservación",
     tipo: "texto" as const,
   },
-  { key: "larva" as const, label: "Larva", tipo: "texto" as const },
-  { key: "canto" as const, label: "Canto", tipo: "texto" as const },
+  {key: "larva" as const, label: "Larva", tipo: "texto" as const},
+  {key: "canto" as const, label: "Canto", tipo: "texto" as const},
   {
     key: "distribucion" as const,
     label: "Distribución",
@@ -100,13 +101,13 @@ const CAMPOS_FICHA = [
     label: "Comentario Estatus Poblacional",
     tipo: "texto" as const,
   },
-  { key: "sinonimia" as const, label: "Sinonimia", tipo: "texto" as const },
+  {key: "sinonimia" as const, label: "Sinonimia", tipo: "texto" as const},
   {
     key: "agradecimiento" as const,
     label: "Agradecimiento",
     tipo: "texto" as const,
   },
-  { key: "usos" as const, label: "Usos", tipo: "texto" as const },
+  {key: "usos" as const, label: "Usos", tipo: "texto" as const},
   // Campos numéricos con min y max
   {
     key: "rango_altitudinal" as const,
@@ -203,28 +204,68 @@ export default function EditorCitas({
   taxonCatalogoAwe,
 }: EditorCitasProps) {
   const router = useRouter();
-  const [fichaEspecie, setFichaEspecie] =
-    useState<FichaEspecieEditor>(initialFicha);
-  const [campoSeleccionado, setCampoSeleccionado] = useState<string>(
-    "informacion_adicional",
-  );
-  const [textoEditor, setTextoEditor] = useState<string>(
-    initialFicha.informacion_adicional || "",
-  );
+  const [fichaEspecie, setFichaEspecie] = useState<FichaEspecieEditor>(initialFicha);
+  const [campoSeleccionado, setCampoSeleccionado] = useState<string>("informacion_adicional");
+  const [textoEditor, setTextoEditor] = useState<string>(initialFicha.informacion_adicional || "");
   const [vistaPrevia, setVistaPrevia] = useState<string>("");
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  // Estado para el diálogo de enlace
+  const [mostrarDialogoEnlace, setMostrarDialogoEnlace] = useState(false);
+  const [urlEnlace, setUrlEnlace] = useState<string>("");
+
+  // Configuración del editor Tiptap solo para texto (sin imágenes ni multimedia)
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "text-blue-600 underline",
+        },
+      }),
+    ],
+    content: textoEditor,
+    immediatelyRender: false,
+    onUpdate: ({editor: editorInstance}) => {
+      setTextoEditor(editorInstance.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
+      },
+    },
+  });
+
+  // Actualizar el editor cuando cambia el campo seleccionado
+  useEffect(() => {
+    if (!editor) return;
+
+    const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
+
+    if (
+      campo?.tipo === "catalogo_awe" ||
+      (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) ||
+      campo?.tipo === "numero"
+    ) {
+      // Para campos de catálogo AWE, rango o número, no hay texto editor
+      editor.commands.setContent("");
+    } else {
+      const valor = (fichaEspecie[campoSeleccionado as keyof FichaEspecieEditor] as string) || "";
+
+      if (editor.getHTML() !== valor) {
+        editor.commands.setContent(valor);
+      }
+    }
+  }, [campoSeleccionado, fichaEspecie, editor]);
   // Estado para campos de catálogo AWE (array de IDs seleccionados)
   const [catalogoAweSeleccionados, setCatalogoAweSeleccionados] = useState<
     Record<string, number[]>
   >({});
   // Estado para campos numéricos
   const [valoresNumericos, setValoresNumericos] = useState<
-    Record<
-      string,
-      { min: number | null; max: number | null; valor: number | null }
-    >
+    Record<string, {min: number | null; max: number | null; valor: number | null}>
   >({});
 
   // Inicializar valores de catálogo AWE desde props
@@ -233,8 +274,7 @@ export default function EditorCitas({
 
     CAMPOS_FICHA.forEach((campo) => {
       if (campo.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
-        valoresIniciales[campo.key] =
-          taxonCatalogoAwe[campo.tipoCatalogoId] || [];
+        valoresIniciales[campo.key] = taxonCatalogoAwe[campo.tipoCatalogoId] || [];
       }
     });
 
@@ -245,33 +285,21 @@ export default function EditorCitas({
   useEffect(() => {
     const valoresIniciales: Record<
       string,
-      { min: number | null; max: number | null; valor: number | null }
+      {min: number | null; max: number | null; valor: number | null}
     > = {};
 
     CAMPOS_FICHA.forEach((campo) => {
-      if (
-        campo.tipo === "rango" &&
-        "campoMin" in campo &&
-        "campoMax" in campo
-      ) {
+      if (campo.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
         valoresIniciales[campo.key] = {
-          min:
-            (fichaEspecie[
-              campo.campoMin as keyof FichaEspecieEditor
-            ] as number) || null,
-          max:
-            (fichaEspecie[
-              campo.campoMax as keyof FichaEspecieEditor
-            ] as number) || null,
+          min: (fichaEspecie[campo.campoMin as keyof FichaEspecieEditor] as number) || null,
+          max: (fichaEspecie[campo.campoMax as keyof FichaEspecieEditor] as number) || null,
           valor: null,
         };
       } else if (campo.tipo === "numero") {
         valoresIniciales[campo.key] = {
           min: null,
           max: null,
-          valor:
-            (fichaEspecie[campo.key as keyof FichaEspecieEditor] as number) ||
-            null,
+          valor: (fichaEspecie[campo.key as keyof FichaEspecieEditor] as number) || null,
         };
       }
     });
@@ -283,18 +311,11 @@ export default function EditorCitas({
   useEffect(() => {
     const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-    if (
-      campo?.tipo === "catalogo_awe" ||
-      campo?.tipo === "rango" ||
-      campo?.tipo === "numero"
-    ) {
+    if (campo?.tipo === "catalogo_awe" || campo?.tipo === "rango" || campo?.tipo === "numero") {
       // Para campos de catálogo AWE, rango o número, no hay texto editor
       setTextoEditor("");
     } else {
-      const valor =
-        (fichaEspecie[
-          campoSeleccionado as keyof FichaEspecieEditor
-        ] as string) || "";
+      const valor = (fichaEspecie[campoSeleccionado as keyof FichaEspecieEditor] as string) || "";
 
       setTextoEditor(valor);
     }
@@ -360,14 +381,9 @@ export default function EditorCitas({
     const citasEncontradas = textoEditor.match(/\{\{(\d+)\}\}/g) || [];
 
     citasEncontradas.forEach((match) => {
-      const idPublicacion = Number.parseInt(
-        match.replaceAll(/\{\{|\}\}/g, ""),
-        10,
-      );
+      const idPublicacion = Number.parseInt(match.replaceAll(/\{\{|\}\}/g, ""), 10);
       // Buscar la publicación por id_publicacion
-      const publicacion = publicaciones.find(
-        (pub) => pub.id_publicacion === idPublicacion,
-      );
+      const publicacion = publicaciones.find((pub) => pub.id_publicacion === idPublicacion);
 
       if (publicacion?.cita_corta) {
         // Reemplazar {{id_publicacion}} con cita_corta en la vista previa
@@ -383,7 +399,13 @@ export default function EditorCitas({
   const insertarCita = (idPublicacion: number) => {
     const nuevaCita = `{{${String(idPublicacion)}}}`;
 
-    setTextoEditor((prev) => prev + (prev ? " " : "") + nuevaCita);
+    if (editor) {
+      // Insertar el texto en la posición del cursor
+      editor.chain().insertContent(nuevaCita).focus().run();
+    } else {
+      // Fallback: agregar al final si no hay editor
+      setTextoEditor((prev) => prev + (prev ? " " : "") + nuevaCita);
+    }
   };
 
   // Guardar cambios
@@ -394,11 +416,7 @@ export default function EditorCitas({
     try {
       const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-      if (
-        campo?.tipo === "rango" &&
-        "campoMin" in campo &&
-        "campoMax" in campo
-      ) {
+      if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
         // Guardar campos de rango (min y max)
         const valores = valoresNumericos[campoSeleccionado] || {
           min: null,
@@ -424,9 +442,7 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" &&
-            errorData !== null &&
-            "error" in errorData
+            typeof errorData === "object" && errorData !== null && "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -461,9 +477,7 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" &&
-            errorData !== null &&
-            "error" in errorData
+            typeof errorData === "object" && errorData !== null && "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -479,30 +493,24 @@ export default function EditorCitas({
         setTimeout(() => setSaveMessage(null), 3000);
       } else if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
         // Guardar catálogo AWE
-        const idsSeleccionados =
-          catalogoAweSeleccionados[campoSeleccionado] || [];
+        const idsSeleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
 
-        const response = await fetch(
-          `/api/taxon-catalogo-awe/${String(taxonId)}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              tipo_catalogo_awe_id: campo.tipoCatalogoId,
-              catalogo_awe_ids: idsSeleccionados,
-            }),
+        const response = await fetch(`/api/taxon-catalogo-awe/${String(taxonId)}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            tipo_catalogo_awe_id: campo.tipoCatalogoId,
+            catalogo_awe_ids: idsSeleccionados,
+          }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" &&
-            errorData !== null &&
-            "error" in errorData
+            typeof errorData === "object" && errorData !== null && "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -543,9 +551,7 @@ export default function EditorCitas({
           const errorData = await response.json().catch(() => ({}));
 
           const errorMessage =
-            typeof errorData === "object" &&
-            errorData !== null &&
-            "error" in errorData
+            typeof errorData === "object" && errorData !== null && "error" in errorData
               ? String(errorData.error)
               : "Error al guardar";
 
@@ -563,9 +569,7 @@ export default function EditorCitas({
     } catch (error) {
       console.error("Error al guardar:", error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Error al guardar. Por favor, intenta de nuevo.";
+        error instanceof Error ? error.message : "Error al guardar. Por favor, intenta de nuevo.";
 
       setSaveMessage(`Error: ${errorMessage}`);
     } finally {
@@ -580,9 +584,7 @@ export default function EditorCitas({
           {/* Header */}
           <div className="flex-shrink-0 border-b bg-white px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Editor de Textos con Citas
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
               <div className="flex items-center gap-2">
                 <Button
                   className="flex items-center gap-1"
@@ -591,9 +593,7 @@ export default function EditorCitas({
                   variant="outline"
                   onClick={() => {
                     if (anteriorEspecie) {
-                      router.push(
-                        `/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`,
-                      );
+                      router.push(`/sapopedia/editor-citas/${toSlug(anteriorEspecie.taxon)}`);
                     }
                   }}
                 >
@@ -607,9 +607,7 @@ export default function EditorCitas({
                   variant="outline"
                   onClick={() => {
                     if (siguienteEspecie) {
-                      router.push(
-                        `/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`,
-                      );
+                      router.push(`/sapopedia/editor-citas/${toSlug(siguienteEspecie.taxon)}`);
                     }
                   }}
                 >
@@ -627,9 +625,7 @@ export default function EditorCitas({
               {/* Especie Selector con Buscador */}
               <div className="flex-shrink-0 space-y-3 border-b p-4">
                 <div>
-                  <div className="mb-2 block text-sm font-medium text-gray-700">
-                    Buscar Especie
-                  </div>
+                  <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
                   <EditorCitasSearch />
                 </div>
                 <div className="flex gap-3">
@@ -645,10 +641,7 @@ export default function EditorCitas({
                       id="especie-actual"
                     >
                       {(() => {
-                        console.log(
-                          "🔍 nombreCientifico recibido:",
-                          nombreCientifico,
-                        );
+                        console.log("🔍 nombreCientifico recibido:", nombreCientifico);
                         console.log("🔍 tipo:", typeof nombreCientifico);
                         console.log("🔍 longitud:", nombreCientifico?.length);
                         console.log(
@@ -657,10 +650,7 @@ export default function EditorCitas({
                         );
 
                         return (
-                          <span
-                            className="italic"
-                            style={{ fontStyle: "italic" }}
-                          >
+                          <span className="italic" style={{fontStyle: "italic"}}>
                             {nombreCientifico}
                           </span>
                         );
@@ -688,15 +678,9 @@ export default function EditorCitas({
               {/* Text Editor, Selector de Catálogo AWE o Campos Numéricos */}
               <div className="flex-1 overflow-hidden p-4">
                 {(() => {
-                  const campo = CAMPOS_FICHA.find(
-                    (c) => c.key === campoSeleccionado,
-                  );
+                  const campo = CAMPOS_FICHA.find((c) => c.key === campoSeleccionado);
 
-                  if (
-                    campo?.tipo === "rango" &&
-                    "campoMin" in campo &&
-                    "campoMax" in campo
-                  ) {
+                  if (campo?.tipo === "rango" && "campoMin" in campo && "campoMax" in campo) {
                     // Campos de rango (min y max)
                     const valores = valoresNumericos[campoSeleccionado] || {
                       min: null,
@@ -706,9 +690,7 @@ export default function EditorCitas({
 
                     return (
                       <div className="flex h-full flex-col space-y-4">
-                        <div className="text-sm font-medium text-gray-700">
-                          {campo.label}
-                        </div>
+                        <div className="text-sm font-medium text-gray-700">{campo.label}</div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label
@@ -725,17 +707,13 @@ export default function EditorCitas({
                               value={valores.min ?? ""}
                               onChange={(e) => {
                                 const nuevoValor =
-                                  e.target.value === ""
-                                    ? null
-                                    : Number.parseFloat(e.target.value);
+                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
 
                                 setValoresNumericos({
                                   ...valoresNumericos,
                                   [campoSeleccionado]: {
                                     ...valores,
-                                    min: Number.isNaN(nuevoValor)
-                                      ? null
-                                      : nuevoValor,
+                                    min: Number.isNaN(nuevoValor) ? null : nuevoValor,
                                   },
                                 });
                               }}
@@ -756,17 +734,13 @@ export default function EditorCitas({
                               value={valores.max ?? ""}
                               onChange={(e) => {
                                 const nuevoValor =
-                                  e.target.value === ""
-                                    ? null
-                                    : Number.parseFloat(e.target.value);
+                                  e.target.value === "" ? null : Number.parseFloat(e.target.value);
 
                                 setValoresNumericos({
                                   ...valoresNumericos,
                                   [campoSeleccionado]: {
                                     ...valores,
-                                    max: Number.isNaN(nuevoValor)
-                                      ? null
-                                      : nuevoValor,
+                                    max: Number.isNaN(nuevoValor) ? null : nuevoValor,
                                   },
                                 });
                               }}
@@ -779,8 +753,7 @@ export default function EditorCitas({
 
                   if (campo?.tipo === "numero") {
                     // Campo numérico simple
-                    const valor =
-                      valoresNumericos[campoSeleccionado]?.valor ?? null;
+                    const valor = valoresNumericos[campoSeleccionado]?.valor ?? null;
 
                     return (
                       <div className="flex h-full flex-col">
@@ -798,18 +771,14 @@ export default function EditorCitas({
                           value={valor ?? ""}
                           onChange={(e) => {
                             const nuevoValor =
-                              e.target.value === ""
-                                ? null
-                                : Number.parseFloat(e.target.value);
+                              e.target.value === "" ? null : Number.parseFloat(e.target.value);
 
                             setValoresNumericos({
                               ...valoresNumericos,
                               [campoSeleccionado]: {
                                 min: null,
                                 max: null,
-                                valor: Number.isNaN(nuevoValor)
-                                  ? null
-                                  : nuevoValor,
+                                valor: Number.isNaN(nuevoValor) ? null : nuevoValor,
                               },
                             });
                           }}
@@ -819,10 +788,8 @@ export default function EditorCitas({
                   }
 
                   if (campo?.tipo === "catalogo_awe" && campo.tipoCatalogoId) {
-                    const opciones =
-                      catalogoAweOpciones[campo.tipoCatalogoId] || [];
-                    const seleccionados =
-                      catalogoAweSeleccionados[campoSeleccionado] || [];
+                    const opciones = catalogoAweOpciones[campo.tipoCatalogoId] || [];
+                    const seleccionados = catalogoAweSeleccionados[campoSeleccionado] || [];
 
                     return (
                       <div className="flex h-full flex-col overflow-hidden">
@@ -831,9 +798,7 @@ export default function EditorCitas({
                         </div>
                         <div className="flex-1 space-y-2 overflow-y-auto">
                           {opciones.length === 0 ? (
-                            <p className="text-sm text-gray-500">
-                              No hay opciones disponibles
-                            </p>
+                            <p className="text-sm text-gray-500">No hay opciones disponibles</p>
                           ) : (
                             opciones.map((opcion) => (
                               <label
@@ -841,20 +806,13 @@ export default function EditorCitas({
                                 className="flex items-center gap-2 rounded border border-gray-200 bg-white p-3 hover:bg-gray-50"
                               >
                                 <input
-                                  checked={seleccionados.includes(
-                                    opcion.id_catalogo_awe,
-                                  )}
+                                  checked={seleccionados.includes(opcion.id_catalogo_awe)}
                                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                   type="checkbox"
                                   onChange={(e) => {
                                     const nuevosSeleccionados = e.target.checked
-                                      ? [
-                                          ...seleccionados,
-                                          opcion.id_catalogo_awe,
-                                        ]
-                                      : seleccionados.filter(
-                                          (id) => id !== opcion.id_catalogo_awe,
-                                        );
+                                      ? [...seleccionados, opcion.id_catalogo_awe]
+                                      : seleccionados.filter((id) => id !== opcion.id_catalogo_awe);
 
                                     setCatalogoAweSeleccionados({
                                       ...catalogoAweSeleccionados,
@@ -862,9 +820,7 @@ export default function EditorCitas({
                                     });
                                   }}
                                 />
-                                <span className="text-sm text-gray-700">
-                                  {opcion.nombre}
-                                </span>
+                                <span className="text-sm text-gray-700">{opcion.nombre}</span>
                                 {opcion.sigla && (
                                   <span className="ml-auto text-xs text-gray-500">
                                     ({opcion.sigla})
@@ -886,13 +842,139 @@ export default function EditorCitas({
                       >
                         Editor de Texto
                       </label>
-                      <Textarea
-                        className="flex-1 resize-none font-mono text-sm"
-                        id="texto-editor"
-                        placeholder="Escribe el texto aquí. Usa el botón 'Insertar' para añadir citas con {{id_publicacion}}."
-                        value={textoEditor}
-                        onChange={(e) => setTextoEditor(e.target.value)}
-                      />
+                      <div className="flex flex-1 flex-col overflow-hidden rounded-md border border-gray-300">
+                        {/* Toolbar */}
+                        <div className="flex flex-wrap items-center gap-1 border-b border-gray-300 bg-gray-50 p-2">
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("bold")
+                                ? "bg-gray-200 font-bold"
+                                : "hover:bg-gray-100"
+                            }`}
+                            disabled={!editor?.can().chain().focus().toggleBold().run()}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleBold().run()}
+                          >
+                            <strong>B</strong>
+                          </button>
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("italic")
+                                ? "bg-gray-200 italic"
+                                : "hover:bg-gray-100"
+                            }`}
+                            disabled={!editor?.can().chain().focus().toggleItalic().run()}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleItalic().run()}
+                          >
+                            <em>I</em>
+                          </button>
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("strike")
+                                ? "bg-gray-200 line-through"
+                                : "hover:bg-gray-100"
+                            }`}
+                            disabled={!editor?.can().chain().focus().toggleStrike().run()}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleStrike().run()}
+                          >
+                            <s>S</s>
+                          </button>
+                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("heading", {level: 1})
+                                ? "bg-gray-200"
+                                : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleHeading({level: 1}).run()}
+                          >
+                            H1
+                          </button>
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("heading", {level: 2})
+                                ? "bg-gray-200"
+                                : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleHeading({level: 2}).run()}
+                          >
+                            H2
+                          </button>
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("heading", {level: 3})
+                                ? "bg-gray-200"
+                                : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleHeading({level: 3}).run()}
+                          >
+                            H3
+                          </button>
+                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("bulletList") ? "bg-gray-200" : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                          >
+                            • Lista
+                          </button>
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("orderedList") ? "bg-gray-200" : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                          >
+                            1. Lista
+                          </button>
+                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <button
+                            className={`rounded px-2 py-1 text-sm ${
+                              editor?.isActive("link") ? "bg-gray-200" : "hover:bg-gray-100"
+                            }`}
+                            type="button"
+                            onClick={() => {
+                              if (editor?.isActive("link")) {
+                                // Si ya hay un enlace, obtener su URL y abrir el diálogo para editarlo
+                                const attrs = editor.getAttributes("link");
+                                const href = typeof attrs.href === "string" ? attrs.href : "";
+
+                                setUrlEnlace(href);
+                                setMostrarDialogoEnlace(true);
+                              } else {
+                                // Si no hay enlace, abrir el diálogo para crear uno nuevo
+                                setUrlEnlace("");
+                                setMostrarDialogoEnlace(true);
+                              }
+                            }}
+                          >
+                            🔗 Link
+                          </button>
+                          <button
+                            className="rounded px-2 py-1 text-sm hover:bg-gray-100 disabled:opacity-50"
+                            disabled={!editor?.isActive("link")}
+                            type="button"
+                            onClick={() => editor?.chain().focus().unsetLink().run()}
+                          >
+                            🔗✕
+                          </button>
+                        </div>
+                        {/* Editor Content */}
+                        <div className="flex-1 overflow-y-auto">
+                          {editor ? (
+                            <EditorContent className="h-full" editor={editor} />
+                          ) : (
+                            <div className="h-full p-4 text-gray-500">Cargando editor...</div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}
@@ -930,9 +1012,7 @@ export default function EditorCitas({
               <div className="flex flex-1 flex-col overflow-hidden border-b">
                 <div className="flex-shrink-0 border-b bg-white p-4">
                   <div className="mb-4">
-                    <div className="text-sm font-medium text-gray-700">
-                      Referencias Disponibles
-                    </div>
+                    <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
                   </div>
                 </div>
 
@@ -955,19 +1035,12 @@ export default function EditorCitas({
 
                         autor = matchAutor
                           ? matchAutor[1].trim()
-                          : pub.titulo.split(",")[0]?.trim() ||
-                            pub.titulo.split(" ")[0] ||
-                            "";
+                          : pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
                       } else {
-                        autor =
-                          pub.titulo.split(",")[0]?.trim() ||
-                          pub.titulo.split(" ")[0] ||
-                          "";
+                        autor = pub.titulo.split(",")[0]?.trim() || pub.titulo.split(" ")[0] || "";
                       }
 
-                      const año =
-                        pub.numero_publicacion_ano ||
-                        new Date(pub.fecha).getFullYear();
+                      const año = pub.numero_publicacion_ano || new Date(pub.fecha).getFullYear();
 
                       return (
                         <div
@@ -976,12 +1049,9 @@ export default function EditorCitas({
                         >
                           <div className="min-w-0 flex-1">
                             <div className="mb-0.5 text-xs font-semibold text-gray-900">
-                              <span className="text-gray-500">[{numero}]</span>{" "}
-                              {autor} ({año})
+                              <span className="text-gray-500">[{numero}]</span> {autor} ({año})
                             </div>
-                            <div className="line-clamp-2 text-xs text-gray-700">
-                              {pub.titulo}
-                            </div>
+                            <div className="line-clamp-2 text-xs text-gray-700">{pub.titulo}</div>
                           </div>
                           <Button
                             className="flex-shrink-0"
@@ -1000,23 +1070,90 @@ export default function EditorCitas({
 
               {/* Vista Previa */}
               <div className="flex flex-1 flex-col overflow-hidden p-4">
-                <div className="mb-2 block text-sm font-medium text-gray-700">
-                  Vista Previa
-                </div>
+                <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
                 {mostrarVistaPrevia ? (
-                  <div className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
-                    {vistaPrevia ||
-                      "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar."}
-                  </div>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        vistaPrevia ||
+                        "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar.",
+                    }}
+                    className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed"
+                  />
                 ) : (
                   <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
-                    Haz clic en &quot;Ver Vista Previa&quot; para ver el texto
-                    con las citas formateadas
+                    Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas
+                    formateadas
                   </div>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Diálogo para agregar/editar enlace */}
+          <Dialog open={mostrarDialogoEnlace} onOpenChange={setMostrarDialogoEnlace}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Agregar Enlace</DialogTitle>
+                <DialogDescription>
+                  Ingresa la URL del enlace. Si hay texto seleccionado, se convertirá en un enlace.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <Input
+                  placeholder="https://ejemplo.com"
+                  value={urlEnlace}
+                  onChange={(e) => setUrlEnlace(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (urlEnlace.trim()) {
+                        const url = urlEnlace.trim();
+                        // Asegurar que la URL tenga protocolo
+                        const urlConProtocolo =
+                          url.startsWith("http://") || url.startsWith("https://")
+                            ? url
+                            : `https://${url}`;
+
+                        editor?.chain().focus().setLink({href: urlConProtocolo}).run();
+                        setMostrarDialogoEnlace(false);
+                        setUrlEnlace("");
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setMostrarDialogoEnlace(false);
+                    setUrlEnlace("");
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (urlEnlace.trim()) {
+                      const url = urlEnlace.trim();
+                      // Asegurar que la URL tenga protocolo
+                      const urlConProtocolo =
+                        url.startsWith("http://") || url.startsWith("https://")
+                          ? url
+                          : `https://${url}`;
+
+                      editor?.chain().focus().setLink({href: urlConProtocolo}).run();
+                      setMostrarDialogoEnlace(false);
+                      setUrlEnlace("");
+                    }
+                  }}
+                >
+                  Aplicar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Footer */}
           <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-white px-6 py-4 shadow-lg">
