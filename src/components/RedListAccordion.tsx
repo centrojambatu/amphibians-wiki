@@ -99,13 +99,13 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
   const renderSpecies = (species: SpeciesListItem) => (
     <div
       key={species.id_taxon}
-      className="relative flex items-center gap-4 rounded-md border border-gray-200 bg-white px-4 py-3 transition-all hover:border-gray-300 hover:bg-gray-50"
+      className="relative flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3 transition-all hover:border-border hover:bg-muted/50"
     >
       {/* Nombre científico */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Link
-            className="text-sm font-medium text-gray-800 italic hover:underline"
+            className="text-sm font-medium text-foreground italic hover:underline"
             href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
           >
             {species.nombre_cientifico}
@@ -120,7 +120,7 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-gray-600">{species.nombre_comun}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{species.nombre_comun}</div>
         )}
       </div>
 
@@ -203,7 +203,7 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
             )}
           </>
         ) : (
-          <span className="text-gray-400">-</span>
+          <span className="text-muted-foreground">-</span>
         )}
       </div>
 
@@ -242,7 +242,7 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     return (
       <div key={categoriaId} className="relative">
         <div
-          className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3"
+          className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3"
           role="button"
           tabIndex={0}
           onClick={() => toggleItem(categoriaId)}
@@ -255,9 +255,9 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
         >
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-800">{grupo.categoria.nombre}</span>
+              <span className="text-sm font-semibold text-foreground">{grupo.categoria.nombre}</span>
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {grupo.especies.length} especie
               {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas} endémica
               {especiesEndemicas !== 1 ? "s" : ""})
@@ -271,11 +271,11 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="mt-3 rounded-lg bg-gray-50 p-4">
+          <div className="mt-3 rounded-lg bg-muted p-4">
             {/* Header de la tabla */}
             <div className="mb-3 px-4 py-2">
-              <div className="mb-2 text-xs text-gray-400">Especies</div>
-              <div className="flex items-center gap-4 text-xs text-gray-400">
+              <div className="mb-2 text-xs text-muted-foreground">Especies</div>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex-1">Nombre</div>
                 <div className="w-12 text-center">En</div>
                 <div className="w-16 text-center">LR</div>

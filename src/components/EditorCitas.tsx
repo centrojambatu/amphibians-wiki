@@ -241,7 +241,7 @@ export default function EditorCitas({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-blue-600 underline",
+          class: "text-primary underline hover:text-primary/80",
         },
       }),
     ],
@@ -252,7 +252,7 @@ export default function EditorCitas({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-a:text-primary dark:prose-invert",
       },
     },
     onSelectionUpdate: ({editor: editorInstance}) => {
@@ -627,13 +627,13 @@ export default function EditorCitas({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-7xl px-4 py-4">
-        <div className="flex h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div className="flex h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-lg">
           {/* Header */}
-          <div className="flex-shrink-0 border-b bg-white px-6 py-4">
+          <div className="flex-shrink-0 border-b bg-card px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-900">Editor de Textos con Citas</h1>
+              <h1 className="text-2xl font-bold text-foreground">Editor de Textos con Citas</h1>
               <div className="flex items-center gap-2">
                 <Button
                   className="flex items-center gap-1"
@@ -670,23 +670,23 @@ export default function EditorCitas({
           {/* Main Content - Two Panels */}
           <div className="flex flex-1 overflow-hidden">
             {/* Left Panel */}
-            <div className="flex w-1/2 flex-col overflow-hidden border-r bg-white">
+            <div className="flex w-1/2 flex-col overflow-hidden border-r bg-card">
               {/* Especie Selector con Buscador */}
               <div className="flex-shrink-0 space-y-3 border-b p-4">
                 <div>
-                  <div className="mb-2 block text-sm font-medium text-gray-700">Buscar Especie</div>
+                  <div className="mb-2 block text-sm font-medium text-foreground">Buscar Especie</div>
                   <EditorCitasSearch />
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <label
-                      className="mb-2 block text-sm font-medium text-gray-700"
+                      className="mb-2 block text-sm font-medium text-foreground"
                       htmlFor="especie-actual"
                     >
                       Especie Actual
                     </label>
                     <div
-                      className="border-input flex h-9 items-center rounded-md border bg-gray-50 px-3 text-sm text-gray-600"
+                      className="border-input flex h-9 items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground"
                       id="especie-actual"
                     >
                       {(() => {
@@ -708,14 +708,14 @@ export default function EditorCitas({
                   </div>
                   <div className="flex-1">
                     <label
-                      className="mb-2 block text-sm font-medium text-gray-700"
+                      className="mb-2 block text-sm font-medium text-foreground"
                       htmlFor="taxon-id"
                     >
                       Taxon ID
                     </label>
                     <Input
                       readOnly
-                      className="bg-gray-50 text-gray-600"
+                      className="bg-muted text-muted-foreground"
                       id="taxon-id"
                       type="text"
                       value={taxonId.toString()}
@@ -743,7 +743,7 @@ export default function EditorCitas({
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label
-                              className="mb-2 block text-sm font-medium text-gray-700"
+                              className="mb-2 block text-sm font-medium text-foreground"
                               htmlFor={`${campo.key}-min`}
                             >
                               Mínimo
@@ -807,7 +807,7 @@ export default function EditorCitas({
                     return (
                       <div className="flex h-full flex-col">
                         <label
-                          className="mb-2 block text-sm font-medium text-gray-700"
+                          className="mb-2 block text-sm font-medium text-foreground"
                           htmlFor={`${campo.key}-valor`}
                         >
                           {campo.label}
@@ -842,21 +842,21 @@ export default function EditorCitas({
 
                     return (
                       <div className="flex h-full flex-col overflow-hidden">
-                        <div className="mb-2 block text-sm font-medium text-gray-700">
+                        <div className="mb-2 block text-sm font-medium text-foreground">
                           Seleccionar Opciones
                         </div>
                         <div className="flex-1 space-y-2 overflow-y-auto">
                           {opciones.length === 0 ? (
-                            <p className="text-sm text-gray-500">No hay opciones disponibles</p>
+                            <p className="text-sm text-muted-foreground">No hay opciones disponibles</p>
                           ) : (
                             opciones.map((opcion) => (
                               <label
                                 key={opcion.id_catalogo_awe}
-                                className="flex items-center gap-2 rounded border border-gray-200 bg-white p-3 hover:bg-gray-50"
+                                className="flex items-center gap-2 rounded border border-border bg-card p-3 hover:bg-muted/50 transition-colors"
                               >
                                 <input
                                   checked={seleccionados.includes(opcion.id_catalogo_awe)}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
                                   type="checkbox"
                                   onChange={(e) => {
                                     const nuevosSeleccionados = e.target.checked
@@ -869,9 +869,9 @@ export default function EditorCitas({
                                     });
                                   }}
                                 />
-                                <span className="text-sm text-gray-700">{opcion.nombre}</span>
+                                <span className="text-sm text-foreground">{opcion.nombre}</span>
                                 {opcion.sigla && (
-                                  <span className="ml-auto text-xs text-gray-500">
+                                  <span className="ml-auto text-xs text-muted-foreground">
                                     ({opcion.sigla})
                                   </span>
                                 )}
@@ -886,19 +886,19 @@ export default function EditorCitas({
                   return (
                     <div className="flex h-full flex-col">
                       <label
-                        className="mb-2 block text-sm font-medium text-gray-700"
+                        className="mb-2 block text-sm font-medium text-foreground"
                         htmlFor="texto-editor"
                       >
                         Editor de Texto
                       </label>
-                      <div className="flex flex-1 flex-col overflow-hidden rounded-md border border-gray-300">
+                      <div className="flex flex-1 flex-col overflow-hidden rounded-md border border-border">
                         {/* Toolbar */}
-                        <div className="flex flex-wrap items-center gap-1 border-b border-gray-300 bg-gray-50 p-2">
+                        <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted p-2">
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("bold")
-                                ? "bg-gray-200 font-bold"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted font-bold text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             disabled={!editor?.can().chain().focus().toggleBold().run()}
                             type="button"
@@ -907,10 +907,10 @@ export default function EditorCitas({
                             <strong>B</strong>
                           </button>
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("italic")
-                                ? "bg-gray-200 italic"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted italic text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             disabled={!editor?.can().chain().focus().toggleItalic().run()}
                             type="button"
@@ -919,10 +919,10 @@ export default function EditorCitas({
                             <em>I</em>
                           </button>
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("strike")
-                                ? "bg-gray-200 line-through"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted line-through text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             disabled={!editor?.can().chain().focus().toggleStrike().run()}
                             type="button"
@@ -930,12 +930,12 @@ export default function EditorCitas({
                           >
                             <s>S</s>
                           </button>
-                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <div className="mx-1 h-6 w-px bg-border" />
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("heading", {level: 1})
-                                ? "bg-gray-200"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => editor?.chain().focus().toggleHeading({level: 1}).run()}
@@ -943,10 +943,10 @@ export default function EditorCitas({
                             H1
                           </button>
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("heading", {level: 2})
-                                ? "bg-gray-200"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => editor?.chain().focus().toggleHeading({level: 2}).run()}
@@ -954,20 +954,20 @@ export default function EditorCitas({
                             H2
                           </button>
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
                               editor?.isActive("heading", {level: 3})
-                                ? "bg-gray-200"
-                                : "hover:bg-gray-100"
+                                ? "bg-muted text-foreground"
+                                : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => editor?.chain().focus().toggleHeading({level: 3}).run()}
                           >
                             H3
                           </button>
-                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <div className="mx-1 h-6 w-px bg-border" />
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
-                              editor?.isActive("bulletList") ? "bg-gray-200" : "hover:bg-gray-100"
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
+                              editor?.isActive("bulletList") ? "bg-muted text-foreground" : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => editor?.chain().focus().toggleBulletList().run()}
@@ -975,18 +975,18 @@ export default function EditorCitas({
                             • Lista
                           </button>
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
-                              editor?.isActive("orderedList") ? "bg-gray-200" : "hover:bg-gray-100"
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
+                              editor?.isActive("orderedList") ? "bg-muted text-foreground" : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
                           >
                             1. Lista
                           </button>
-                          <div className="mx-1 h-6 w-px bg-gray-300" />
+                          <div className="mx-1 h-6 w-px bg-border" />
                           <button
-                            className={`rounded px-2 py-1 text-sm ${
-                              editor?.isActive("link") ? "bg-gray-200" : "hover:bg-gray-100"
+                            className={`rounded px-2 py-1 text-sm transition-colors ${
+                              editor?.isActive("link") ? "bg-muted text-foreground" : "hover:bg-muted/50 text-foreground"
                             }`}
                             type="button"
                             onClick={() => {
@@ -1007,7 +1007,7 @@ export default function EditorCitas({
                             🔗 Link
                           </button>
                           <button
-                            className="rounded px-2 py-1 text-sm hover:bg-gray-100 disabled:opacity-50"
+                            className="rounded px-2 py-1 text-sm hover:bg-muted/50 disabled:opacity-50 text-foreground transition-colors"
                             disabled={!editor?.isActive("link")}
                             type="button"
                             onClick={() => editor?.chain().focus().unsetLink().run()}
@@ -1018,6 +1018,9 @@ export default function EditorCitas({
                         {/* Editor Content */}
                         <div className="flex-1 overflow-y-auto">
                           <style>{`
+                            .ProseMirror {
+                              color: hsl(var(--foreground));
+                            }
                             .ProseMirror ul,
                             .ProseMirror ol {
                               padding-left: 1.5rem;
@@ -1031,6 +1034,7 @@ export default function EditorCitas({
                             }
                             .ProseMirror li {
                               margin: 0.25rem 0;
+                              color: hsl(var(--foreground));
                             }
                             .ProseMirror ul[data-type="taskList"] {
                               list-style: none;
@@ -1048,11 +1052,17 @@ export default function EditorCitas({
                             .ProseMirror ul[data-type="taskList"] li > div {
                               flex: 1 1 auto;
                             }
+                            .ProseMirror a {
+                              color: hsl(var(--primary));
+                            }
+                            .ProseMirror a:hover {
+                              color: hsl(var(--primary) / 0.8);
+                            }
                           `}</style>
                           {editor ? (
                             <EditorContent className="h-full" editor={editor} />
                           ) : (
-                            <div className="h-full p-4 text-gray-500">Cargando editor...</div>
+                            <div className="h-full p-4 text-muted-foreground">Cargando editor...</div>
                           )}
                         </div>
                       </div>
@@ -1063,11 +1073,11 @@ export default function EditorCitas({
             </div>
 
             {/* Right Panel */}
-            <div className="flex w-1/2 flex-col overflow-hidden bg-white">
+            <div className="flex w-1/2 flex-col overflow-hidden bg-card">
               {/* Campo Selector */}
               <div className="flex-shrink-0 border-b p-4">
                 <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-foreground"
                   htmlFor="campo-selector"
                 >
                   Campo
@@ -1085,21 +1095,21 @@ export default function EditorCitas({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 </div>
               </div>
 
               {/* Referencias Disponibles */}
               <div className="flex flex-1 flex-col overflow-hidden border-b">
-                <div className="flex-shrink-0 border-b bg-white p-4">
+                <div className="flex-shrink-0 border-b bg-card p-4">
                   <div className="mb-4">
-                    <div className="text-sm font-medium text-gray-700">Referencias Disponibles</div>
+                    <div className="text-sm font-medium text-foreground">Referencias Disponibles</div>
                   </div>
                 </div>
 
                 {publicaciones.length === 0 ? (
                   <div className="flex flex-1 items-center justify-center p-4">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       No hay referencias disponibles para esta especie.
                     </p>
                   </div>
@@ -1126,13 +1136,13 @@ export default function EditorCitas({
                       return (
                         <div
                           key={pub.id_publicacion}
-                          className="flex items-start justify-between gap-2 rounded border border-gray-200 bg-white p-2"
+                          className="flex items-start justify-between gap-2 rounded border border-border bg-card p-2 hover:bg-muted/50 transition-colors"
                         >
                           <div className="min-w-0 flex-1">
-                            <div className="mb-0.5 text-xs font-semibold text-gray-900">
-                              <span className="text-gray-500">[{numero}]</span> {autor} ({año})
+                            <div className="mb-0.5 text-xs font-semibold text-foreground">
+                              <span className="text-muted-foreground">[{numero}]</span> {autor} ({año})
                             </div>
-                            <div className="line-clamp-2 text-xs text-gray-700">{pub.titulo}</div>
+                            <div className="line-clamp-2 text-xs text-foreground">{pub.titulo}</div>
                           </div>
                           <Button
                             className="flex-shrink-0"
@@ -1151,7 +1161,7 @@ export default function EditorCitas({
 
               {/* Vista Previa */}
               <div className="flex flex-1 flex-col overflow-hidden p-4">
-                <div className="mb-2 block text-sm font-medium text-gray-700">Vista Previa</div>
+                <div className="mb-2 block text-sm font-medium text-foreground">Vista Previa</div>
                 {mostrarVistaPrevia ? (
                   <div
                     dangerouslySetInnerHTML={{
@@ -1159,10 +1169,10 @@ export default function EditorCitas({
                         vistaPrevia ||
                         "No hay vista previa disponible. Haz clic en 'Ver Vista Previa' para generar.",
                     }}
-                    className="flex-1 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed"
+                    className="flex-1 overflow-y-auto rounded border border-border bg-muted p-4 text-sm leading-relaxed text-foreground"
                   />
                 ) : (
-                  <div className="flex flex-1 items-center justify-center rounded border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                  <div className="flex flex-1 items-center justify-center rounded border border-border bg-muted text-sm text-muted-foreground">
                     Haz clic en &quot;Ver Vista Previa&quot; para ver el texto con las citas
                     formateadas
                   </div>
@@ -1237,11 +1247,11 @@ export default function EditorCitas({
           </Dialog>
 
           {/* Footer */}
-          <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-white px-6 py-4 shadow-lg">
+          <div className="relative z-50 flex min-h-[64px] flex-shrink-0 items-center justify-between border-t bg-card px-6 py-4 shadow-lg">
             <div className="flex items-center gap-4">
               {saveMessage && (
                 <span
-                  className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-red-600" : "text-green-600"}`}
+                  className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-destructive" : "text-green-600 dark:text-green-400"}`}
                 >
                   {saveMessage}
                 </span>
