@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -28,12 +29,15 @@ export default function RootLayout({
           <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
-                <Link
-                  className="text-2xl font-bold"
-                  href="/"
-                  style={{ color: "#006d1b" }}
-                >
-                  🐸 Anfibios de Ecuador
+                <Link href="/" className="flex items-center">
+                  <Image
+                    src="/assets/references/logo.png"
+                    alt="Anfibios de Ecuador"
+                    width={150}
+                    height={45}
+                    className="h-auto w-auto"
+                    priority
+                  />
                 </Link>
                 <nav className="flex items-center gap-4">
                   <Link href="/">
