@@ -359,3 +359,4 @@ CREATE POLICY "Allow public read" ON prestamocoleccion FOR SELECT USING (true);
 CREATE POLICY "Allow public read" ON prestamotejido FOR SELECT USING (true);
 
 
+
