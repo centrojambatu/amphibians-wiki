@@ -308,6 +308,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.color_en_vida ?? null,
     fichaEspecie?.color_en_preservacion ?? null,
     fichaEspecie?.sinonimia ?? null,
+    fichaEspecie?.comparacion ?? null,
     fichaEspecie?.usos ?? null,
     vistaDataTyped?.distribucion_global ?? null,
   ];
@@ -379,6 +380,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     morfometria: fichaEspecie?.morfometria ?? null,
     color_en_vida: fichaEspecie?.color_en_vida ?? null,
     color_en_preservacion: fichaEspecie?.color_en_preservacion ?? null,
+    comparacion: fichaEspecie?.comparacion ?? null,
     habitat_biologia: fichaEspecie?.habitat_biologia ?? null,
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
     distribucion: fichaEspecie?.distribucion ?? null,

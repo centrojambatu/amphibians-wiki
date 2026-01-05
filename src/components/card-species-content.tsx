@@ -313,6 +313,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 )} */}
               </CardContent>
             </Card>
+            {/* Comparaciones */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Comparaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.comparacion ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.comparacion),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
             {/* Historia Natural */}
             <Card className="">
               <CardHeader>
