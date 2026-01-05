@@ -5,31 +5,59 @@ export default async function getFichaGenero(idFichaGenero: string) {
 
   console.log("🔍 getFichaGenero llamado con:", idFichaGenero);
 
-  // Buscar por id_ficha_genero o nombre del taxon
+  // Buscar por taxon_id, id_ficha_genero o nombre del taxon
   const isNumber = typeof idFichaGenero === "number" || /^\d+$/.test(idFichaGenero);
 
   let taxonId: number | null = null;
   let idFichaGeneroNum: number | null = null;
 
   if (isNumber) {
-    // Buscar por id_ficha_genero
     const idNum = Number(idFichaGenero);
 
-    console.log("🔢 Buscando por id_ficha_genero:", idNum);
-    const {data: fichaData, error: errorFicha} = await supabaseClient
-      .from("ficha_genero")
-      .select("*, taxon(*)")
-      .eq("id_ficha_genero", idNum)
+    // Primero intentar buscar si es un taxon_id de un género
+    console.log("🔢 Buscando por taxon_id:", idNum);
+    const {data: taxonData, error: errorTaxon} = await supabaseClient
+      .from("taxon")
+      .select("id_taxon")
+      .eq("id_taxon", idNum)
+      .eq("rank_id", 6) // Género
       .single();
 
-    if (errorFicha || !fichaData) {
-      console.error("❌ Error al obtener datos de ficha_genero por id:", errorFicha);
+    if (!errorTaxon && taxonData) {
+      // Es un taxon_id válido de género
+      taxonId = taxonData.id_taxon;
+      console.log("✅ Encontrado como taxon_id de género:", taxonId);
 
-      return null;
+      // Buscar la ficha_genero por taxon_id
+      const {data: fichaData, error: errorFicha} = await supabaseClient
+        .from("ficha_genero")
+        .select("id_ficha_genero")
+        .eq("taxon_id", taxonId)
+        .single();
+
+      if (!errorFicha && fichaData) {
+        idFichaGeneroNum = fichaData.id_ficha_genero;
+      } else {
+        console.error("❌ No se encontró ficha_genero para taxon_id:", taxonId);
+        return null;
+      }
+    } else {
+      // Intentar buscar por id_ficha_genero
+      console.log("🔢 Buscando por id_ficha_genero:", idNum);
+      const {data: fichaData, error: errorFicha} = await supabaseClient
+        .from("ficha_genero")
+        .select("*, taxon(*)")
+        .eq("id_ficha_genero", idNum)
+        .single();
+
+      if (errorFicha || !fichaData) {
+        console.error("❌ Error al obtener datos de ficha_genero por id:", errorFicha);
+        return null;
+      }
+
+      taxonId = fichaData.taxon_id;
+      idFichaGeneroNum = fichaData.id_ficha_genero;
     }
-
-    taxonId = fichaData.taxon_id;
-    idFichaGeneroNum = fichaData.id_ficha_genero;
   } else {
     // Buscar por nombre del taxon
     console.log("📝 Buscando por nombre del taxon:", idFichaGenero);

@@ -2,59 +2,72 @@
 
 import Link from "next/link";
 
-import { processHTMLLinks } from "@/lib/process-html-links";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
-import { CardHeader } from "./ui/card";
+import {CardHeader} from "./ui/card";
 
 interface CardSpeciesHeaderProps {
   fichaEspecie: any;
 }
 
-export const CardSpeciesHeader = ({ fichaEspecie }: CardSpeciesHeaderProps) => {
+export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
   return (
     <CardHeader className="sticky top-0 z-30 text-center">
-      <div className="space-y-4" style={{ padding: "20px 30px 30px" }}>
+      <div className="space-y-4" style={{padding: "20px 30px 30px"}}>
         {/* Título principal - Jerarquía taxonómica completa */}
         <div className="flex flex-wrap items-baseline justify-center gap-2">
-          {/* Orden - PEQUEÑO con link */}
-          <Link
-            className="text-sm font-medium transition-all hover:underline"
-            href="/TODO-ORDER-LINK"
-            style={{ color: "#006d1b" }}
-          >
-            {fichaEspecie.lineage[3]?.taxon}
-          </Link>
-          <span
-            className="text-foreground text-sm"
-            style={{ fontWeight: "300" }}
-          >
-            |
-          </span>
+          {/* Orden - PEQUEÑO sin link */}
+          {fichaEspecie.lineage?.[3]?.taxon && (
+            <>
+              <span className="text-sm font-medium" style={{color: "#006d1b"}}>
+                {fichaEspecie.lineage[3].taxon}
+              </span>
+              <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
+                |
+              </span>
+            </>
+          )}
 
-          {/* Familia - PEQUEÑO con link */}
-          <Link
-            className="text-sm font-medium transition-all hover:underline"
-            href="/family/TODO familyId"
-            style={{ color: "#006d1b" }}
-          >
-            {fichaEspecie.lineage[2]?.taxon}
-          </Link>
-          <span
-            className="text-foreground text-sm"
-            style={{ fontWeight: "300" }}
-          >
-            |
-          </span>
+          {/* Familia - PEQUEÑO con link (rank_id = 5) */}
+          {(() => {
+            const familia = fichaEspecie.lineage?.find((item: any) => item.rank_id === 5);
 
-          {/* Género - PEQUEÑO e itálica con link */}
-          <Link
-            className="text-sm font-medium italic transition-all hover:underline"
-            href="/genus/TODO genusId"
-            style={{ color: "#006d1b" }}
-          >
-            {fichaEspecie.lineage[1]?.taxon}
-          </Link>
-          <span className="text-sm" style={{ fontWeight: "300" }}>
+            return familia?.taxon ? (
+              <>
+                <Link
+                  className="text-sm font-medium transition-all hover:underline"
+                  href={`/sapopedia/family/${familia.id_taxon || ""}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {familia.taxon}
+                </Link>
+                <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
+                  |
+                </span>
+              </>
+            ) : null;
+          })()}
+
+          {/* Género - PEQUEÑO e itálica con link (rank_id = 6) */}
+          {(() => {
+            const genero = fichaEspecie.lineage?.find((item: any) => item.rank_id === 6);
+
+            return genero?.taxon ? (
+              <>
+                <Link
+                  className="text-sm font-medium italic transition-all hover:underline"
+                  href={`/sapopedia/genus/${genero.id_taxon || ""}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {genero.taxon}
+                </Link>
+                <span className="text-sm" style={{fontWeight: "300"}}>
+                  |
+                </span>
+              </>
+            ) : null;
+          })()}
+          <span className="text-sm" style={{fontWeight: "300"}}>
             |
           </span>
 

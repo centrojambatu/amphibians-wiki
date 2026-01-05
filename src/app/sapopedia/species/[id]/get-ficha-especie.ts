@@ -138,7 +138,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       _taxon_id: taxonId,
     }),
     supabaseClient.from("taxon_publicacion").select("*, publicacion(*)").eq("taxon_id", taxonId),
-    supabaseClient.from("taxon").select("*, taxonPadre:taxon_id(*)").eq("id_taxon", taxonId),
+    supabaseClient
+      .from("taxon")
+      .select("*, taxonPadre:taxon_id(*, taxonPadre:taxon_id(*))")
+      .eq("id_taxon", taxonId),
     supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: taxonId}),
   ]);
 

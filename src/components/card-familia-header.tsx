@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import { processHTMLLinks } from "@/lib/process-html-links";
 
 import { CardHeader } from "./ui/card";
@@ -16,16 +14,12 @@ export const CardFamiliaHeader = ({ fichaFamilia }: CardFamiliaHeaderProps) => {
       <div className="space-y-4" style={{ padding: "20px 30px 30px" }}>
         {/* Título principal - Jerarquía taxonómica completa */}
         <div className="flex flex-wrap items-baseline justify-center gap-2">
-          {/* Orden - PEQUEÑO con link */}
+          {/* Orden - PEQUEÑO sin link (solo visual) */}
           {fichaFamilia.lineage?.[3]?.taxon && (
             <>
-              <Link
-                className="text-sm font-medium transition-all hover:underline"
-                href="/TODO-ORDER-LINK"
-                style={{ color: "#006d1b" }}
-              >
+              <span className="text-sm font-medium" style={{ color: "#006d1b" }}>
                 {fichaFamilia.lineage[3].taxon}
-              </Link>
+              </span>
               <span
                 className="text-foreground text-sm"
                 style={{ fontWeight: "300" }}
@@ -51,12 +45,12 @@ export const CardFamiliaHeader = ({ fichaFamilia }: CardFamiliaHeaderProps) => {
           )}
         </div>
 
-        {/* Nombre común */}
-        {fichaFamilia.nombre_comun && (
+        {/* Nombre común - Comentado por el momento */}
+        {/* {fichaFamilia.nombre_comun && (
           <p className="text-foreground text-xl font-semibold">
             {fichaFamilia.nombre_comun}
           </p>
-        )}
+        )} */}
       </div>
     </CardHeader>
   );

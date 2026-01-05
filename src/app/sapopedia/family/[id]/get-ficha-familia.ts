@@ -5,31 +5,59 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
 
   console.log("🔍 getFichaFamilia llamado con:", idFichaFamilia);
 
-  // Buscar por id_ficha_familia o nombre del taxon
+  // Buscar por taxon_id, id_ficha_familia o nombre del taxon
   const isNumber = typeof idFichaFamilia === "number" || /^\d+$/.test(idFichaFamilia);
 
   let taxonId: number | null = null;
   let idFichaFamiliaNum: number | null = null;
 
   if (isNumber) {
-    // Buscar por id_ficha_familia
     const idNum = Number(idFichaFamilia);
 
-    console.log("🔢 Buscando por id_ficha_familia:", idNum);
-    const {data: fichaData, error: errorFicha} = await supabaseClient
-      .from("ficha_familia")
-      .select("*, taxon(*)")
-      .eq("id_ficha_familia", idNum)
+    // Primero intentar buscar si es un taxon_id de una familia
+    console.log("🔢 Buscando por taxon_id:", idNum);
+    const {data: taxonData, error: errorTaxon} = await supabaseClient
+      .from("taxon")
+      .select("id_taxon")
+      .eq("id_taxon", idNum)
+      .eq("rank_id", 5) // Familia
       .single();
 
-    if (errorFicha || !fichaData) {
-      console.error("❌ Error al obtener datos de ficha_familia por id:", errorFicha);
+    if (!errorTaxon && taxonData) {
+      // Es un taxon_id válido de familia
+      taxonId = taxonData.id_taxon;
+      console.log("✅ Encontrado como taxon_id de familia:", taxonId);
 
-      return null;
+      // Buscar la ficha_familia por taxon_id
+      const {data: fichaData, error: errorFicha} = await supabaseClient
+        .from("ficha_familia")
+        .select("id_ficha_familia")
+        .eq("taxon_id", taxonId)
+        .single();
+
+      if (!errorFicha && fichaData) {
+        idFichaFamiliaNum = fichaData.id_ficha_familia;
+      } else {
+        console.error("❌ No se encontró ficha_familia para taxon_id:", taxonId);
+        return null;
+      }
+    } else {
+      // Intentar buscar por id_ficha_familia
+      console.log("🔢 Buscando por id_ficha_familia:", idNum);
+      const {data: fichaData, error: errorFicha} = await supabaseClient
+        .from("ficha_familia")
+        .select("*, taxon(*)")
+        .eq("id_ficha_familia", idNum)
+        .single();
+
+      if (errorFicha || !fichaData) {
+        console.error("❌ Error al obtener datos de ficha_familia por id:", errorFicha);
+        return null;
+      }
+
+      taxonId = fichaData.taxon_id;
+      idFichaFamiliaNum = fichaData.id_ficha_familia;
     }
-
-    taxonId = fichaData.taxon_id;
-    idFichaFamiliaNum = fichaData.id_ficha_familia;
   } else {
     // Buscar por nombre del taxon
     console.log("📝 Buscando por nombre del taxon:", idFichaFamilia);
