@@ -1199,15 +1199,38 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Historial de la ficha</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.historial ? (
-                  <div className="text-muted-foreground text-sm">
-                    {fichaEspecie.historial.split(/\r\n?|\n/).map((line: string, idx: number) => (
-                      <div key={idx}>{line}</div>
-                    ))}
+                <div className="space-y-4">
+                  {/* Historial */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Historial</h4>
+                    {fichaEspecie.historial ? (
+                      <div className="text-muted-foreground text-sm">
+                        {fichaEspecie.historial
+                          .split(/\r\n?|\n/)
+                          .map((line: string, idx: number) => (
+                            <div key={idx}>{line}</div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
+
+                  {/* Agradecimiento */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Agradecimiento</h4>
+                    {fichaEspecie.agradecimiento ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.agradecimiento),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <Card className="">

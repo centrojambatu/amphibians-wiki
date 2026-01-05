@@ -311,6 +311,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.sinonimia ?? null,
     fichaEspecie?.comparacion ?? null,
     fichaEspecie?.usos ?? null,
+    fichaEspecie?.agradecimiento ?? null,
     vistaDataTyped?.distribucion_global ?? null,
   ];
 
@@ -393,6 +394,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     distribucion_global:
       (vistaDataTyped?.distribucion_global || fichaEspecie?.distribucion_global) ?? null,
     historial: fichaEspecie?.historial ?? null,
+    agradecimiento: fichaEspecie?.agradecimiento ?? null,
     fecha_actualizacion: fichaEspecie?.fecha_actualizacion ?? null,
     rango_altitudinal: fichaEspecie?.rango_altitudinal ?? null,
     rango_altitudinal_min: vistaDataTyped?.rango_altitudinal_min ?? null,
