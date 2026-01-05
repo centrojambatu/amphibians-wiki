@@ -83,8 +83,8 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
             return (
               <Link
                 key={coleccion.id_coleccion}
+                className="coleccion-link block"
                 href={coleccionUrl}
-                // className="block no-underline [&_*]:no-underline"
               >
                 <Card className="hover:bg-muted/50 cursor-pointer border transition-colors">
                   <CardContent className="p-4">

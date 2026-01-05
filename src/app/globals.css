@@ -171,6 +171,18 @@ a.literature-link:active {
   text-decoration: none !important;
 }
 
+/* Enlaces del listado de colecciones - sin subrayado en hover */
+a.coleccion-link,
+a.coleccion-link:link,
+a.coleccion-link:visited,
+a.coleccion-link:hover,
+a.coleccion-link:active,
+a.coleccion-link *,
+a.coleccion-link:hover *,
+a.coleccion-link:active * {
+  text-decoration: none !important;
+}
+
 /* Estilos para botones del header */
 header a button {
   color: #006d1b !important;
