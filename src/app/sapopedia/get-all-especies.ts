@@ -234,6 +234,31 @@ export default async function getAllEspecies(
     }
   }
 
+  // Obtener el campo descubridor de ficha_especie
+  const fichaEspecieIds: number[] = especies
+    .map((e: any) => e.especie_ficha_especie_id as number)
+    .filter((id: number | null | undefined): id is number => id != null);
+
+  const descubridorMap = new Map<number, string | null>();
+
+  if (fichaEspecieIds.length > 0) {
+    const { data: fichasData, error: errorFichas } = await supabaseClient
+      .from("ficha_especie")
+      .select("id_ficha_especie, descubridor")
+      .in("id_ficha_especie", fichaEspecieIds);
+
+    if (errorFichas) {
+      console.error("Error al obtener descubridor de ficha_especie:", errorFichas);
+    } else if (fichasData) {
+      for (const ficha of fichasData) {
+        descubridorMap.set(
+          ficha.id_ficha_especie,
+          ficha.descubridor ?? null,
+        );
+      }
+    }
+  }
+
   // Mapear los datos de la vista a nuestro tipo SpeciesListItem
   const especiesFormateadas: SpeciesListItem[] = especies.map(
     (especie: any) => {
@@ -271,7 +296,9 @@ export default async function getAllEspecies(
         id_ficha_especie: fichaEspecieId,
         nombre_cientifico: especie.nombre_cientifico,
         nombre_comun: especie.nombre_comun,
-        descubridor: especie.especie_autor,
+        descubridor: fichaEspecieId
+          ? descubridorMap.get(fichaEspecieId) ?? null
+          : null,
         orden: especie.orden,
         familia: especie.familia,
         genero: especie.genero,

@@ -145,15 +145,15 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.colector ? (
+                {fichaEspecie.descubridor ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.colector),
+                      __html: procesarHTML(fichaEspecie.descubridor),
                     }}
                     className="text-muted-foreground text-sm italic"
                   />
                 ) : (
-                  <p className="text-muted-foreground text-sm italic">{fichaEspecie.colector}</p>
+                  <p className="text-muted-foreground text-sm italic">{fichaEspecie.descubridor}</p>
                 )}
               </CardContent>
             </Card>
@@ -499,7 +499,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return areasEstado.length > 0 ? (
                               <div className="mb-4 ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Áreas protegidas del Estado
                                 </p>
                                 <div className="space-y-1">
@@ -529,7 +529,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return areasPrivadas.length > 0 ? (
                               <div className="ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Áreas protegidas Privadas
                                 </p>
                                 <div className="space-y-1">
@@ -590,7 +590,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return listaRojaColoma.length > 0 ? (
                               <div className="mb-4 ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Lista Roja Coloma
                                 </p>
                                 <div className="space-y-1">
@@ -620,7 +620,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return listaRojaUICN.length > 0 ? (
                               <div className="mb-4 ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Lista Roja UICN
                                 </p>
                                 <div className="space-y-1">
@@ -649,7 +649,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return cites.length > 0 ? (
                               <div className="ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">CITES</p>
+                                <p className="text-foreground mb-2 text-xs font-semibold">CITES</p>
                                 <div className="space-y-1">
                                   {cites.map((categoria: any) => (
                                     <div
@@ -709,7 +709,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return ecosistemas.length > 0 ? (
                               <div className="mb-4 ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Ecosistemas
                                 </p>
                                 <div className="space-y-1">
@@ -739,7 +739,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return reservasBiosfera.length > 0 ? (
                               <div className="mb-4 ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Reservas de la Biósfera
                                 </p>
                                 <div className="space-y-1">
@@ -769,7 +769,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                             return bosquesProtegidos.length > 0 ? (
                               <div className="ml-4">
-                                <p className="mb-2 text-xs font-semibold text-foreground">
+                                <p className="text-foreground mb-2 text-xs font-semibold">
                                   Bosques Protegidos
                                 </p>
                                 <div className="space-y-1">
@@ -1107,7 +1107,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.wikipedia && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1125,7 +1125,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.aw && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1143,7 +1143,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.genbank && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1161,7 +1161,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.herpnet && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1179,7 +1179,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.inaturalist && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1197,7 +1197,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.asw && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
@@ -1215,7 +1215,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {fichaEspecie.uicn && (
                     <Button
                       asChild
-                      className="group h-auto rounded-md border p-2 hover:bg-muted/50"
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
