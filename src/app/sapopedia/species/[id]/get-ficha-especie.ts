@@ -373,6 +373,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     svl_macho: fichaEspecie?.svl_macho ?? null,
     svl_hembra: fichaEspecie?.svl_hembra ?? null,
     identificacion: fichaEspecie?.identificacion ?? null,
+    sinonimia: fichaEspecie?.sinonimia ?? null,
     habitat_biologia: fichaEspecie?.habitat_biologia ?? null,
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
     distribucion: fichaEspecie?.distribucion ?? null,

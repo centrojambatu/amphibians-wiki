@@ -153,7 +153,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     className="text-muted-foreground text-sm italic"
                   />
                 ) : (
-                  <p className="text-muted-foreground text-sm italic">{fichaEspecie.descubridor}</p>
+                  <p className="text-muted-foreground text-sm italic">No disponible</p>
+                )}
+                {fichaEspecie.sinonimia && (
+                  <div className="mt-4">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.sinonimia),
+                      }}
+                      className="text-muted-foreground text-xs"
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
