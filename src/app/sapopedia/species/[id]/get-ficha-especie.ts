@@ -1,5 +1,7 @@
 import {createServiceClient} from "@/utils/supabase/server";
 
+import getColeccionesEspecie from "./get-colecciones-especie";
+
 export default async function getFichaEspecie(idFichaEspecie: string) {
   const supabaseClient = createServiceClient();
 
@@ -111,6 +113,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     {data: publicaciones, error: errorPublicaciones},
     {data: taxones, error: errorTaxones},
     {data: lineage, error: errorLineage},
+    colecciones,
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
@@ -143,6 +146,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("*, taxonPadre:taxon_id(*, taxonPadre:taxon_id(*))")
       .eq("id_taxon", taxonId),
     supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: taxonId}),
+    getColeccionesEspecie(taxonId, vistaDataTyped.nombre_cientifico),
   ]);
 
   // Manejar errores
@@ -447,6 +451,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     hasOccidentalDistribution: hasOccidentalDistribution ?? false,
     distributions: Array.isArray(distributions) ? distributions : [],
     altitudinalRange: altitudinalRange,
+    colecciones: Array.isArray(colecciones) ? colecciones : [],
   };
 
   // Debug: verificar campos críticos

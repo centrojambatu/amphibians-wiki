@@ -1385,6 +1385,46 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : " No endémica"}
                     </span>
                   </div>
+
+                  {/* Colecciones */}
+                  {(() => {
+                    const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
+                      ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
+                      : "";
+                    const especieUrl = nombreCientifico.replaceAll(" ", "-");
+                    const coleccionesUrl = `/sapopedia/species/${encodeURIComponent(especieUrl)}/colecciones`;
+
+                    return (
+                      <Link href={coleccionesUrl}>
+                        <div
+                          className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                          style={{
+                            backgroundColor: "#f9f9f9",
+                            borderColor: "#dddddd",
+                          }}
+                        >
+                          <h4
+                            className="mb-2"
+                            style={{
+                              color: "#666666",
+                              fontSize: "11px",
+                              fontFamily:
+                                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                              fontWeight: "600",
+                            }}
+                          >
+                            Colecciones
+                          </h4>
+                          <span
+                            className="text-center text-xs font-semibold"
+                            style={{color: "#000000"}}
+                          >
+                            {fichaEspecie.colecciones?.length || 0}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })()}
                 </div>
               </section>
 
