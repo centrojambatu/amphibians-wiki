@@ -4,7 +4,11 @@ import {useMemo} from "react";
 import Link from "next/link";
 import {Camera, MapPin, Volume2} from "lucide-react";
 
-import {processHTMLLinks, processCitationReferences} from "@/lib/process-html-links";
+import {
+  processHTMLLinks,
+  processHTMLLinksNoUnderline,
+  processCitationReferences,
+} from "@/lib/process-html-links";
 import {getBibliographyUrl} from "@/lib/get-bibliography-url";
 
 import {Button} from "./ui/button";
@@ -153,7 +157,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     className="text-muted-foreground text-sm italic"
                   />
                 ) : (
-                  <p className="text-muted-foreground text-sm italic">{fichaEspecie.descubridor}</p>
+                  <p className="text-muted-foreground text-sm italic">No disponible</p>
+                )}
+                {fichaEspecie.sinonimia && (
+                  <div className="mt-4">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.sinonimia),
+                      }}
+                      className="text-muted-foreground text-xs"
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -181,47 +195,107 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Taxonomía */}
-                {fichaEspecie.taxonomia && (
+                {/* Identificación */}
+                {fichaEspecie.identificacion && (
                   <div className="mt-4">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.taxonomia),
+                        __html: procesarHTML(fichaEspecie.identificacion),
                       }}
                       className="text-muted-foreground text-sm"
                     />
                   </div>
                 )}
 
-                {/* Longitud rostro-cloacal */}
-                <div className="mt-4 space-y-2">
-                  {fichaEspecie.svl_macho && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♂:</span>
-                      <span className="text-muted-foreground text-sm">
-                        {fichaEspecie.svl_macho}
-                      </span>
-                    </div>
-                  )}
-                  {fichaEspecie.svl_hembra && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♀:</span>
-                      <span className="text-muted-foreground text-sm">
-                        {fichaEspecie.svl_hembra}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {/* Longitud rostro-cloacal dentro de identificación */}
+                {(fichaEspecie.svl_macho || fichaEspecie.svl_hembra) && (
+                  <div className="mt-3 space-y-1.5">
+                    {fichaEspecie.svl_macho && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-medium">
+                          Longitud rostro-cloacal ♂:
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {fichaEspecie.svl_macho}
+                        </span>
+                      </div>
+                    )}
+                    {fichaEspecie.svl_hembra && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-medium">
+                          Longitud rostro-cloacal ♀:
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {fichaEspecie.svl_hembra}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {fichaEspecie.identificacion ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.identificacion),
-                    }}
-                    className="text-muted-foreground mt-4 text-sm"
-                  />
-                ) : (
-                  <p className="text-muted-foreground mt-4 text-sm">No disponible</p>
+                {/* Morfometría */}
+                {fichaEspecie.morfometria && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Morfometría</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.morfometria),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Diagnosis */}
+                {fichaEspecie.diagnosis && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Diagnosis</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.diagnosis),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Descripción */}
+                {fichaEspecie.descripcion && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Descripción</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.descripcion),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Color en vida */}
+                {fichaEspecie.color_en_vida && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Color en vida</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.color_en_vida),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Color en preservación */}
+                {fichaEspecie.color_en_preservacion && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Color en preservación</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.color_en_preservacion),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
                 )}
 
                 {/* Especies Similares */}
@@ -243,6 +317,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 )} */}
               </CardContent>
             </Card>
+            {/* Comparaciones */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Comparaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.comparacion ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.comparacion),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
             {/* Historia Natural */}
             <Card className="">
               <CardHeader>
@@ -261,15 +353,69 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <p className="text-muted-foreground text-sm">No disponible</p>
                   )}
 
-                  {fichaEspecie.informacion_adicional && (
+                  {/* {fichaEspecie.informacion_adicional && (
                     <div
                       dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.informacion_adicional),
                       }}
                       className="text-muted-foreground text-sm"
                     />
+                  )} */}
+
+                  {fichaEspecie.reproduccion && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Reproducción</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.reproduccion),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {fichaEspecie.dieta && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Dieta</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.dieta),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {fichaEspecie.canto && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Canto</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.canto),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+            {/* Renacuajos */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Renacuajos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.larva ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.larva),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
               </CardContent>
             </Card>
             {/* Contenido */} {/* Información básica */}
@@ -279,66 +425,102 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Distribución Global */}
-                  {fichaEspecie.distribucion_global && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.distribucion_global),
-                        }}
-                        className="text-muted-foreground text-sm"
-                      />
-                    </div>
-                  )}
+                  {/* 1. Distribución Global */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
 
-                  {/* Distribución Geopolítica */}
-                  {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
+                    {/* Geopolítica dentro de Distribución Global */}
                     <div>
-                      <h4 className="mb-2 text-sm font-semibold">Distribución Geopolítica</h4>
-                      <div className="space-y-4">
-                        {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
-                          ([continente, continenteData]: [string, any]) => (
-                            <div key={continente} className="space-y-2">
-                              {Object.entries(continenteData.paises).map(
-                                ([pais, paisData]: [string, any]) => (
-                                  <div key={`${continente}-${pais}`} className="text-xs">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-foreground font-semibold">
-                                        {continente}
-                                      </span>
-                                      <span className="text-muted-foreground">›</span>
-                                      <span className="text-foreground font-medium">{pais}</span>
-                                      {paisData.provincias && paisData.provincias.length > 0 && (
-                                        <>
-                                          <span className="text-muted-foreground">›</span>
-                                          <span className="text-muted-foreground">
-                                            {paisData.provincias.map(
-                                              (provincia: string, idx: number) => (
-                                                <span key={`${pais}-${provincia}-${idx}`}>
-                                                  {idx > 0 && ", "}
-                                                  {provincia}
-                                                </span>
-                                              ),
-                                            )}
-                                          </span>
-                                        </>
-                                      )}
+                      <h5 className="mb-2 text-xs font-semibold">Geopolítica</h5>
+                      {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 ? (
+                        <div className="space-y-4">
+                          {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
+                            ([continente, continenteData]: [string, any]) => (
+                              <div key={continente} className="space-y-2">
+                                {Object.entries(continenteData.paises).map(
+                                  ([pais, paisData]: [string, any]) => (
+                                    <div key={`${continente}-${pais}`} className="text-xs">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-foreground font-semibold">
+                                          {continente}
+                                        </span>
+                                        <span className="text-muted-foreground">›</span>
+                                        <span className="text-foreground font-medium">{pais}</span>
+                                        {paisData.provincias && paisData.provincias.length > 0 && (
+                                          <>
+                                            <span className="text-muted-foreground">›</span>
+                                            <span className="text-muted-foreground">
+                                              {paisData.provincias.map(
+                                                (provincia: string, idx: number) => (
+                                                  <span key={`${pais}-${provincia}-${idx}`}>
+                                                    {idx > 0 && ", "}
+                                                    {provincia}
+                                                  </span>
+                                                ),
+                                              )}
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          ),
-                        )}
-                      </div>
+                                  ),
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-xs">No disponible</p>
+                      )}
                     </div>
-                  )}
 
-                  {/* Zonas Altitudinales */}
-                  {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
+                    {/* Distribución Global (sin título) */}
+                    {fichaEspecie.distribucion_global ? (
+                      <div className="mt-4">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: procesarHTML(fichaEspecie.distribucion_global),
+                          }}
+                          className="text-muted-foreground text-sm"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mt-4 text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 3. Temperatura */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Temperatura</h4>
+                    <p className="text-muted-foreground text-xs">
+                      {fichaEspecie.temperatura_min != null && fichaEspecie.temperatura_max != null
+                        ? `${fichaEspecie.temperatura_min} - ${fichaEspecie.temperatura_max} °C`
+                        : fichaEspecie.temperatura_min != null
+                          ? `Mín: ${fichaEspecie.temperatura_min} °C`
+                          : fichaEspecie.temperatura_max != null
+                            ? `Máx: ${fichaEspecie.temperatura_max} °C`
+                            : "No disponible"}
+                    </p>
+                  </div>
+
+                  {/* 4. Pluviocidad */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Pluviocidad</h4>
+                    <p className="text-muted-foreground text-xs">
+                      {fichaEspecie.pluviocidad_min != null && fichaEspecie.pluviocidad_max != null
+                        ? `${fichaEspecie.pluviocidad_min} - ${fichaEspecie.pluviocidad_max} mm`
+                        : fichaEspecie.pluviocidad_min != null
+                          ? `Mín: ${fichaEspecie.pluviocidad_min} mm`
+                          : fichaEspecie.pluviocidad_max != null
+                            ? `Máx: ${fichaEspecie.pluviocidad_max} mm`
+                            : "No disponible"}
+                    </p>
+                  </div>
+
+                  {/* 5. Zonas Altitudinales */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
+                    {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 ? (
                       <div className="space-y-2">
                         {(() => {
                           // Eliminar duplicados basándose en id_taxon_catalogo_awe
@@ -366,69 +548,72 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           );
                         })()}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
 
-                  {/* Rango Altitudinal */}
+                  {/* 6. Rango Altitudinal */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Rango Altitudinal</h4>
                     <p className="text-muted-foreground text-xs">
-                      {(() => {
-                        const occidente = fichaEspecie.altitudinalRange?.occidente;
-                        const oriente = fichaEspecie.altitudinalRange?.oriente;
-
-                        // Verificar si realmente hay valores (no solo el objeto vacío)
-                        const hasOccidenteValues = occidente?.min != null && occidente?.max != null;
-                        const hasOrienteValues = oriente?.min != null && oriente?.max != null;
-
-                        // Si hay ambas vertientes con valores, mostrar con prefijos
-                        if (hasOccidenteValues && hasOrienteValues) {
-                          return (
-                            <>
-                              <span>
-                                Occ:{" "}
-                                {occidente.min && occidente.max
-                                  ? `${occidente.min}-${occidente.max}`
-                                  : "-"}{" "}
-                                m
-                              </span>
-                              <span> | </span>
-                              <span>
-                                Or:{" "}
-                                {oriente.min && oriente.max ? `${oriente.min}-${oriente.max}` : "-"}{" "}
-                                m
-                              </span>
-                            </>
-                          );
-                        }
-
-                        // Si solo hay una vertiente, mostrar solo los números
-                        if (hasOccidenteValues) {
-                          return `${occidente.min}-${occidente.max} m`;
-                        }
-
-                        if (hasOrienteValues) {
-                          return `${oriente.min}-${oriente.max} m`;
-                        }
-
-                        // Fallback al rango general
-                        return `${fichaEspecie.altitudinalRange?.min || 0}-${fichaEspecie.altitudinalRange?.max || 0} m`;
-                      })()}
+                      {fichaEspecie.rango_altitudinal_min != null &&
+                      fichaEspecie.rango_altitudinal_max != null
+                        ? `${fichaEspecie.rango_altitudinal_min} - ${fichaEspecie.rango_altitudinal_max} m`
+                        : fichaEspecie.rango_altitudinal_min != null
+                          ? `Mín: ${fichaEspecie.rango_altitudinal_min} m`
+                          : fichaEspecie.rango_altitudinal_max != null
+                            ? `Máx: ${fichaEspecie.rango_altitudinal_max} m`
+                            : "No disponible"}
                     </p>
                   </div>
 
-                  {/* ClimaticFloorChart - Ancho completo */}
+                  {/* 7. Distribución Altitudinal */}
                   <div className="-mx-6">
                     <h4 className="mb-2 px-6 text-sm font-semibold">Distribución Altitudinal</h4>
-                    <div className="mb-8 w-full">
-                      <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
-                    </div>
+                    {fichaEspecie.altitudinalRange ? (
+                      <div className="mb-8 w-full">
+                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mb-8 px-6 text-sm">No disponible</p>
+                    )}
                   </div>
 
-                  {/* Regiones Biogeográficas */}
-                  {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
+                  {/* 8. Ecosistemas */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Ecosistemas</h4>
+                    {(() => {
+                      const ecosistemas =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas",
+                        ) || [];
+
+                      return ecosistemas.length > 0 ? (
+                        <div className="space-y-1">
+                          {ecosistemas.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 9. Regiones Biogeográficas */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
+                    {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
                       <div className="space-y-2">
                         {fichaEspecie.dataRegionBio.map((region: any) => (
                           <div key={region.id_taxon_catalogo_awe_region_biogeografica}>
@@ -438,67 +623,115 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            {/* Conservación */}
-            <Card className="">
-              <CardHeader>
-                <CardTitle className="text-base">Conservación</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Comentario Estatus Poblacional */}
-                  {fichaEspecie.comentario_estatus_poblacional ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No disponible</p>
-                  )}
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
 
-                  {/* Áreas Protegidas */}
-                  {(() => {
-                    const areasProtegidas =
-                      fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria: any) =>
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                            "Áreas protegidas Privadas" ||
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                  {/* 10. Reservas de la Biosfera */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Reservas de la Biosfera</h4>
+                    {(() => {
+                      const reservasBiosfera =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Reservas de la Biósfera",
+                        ) || [];
+
+                      return reservasBiosfera.length > 0 ? (
+                        <div className="space-y-1">
+                          {reservasBiosfera.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 11. Bosques Protegidos */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Bosques Protegidos</h4>
+                    {(() => {
+                      const bosquesProtegidos =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Bosques Protegidos",
+                        ) || [];
+
+                      return bosquesProtegidos.length > 0 ? (
+                        <div className="space-y-1">
+                          {bosquesProtegidos.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 12. Áreas Protegidas */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Áreas Protegidas</h4>
+                    {(() => {
+                      const areasProtegidas =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                              "Áreas protegidas Privadas" ||
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                              "Áreas protegidas del Estado",
+                        ) || [];
+
+                      // Eliminar duplicados basándose en catalogo_awe_id
+                      const uniqueMap = new Map();
+
+                      areasProtegidas.forEach((categoria: any) => {
+                        const key = categoria.catalogo_awe_id;
+
+                        if (!uniqueMap.has(key)) {
+                          uniqueMap.set(key, categoria);
+                        }
+                      });
+                      const areasProtegidasUnicas = Array.from(uniqueMap.values());
+
+                      if (areasProtegidasUnicas.length > 0) {
+                        const areasEstado = areasProtegidasUnicas.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
                             "Áreas protegidas del Estado",
-                      ) || [];
+                        );
+                        const areasPrivadas = areasProtegidasUnicas.filter(
+                          (categoria) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Áreas protegidas Privadas",
+                        );
 
-                    // Eliminar duplicados basándose en catalogo_awe_id
-                    const uniqueMap = new Map();
-
-                    areasProtegidas.forEach((categoria: any) => {
-                      const key = categoria.catalogo_awe_id;
-
-                      if (!uniqueMap.has(key)) {
-                        uniqueMap.set(key, categoria);
-                      }
-                    });
-                    const areasProtegidasUnicas = Array.from(uniqueMap.values());
-
-                    return areasProtegidasUnicas.length > 0 ? (
-                      <div>
-                        <h4 className="mb-2 text-sm font-semibold">Áreas Protegidas</h4>
-                        <div className="space-y-3">
-                          {/* Áreas protegidas del Estado */}
-                          {(() => {
-                            const areasEstado = areasProtegidasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Áreas protegidas del Estado",
-                            );
-
-                            return areasEstado.length > 0 ? (
-                              <div className="mb-4 ml-4">
+                        return (
+                          <div className="space-y-3">
+                            {/* Áreas protegidas del Estado */}
+                            {areasEstado.length > 0 ? (
+                              <div className="ml-4">
                                 <p className="text-foreground mb-2 text-xs font-semibold">
                                   Áreas protegidas del Estado
                                 </p>
@@ -516,18 +749,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                   ))}
                                 </div>
                               </div>
-                            ) : null;
-                          })()}
+                            ) : null}
 
-                          {/* Áreas protegidas Privadas */}
-                          {(() => {
-                            const areasPrivadas = areasProtegidasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Áreas protegidas Privadas",
-                            );
-
-                            return areasPrivadas.length > 0 ? (
+                            {/* Áreas protegidas Privadas */}
+                            {areasPrivadas.length > 0 ? (
                               <div className="ml-4">
                                 <p className="text-foreground mb-2 text-xs font-semibold">
                                   Áreas protegidas Privadas
@@ -546,130 +771,147 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                   ))}
                                 </div>
                               </div>
-                            ) : null;
-                          })()}
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
-
-                  {/* Categorías de Conservación */}
-                  {(() => {
-                    const categoriasConservacion =
-                      fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria: any) =>
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                            "Lista Roja Coloma" ||
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Lista Roja UICN" ||
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
-                      ) || [];
-
-                    // Eliminar duplicados basándose en catalogo_awe_id
-                    const uniqueMap = new Map();
-
-                    categoriasConservacion.forEach((categoria: any) => {
-                      const key = categoria.catalogo_awe_id;
-
-                      if (!uniqueMap.has(key)) {
-                        uniqueMap.set(key, categoria);
+                            ) : null}
+                          </div>
+                        );
                       }
-                    });
-                    const categoriasUnicas = Array.from(uniqueMap.values());
 
-                    return categoriasUnicas.length > 0 ? (
-                      <div>
-                        <h4 className="mb-2 text-sm font-semibold">Categorías de Conservación</h4>
-                        <div className="space-y-3">
-                          {/* Lista Roja Coloma */}
-                          {(() => {
-                            const listaRojaColoma = categoriasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Lista Roja Coloma",
-                            );
+                      return <p className="text-muted-foreground text-sm">No disponible</p>;
+                    })()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Conservación */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Conservación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* 1. Lista Roja UICN */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Lista Roja UICN</h4>
+                    {fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla ? (
+                      (() => {
+                        const sigla = fichaEspecie.listaRojaIUCN.catalogo_awe.sigla;
 
-                            return listaRojaColoma.length > 0 ? (
-                              <div className="mb-4 ml-4">
-                                <p className="text-foreground mb-2 text-xs font-semibold">
-                                  Lista Roja Coloma
-                                </p>
-                                <div className="space-y-1">
-                                  {listaRojaColoma.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
+                        // Verificar si es PE
+                        if (isPE(sigla)) {
+                          return (
+                            <div
+                              className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                              style={{
+                                backgroundColor: "#b71c1c",
+                                color: "#ffffff",
+                                borderRadius: "100% 0% 100% 100%",
+                                minWidth: "32px",
+                                minHeight: "32px",
+                                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                              }}
+                            >
+                              PE
+                            </div>
+                          );
+                        }
 
-                          {/* Lista Roja UICN */}
-                          {(() => {
-                            const listaRojaUICN = categoriasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Lista Roja UICN",
-                            );
+                        // Normalizar el valor: trim y uppercase
+                        const valorNormalizado = sigla.toUpperCase().trim();
+                        const valoresValidos = ["LC", "NT", "VU", "EN", "CR", "EW", "EX", "DD"];
 
-                            return listaRojaUICN.length > 0 ? (
-                              <div className="mb-4 ml-4">
-                                <p className="text-foreground mb-2 text-xs font-semibold">
-                                  Lista Roja UICN
-                                </p>
-                                <div className="space-y-1">
-                                  {listaRojaUICN.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
+                        if (valoresValidos.includes(valorNormalizado)) {
+                          return (
+                            <RedListStatus
+                              status={
+                                valorNormalizado as
+                                  | "LC"
+                                  | "NT"
+                                  | "VU"
+                                  | "EN"
+                                  | "CR"
+                                  | "EW"
+                                  | "EX"
+                                  | "DD"
+                              }
+                            />
+                          );
+                        }
 
-                          {/* CITES */}
-                          {(() => {
-                            const cites = categoriasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
-                            );
+                        return (
+                          <div className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold">
+                            {sigla}
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
 
-                            return cites.length > 0 ? (
-                              <div className="ml-4">
-                                <p className="text-foreground mb-2 text-xs font-semibold">CITES</p>
-                                <div className="space-y-1">
-                                  {cites.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
+                  {/* 2. Endemismo */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Endemismo</h4>
+                    <p className="text-muted-foreground text-sm">
+                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : "No endémica"}
+                    </p>
+                  </div>
+
+                  {/* 3. Comentario Estatus Poblacional */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Estatus Poblacional</h4>
+                    {fichaEspecie.comentario_estatus_poblacional ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 4. CITES */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">CITES</h4>
+                    {(() => {
+                      const cites =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
+                        ) || [];
+
+                      // Eliminar duplicados
+                      const uniqueMap = new Map();
+
+                      cites.forEach((categoria: any) => {
+                        const key = categoria.catalogo_awe_id;
+
+                        if (!uniqueMap.has(key)) {
+                          uniqueMap.set(key, categoria);
+                        }
+                      });
+                      const citesUnicos = Array.from(uniqueMap.values());
+
+                      return citesUnicos.length > 0 ? (
+                        <div className="space-y-1">
+                          {citesUnicos.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    ) : null;
-                  })()}
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
 
                   {/* Ecosistemas, Reservas de la Biósfera y Bosques Protegidos */}
                   {(() => {
@@ -795,10 +1037,67 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </div>
               </CardContent>
             </Card>
+            {/* Taxonomía */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Taxonomía y Relaciones filogenéticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.taxonomia ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.taxonomia),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+            {/* Observaciones */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Observaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Usos */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Usos</h4>
+                    {fichaEspecie.usos ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.usos),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* Información Adicional */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Información Adicional</h4>
+                    {fichaEspecie.informacion_adicional ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.informacion_adicional),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {/* { Publicaciones } */}
             <Card className="">
               <CardHeader>
-                <CardTitle className="text-base">Publicaciones</CardTitle>
+                <CardTitle className="text-base">Literatura Citada</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
@@ -873,20 +1172,20 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       return (
                         <Link
                           key={pub.id_taxon_publicacion}
-                          className="hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
+                          className="literature-link hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
                           href={bibliographyUrl}
                         >
                           {pub.publicacion?.titulo && (
                             <div
                               dangerouslySetInnerHTML={{
-                                __html: processHTMLLinks(pub.publicacion.titulo),
+                                __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
                               }}
                               className="hover:text-primary text-sm font-medium"
                             />
                           )}
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: processHTMLLinks(citaParaMostrar),
+                              __html: processHTMLLinksNoUnderline(citaParaMostrar),
                             }}
                             className="text-muted-foreground text-xs"
                           />
@@ -904,15 +1203,38 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Historial de la ficha</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.historial ? (
-                  <div className="text-muted-foreground text-sm">
-                    {fichaEspecie.historial.split(/\r\n?|\n/).map((line: string, idx: number) => (
-                      <div key={idx}>{line}</div>
-                    ))}
+                <div className="space-y-4">
+                  {/* Historial */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Historial</h4>
+                    {fichaEspecie.historial ? (
+                      <div className="text-muted-foreground text-sm">
+                        {fichaEspecie.historial
+                          .split(/\r\n?|\n/)
+                          .map((line: string, idx: number) => (
+                            <div key={idx}>{line}</div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
+
+                  {/* Agradecimiento */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Agradecimiento</h4>
+                    {fichaEspecie.agradecimiento ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.agradecimiento),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <Card className="">
@@ -1063,6 +1385,46 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : " No endémica"}
                     </span>
                   </div>
+
+                  {/* Colecciones */}
+                  {(() => {
+                    const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
+                      ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
+                      : "";
+                    const especieUrl = nombreCientifico.replaceAll(" ", "-");
+                    const coleccionesUrl = `/sapopedia/species/${encodeURIComponent(especieUrl)}/colecciones`;
+
+                    return (
+                      <Link href={coleccionesUrl}>
+                        <div
+                          className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                          style={{
+                            backgroundColor: "#f9f9f9",
+                            borderColor: "#dddddd",
+                          }}
+                        >
+                          <h4
+                            className="mb-2"
+                            style={{
+                              color: "#666666",
+                              fontSize: "11px",
+                              fontFamily:
+                                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                              fontWeight: "600",
+                            }}
+                          >
+                            Colecciones
+                          </h4>
+                          <span
+                            className="text-center text-xs font-semibold"
+                            style={{color: "#000000"}}
+                          >
+                            {fichaEspecie.colecciones?.length || 0}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })()}
                 </div>
               </section>
 

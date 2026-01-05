@@ -1,5 +1,7 @@
 import {createServiceClient} from "@/utils/supabase/server";
 
+import getColeccionesEspecie from "./get-colecciones-especie";
+
 export default async function getFichaEspecie(idFichaEspecie: string) {
   const supabaseClient = createServiceClient();
 
@@ -111,6 +113,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     {data: publicaciones, error: errorPublicaciones},
     {data: taxones, error: errorTaxones},
     {data: lineage, error: errorLineage},
+    colecciones,
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
@@ -138,8 +141,12 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       _taxon_id: taxonId,
     }),
     supabaseClient.from("taxon_publicacion").select("*, publicacion(*)").eq("taxon_id", taxonId),
-    supabaseClient.from("taxon").select("*, taxonPadre:taxon_id(*)").eq("id_taxon", taxonId),
+    supabaseClient
+      .from("taxon")
+      .select("*, taxonPadre:taxon_id(*, taxonPadre:taxon_id(*))")
+      .eq("id_taxon", taxonId),
     supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: taxonId}),
+    getColeccionesEspecie(taxonId, vistaDataTyped.nombre_cientifico),
   ]);
 
   // Manejar errores
@@ -303,12 +310,15 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.diagnosis ?? null,
     fichaEspecie?.dieta ?? null,
     fichaEspecie?.reproduccion ?? null,
+    fichaEspecie?.canto ?? null,
     fichaEspecie?.larva ?? null,
     fichaEspecie?.morfometria ?? null,
     fichaEspecie?.color_en_vida ?? null,
     fichaEspecie?.color_en_preservacion ?? null,
     fichaEspecie?.sinonimia ?? null,
+    fichaEspecie?.comparacion ?? null,
     fichaEspecie?.usos ?? null,
+    fichaEspecie?.agradecimiento ?? null,
     vistaDataTyped?.distribucion_global ?? null,
   ];
 
@@ -373,16 +383,33 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     svl_macho: fichaEspecie?.svl_macho ?? null,
     svl_hembra: fichaEspecie?.svl_hembra ?? null,
     identificacion: fichaEspecie?.identificacion ?? null,
+    sinonimia: fichaEspecie?.sinonimia ?? null,
+    descripcion: fichaEspecie?.descripcion ?? null,
+    diagnosis: fichaEspecie?.diagnosis ?? null,
+    morfometria: fichaEspecie?.morfometria ?? null,
+    color_en_vida: fichaEspecie?.color_en_vida ?? null,
+    color_en_preservacion: fichaEspecie?.color_en_preservacion ?? null,
+    comparacion: fichaEspecie?.comparacion ?? null,
     habitat_biologia: fichaEspecie?.habitat_biologia ?? null,
+    reproduccion: fichaEspecie?.reproduccion ?? null,
+    dieta: fichaEspecie?.dieta ?? null,
+    canto: fichaEspecie?.canto ?? null,
+    larva: fichaEspecie?.larva ?? null,
+    usos: fichaEspecie?.usos ?? null,
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
     distribucion: fichaEspecie?.distribucion ?? null,
     distribucion_global:
       (vistaDataTyped?.distribucion_global || fichaEspecie?.distribucion_global) ?? null,
     historial: fichaEspecie?.historial ?? null,
+    agradecimiento: fichaEspecie?.agradecimiento ?? null,
     fecha_actualizacion: fichaEspecie?.fecha_actualizacion ?? null,
     rango_altitudinal: fichaEspecie?.rango_altitudinal ?? null,
     rango_altitudinal_min: vistaDataTyped?.rango_altitudinal_min ?? null,
     rango_altitudinal_max: vistaDataTyped?.rango_altitudinal_max ?? null,
+    temperatura_min: fichaEspecie?.temperatura_min ?? null,
+    temperatura_max: fichaEspecie?.temperatura_max ?? null,
+    pluviocidad_min: fichaEspecie?.pluviocidad_min ?? null,
+    pluviocidad_max: fichaEspecie?.pluviocidad_max ?? null,
     observacion_zona_altitudinal:
       (vistaDataTyped?.observacion_zona_altitudinal ||
         fichaEspecie?.observacion_zona_altitudinal) ??
@@ -424,6 +451,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     hasOccidentalDistribution: hasOccidentalDistribution ?? false,
     distributions: Array.isArray(distributions) ? distributions : [],
     altitudinalRange: altitudinalRange,
+    colecciones: Array.isArray(colecciones) ? colecciones : [],
   };
 
   // Debug: verificar campos críticos
