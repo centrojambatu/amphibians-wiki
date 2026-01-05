@@ -421,66 +421,102 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Distribución Global */}
-                  {fichaEspecie.distribucion_global && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.distribucion_global),
-                        }}
-                        className="text-muted-foreground text-sm"
-                      />
-                    </div>
-                  )}
+                  {/* 1. Distribución Global */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
 
-                  {/* Distribución Geopolítica */}
-                  {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 && (
+                    {/* Geopolítica dentro de Distribución Global */}
                     <div>
-                      <h4 className="mb-2 text-sm font-semibold">Distribución Geopolítica</h4>
-                      <div className="space-y-4">
-                        {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
-                          ([continente, continenteData]: [string, any]) => (
-                            <div key={continente} className="space-y-2">
-                              {Object.entries(continenteData.paises).map(
-                                ([pais, paisData]: [string, any]) => (
-                                  <div key={`${continente}-${pais}`} className="text-xs">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-foreground font-semibold">
-                                        {continente}
-                                      </span>
-                                      <span className="text-muted-foreground">›</span>
-                                      <span className="text-foreground font-medium">{pais}</span>
-                                      {paisData.provincias && paisData.provincias.length > 0 && (
-                                        <>
-                                          <span className="text-muted-foreground">›</span>
-                                          <span className="text-muted-foreground">
-                                            {paisData.provincias.map(
-                                              (provincia: string, idx: number) => (
-                                                <span key={`${pais}-${provincia}-${idx}`}>
-                                                  {idx > 0 && ", "}
-                                                  {provincia}
-                                                </span>
-                                              ),
-                                            )}
-                                          </span>
-                                        </>
-                                      )}
+                      <h5 className="mb-2 text-xs font-semibold">Geopolítica</h5>
+                      {fichaEspecie.geoPolitica && fichaEspecie.geoPolitica.length > 0 ? (
+                        <div className="space-y-4">
+                          {Object.entries(groupGeoPoliticalData(fichaEspecie.geoPolitica)).map(
+                            ([continente, continenteData]: [string, any]) => (
+                              <div key={continente} className="space-y-2">
+                                {Object.entries(continenteData.paises).map(
+                                  ([pais, paisData]: [string, any]) => (
+                                    <div key={`${continente}-${pais}`} className="text-xs">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-foreground font-semibold">
+                                          {continente}
+                                        </span>
+                                        <span className="text-muted-foreground">›</span>
+                                        <span className="text-foreground font-medium">{pais}</span>
+                                        {paisData.provincias && paisData.provincias.length > 0 && (
+                                          <>
+                                            <span className="text-muted-foreground">›</span>
+                                            <span className="text-muted-foreground">
+                                              {paisData.provincias.map(
+                                                (provincia: string, idx: number) => (
+                                                  <span key={`${pais}-${provincia}-${idx}`}>
+                                                    {idx > 0 && ", "}
+                                                    {provincia}
+                                                  </span>
+                                                ),
+                                              )}
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          ),
-                        )}
-                      </div>
+                                  ),
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-xs">No disponible</p>
+                      )}
                     </div>
-                  )}
 
-                  {/* Zonas Altitudinales */}
-                  {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
+                    {/* Distribución Global (sin título) */}
+                    {fichaEspecie.distribucion_global ? (
+                      <div className="mt-4">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: procesarHTML(fichaEspecie.distribucion_global),
+                          }}
+                          className="text-muted-foreground text-sm"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mt-4 text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 3. Temperatura */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Temperatura</h4>
+                    <p className="text-muted-foreground text-xs">
+                      {fichaEspecie.temperatura_min != null && fichaEspecie.temperatura_max != null
+                        ? `${fichaEspecie.temperatura_min} - ${fichaEspecie.temperatura_max} °C`
+                        : fichaEspecie.temperatura_min != null
+                          ? `Mín: ${fichaEspecie.temperatura_min} °C`
+                          : fichaEspecie.temperatura_max != null
+                            ? `Máx: ${fichaEspecie.temperatura_max} °C`
+                            : "No disponible"}
+                    </p>
+                  </div>
+
+                  {/* 4. Pluviocidad */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Pluviocidad</h4>
+                    <p className="text-muted-foreground text-xs">
+                      {fichaEspecie.pluviocidad_min != null && fichaEspecie.pluviocidad_max != null
+                        ? `${fichaEspecie.pluviocidad_min} - ${fichaEspecie.pluviocidad_max} mm`
+                        : fichaEspecie.pluviocidad_min != null
+                          ? `Mín: ${fichaEspecie.pluviocidad_min} mm`
+                          : fichaEspecie.pluviocidad_max != null
+                            ? `Máx: ${fichaEspecie.pluviocidad_max} mm`
+                            : "No disponible"}
+                    </p>
+                  </div>
+
+                  {/* 5. Zonas Altitudinales */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
+                    {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 ? (
                       <div className="space-y-2">
                         {(() => {
                           // Eliminar duplicados basándose en id_taxon_catalogo_awe
@@ -508,69 +544,72 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           );
                         })()}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
 
-                  {/* Rango Altitudinal */}
+                  {/* 6. Rango Altitudinal */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Rango Altitudinal</h4>
                     <p className="text-muted-foreground text-xs">
-                      {(() => {
-                        const occidente = fichaEspecie.altitudinalRange?.occidente;
-                        const oriente = fichaEspecie.altitudinalRange?.oriente;
-
-                        // Verificar si realmente hay valores (no solo el objeto vacío)
-                        const hasOccidenteValues = occidente?.min != null && occidente?.max != null;
-                        const hasOrienteValues = oriente?.min != null && oriente?.max != null;
-
-                        // Si hay ambas vertientes con valores, mostrar con prefijos
-                        if (hasOccidenteValues && hasOrienteValues) {
-                          return (
-                            <>
-                              <span>
-                                Occ:{" "}
-                                {occidente.min && occidente.max
-                                  ? `${occidente.min}-${occidente.max}`
-                                  : "-"}{" "}
-                                m
-                              </span>
-                              <span> | </span>
-                              <span>
-                                Or:{" "}
-                                {oriente.min && oriente.max ? `${oriente.min}-${oriente.max}` : "-"}{" "}
-                                m
-                              </span>
-                            </>
-                          );
-                        }
-
-                        // Si solo hay una vertiente, mostrar solo los números
-                        if (hasOccidenteValues) {
-                          return `${occidente.min}-${occidente.max} m`;
-                        }
-
-                        if (hasOrienteValues) {
-                          return `${oriente.min}-${oriente.max} m`;
-                        }
-
-                        // Fallback al rango general
-                        return `${fichaEspecie.altitudinalRange?.min || 0}-${fichaEspecie.altitudinalRange?.max || 0} m`;
-                      })()}
+                      {fichaEspecie.rango_altitudinal_min != null &&
+                      fichaEspecie.rango_altitudinal_max != null
+                        ? `${fichaEspecie.rango_altitudinal_min} - ${fichaEspecie.rango_altitudinal_max} m`
+                        : fichaEspecie.rango_altitudinal_min != null
+                          ? `Mín: ${fichaEspecie.rango_altitudinal_min} m`
+                          : fichaEspecie.rango_altitudinal_max != null
+                            ? `Máx: ${fichaEspecie.rango_altitudinal_max} m`
+                            : "No disponible"}
                     </p>
                   </div>
 
-                  {/* ClimaticFloorChart - Ancho completo */}
+                  {/* 7. Distribución Altitudinal */}
                   <div className="-mx-6">
                     <h4 className="mb-2 px-6 text-sm font-semibold">Distribución Altitudinal</h4>
-                    <div className="mb-8 w-full">
-                      <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
-                    </div>
+                    {fichaEspecie.altitudinalRange ? (
+                      <div className="mb-8 w-full">
+                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mb-8 px-6 text-sm">No disponible</p>
+                    )}
                   </div>
 
-                  {/* Regiones Biogeográficas */}
-                  {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 && (
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
+                  {/* 8. Ecosistemas */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Ecosistemas</h4>
+                    {(() => {
+                      const ecosistemas =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas",
+                        ) || [];
+
+                      return ecosistemas.length > 0 ? (
+                        <div className="space-y-1">
+                          {ecosistemas.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 9. Regiones Biogeográficas */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
+                    {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
                       <div className="space-y-2">
                         {fichaEspecie.dataRegionBio.map((region: any) => (
                           <div key={region.id_taxon_catalogo_awe_region_biogeografica}>
@@ -580,8 +619,41 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 10. Reservas de la Biosfera */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Reservas de la Biosfera</h4>
+                    {(() => {
+                      const reservasBiosfera =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Reservas de la Biósfera",
+                        ) || [];
+
+                      return reservasBiosfera.length > 0 ? (
+                        <div className="space-y-1">
+                          {reservasBiosfera.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
                 </div>
               </CardContent>
             </Card>

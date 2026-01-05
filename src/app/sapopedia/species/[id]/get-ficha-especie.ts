@@ -396,6 +396,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     rango_altitudinal: fichaEspecie?.rango_altitudinal ?? null,
     rango_altitudinal_min: vistaDataTyped?.rango_altitudinal_min ?? null,
     rango_altitudinal_max: vistaDataTyped?.rango_altitudinal_max ?? null,
+    temperatura_min: fichaEspecie?.temperatura_min ?? null,
+    temperatura_max: fichaEspecie?.temperatura_max ?? null,
+    pluviocidad_min: fichaEspecie?.pluviocidad_min ?? null,
+    pluviocidad_max: fichaEspecie?.pluviocidad_max ?? null,
     observacion_zona_altitudinal:
       (vistaDataTyped?.observacion_zona_altitudinal ||
         fichaEspecie?.observacion_zona_altitudinal) ??
