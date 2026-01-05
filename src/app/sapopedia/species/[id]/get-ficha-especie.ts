@@ -386,6 +386,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     reproduccion: fichaEspecie?.reproduccion ?? null,
     dieta: fichaEspecie?.dieta ?? null,
     canto: fichaEspecie?.canto ?? null,
+    larva: fichaEspecie?.larva ?? null,
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
     distribucion: fichaEspecie?.distribucion ?? null,
     distribucion_global:

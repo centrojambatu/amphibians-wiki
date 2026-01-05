@@ -396,6 +396,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </div>
               </CardContent>
             </Card>
+            {/* Renacuajos */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Renacuajos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.larva ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.larva),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
             {/* Contenido */} {/* Información básica */}
             <Card className="">
               <CardHeader>
