@@ -3,7 +3,7 @@
 import {useMemo} from "react";
 import Link from "next/link";
 
-import {processHTMLLinks, processCitationReferences} from "@/lib/process-html-links";
+import {processHTMLLinks, processHTMLLinksNoUnderline, processCitationReferences} from "@/lib/process-html-links";
 import {getBibliographyUrl} from "@/lib/get-bibliography-url";
 
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
@@ -241,20 +241,20 @@ export const CardGeneroContent = ({fichaGenero}: CardGeneroContentProps) => {
                       return (
                         <Link
                           key={pub.id_taxon_publicacion}
-                          className="hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
+                          className="literature-link hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
                           href={bibliographyUrl}
                         >
                           {pub.publicacion?.titulo && (
                             <div
                               dangerouslySetInnerHTML={{
-                                __html: processHTMLLinks(pub.publicacion.titulo),
+                                __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
                               }}
                               className="hover:text-primary text-sm font-medium"
                             />
                           )}
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: processHTMLLinks(citaParaMostrar),
+                              __html: processHTMLLinksNoUnderline(citaParaMostrar),
                             }}
                             className="text-muted-foreground text-xs"
                           />
