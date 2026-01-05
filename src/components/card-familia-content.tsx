@@ -163,25 +163,6 @@ export const CardFamiliaContent = ({fichaFamilia}: CardFamiliaContentProps) => {
               </CardContent>
             </Card>
 
-            {/* Agradecimientos */}
-            <Card className="">
-              <CardHeader>
-                <CardTitle className="text-base">Agradecimientos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaFamilia.agradecimientos ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaFamilia.agradecimientos),
-                    }}
-                    className="text-muted-foreground text-sm"
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Literatura Citada */}
             <Card className="">
               <CardHeader>
@@ -283,6 +264,25 @@ export const CardFamiliaContent = ({fichaFamilia}: CardFamiliaContentProps) => {
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm">No hay publicaciones disponibles</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Agradecimientos */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Agradecimientos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaFamilia.agradecimientos ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaFamilia.agradecimientos),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
                 )}
               </CardContent>
             </Card>

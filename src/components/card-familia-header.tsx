@@ -15,19 +15,22 @@ export const CardFamiliaHeader = ({ fichaFamilia }: CardFamiliaHeaderProps) => {
         {/* Título principal - Jerarquía taxonómica completa */}
         <div className="flex flex-wrap items-baseline justify-center gap-2">
           {/* Orden - PEQUEÑO sin link (solo visual) */}
-          {fichaFamilia.lineage?.[3]?.taxon && (
-            <>
-              <span className="text-sm font-medium" style={{ color: "#006d1b" }}>
-                {fichaFamilia.lineage[3].taxon}
-              </span>
-              <span
-                className="text-foreground text-sm"
-                style={{ fontWeight: "300" }}
-              >
-                |
-              </span>
-            </>
-          )}
+          {(() => {
+            const orden = fichaFamilia.lineage?.find((item: any) => item.rank_id === 4);
+            return orden?.taxon ? (
+              <>
+                <span className="text-sm font-medium" style={{ color: "#006d1b" }}>
+                  {orden.taxon}
+                </span>
+                <span
+                  className="text-foreground text-sm"
+                  style={{ fontWeight: "300" }}
+                >
+                  |
+                </span>
+              </>
+            ) : null;
+          })()}
 
           {/* Familia - GRANDE, destacado, en cursiva (no clicable) */}
           <span className="text-foreground text-4xl font-bold italic">
