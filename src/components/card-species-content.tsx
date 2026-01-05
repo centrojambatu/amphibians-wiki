@@ -357,6 +357,42 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       className="text-muted-foreground text-sm"
                     />
                   )}
+
+                  {fichaEspecie.reproduccion && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Reproducción</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.reproduccion),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {fichaEspecie.dieta && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Dieta</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.dieta),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {fichaEspecie.canto && (
+                    <div className="mt-4">
+                      <h4 className="mb-2 text-sm font-semibold">Canto</h4>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.canto),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
