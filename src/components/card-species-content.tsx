@@ -191,47 +191,107 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Taxonomía */}
-                {fichaEspecie.taxonomia && (
+                {/* Identificación */}
+                {fichaEspecie.identificacion && (
                   <div className="mt-4">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.taxonomia),
+                        __html: procesarHTML(fichaEspecie.identificacion),
                       }}
                       className="text-muted-foreground text-sm"
                     />
                   </div>
                 )}
 
-                {/* Longitud rostro-cloacal */}
-                <div className="mt-4 space-y-2">
-                  {fichaEspecie.svl_macho && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♂:</span>
-                      <span className="text-muted-foreground text-sm">
-                        {fichaEspecie.svl_macho}
-                      </span>
-                    </div>
-                  )}
-                  {fichaEspecie.svl_hembra && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">Longitud rostro-cloacal ♀:</span>
-                      <span className="text-muted-foreground text-sm">
-                        {fichaEspecie.svl_hembra}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {/* Longitud rostro-cloacal dentro de identificación */}
+                {(fichaEspecie.svl_macho || fichaEspecie.svl_hembra) && (
+                  <div className="mt-3 space-y-1.5">
+                    {fichaEspecie.svl_macho && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-medium">
+                          Longitud rostro-cloacal ♂:
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {fichaEspecie.svl_macho}
+                        </span>
+                      </div>
+                    )}
+                    {fichaEspecie.svl_hembra && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-medium">
+                          Longitud rostro-cloacal ♀:
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {fichaEspecie.svl_hembra}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {fichaEspecie.identificacion ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.identificacion),
-                    }}
-                    className="text-muted-foreground mt-4 text-sm"
-                  />
-                ) : (
-                  <p className="text-muted-foreground mt-4 text-sm">No disponible</p>
+                {/* Morfometría */}
+                {fichaEspecie.morfometria && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Morfometría</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.morfometria),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Diagnosis */}
+                {fichaEspecie.diagnosis && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Diagnosis</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.diagnosis),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Descripción */}
+                {fichaEspecie.descripcion && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Descripción</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.descripcion),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Color en vida */}
+                {fichaEspecie.color_en_vida && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Color en vida</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.color_en_vida),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Color en preservación */}
+                {fichaEspecie.color_en_preservacion && (
+                  <div className="mt-4">
+                    <h4 className="mb-2 text-sm font-semibold">Color en preservación</h4>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: procesarHTML(fichaEspecie.color_en_preservacion),
+                      }}
+                      className="text-muted-foreground text-sm"
+                    />
+                  </div>
                 )}
 
                 {/* Especies Similares */}
