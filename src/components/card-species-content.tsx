@@ -349,14 +349,14 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <p className="text-muted-foreground text-sm">No disponible</p>
                   )}
 
-                  {fichaEspecie.informacion_adicional && (
+                  {/* {fichaEspecie.informacion_adicional && (
                     <div
                       dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.informacion_adicional),
                       }}
                       className="text-muted-foreground text-sm"
                     />
-                  )}
+                  )} */}
 
                   {fichaEspecie.reproduccion && (
                     <div className="mt-4">
@@ -655,7 +655,38 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 11. Áreas Protegidas */}
+                  {/* 11. Bosques Protegidos */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Bosques Protegidos</h4>
+                    {(() => {
+                      const bosquesProtegidos =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Bosques Protegidos",
+                        ) || [];
+
+                      return bosquesProtegidos.length > 0 ? (
+                        <div className="space-y-1">
+                          {bosquesProtegidos.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 12. Áreas Protegidas */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Áreas Protegidas</h4>
                     {(() => {
@@ -1002,10 +1033,67 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </div>
               </CardContent>
             </Card>
+            {/* Taxonomía */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Taxonomía y Relaciones filogenéticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.taxonomia ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.taxonomia),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
+            {/* Observaciones */}
+            <Card className="">
+              <CardHeader>
+                <CardTitle className="text-base">Observaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Usos */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Usos</h4>
+                    {fichaEspecie.usos ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.usos),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* Información Adicional */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Información Adicional</h4>
+                    {fichaEspecie.informacion_adicional ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.informacion_adicional),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {/* { Publicaciones } */}
             <Card className="">
               <CardHeader>
-                <CardTitle className="text-base">Publicaciones</CardTitle>
+                <CardTitle className="text-base">Literatura Citada</CardTitle>
               </CardHeader>
               <CardContent>
                 {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
