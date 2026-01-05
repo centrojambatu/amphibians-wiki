@@ -67,9 +67,6 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
               </>
             ) : null;
           })()}
-          <span className="text-sm" style={{fontWeight: "300"}}>
-            |
-          </span>
 
           {/* Especie - GRANDE, destacado, en cursiva (no clicable) */}
           <span className="text-foreground text-4xl font-bold italic">{`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`}</span>
