@@ -52,6 +52,9 @@ export default function RootLayout({
                   <Link href="/sapopedia/nombres">
                     <Button variant="ghost">Nombres</Button>
                   </Link>
+                  <Link href="/sapoteca">
+                    <Button variant="ghost">Sapoteca</Button>
+                  </Link>
                   <Link href="/sapopedia/editor-citas">
                     <Button variant="ghost">Editor Ficha Especie</Button>
                   </Link>
