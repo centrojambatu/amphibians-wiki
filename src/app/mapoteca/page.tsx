@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Filter, Layers, Search, X, Mountain } from "lucide-react";
+import Link from "next/link";
+import { Filter, Search, X, Mountain, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -63,9 +65,10 @@ export default function MapotecaPage() {
   const [provinciaFilter, setProvinciaFilter] = useState<string>("");
   const [especieFilter, setEspecieFilter] = useState<string>(especieFromUrl);
   const [searchInput, setSearchInput] = useState<string>(especieFromUrl);
-  const [colorMode, setColorMode] = useState<"genus" | "elevation">("elevation");
   const [mapType, setMapType] = useState<"relief" | "terrain" | "provinces" | "satellite" | "streets">("provinces");
   const [showFilters, setShowFilters] = useState(true);
+  // Si viene de una ficha de especie, mostrar todos los puntos de esa especie
+  const [maxPoints, setMaxPoints] = useState<number>(especieFromUrl ? 11000 : 1000);
 
   // Debounce para búsqueda de especie
   useEffect(() => {
@@ -83,6 +86,10 @@ export default function MapotecaPage() {
   };
 
   const hasActiveFilters = provinciaFilter || especieFilter;
+  const router = useRouter();
+
+  // Generar link de regreso a la ficha de especie
+  const speciesSlug = especieFromUrl ? especieFromUrl.replaceAll(" ", "-") : "";
 
   return (
     <div className="bg-background min-h-screen">
@@ -97,6 +104,26 @@ export default function MapotecaPage() {
           </p>
         </div>
       </div>
+
+      {/* Botón de regresar a la ficha (solo si viene de una ficha de especie) */}
+      {especieFromUrl && (
+        <div className="container mx-auto px-4 pb-4">
+          <Link
+            href={`/sapopedia/species/${speciesSlug}`}
+            className="inline-flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-80"
+            style={{
+              color: "#16a34a",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "400",
+              fontSize: "16px",
+            }}
+          >
+            <span>←</span>
+            <span>Volver a la ficha de la especie</span>
+          </Link>
+        </div>
+      )}
 
       {/* Contenido principal */}
       <div className="container mx-auto px-4 py-6">
@@ -148,25 +175,6 @@ export default function MapotecaPage() {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Selector de modo de color */}
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-muted-foreground" />
-              <Select
-                value={colorMode}
-                onValueChange={(value: "genus" | "elevation") =>
-                  setColorMode(value)
-                }
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Colorear por..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="genus">Por género</SelectItem>
-                  <SelectItem value="elevation">Por elevación</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           {/* Filtros expandibles */}
@@ -212,16 +220,22 @@ export default function MapotecaPage() {
                 </Select>
               </div>
 
-              {/* Estadísticas rápidas */}
+              {/* Slider de puntos máximos */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Información
+                  Puntos a mostrar: <span className="font-bold text-green-600">{maxPoints.toLocaleString()}</span>
                 </label>
-                <div className="rounded-lg bg-green-50 p-3 text-sm dark:bg-green-900/20">
-                  <p className="text-green-800 dark:text-green-200">
-                    <strong>Tip:</strong> Pasa el mouse sobre los puntos para
-                    ver detalles. Haz clic para ir a la ficha de la especie.
-                  </p>
+                <Slider
+                  value={[maxPoints]}
+                  onValueChange={(value) => setMaxPoints(value[0])}
+                  min={100}
+                  max={11000}
+                  step={100}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>100</span>
+                  <span>11,000</span>
                 </div>
               </div>
             </div>
@@ -242,8 +256,8 @@ export default function MapotecaPage() {
           <MapotecaMap
             provinciaFilter={provinciaFilter === "all" ? "" : provinciaFilter}
             especieFilter={especieFilter}
-            colorMode={colorMode}
             mapType={mapType}
+            maxPoints={maxPoints}
           />
         </Suspense>
 

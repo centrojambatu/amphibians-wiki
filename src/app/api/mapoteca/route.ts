@@ -21,38 +21,64 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const provincia = searchParams.get("provincia");
   const especie = searchParams.get("especie");
-  const limit = searchParams.get("limit") || "15000"; // Total de registros ~10,622
 
   const supabase = await createClient();
 
-  // Query para obtener ubicaciones con nombre científico
-  let query = supabase
-    .from("ubicacion_especie")
-    .select(
-      `
-      id_ubicacion_especie,
-      id_ficha_especie,
-      id_taxon,
-      provincia,
-      localidad,
-      voucher,
-      latitud,
-      longitud,
-      elevacion
-    `
-    )
-    .not("latitud", "is", null)
-    .not("longitud", "is", null)
-    .limit(parseInt(limit));
+  // Función para obtener todas las ubicaciones con paginación
+  async function fetchAllUbicaciones() {
+    const pageSize = 1000;
+    let allData: any[] = [];
+    let page = 0;
+    let hasMore = true;
 
-  // Filtrar por provincia si se especifica
-  if (provincia) {
-    query = query.ilike("provincia", `%${provincia}%`);
+    while (hasMore) {
+      let query = supabase
+        .from("ubicacion_especie")
+        .select(
+          `
+          id_ubicacion_especie,
+          id_ficha_especie,
+          id_taxon,
+          provincia,
+          localidad,
+          voucher,
+          latitud,
+          longitud,
+          elevacion
+        `
+        )
+        .not("latitud", "is", null)
+        .not("longitud", "is", null)
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+        .order("id_ubicacion_especie");
+
+      // Filtrar por provincia si se especifica
+      if (provincia) {
+        query = query.ilike("provincia", `%${provincia}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        hasMore = data.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    return allData;
   }
 
-  const { data: ubicaciones, error: ubicacionesError } = await query;
-
-  if (ubicacionesError) {
+  let ubicaciones;
+  try {
+    ubicaciones = await fetchAllUbicaciones();
+  } catch (ubicacionesError) {
     console.error("Error fetching ubicaciones:", ubicacionesError);
     return NextResponse.json(
       { error: "Error fetching ubicaciones" },

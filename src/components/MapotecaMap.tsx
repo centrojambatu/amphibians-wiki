@@ -114,6 +114,7 @@ interface MapotecaMapProps {
   especieFilter?: string;
   colorMode?: "genus" | "elevation";
   mapType?: MapTileType;
+  maxPoints?: number;
 }
 
 export default function MapotecaMap({
@@ -121,6 +122,7 @@ export default function MapotecaMap({
   especieFilter,
   colorMode = "elevation",
   mapType = "provinces",
+  maxPoints = 11000,
 }: MapotecaMapProps) {
   const [ubicaciones, setUbicaciones] = useState<UbicacionEspecie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,6 +139,7 @@ export default function MapotecaMap({
         const params = new URLSearchParams();
         if (provinciaFilter) params.set("provincia", provinciaFilter);
         if (especieFilter) params.set("especie", especieFilter);
+        params.set("limit", "15000"); // Asegurar que se envíe el límite
 
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
@@ -153,11 +156,16 @@ export default function MapotecaMap({
     fetchUbicaciones();
   }, [provinciaFilter, especieFilter]);
 
+  // Limitar ubicaciones según maxPoints
+  const limitedUbicaciones = useMemo(() => {
+    return ubicaciones.slice(0, maxPoints);
+  }, [ubicaciones, maxPoints]);
+
   // Agrupar por ubicación para evitar sobreposición
   const groupedUbicaciones = useMemo(() => {
     const groups = new Map<string, UbicacionEspecie[]>();
 
-    ubicaciones.forEach((u) => {
+    limitedUbicaciones.forEach((u) => {
       // Redondear coordenadas para agrupar puntos muy cercanos
       const key = `${u.latitud?.toFixed(4)}_${u.longitud?.toFixed(4)}`;
       const existing = groups.get(key) || [];
@@ -165,7 +173,7 @@ export default function MapotecaMap({
     });
 
     return groups;
-  }, [ubicaciones]);
+  }, [limitedUbicaciones]);
 
   // Navegar a la ficha de especie
   const handleSpeciesClick = useCallback(
@@ -215,8 +223,8 @@ export default function MapotecaMap({
           url={MAP_TILES[mapType].url}
         />
 
-        {ubicaciones.length > 0 && (
-          <MapBoundsAdjuster ubicaciones={ubicaciones} />
+        {limitedUbicaciones.length > 0 && (
+          <MapBoundsAdjuster ubicaciones={limitedUbicaciones} />
         )}
 
         {Array.from(groupedUbicaciones.entries()).map(([key, group]) => {
@@ -399,10 +407,16 @@ export default function MapotecaMap({
       {/* Contador de registros */}
       <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg dark:bg-gray-800/95">
         <span className="font-semibold text-green-700 dark:text-green-400">
-          {ubicaciones.length.toLocaleString()}
-        </span>{" "}
+          {limitedUbicaciones.length.toLocaleString()}
+        </span>
+        {ubicaciones.length > limitedUbicaciones.length && (
+          <span className="text-gray-500 dark:text-gray-400">
+            {" / "}
+            {ubicaciones.length.toLocaleString()}
+          </span>
+        )}
         <span className="text-gray-600 dark:text-gray-300">
-          registros mostrados
+          {" "}registros{ubicaciones.length > limitedUbicaciones.length ? "" : " mostrados"}
         </span>
       </div>
     </div>
