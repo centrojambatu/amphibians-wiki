@@ -54,6 +54,15 @@ export default async function NombresPage() {
         </p>
       </div>
 
+      <div className="mb-8 flex justify-center">
+        <img
+          alt="Mapa nombres comunes"
+          className="mx-auto max-w-full rounded-md shadow grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
+          src="/assets/references/mapa_nombre_comun.jpg"
+          style={{width: "100%", maxWidth: "700px", height: "auto"}}
+        />
+      </div>
+
       {/* Estadísticas */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-gray-200 bg-white p-6">
