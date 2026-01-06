@@ -1451,15 +1451,16 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
 
-                  <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                  <Link
+                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                    href={`/mapoteca?especie=${encodeURIComponent(`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim())}`}
                     style={{
                       backgroundColor: "#f9f9f9",
                       borderColor: "#dddddd",
                     }}
                   >
                     <MapPin className="h-8 w-8" style={{color: "#333333"}} />
-                  </div>
+                  </Link>
                 </div>
               </section>
 
