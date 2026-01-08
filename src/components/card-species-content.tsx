@@ -2,7 +2,7 @@
 
 import {useMemo} from "react";
 import Link from "next/link";
-import {Camera, MapPin, Volume2} from "lucide-react";
+import {Camera, MapPin, Video, Volume2} from "lucide-react";
 
 import {
   processHTMLLinks,
@@ -1255,9 +1255,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen py-4 pr-8 pl-4" style={{width: "20%"}}>
-          <Card className="h-full overflow-hidden">
-            <CardContent className="h-full space-y-2 overflow-y-auto p-4">
+        <div className="sticky top-0 py-4 pr-8 pl-4" style={{width: "20%", maxHeight: "100vh"}}>
+          <Card className="h-fit">
+            <CardContent className="space-y-2 p-4">
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-1 gap-2">
@@ -1432,27 +1432,40 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <section>
                 <div className="grid grid-cols-1 gap-2">
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
                     style={{
                       backgroundColor: "#f9f9f9",
                       borderColor: "#dddddd",
                     }}
                   >
                     <Camera className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
                   </div>
 
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
                     style={{
                       backgroundColor: "#f9f9f9",
                       borderColor: "#dddddd",
                     }}
                   >
                     <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Fonoteca</span>
+                  </div>
+
+                  <div
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
+                  >
+                    <Video className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
                   </div>
 
                   <Link
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
                     href={`/mapoteca?especie=${encodeURIComponent(`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim())}`}
                     style={{
                       backgroundColor: "#f9f9f9",
@@ -1460,6 +1473,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     }}
                   >
                     <MapPin className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Mapoteca</span>
                   </Link>
                 </div>
               </section>
@@ -1474,7 +1488,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.wikipedia}>
+                      <a href={fichaEspecie.wikipedia} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="ASW Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1492,7 +1506,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.aw}>
+                      <a href={fichaEspecie.aw} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="AmphibiaWeb Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1510,7 +1524,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.genbank}>
+                      <a href={fichaEspecie.genbank} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="NCBI Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1528,7 +1542,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.herpnet}>
+                      <a href={fichaEspecie.herpnet} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="VertNet Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1546,7 +1560,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.inaturalist}>
+                      <a href={fichaEspecie.inaturalist} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="iNaturalist Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1564,7 +1578,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.asw}>
+                      <a href={fichaEspecie.asw} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="amnh Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1582,7 +1596,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.uicn}>
+                      <a href={fichaEspecie.uicn} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="IUCN Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
