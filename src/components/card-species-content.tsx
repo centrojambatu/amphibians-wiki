@@ -1474,7 +1474,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.wikipedia}>
+                      <a href={fichaEspecie.wikipedia} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="ASW Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1492,7 +1492,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.aw}>
+                      <a href={fichaEspecie.aw} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="AmphibiaWeb Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1510,7 +1510,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.genbank}>
+                      <a href={fichaEspecie.genbank} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="NCBI Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1528,7 +1528,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.herpnet}>
+                      <a href={fichaEspecie.herpnet} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="VertNet Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1546,7 +1546,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.inaturalist}>
+                      <a href={fichaEspecie.inaturalist} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="iNaturalist Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1564,7 +1564,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.asw}>
+                      <a href={fichaEspecie.asw} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="amnh Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
@@ -1582,7 +1582,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.uicn}>
+                      <a href={fichaEspecie.uicn} rel="noopener noreferrer" target="_blank">
                         <img
                           alt="IUCN Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"

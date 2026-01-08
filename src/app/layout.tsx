@@ -29,7 +29,7 @@ export default function RootLayout({
           <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
-                <Link href="/" className="flex items-center">
+                <Link href="/sapopedia" className="flex items-center">
                   <Image
                     src="/assets/references/logo.png"
                     alt="Anfibios de Ecuador"
@@ -40,26 +40,23 @@ export default function RootLayout({
                   />
                 </Link>
                 <nav className="flex items-center gap-4">
-                  <Link href="/">
-                    <Button variant="ghost">Inicio</Button>
-                  </Link>
                   <Link href="/sapopedia">
-                    <Button variant="ghost">SapoPedia</Button>
+                    <Button variant="ghost" className="cursor-pointer">SapoPedia</Button>
                   </Link>
                   <Link href="/sapopedia/lista-roja">
-                    <Button variant="ghost">Lista Roja</Button>
+                    <Button variant="ghost" className="cursor-pointer">Lista Roja</Button>
                   </Link>
                   <Link href="/sapopedia/nombres">
-                    <Button variant="ghost">Nombres</Button>
+                    <Button variant="ghost" className="cursor-pointer">Nombres</Button>
                   </Link>
                   <Link href="/sapoteca">
-                    <Button variant="ghost">Sapoteca</Button>
+                    <Button variant="ghost" className="cursor-pointer">Sapoteca</Button>
                   </Link>
                   <Link href="/mapoteca">
-                    <Button variant="ghost">Mapoteca</Button>
+                    <Button variant="ghost" className="cursor-pointer">Mapoteca</Button>
                   </Link>
                   <Link href="/sapopedia/editor-citas">
-                    <Button variant="ghost">Editor Ficha Especie</Button>
+                    <Button variant="ghost" className="cursor-pointer">Editor Ficha Especie</Button>
                   </Link>
                   <ThemeSwitcher />
                 </nav>
