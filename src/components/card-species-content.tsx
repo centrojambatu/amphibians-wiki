@@ -2,7 +2,7 @@
 
 import {useMemo} from "react";
 import Link from "next/link";
-import {Camera, MapPin, Volume2} from "lucide-react";
+import {Camera, MapPin, Video, Volume2} from "lucide-react";
 
 import {
   processHTMLLinks,
@@ -1255,9 +1255,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 h-screen py-4 pr-8 pl-4" style={{width: "20%"}}>
-          <Card className="h-full overflow-hidden">
-            <CardContent className="h-full space-y-2 overflow-y-auto p-4">
+        <div className="sticky top-0 py-4 pr-8 pl-4" style={{width: "20%", maxHeight: "100vh"}}>
+          <Card className="h-fit">
+            <CardContent className="space-y-2 p-4">
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-1 gap-2">
@@ -1432,27 +1432,40 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <section>
                 <div className="grid grid-cols-1 gap-2">
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
                     style={{
                       backgroundColor: "#f9f9f9",
                       borderColor: "#dddddd",
                     }}
                   >
                     <Camera className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
                   </div>
 
                   <div
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
                     style={{
                       backgroundColor: "#f9f9f9",
                       borderColor: "#dddddd",
                     }}
                   >
                     <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Fonoteca</span>
+                  </div>
+
+                  <div
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
+                  >
+                    <Video className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
                   </div>
 
                   <Link
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
                     href={`/mapoteca?especie=${encodeURIComponent(`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim())}`}
                     style={{
                       backgroundColor: "#f9f9f9",
@@ -1460,6 +1473,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     }}
                   >
                     <MapPin className="h-8 w-8" style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Mapoteca</span>
                   </Link>
                 </div>
               </section>
