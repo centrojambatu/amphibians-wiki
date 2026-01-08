@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Filter, Search, X, Mountain, ArrowLeft } from "lucide-react";
@@ -58,7 +58,8 @@ const PROVINCIAS = [
   "Zamora Chinchipe",
 ];
 
-export default function MapotecaPage() {
+// Componente interno que usa useSearchParams
+function MapotecaContent() {
   const searchParams = useSearchParams();
   const especieFromUrl = searchParams.get("especie") || "";
   
@@ -86,25 +87,12 @@ export default function MapotecaPage() {
   };
 
   const hasActiveFilters = provinciaFilter || especieFilter;
-  const router = useRouter();
 
   // Generar link de regreso a la ficha de especie
   const speciesSlug = especieFromUrl ? especieFromUrl.replaceAll(" ", "-") : "";
 
   return (
-    <div className="bg-background min-h-screen">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Mapoteca
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Mapa interactivo de distribución de anfibios en Ecuador
-          </p>
-        </div>
-      </div>
-
+    <>
       {/* Botón de regresar a la ficha (solo si viene de una ficha de especie) */}
       {especieFromUrl && (
         <div className="container mx-auto px-4 pb-4">
@@ -243,23 +231,12 @@ export default function MapotecaPage() {
         </div>
 
         {/* Mapa */}
-        <Suspense
-          fallback={
-            <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-              <div className="text-center">
-                <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
-                <p className="text-muted-foreground">Cargando mapa...</p>
-              </div>
-            </div>
-          }
-        >
-          <MapotecaMap
-            provinciaFilter={provinciaFilter === "all" ? "" : provinciaFilter}
-            especieFilter={especieFilter}
-            mapType={mapType}
-            maxPoints={maxPoints}
-          />
-        </Suspense>
+        <MapotecaMap
+          provinciaFilter={provinciaFilter === "all" ? "" : provinciaFilter}
+          especieFilter={especieFilter}
+          mapType={mapType}
+          maxPoints={maxPoints}
+        />
 
         {/* Información adicional */}
         <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -298,6 +275,44 @@ export default function MapotecaPage() {
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+// Componente de carga para el Suspense
+function MapotecaLoading() {
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+          <p className="text-muted-foreground">Cargando mapa...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Página principal que envuelve el contenido en Suspense
+export default function MapotecaPage() {
+  return (
+    <div className="bg-background min-h-screen">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Mapoteca
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Mapa interactivo de distribución de anfibios en Ecuador
+          </p>
+        </div>
+      </div>
+
+      {/* Contenido envuelto en Suspense */}
+      <Suspense fallback={<MapotecaLoading />}>
+        <MapotecaContent />
+      </Suspense>
     </div>
   );
 }
