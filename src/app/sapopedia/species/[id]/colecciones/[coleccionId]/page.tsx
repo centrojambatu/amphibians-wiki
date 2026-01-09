@@ -1,5 +1,7 @@
-import { notFound } from "next/navigation";
-import { createServiceClient } from "@/utils/supabase/server";
+import {notFound} from "next/navigation";
+
+import {createServiceClient} from "@/utils/supabase/server";
+
 import getColeccionById from "./get-coleccion-by-id";
 import {
   getCantosByColeccion,
@@ -19,8 +21,8 @@ interface PageProps {
   }>;
 }
 
-export default async function ColeccionDetailPage({ params }: PageProps) {
-  const { id, coleccionId } = await params;
+export default async function ColeccionDetailPage({params}: PageProps) {
+  const {id, coleccionId} = await params;
 
   const coleccionIdNum = Number.parseInt(coleccionId, 10);
   const taxonIdNum = Number.parseInt(id, 10);
@@ -58,9 +60,9 @@ export default async function ColeccionDetailPage({ params }: PageProps) {
   // Como taxon_id está NULL en todas las colecciones, validamos por taxon_nombre
   // que contiene el nombre científico completo de la especie
   const supabaseClient = createServiceClient();
-  
+
   // Obtener el nombre científico completo de la especie (género + especie)
-  const { data: taxonData, error: taxonError } = await supabaseClient
+  const {data: taxonData, error: taxonError} = await supabaseClient
     .from("taxon")
     .select("taxon, taxon_id")
     .eq("id_taxon", taxonIdNum)
@@ -72,8 +74,9 @@ export default async function ColeccionDetailPage({ params }: PageProps) {
 
   // Obtener el género (taxon padre)
   let nombreCientificoCompleto = taxonData.taxon || "";
+
   if (taxonData.taxon_id) {
-    const { data: generoData } = await supabaseClient
+    const {data: generoData} = await supabaseClient
       .from("taxon")
       .select("taxon")
       .eq("id_taxon", taxonData.taxon_id)
@@ -87,19 +90,19 @@ export default async function ColeccionDetailPage({ params }: PageProps) {
   // Validar que el taxon_nombre de la colección coincida con el nombre científico
   // Primero verificar si taxon_id coincide (por si acaso se llena en el futuro)
   const taxonIdCoincide = coleccion.taxon_id === taxonIdNum;
-  
+
   // Si taxon_id no coincide, validar por taxon_nombre usando comparación flexible
   // (case-insensitive, parcial) como en getColeccionesEspecie
   if (!taxonIdCoincide) {
     const coleccionTaxonNombre = coleccion.taxon_nombre?.toLowerCase().trim() || "";
     const nombreCientificoLower = nombreCientificoCompleto.toLowerCase().trim();
-    
+
     // Verificar coincidencia: el taxon_nombre debe contener el nombre científico o viceversa
     const nombresCoinciden =
       coleccionTaxonNombre &&
       (coleccionTaxonNombre.includes(nombreCientificoLower) ||
         nombreCientificoLower.includes(coleccionTaxonNombre));
-    
+
     if (!nombresCoinciden) {
       notFound();
     }
@@ -111,16 +114,16 @@ export default async function ColeccionDetailPage({ params }: PageProps) {
 
   return (
     <ColeccionDetailClient
-      coleccion={coleccion}
       cantos={cantos}
-      tejidos={tejidos}
-      prestamosColeccion={prestamosColeccion}
-      prestamosTejido={prestamosTejido}
+      coleccion={coleccion}
       coleccionPersonal={coleccionPersonal}
-      identificaciones={identificaciones}
+      coleccionesUrl={coleccionesUrl}
       cuerposAgua={cuerposAgua}
       especieUrl={especieUrl}
-      coleccionesUrl={coleccionesUrl}
+      identificaciones={identificaciones}
+      prestamosColeccion={prestamosColeccion}
+      prestamosTejido={prestamosTejido}
+      tejidos={tejidos}
     />
   );
 }
