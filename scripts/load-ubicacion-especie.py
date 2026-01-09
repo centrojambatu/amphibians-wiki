@@ -25,34 +25,34 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def get_taxon_map():
     """Obtiene un mapa de nombre completo de especie -> taxon_id para especies (rank_id = 7)"""
     print("Obteniendo taxones de nivel especie con su género...")
-    
+
     taxon_map = {}
-    
+
     # Obtener todos los géneros (rank_id = 6)
     generos_response = supabase.table("taxon").select("id_taxon, taxon").eq("rank_id", 6).execute()
     generos_map = {row["id_taxon"]: row["taxon"] for row in generos_response.data}
     print(f"  - Géneros encontrados: {len(generos_response.data)}")
-    
+
     # Obtener todas las especies (rank_id = 7)
     especies_response = supabase.table("taxon").select("id_taxon, taxon, taxon_id").eq("rank_id", 7).execute()
     print(f"  - Especies encontradas: {len(especies_response.data)}")
-    
+
     for row in especies_response.data:
         genero_id = row.get("taxon_id")
         epiteto = row["taxon"].strip()
         taxon_id = row["id_taxon"]
-        
+
         if genero_id and genero_id in generos_map:
             genero = generos_map[genero_id]
             nombre_completo = f"{genero} {epiteto}"
-            
+
             # Guardar con diferentes variantes para facilitar búsqueda
             taxon_map[nombre_completo] = taxon_id
             taxon_map[nombre_completo.lower()] = taxon_id
-        
+
         # También guardar solo el epíteto por si acaso
         taxon_map[epiteto.lower()] = taxon_id
-    
+
     print(f"Mapa de nombres contiene {len(taxon_map)} entradas")
     return taxon_map
 
@@ -101,60 +101,87 @@ def normalize_species_name(name: str) -> str:
     """Normaliza el nombre de especie corrigiendo problemas de codificación"""
     if not name:
         return name
-    
+
     name = name.strip()
-    
+
     # Primero verificar si hay una corrección exacta
     if name in SPECIES_NAME_CORRECTIONS:
         return SPECIES_NAME_CORRECTIONS[name]
-    
+
     return name
 
 def get_ficha_especie_map():
     """Obtiene un mapa de taxon_id -> id_ficha_especie"""
     print("Obteniendo fichas de especie...")
-    
+
     response = supabase.table("ficha_especie").select("id_ficha_especie, taxon_id").execute()
-    
+
     ficha_map = {}
     for row in response.data:
         ficha_map[row["taxon_id"]] = row["id_ficha_especie"]
-    
+
     print(f"Se encontraron {len(response.data)} fichas de especie")
     return ficha_map
 
 def load_excel_data(file_path: str):
     """Carga los datos del archivo Excel"""
     print(f"Leyendo archivo Excel: {file_path}")
-    
+
     df = pd.read_excel(file_path)
-    
+
     # Mostrar columnas disponibles
     print(f"Columnas encontradas: {list(df.columns)}")
     print(f"Total de filas: {len(df)}")
-    
+
     return df
 
+def get_existing_ubicaciones():
+    """Obtiene los registros existentes para verificar duplicados"""
+    print("Obteniendo registros existentes...")
+
+    response = supabase.table("ubicacion_especie").select("id_ubicacion_especie, id_ficha_especie, id_taxon, latitud, longitud, voucher, localidad").execute()
+
+    # Crear un set de tuplas para identificar registros únicos
+    existing = {}
+    for row in response.data:
+        # Usar una combinación de campos como clave única
+        key = (
+            row.get("id_ficha_especie"),
+            row.get("id_taxon"),
+            round(row.get("latitud"), 6) if row.get("latitud") else None,
+            round(row.get("longitud"), 6) if row.get("longitud") else None,
+            str(row.get("voucher", "")).strip() if row.get("voucher") else None,
+            str(row.get("localidad", "")).strip() if row.get("localidad") else None,
+        )
+        existing[key] = row.get("id_ubicacion_especie")
+
+    print(f"Registros existentes: {len(existing)}")
+    return existing
+
 def process_and_insert_data(df: pd.DataFrame, taxon_map: dict, ficha_map: dict):
-    """Procesa los datos del DataFrame y los inserta en la tabla ubicacion_especie"""
-    
+    """Procesa los datos del DataFrame y los inserta o actualiza en la tabla ubicacion_especie"""
+
+    # Obtener registros existentes
+    existing_ubicaciones = get_existing_ubicaciones()
+
     records_to_insert = []
+    records_to_update = []
     species_not_found = set()
     ficha_not_found = set()
-    
+
     # Mapeo de columnas del Excel a campos de la tabla
     # Basado en la estructura real del archivo:
     # ['Order', 'Family', 'Species', 'Province', 'Locality', 'Voucher', 'Latitud', 'Longitud', 'Elev. (m)']
     column_mapping = {
         'species': ['Species', 'species'],
         'provincia': ['Province', 'Provincia', 'province'],
-        'localidad': ['Locality', 'Localidad', 'locality'], 
+        'localidad': ['Locality', 'Localidad', 'locality'],
         'voucher': ['Voucher', 'voucher'],
         'latitud': ['Latitud', 'latitud', 'Latitude', 'lat'],
         'longitud': ['Longitud', 'longitud', 'Longitude', 'lon', 'long'],
         'elevacion': ['Elev. (m)', 'Elevation', 'elevacion', 'Elevacion', 'Elev']
     }
-    
+
     # Detectar nombres de columnas reales
     actual_columns = {}
     for field, possible_names in column_mapping.items():
@@ -162,23 +189,23 @@ def process_and_insert_data(df: pd.DataFrame, taxon_map: dict, ficha_map: dict):
             if col in possible_names or col.lower() in [n.lower() for n in possible_names]:
                 actual_columns[field] = col
                 break
-    
+
     print(f"Columnas mapeadas: {actual_columns}")
-    
+
     for idx, row in df.iterrows():
         # Obtener nombre de especie
         species_col = actual_columns.get('species')
         if not species_col or pd.isna(row.get(species_col)):
             continue
-            
+
         species_name_original = str(row[species_col]).strip()
-        
+
         # Normalizar el nombre (corregir problemas de codificación)
         species_name = normalize_species_name(species_name_original)
-        
+
         # Buscar taxon_id
         taxon_id = taxon_map.get(species_name) or taxon_map.get(species_name.lower())
-        
+
         if not taxon_id:
             # Mostrar tanto el nombre original como el normalizado si son diferentes
             if species_name != species_name_original:
@@ -186,21 +213,26 @@ def process_and_insert_data(df: pd.DataFrame, taxon_map: dict, ficha_map: dict):
             else:
                 species_not_found.add(species_name)
             continue
-        
+
         # Buscar ficha_especie
         ficha_id = ficha_map.get(taxon_id)
-        
+
         if not ficha_id:
             ficha_not_found.add(species_name)
             continue
-        
+
         # Construir registro
         record = {
             "id_ficha_especie": ficha_id,
             "id_taxon": taxon_id,
         }
-        
+
         # Agregar campos opcionales
+        latitud = None
+        longitud = None
+        voucher = None
+        localidad = None
+
         for field in ['provincia', 'localidad', 'voucher', 'latitud', 'longitud', 'elevacion']:
             col = actual_columns.get(field)
             if col and not pd.isna(row.get(col)):
@@ -209,37 +241,82 @@ def process_and_insert_data(df: pd.DataFrame, taxon_map: dict, ficha_map: dict):
                 if field in ['latitud', 'longitud', 'elevacion']:
                     try:
                         record[field] = float(value)
+                        if field == 'latitud':
+                            latitud = float(value)
+                        elif field == 'longitud':
+                            longitud = float(value)
                     except (ValueError, TypeError):
                         record[field] = None
                 else:
                     record[field] = str(value).strip() if value else None
+                    if field == 'voucher':
+                        voucher = str(value).strip() if value else None
+                    elif field == 'localidad':
+                        localidad = str(value).strip() if value else None
             else:
                 record[field] = None
-        
-        records_to_insert.append(record)
-    
+
+        # Verificar si el registro ya existe
+        key = (
+            ficha_id,
+            taxon_id,
+            round(latitud, 6) if latitud else None,
+            round(longitud, 6) if longitud else None,
+            voucher,
+            localidad,
+        )
+
+        existing_id = existing_ubicaciones.get(key)
+        if existing_id:
+            # Actualizar registro existente
+            record["id_ubicacion_especie"] = existing_id
+            records_to_update.append(record)
+        else:
+            # Insertar nuevo registro
+            records_to_insert.append(record)
+
     # Mostrar estadísticas
     print(f"\n=== Estadísticas ===")
     print(f"Registros a insertar: {len(records_to_insert)}")
+    print(f"Registros a actualizar: {len(records_to_update)}")
     print(f"Especies no encontradas en taxon: {len(species_not_found)}")
     print(f"Especies sin ficha_especie: {len(ficha_not_found)}")
-    
+
     if species_not_found:
         print(f"\nEspecies no encontradas (primeras 20):")
         for sp in list(species_not_found)[:20]:
             print(f"  - {sp}")
-    
+
     if ficha_not_found:
         print(f"\nEspecies sin ficha (primeras 20):")
         for sp in list(ficha_not_found)[:20]:
             print(f"  - {sp}")
-    
-    # Insertar en lotes
+
+    # Actualizar registros existentes
+    if records_to_update:
+        print(f"\nActualizando {len(records_to_update)} registros...")
+        batch_size = 500
+        total_updated = 0
+
+        for i in range(0, len(records_to_update), batch_size):
+            batch = records_to_update[i:i + batch_size]
+            try:
+                for record in batch:
+                    record_id = record.pop("id_ubicacion_especie")
+                    supabase.table("ubicacion_especie").update(record).eq("id_ubicacion_especie", record_id).execute()
+                total_updated += len(batch)
+                print(f"  Actualizados {total_updated}/{len(records_to_update)} registros")
+            except Exception as e:
+                print(f"  Error actualizando lote {i//batch_size + 1}: {e}")
+
+        print(f"\n✓ Actualización completada: {total_updated} registros")
+
+    # Insertar nuevos registros en lotes
     if records_to_insert:
-        print(f"\nInsertando {len(records_to_insert)} registros...")
+        print(f"\nInsertando {len(records_to_insert)} registros nuevos...")
         batch_size = 500
         total_inserted = 0
-        
+
         for i in range(0, len(records_to_insert), batch_size):
             batch = records_to_insert[i:i + batch_size]
             try:
@@ -248,30 +325,40 @@ def process_and_insert_data(df: pd.DataFrame, taxon_map: dict, ficha_map: dict):
                 print(f"  Insertados {total_inserted}/{len(records_to_insert)} registros")
             except Exception as e:
                 print(f"  Error insertando lote {i//batch_size + 1}: {e}")
-        
+
         print(f"\n✓ Inserción completada: {total_inserted} registros")
     else:
-        print("\nNo hay registros para insertar")
-    
+        print("\nNo hay registros nuevos para insertar")
+
     return records_to_insert
 
 def main():
-    # Ruta al archivo Excel
+    # Ruta al archivo Excel (primero intentar el corregido, luego el original)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_dir = os.path.dirname(script_dir)
-    excel_path = os.path.join(project_dir, "location_species.xlsx")
-    
-    if not os.path.exists(excel_path):
-        print(f"Error: No se encontró el archivo {excel_path}")
+    excel_path_corrected = os.path.join(project_dir, "location_species_corrected.xlsx")
+    excel_path_original = os.path.join(project_dir, "location_species.xlsx")
+
+    # Priorizar el archivo corregido
+    if os.path.exists(excel_path_corrected):
+        excel_path = excel_path_corrected
+        print(f"Usando archivo corregido: {excel_path}")
+    elif os.path.exists(excel_path_original):
+        excel_path = excel_path_original
+        print(f"Usando archivo original: {excel_path}")
+    else:
+        print(f"Error: No se encontró ningún archivo de ubicaciones")
+        print(f"  Buscado: {excel_path_corrected}")
+        print(f"  Buscado: {excel_path_original}")
         return
-    
+
     # Cargar mapas de referencia
     taxon_map = get_taxon_map()
     ficha_map = get_ficha_especie_map()
-    
+
     # Cargar datos del Excel
     df = load_excel_data(excel_path)
-    
+
     # Procesar e insertar datos
     process_and_insert_data(df, taxon_map, ficha_map)
 

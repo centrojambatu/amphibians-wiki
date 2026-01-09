@@ -53,14 +53,12 @@ export default async function getColeccionesEspecie(
     pageSize: number = 1000,
   ): Promise<any[]> => {
     const allData: any[] = [];
-    let page = 0;
+    let offset = 0;
     let hasMore = true;
+    let totalFetched = 0;
 
     while (hasMore) {
-      const from = page * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error } = await queryBuilder.range(from, to);
+      const { data, error } = await queryBuilder.range(offset, offset + pageSize - 1);
 
       if (error) {
         console.error("Error al obtener colecciones (paginación):", error);
@@ -69,17 +67,31 @@ export default async function getColeccionesEspecie(
 
       if (data && data.length > 0) {
         allData.push(...data);
-        hasMore = data.length === pageSize; // Si obtenemos menos registros que el tamaño de página, no hay más
-        page++;
+        totalFetched += data.length;
+        offset += pageSize;
+        
+        // Si obtenemos menos registros que el tamaño de página, no hay más
+        if (data.length < pageSize) {
+          hasMore = false;
+        }
       } else {
         hasMore = false;
       }
+    }
+
+    if (totalFetched > 0) {
+      console.log(`✅ Colecciones obtenidas: ${totalFetched} registros`);
     }
 
     return allData;
   };
 
   // Construir las queries base
+  // Nota: Como todas las colecciones tienen taxon_id NULL, la query por taxon_id no devolverá resultados
+  // Por lo tanto, priorizamos la búsqueda por taxon_nombre
+  const queries: Promise<any[]>[] = [];
+
+  // Query 1: buscar por taxon_id (aunque probablemente no devuelva resultados porque taxon_id está NULL)
   const query1 = supabaseClient
     .from("vw_coleccion_completa")
     .select(
@@ -89,9 +101,10 @@ export default async function getColeccionesEspecie(
     .order("fecha_col", { ascending: false, nullsFirst: false })
     .order("id_coleccion", { ascending: false });
 
-  const queries: Promise<any[]>[] = [fetchAllRecords(query1)];
+  queries.push(fetchAllRecords(query1));
 
-  // Query 2: buscar por taxon_nombre si está disponible
+  // Query 2: buscar por taxon_nombre (esta es la que realmente funciona)
+  // Esta query es esencial porque taxon_id está NULL en todas las colecciones
   if (nombreCientifico) {
     const query2 = supabaseClient
       .from("vw_coleccion_completa")
@@ -123,6 +136,8 @@ export default async function getColeccionesEspecie(
       }
     }
   }
+
+  console.log(`📊 Total de colecciones únicas encontradas: ${allData.length}`);
 
   // Ordenar por fecha_col e id_coleccion (ya vienen ordenados, pero por si acaso)
   allData.sort((a, b) => {
