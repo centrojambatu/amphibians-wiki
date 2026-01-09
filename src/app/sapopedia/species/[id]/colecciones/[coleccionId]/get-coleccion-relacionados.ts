@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/utils/supabase/server";
+import {createServiceClient} from "@/utils/supabase/server";
 
 export interface Canto {
   id_canto: number;
@@ -147,14 +147,15 @@ export interface CuerpoAgua {
 export async function getCantosByColeccion(coleccionId: number): Promise<Canto[]> {
   const supabaseClient = createServiceClient();
 
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("canto")
     .select("*")
     .eq("coleccion_id", coleccionId)
-    .order("fecha", { ascending: false });
+    .order("fecha", {ascending: false});
 
   if (error) {
     console.error("Error al obtener cantos:", error);
+
     return [];
   }
 
@@ -163,22 +164,44 @@ export async function getCantosByColeccion(coleccionId: number): Promise<Canto[]
 
 /**
  * Obtiene los tejidos relacionados con una colección
+ * Implementa paginación para obtener todos los registros (Supabase limita a 1000 por defecto)
  */
 export async function getTejidosByColeccion(coleccionId: number): Promise<Tejido[]> {
   const supabaseClient = createServiceClient();
 
-  const { data, error } = await supabaseClient
-    .from("tejido")
-    .select("*")
-    .eq("coleccion_id", coleccionId)
-    .order("fecha", { ascending: false });
+  const PAGE_SIZE = 1000;
+  let allTejidos: Tejido[] = [];
+  let offset = 0;
+  let hasMore = true;
 
-  if (error) {
-    console.error("Error al obtener tejidos:", error);
-    return [];
+  while (hasMore) {
+    const {data, error} = await supabaseClient
+      .from("tejido")
+      .select("*")
+      .eq("coleccion_id", coleccionId)
+      .order("fecha", {ascending: false, nullsFirst: false})
+      .order("id_tejido", {ascending: true})
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error("Error al obtener tejidos:", error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      allTejidos = allTejidos.concat(data as Tejido[]);
+      offset += PAGE_SIZE;
+
+      // Si obtenemos menos registros que el tamaño de página, no hay más
+      if (data.length < PAGE_SIZE) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
   }
 
-  return (data || []) as Tejido[];
+  return allTejidos;
 }
 
 /**
@@ -187,13 +210,14 @@ export async function getTejidosByColeccion(coleccionId: number): Promise<Tejido
 export async function getPrestamosColeccion(coleccionId: number): Promise<PrestamoColeccion[]> {
   const supabaseClient = createServiceClient();
 
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("prestamocoleccion")
     .select("*, prestamo(*)")
     .eq("coleccion_id", coleccionId);
 
   if (error) {
     console.error("Error al obtener préstamos de colección:", error);
+
     return [];
   }
 
@@ -203,11 +227,13 @@ export async function getPrestamosColeccion(coleccionId: number): Promise<Presta
 /**
  * Obtiene los préstamos de tejido relacionados con una colección
  */
-export async function getPrestamosTejidoByColeccion(coleccionId: number): Promise<PrestamoTejido[]> {
+export async function getPrestamosTejidoByColeccion(
+  coleccionId: number,
+): Promise<PrestamoTejido[]> {
   const supabaseClient = createServiceClient();
 
   // Primero obtener los tejidos de la colección
-  const { data: tejidos, error: errorTejidos } = await supabaseClient
+  const {data: tejidos, error: errorTejidos} = await supabaseClient
     .from("tejido")
     .select("id_tejido")
     .eq("coleccion_id", coleccionId);
@@ -218,13 +244,14 @@ export async function getPrestamosTejidoByColeccion(coleccionId: number): Promis
 
   const tejidoIds = tejidos.map((t: any) => t.id_tejido);
 
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("prestamotejido")
     .select("*, prestamo(*), tejido(id_tejido, codtejido)")
     .in("tejido_id", tejidoIds);
 
   if (error) {
     console.error("Error al obtener préstamos de tejido:", error);
+
     return [];
   }
 
@@ -237,14 +264,15 @@ export async function getPrestamosTejidoByColeccion(coleccionId: number): Promis
 export async function getColeccionPersonal(coleccionId: number): Promise<ColeccionPersonal[]> {
   const supabaseClient = createServiceClient();
 
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("coleccionpersonal")
     .select("*, personal(*)")
     .eq("coleccion_id", coleccionId)
-    .order("principal", { ascending: false });
+    .order("principal", {ascending: false});
 
   if (error) {
     console.error("Error al obtener personal de colección:", error);
+
     return [];
   }
 
@@ -254,17 +282,20 @@ export async function getColeccionPersonal(coleccionId: number): Promise<Colecci
 /**
  * Obtiene el histórico de identificaciones de una colección
  */
-export async function getIdentificacionesByColeccion(coleccionId: number): Promise<Identificacion[]> {
+export async function getIdentificacionesByColeccion(
+  coleccionId: number,
+): Promise<Identificacion[]> {
   const supabaseClient = createServiceClient();
 
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("identificacion")
     .select("*")
     .eq("coleccion_id", coleccionId)
-    .order("fecha", { ascending: false });
+    .order("fecha", {ascending: false});
 
   if (error) {
     console.error("Error al obtener identificaciones:", error);
+
     return [];
   }
 
@@ -278,7 +309,7 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
   const supabaseClient = createServiceClient();
 
   // Primero obtener el campobase_id de la colección
-  const { data: coleccion, error: errorColeccion } = await supabaseClient
+  const {data: coleccion, error: errorColeccion} = await supabaseClient
     .from("coleccion")
     .select("campobase_id")
     .eq("id_coleccion", coleccionId)
@@ -289,14 +320,15 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
   }
 
   // Obtener todos los cuerpos de agua del campobase
-  const { data, error } = await supabaseClient
+  const {data, error} = await supabaseClient
     .from("cuerpoagua")
     .select("*")
     .eq("campobase_id", coleccion.campobase_id)
-    .order("id_cuerpoagua", { ascending: true });
+    .order("id_cuerpoagua", {ascending: true});
 
   if (error) {
     console.error("Error al obtener cuerpos de agua:", error);
+
     return [];
   }
 
