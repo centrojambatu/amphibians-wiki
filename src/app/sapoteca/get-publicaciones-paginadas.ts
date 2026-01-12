@@ -11,6 +11,8 @@ export interface PublicacionSapoteca {
   numero_publicacion_ano: number | null;
   fecha: string;
   slug: string;
+  total_enlaces: number | null;
+  primer_enlace: string | null;
 }
 
 export interface FiltrosSapoteca {
@@ -49,7 +51,7 @@ export default async function getPublicacionesPaginadas(
   let dataQuery = supabaseClient
     .from("vw_publicacion_completa")
     .select(
-      "id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha",
+      "id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha, total_enlaces",
     );
 
   // Aplicar filtros
@@ -62,11 +64,23 @@ export default async function getPublicacionesPaginadas(
 
   if (filtros?.años && filtros.años.length > 0) {
     // Filtrar por la columna 'anos' que contiene años como string (puede tener múltiples años separados por comas)
-    // Construir una condición OR para buscar cualquiera de los años seleccionados
-    const condicionesAño = filtros.años.map((año) => `anos.ilike.%${año}%`).join(",");
-
-    countQuery = countQuery.or(condicionesAño);
-    dataQuery = dataQuery.or(condicionesAño);
+    // Si hay muchos años, usar un enfoque diferente para evitar errores
+    if (filtros.años.length > 50) {
+      // Si hay más de 50 años, usar un filtro más simple basado en el rango
+      const añoMin = Math.min(...filtros.años);
+      const añoMax = Math.max(...filtros.años);
+      // Filtrar por años que contengan cualquier año en el rango
+      const añoMinStr = añoMin.toString();
+      const añoMaxStr = añoMax.toString();
+      countQuery = countQuery.or(`anos.ilike.%${añoMinStr}%,anos.ilike.%${añoMaxStr}%`);
+      dataQuery = dataQuery.or(`anos.ilike.%${añoMinStr}%,anos.ilike.%${añoMaxStr}%`);
+    } else {
+      // Construir una condición OR para buscar cualquiera de los años seleccionados
+      // El formato debe ser: "campo.operador.valor,campo.operador.valor"
+      const condicionesAño = filtros.años.map((año) => `anos.ilike.%${año}%`).join(",");
+      countQuery = countQuery.or(condicionesAño);
+      dataQuery = dataQuery.or(condicionesAño);
+    }
   }
 
   if (filtros?.autor) {
@@ -105,7 +119,8 @@ export default async function getPublicacionesPaginadas(
   const {count, error: countError} = await countQuery;
 
   if (countError) {
-    console.error("Error al contar publicaciones:", countError);
+    console.error("Error al contar publicaciones:", JSON.stringify(countError, null, 2));
+    console.error("Filtros aplicados:", JSON.stringify(filtros, null, 2));
 
     return {
       publicaciones: [],
@@ -147,6 +162,29 @@ export default async function getPublicacionesPaginadas(
     };
   }
 
+  // Obtener los IDs de las publicaciones que tienen enlaces
+  const publicacionIds = publicaciones.map((p: any) => p.id_publicacion);
+  
+  // Obtener el primer enlace de cada publicación
+  const {data: enlacesData} = await supabaseClient
+    .from("publicacion_enlace")
+    .select("publicacion_id, enlace")
+    .in("publicacion_id", publicacionIds)
+    .neq("enlace", "http://")
+    .neq("enlace", "")
+    .not("enlace", "is", null)
+    .order("id_publicacion_enlace", {ascending: true});
+
+  // Crear un mapa de publicacion_id -> primer_enlace
+  const enlacesMap = new Map<number, string>();
+  if (enlacesData) {
+    enlacesData.forEach((enlace: any) => {
+      if (!enlacesMap.has(enlace.publicacion_id)) {
+        enlacesMap.set(enlace.publicacion_id, enlace.enlace);
+      }
+    });
+  }
+
   // Transformar los datos
   const publicacionesTransformadas: PublicacionSapoteca[] = publicaciones.map((pub: any) => {
     const año =
@@ -162,6 +200,8 @@ export default async function getPublicacionesPaginadas(
       numero_publicacion_ano: pub.numero_publicacion_ano,
       fecha: pub.fecha,
       slug: generatePublicacionSlug(pub.cita_corta, año, pub.titulo, pub.id_publicacion),
+      total_enlaces: pub.total_enlaces || null,
+      primer_enlace: enlacesMap.get(pub.id_publicacion) || null,
     };
   });
 
