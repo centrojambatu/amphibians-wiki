@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {Button} from "@/components/ui/button";
-import {ThemeProvider} from "@/components/theme-provider";
-import {ThemeSwitcher} from "@/components/theme-switcher";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,74 +14,67 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   return (
-    <html suppressHydrationWarning lang="es">
+    <html lang="es">
       <body className="bg-background min-h-screen font-sans antialiased">
-        <ThemeProvider
-          disableTransitionOnChange
-          enableSystem
-          attribute="class"
-          defaultTheme="system"
-        >
-          <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
-                <Link className="flex items-center" href="/sapopedia">
-                  <Image
-                    priority
-                    alt="Anfibios de Ecuador"
-                    className="h-auto w-auto"
-                    height={45}
-                    src="/assets/references/logo.png"
-                    width={150}
-                  />
+        <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link className="flex items-center" href="/sapopedia">
+                <Image
+                  priority
+                  alt="Anfibios de Ecuador"
+                  className="h-auto w-auto"
+                  height={45}
+                  src="/assets/references/logo.png"
+                  width={150}
+                />
+              </Link>
+              <nav className="flex items-center gap-4">
+                <Link href="/sapopedia">
+                  <Button className="cursor-pointer" variant="ghost">
+                    SapoPedia
+                  </Button>
                 </Link>
-                <nav className="flex items-center gap-4">
-                  <Link href="/sapopedia">
-                    <Button className="cursor-pointer" variant="ghost">
-                      SapoPedia
-                    </Button>
-                  </Link>
-                  <Link href="/sapopedia/lista-roja">
-                    <Button className="cursor-pointer" variant="ghost">
-                      Lista Roja
-                    </Button>
-                  </Link>
-                  <Link href="/sapopedia/nombres">
-                    <Button className="cursor-pointer" variant="ghost">
-                      Nombres
-                    </Button>
-                  </Link>
-                  <Link href="/sapoteca">
-                    <Button className="cursor-pointer" variant="ghost">
-                      Sapoteca
-                    </Button>
-                  </Link>
-                  <Link href="/mapoteca">
-                    <Button className="cursor-pointer" variant="ghost">
-                      Mapoteca
-                    </Button>
-                  </Link>
-                  <Link href="/sapopedia/editor-citas">
-                    <Button className="cursor-pointer" variant="ghost">
-                      Editor Ficha Especie
-                    </Button>
-                  </Link>
-                </nav>
-              </div>
+                <Link href="/sapopedia/lista-roja">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Lista Roja
+                  </Button>
+                </Link>
+                <Link href="/sapopedia/nombres">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Nombres
+                  </Button>
+                </Link>
+                <Link href="/sapoteca">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Sapoteca
+                  </Button>
+                </Link>
+                <Link href="/mapoteca">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Mapoteca
+                  </Button>
+                </Link>
+                <Link href="/sapopedia/editor-citas">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Editor Ficha Especie
+                  </Button>
+                </Link>
+              </nav>
             </div>
-          </header>
+          </div>
+        </header>
 
-          <main className="flex-1">{children}</main>
+        <main className="flex-1">{children}</main>
 
-          <footer className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
-            <div className="container mx-auto px-4 py-8">
-              <div className="text-muted-foreground text-center text-sm">
-                <p className="mb-2">© 2024 Centro Jambatu</p>
-                <p>Enciclopedia electrónica de Anfibios de Ecuador</p>
-              </div>
+        <footer className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-muted-foreground text-center text-sm">
+              <p className="mb-2">© 2024 Centro Jambatu</p>
+              <p>Enciclopedia electrónica de Anfibios de Ecuador</p>
             </div>
-          </footer>
-        </ThemeProvider>
+          </div>
+        </footer>
       </body>
     </html>
   );

@@ -186,7 +186,7 @@ export default function MapotecaMap({
 
   if (loading) {
     return (
-      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
           <p className="text-muted-foreground">
@@ -199,9 +199,9 @@ export default function MapotecaMap({
 
   if (error) {
     return (
-      <div className="flex h-[600px] items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20">
+      <div className="flex h-[600px] items-center justify-center rounded-lg bg-red-50">
         <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+          <p className="text-red-600">Error: {error}</p>
         </div>
       </div>
     );
@@ -341,8 +341,8 @@ export default function MapotecaMap({
       </MapContainer>
 
       {/* Leyenda */}
-      <div className="absolute right-3 top-3 z-[1000] rounded-lg bg-white/95 p-3 text-xs shadow-lg dark:bg-gray-800/95">
-        <p className="mb-2 font-semibold text-gray-700 dark:text-gray-200">
+      <div className="absolute right-3 top-3 z-[1000] rounded-lg bg-white/95 p-3 text-xs shadow-lg">
+        <p className="mb-2 font-semibold text-gray-700">
           {colorMode === "elevation" ? "Elevación (m)" : "Por género"}
         </p>
         {colorMode === "elevation" ? (
@@ -405,17 +405,17 @@ export default function MapotecaMap({
       </div>
 
       {/* Contador de registros */}
-      <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg dark:bg-gray-800/95">
-        <span className="font-semibold text-green-700 dark:text-green-400">
+      <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg">
+        <span className="font-semibold text-green-700">
           {limitedUbicaciones.length.toLocaleString()}
         </span>
         {ubicaciones.length > limitedUbicaciones.length && (
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className="text-gray-500">
             {" / "}
             {ubicaciones.length.toLocaleString()}
           </span>
         )}
-        <span className="text-gray-600 dark:text-gray-300">
+        <span className="text-gray-600">
           {" "}registros{ubicaciones.length > limitedUbicaciones.length ? "" : " mostrados"}
         </span>
       </div>

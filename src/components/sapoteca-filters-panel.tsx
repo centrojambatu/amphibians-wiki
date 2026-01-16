@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import {
   Accordion,
   AccordionContent,
@@ -49,9 +50,21 @@ export default function SapotecaFiltersPanel({
   const [sugerenciasTitulos, setSugerenciasTitulos] = useState<string[]>([]);
   const [sugerenciasAutores, setSugerenciasAutores] = useState<string[]>([]);
 
+  // Calcular rango de años disponible
+  const añoMin = años.length > 0 ? Math.min(...años) : 1970;
+  const añoMax = años.length > 0 ? Math.max(...años) : new Date().getFullYear();
+
+  // Inicializar rango de años desde URL o usar el rango completo
+  const añosIniciales = searchParams.get("años")?.split(",").map(Number).filter((n) => !isNaN(n));
+  const rangoAñosInicial = añosIniciales && añosIniciales.length > 0
+    ? [Math.min(...añosIniciales), Math.max(...añosIniciales)]
+    : [añoMin, añoMax];
+
+  const [rangoAños, setRangoAños] = useState<number[]>(rangoAñosInicial);
+
   const [filtros, setFiltros] = useState<FiltrosSapoteca>({
     titulo: tituloInicial || undefined,
-    años: searchParams.get("años")?.split(",").map(Number).filter((n) => !isNaN(n)) || undefined,
+    años: añosIniciales || undefined,
     autor: autorInicial || undefined,
     tiposPublicacion: searchParams.get("tipos")?.split(",").map(Number) || undefined,
   });
@@ -79,6 +92,17 @@ export default function SapotecaFiltersPanel({
       setSugerenciasAutores([]);
     }
   }, [autorQuery]);
+
+  // Sincronizar rango de años cuando se limpien los filtros
+  useEffect(() => {
+    if (!filtros.años || filtros.años.length === 0) {
+      const nuevoRango = [añoMin, añoMax];
+      if (rangoAños[0] !== nuevoRango[0] || rangoAños[1] !== nuevoRango[1]) {
+        setRangoAños(nuevoRango);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtros.años?.length, añoMin, añoMax]);
 
   // Actualizar URL cuando cambien los filtros (evitar en montaje inicial)
   const [isInitialMount, setIsInitialMount] = useState(true);
@@ -129,22 +153,22 @@ export default function SapotecaFiltersPanel({
     setTituloOpen(false);
   };
 
-  const handleAñoChange = (año: number, checked: boolean) => {
-    setFiltros((prev) => {
-      const añosActuales = prev.años || [];
-      let nuevosAños: number[];
-
-      if (checked) {
-        nuevosAños = [...añosActuales, año];
-      } else {
-        nuevosAños = añosActuales.filter((a) => a !== año);
+  const handleRangoAñosChange = (nuevoRango: number[]) => {
+    setRangoAños(nuevoRango);
+    
+    // Generar array de años en el rango seleccionado
+    const [min, max] = nuevoRango;
+    const añosEnRango: number[] = [];
+    for (let año = min; año <= max; año++) {
+      if (años.includes(año)) {
+        añosEnRango.push(año);
       }
+    }
 
-      return {
-        ...prev,
-        años: nuevosAños.length > 0 ? nuevosAños : undefined,
-      };
-    });
+    setFiltros((prev) => ({
+      ...prev,
+      años: añosEnRango.length > 0 ? añosEnRango : undefined,
+    }));
   };
 
   const handleAutorChange = (value: string) => {
@@ -186,6 +210,7 @@ export default function SapotecaFiltersPanel({
   const limpiarFiltros = () => {
     setTituloQuery("");
     setAutorQuery("");
+    setRangoAños([añoMin, añoMax]);
     setFiltros({
       titulo: undefined,
       años: undefined,
@@ -276,61 +301,30 @@ export default function SapotecaFiltersPanel({
               Años
               {filtros.años && filtros.años.length > 0 && (
                 <span className="ml-2 text-xs text-muted-foreground">
-                  ({filtros.años.length})
+                  {rangoAños[0]} - {rangoAños[1]}
                 </span>
               )}
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-2">
-                <div className="max-h-[300px] overflow-y-auto">
-                  {/* Organizar años por décadas */}
-                  {(() => {
-                    const añosPorDecada: Record<string, number[]> = {};
-                    años.forEach((año) => {
-                      const decada = Math.floor(año / 10) * 10;
-                      const decadaKey = `${decada}s`;
-                      if (!añosPorDecada[decadaKey]) {
-                        añosPorDecada[decadaKey] = [];
-                      }
-                      añosPorDecada[decadaKey].push(año);
-                    });
-
-                    return Object.keys(añosPorDecada)
-                      .sort((a, b) => {
-                        const numA = Number.parseInt(a.replace("s", ""));
-                        const numB = Number.parseInt(b.replace("s", ""));
-                        return numB - numA;
-                      })
-                      .map((decadaKey) => {
-                        const decadaAños = añosPorDecada[decadaKey].sort((a, b) => b - a);
-                        return (
-                          <div key={decadaKey} className="mb-4 last:mb-0">
-                            <div className="mb-2 text-xs font-semibold text-muted-foreground">
-                              {decadaKey}
-                            </div>
-                            <div className="grid grid-cols-4 gap-1">
-                              {decadaAños.map((año) => (
-                                <div key={año} className="flex items-center space-x-1">
-                                  <input
-                                    type="checkbox"
-                                    id={`año-${año}`}
-                                    checked={filtros.años?.includes(año) || false}
-                                    onChange={(e) => handleAñoChange(año, e.target.checked)}
-                                    className="h-4 w-4 rounded border-gray-300"
-                                  />
-                                  <label
-                                    htmlFor={`año-${año}`}
-                                    className="text-xs cursor-pointer flex-1"
-                                  >
-                                    {año}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      });
-                  })()}
+              <div className="space-y-4 px-4 py-2">
+                <div className="space-y-2">
+                  <div className="px-4">
+                    <Slider
+                      value={rangoAños}
+                      onValueChange={handleRangoAñosChange}
+                      min={añoMin}
+                      max={añoMax}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground px-4">
+                    <span>{añoMin}</span>
+                    <span className="font-semibold text-foreground">
+                      {rangoAños[0]} - {rangoAños[1]}
+                    </span>
+                    <span>{añoMax}</span>
+                  </div>
                 </div>
               </div>
             </AccordionContent>

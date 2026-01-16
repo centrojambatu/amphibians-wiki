@@ -1,0 +1,344 @@
+Registros de nombres comunes corregidos
+Total: 68
+================================================================================
+
+Especie: Agalychnis buckleyi
+Idioma: Español
+Nombre anterior: Cutín de Buckley
+Nombre correcto: Rana hoja de Buckley
+--------------------------------------------------------------------------------
+Especie: Agalychnis buckleyi
+Idioma: Inglés
+Nombre anterior: Buckley’s rainfrog
+Nombre correcto: Buckley’s leaf frog
+--------------------------------------------------------------------------------
+Especie: Atelopus boulengeri
+Idioma: Español
+Nombre anterior: Rana venenosa de Boulenger
+Nombre correcto: Rana arlequín de Boulenger
+--------------------------------------------------------------------------------
+Especie: Atelopus boulengeri
+Idioma: Inglés
+Nombre anterior: Boulenger poison frog
+Nombre correcto: Boulenger’s harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus colomai
+Idioma: Español
+Nombre anterior: Sapo de Coloma
+Nombre correcto: Rana arlequín de Coloma
+--------------------------------------------------------------------------------
+Especie: Atelopus colomai
+Idioma: Inglés
+Nombre anterior: Coloma’s toad
+Nombre correcto: Coloma’s harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus longirostris
+Idioma: Español
+Nombre anterior: Cutín de rostro largo
+Nombre correcto: Rana arlequín picudita
+--------------------------------------------------------------------------------
+Especie: Atelopus longirostris
+Idioma: Inglés
+Nombre anterior: Long-snouted rainfrog
+Nombre correcto: Longnose harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus lynchi
+Idioma: Español
+Nombre anterior: Rana de cristal de Lynch
+Nombre correcto: Rana arlequín de Lynch
+--------------------------------------------------------------------------------
+Especie: Atelopus lynchi
+Idioma: Inglés
+Nombre anterior: Lynch’s glassfrog
+Nombre correcto: Lynch’s harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus onorei
+Idioma: Español
+Nombre anterior: Cutín de Onore
+Nombre correcto: Rana arlequín de Onore
+--------------------------------------------------------------------------------
+Especie: Atelopus onorei
+Idioma: Inglés
+Nombre anterior: Onore’s rainfrog
+Nombre correcto: Onore’s harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus orcesi
+Idioma: Español
+Nombre anterior: Cutín de Orces
+Nombre correcto: Rana arlequín de Orcés
+--------------------------------------------------------------------------------
+Especie: Atelopus orcesi
+Idioma: Inglés
+Nombre anterior: Orces’ rainfrog
+Nombre correcto: Orcés’ harlequin frog
+--------------------------------------------------------------------------------
+Especie: Atelopus petersi
+Idioma: Español
+Nombre anterior: Cutín de Peters
+Nombre correcto: Rana arlequín de Peters
+--------------------------------------------------------------------------------
+Especie: Atelopus petersi
+Idioma: Inglés
+Nombre anterior: Peters’ rainfrog
+Nombre correcto: Peters’ harlequin frog
+--------------------------------------------------------------------------------
+Especie: Boana ventrimaculata
+Idioma: Español
+Nombre anterior: Rana venenosa de vientre punteado
+Nombre correcto: Rana arbórea de vientre manchado
+--------------------------------------------------------------------------------
+Especie: Boana ventrimaculata
+Idioma: Inglés
+Nombre anterior: Spotted belly poison frog
+Nombre correcto: Belly-spotted treefrog
+--------------------------------------------------------------------------------
+Especie: Bolitoglossa medemi
+Idioma: Inglés
+Nombre anterior: Medem’s glassfrog
+Nombre correcto: Medem’s lungless salamander
+--------------------------------------------------------------------------------
+Especie: Caecilia bokermanni
+Idioma: Español
+Nombre anterior: Ranita de charco de Bokermann
+Nombre correcto: Ilulo de Bokermann
+--------------------------------------------------------------------------------
+Especie: Caecilia bokermanni
+Idioma: Inglés
+Nombre anterior: Bokermann’s swampfrog
+Nombre correcto: Bokermann’s caecilian
+--------------------------------------------------------------------------------
+Especie: Caecilia buckleyi
+Idioma: Español
+Nombre anterior: Cutín de Buckley
+Nombre correcto: Ilulo de Buckley
+--------------------------------------------------------------------------------
+Especie: Caecilia buckleyi
+Idioma: Inglés
+Nombre anterior: Buckley’s rainfrog
+Nombre correcto: Buckley’s caecilian
+--------------------------------------------------------------------------------
+Especie: Callimedusa ecuatoriana
+Idioma: Español
+Nombre anterior: Salamandra gusano ecuatoriana
+Nombre correcto: Rana hoja ecuatoriana
+--------------------------------------------------------------------------------
+Especie: Callimedusa ecuatoriana
+Idioma: Inglés
+Nombre anterior: Ecuadorian worm salamander
+Nombre correcto: Ecuadorian leaf frog
+--------------------------------------------------------------------------------
+Especie: Centrolene buckleyi
+Idioma: Español
+Nombre anterior: Cutín de Buckley
+Nombre correcto: Rana de cristal de Buckley
+--------------------------------------------------------------------------------
+Especie: Centrolene buckleyi
+Idioma: Inglés
+Nombre anterior: Buckley’s rainfrog
+Nombre correcto: Buckley’s glassfrog
+--------------------------------------------------------------------------------
+Especie: Centrolene condor
+Idioma: Español
+Nombre anterior: Cutín del Cóndor
+Nombre correcto: Rana de cristal de El Cóndor
+--------------------------------------------------------------------------------
+Especie: Centrolene condor
+Idioma: Inglés
+Nombre anterior: Cóndor rainfrog
+Nombre correcto: Cóndor glassfrog
+--------------------------------------------------------------------------------
+Especie: Ceratophrys cornuta
+Idioma: Español
+Nombre anterior: Rana marsupial con cuernos
+Nombre correcto: Sapo pacman cornudo amazónico
+--------------------------------------------------------------------------------
+Especie: Ceratophrys cornuta
+Idioma: Inglés
+Nombre anterior: Horned marsupial frog
+Nombre correcto: Horned pac-man frog
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis anatipes
+Idioma: Español
+Nombre anterior: Cutín de cabeza ancha con membrana
+Nombre correcto: Ranita hocicuda pato
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis anatipes
+Idioma: Inglés
+Nombre anterior: Webbed broad-headed rainfrog
+Nombre correcto: Duck foot snouted frog
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis bassleri
+Idioma: Español
+Nombre anterior: Ilulo de Bassler
+Nombre correcto: Ranita hocicuda de Bassler
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis bassleri
+Idioma: Inglés
+Nombre anterior: Bassler’s caecilian
+Nombre correcto: Bassler’s snouted frog
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis parkeri
+Idioma: Español
+Nombre anterior: Cutín de Parker
+Nombre correcto: Ranita hocicuda de Parker
+--------------------------------------------------------------------------------
+Especie: Chiasmocleis ventrimaculata
+Idioma: Inglés
+Nombre anterior: Spotted belly poison frog
+Nombre correcto: Ventrimaculated snouted frog
+--------------------------------------------------------------------------------
+Especie: Chthonerpeton onorei
+Idioma: Inglés
+Nombre anterior: Onore’s rainfrog
+Nombre correcto: Onore’s caecilian
+--------------------------------------------------------------------------------
+Especie: Engystomops petersi
+Idioma: Inglés
+Nombre anterior: Peters’ rainfrog
+Nombre correcto: Peters’ bully foam toad
+--------------------------------------------------------------------------------
+Especie: Epicrionops petersi
+Idioma: Español
+Nombre anterior: Cutín de Peters
+Nombre correcto: Ilulo de Peters
+--------------------------------------------------------------------------------
+Especie: Epicrionops petersi
+Idioma: Inglés
+Nombre anterior: Peters’ rainfrog
+Nombre correcto: Peters’ caecilian
+--------------------------------------------------------------------------------
+Especie: Hyloscirtus lindae
+Idioma: Español
+Nombre anterior: Rana de cristal de Linda
+Nombre correcto: Rana torrentícola de Linda
+--------------------------------------------------------------------------------
+Especie: Hyloscirtus lindae
+Idioma: Inglés
+Nombre anterior: Linda’s glassfrog
+Nombre correcto: Linda’s stream treefrog
+--------------------------------------------------------------------------------
+Especie: Hyloscirtus mashpi
+Idioma: Inglés
+Nombre anterior: Mashpi glassfrog
+Nombre correcto: Mashpi stream frog
+--------------------------------------------------------------------------------
+Especie: Hyloxalus vertebralis
+Idioma: Español
+Nombre anterior: Cutín vertebralis
+Nombre correcto: Rana cohete vertebral
+--------------------------------------------------------------------------------
+Especie: Hyloxalus vertebralis
+Idioma: Inglés
+Nombre anterior: Vertebralis rainfrog
+Nombre correcto: Vertebral rocket frog
+--------------------------------------------------------------------------------
+Especie: Hyloxalus yasuni
+Idioma: Español
+Nombre anterior: Rana espinosa de Yasuní
+Nombre correcto: Rana cohete de Yasuní
+--------------------------------------------------------------------------------
+Especie: Hyloxalus yasuni
+Idioma: Inglés
+Nombre anterior: Yasuni spiny-backed treefrog
+Nombre correcto: Yasuni rocket frog
+--------------------------------------------------------------------------------
+Especie: Nymphargus anomalus
+Idioma: Español
+Nombre anterior: Cutín de cabeza ancha sin disco
+Nombre correcto: Rana de cristal anómala
+--------------------------------------------------------------------------------
+Especie: Nymphargus anomalus
+Idioma: Inglés
+Nombre anterior: Disk-less broad-headed rainfrog
+Nombre correcto: Anomalous glassfrog
+--------------------------------------------------------------------------------
+Especie: Nymphargus balionotus
+Idioma: Español
+Nombre anterior: Cutín manchado
+Nombre correcto: Rana de cristal salpicada
+--------------------------------------------------------------------------------
+Especie: Nymphargus balionotus
+Idioma: Inglés
+Nombre anterior: Speckled rainfrog
+Nombre correcto: Spotted glassfrog
+--------------------------------------------------------------------------------
+Especie: Nymphargus buenaventura
+Idioma: Español
+Nombre anterior: Cutín de Buenaventura
+Nombre correcto: Rana de cristal de Buenaventura
+--------------------------------------------------------------------------------
+Especie: Nymphargus buenaventura
+Idioma: Inglés
+Nombre anterior: Buenaventura rainfrog
+Nombre correcto: Buenaventura glassfrog
+--------------------------------------------------------------------------------
+Especie: Nymphargus colomai
+Idioma: Inglés
+Nombre anterior: Coloma’s toad
+Nombre correcto: Coloma’s glassfrog
+--------------------------------------------------------------------------------
+Especie: Osteocephalus buckleyi
+Idioma: Español
+Nombre anterior: Cutín de Buckley
+Nombre correcto: Rana espinosa de Buckley
+--------------------------------------------------------------------------------
+Especie: Osteocephalus buckleyi
+Idioma: Inglés
+Nombre anterior: Buckley’s rainfrog
+Nombre correcto: Buckley’s spiny-backed treefrog
+--------------------------------------------------------------------------------
+Especie: Osteocephalus cannatellai
+Idioma: Español
+Nombre anterior: Ranita de charco de Cannatella
+Nombre correcto: Rana espinosa de Cannatella
+--------------------------------------------------------------------------------
+Especie: Osteocephalus cannatellai
+Idioma: Inglés
+Nombre anterior: Cannatella’s swampfrog
+Nombre correcto: Cannatella’s spiny-backed treefrog
+--------------------------------------------------------------------------------
+Especie: Osteocephalus festae
+Idioma: Español
+Nombre anterior: Sapo de Festa
+Nombre correcto: Rana espinosa de Festa
+--------------------------------------------------------------------------------
+Especie: Osteocephalus festae
+Idioma: Inglés
+Nombre anterior: Festa’s toad
+Nombre correcto: Festa’s spiny-backed treefrog
+--------------------------------------------------------------------------------
+Especie: Pristimantis duellmani
+Idioma: Español
+Nombre anterior: Rana espinosa de Duellman
+Nombre correcto: Cutín de Duellman
+--------------------------------------------------------------------------------
+Especie: Pristimantis ecuadorensis
+Idioma: Español
+Nombre anterior: Sapo ecuatoriano
+Nombre correcto: Cutín ecuatoriano
+--------------------------------------------------------------------------------
+Especie: Pristimantis ecuadorensis
+Idioma: Inglés
+Nombre anterior: Ecuadorian toad
+Nombre correcto: Ecuadorian rainfrog
+--------------------------------------------------------------------------------
+Especie: Pristimantis marcoreyesi
+Idioma: Español
+Nombre anterior: Rana de cristal de Marco Reyes
+Nombre correcto: Cutín de Reyes
+--------------------------------------------------------------------------------
+Especie: Pristimantis marcoreyesi
+Idioma: Inglés
+Nombre anterior: Marco Reyes’ glassfrog
+Nombre correcto: Reyes’ rainfrog
+--------------------------------------------------------------------------------
+Especie: Pristimantis philipi
+Idioma: Español
+Nombre anterior: Cutín de Peracca
+Nombre correcto: Cutín de Philip
+--------------------------------------------------------------------------------
+Especie: Pristimantis philipi
+Idioma: Inglés
+Nombre anterior: Waterfall rainfrog
+Nombre correcto: Philip’s rainfrog
+--------------------------------------------------------------------------------

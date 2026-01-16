@@ -144,6 +144,32 @@ function normalizarNombres(
   });
 
   // PASADA 2: Optimizar nombres únicos (subir al grupo padre)
+  // Primero, identificar nombres base simples y sus variaciones
+  const nombresBaseSimples = new Set<string>();
+  especiesConBase.forEach((item) => {
+    const palabras = item.nombreBase.split(/\s+/);
+    if (palabras.length > 0) {
+      const primeraPalabra = palabras[0];
+      if (/^(Ilulo|Sapo|Sapito|Cutín|Cutin|Rana|Ranita|Salamandra|Kayla|Pipa|Smilisca)$/iu.test(primeraPalabra)) {
+        nombresBaseSimples.add(normalizarTildes(primeraPalabra));
+      }
+    }
+  });
+
+  // Contar variaciones por nombre base simple
+  const variacionesPorBaseSimple: Record<string, number> = {};
+  especiesConBase.forEach((item) => {
+    const palabras = item.nombreBase.split(/\s+/);
+    if (palabras.length > 0) {
+      const primeraPalabra = palabras[0];
+      const baseSimpleNormalizado = normalizarTildes(primeraPalabra);
+      if (nombresBaseSimples.has(baseSimpleNormalizado)) {
+        variacionesPorBaseSimple[baseSimpleNormalizado] =
+          (variacionesPorBaseSimple[baseSimpleNormalizado] || 0) + 1;
+      }
+    }
+  });
+
   const especiesOptimizadas = especiesConBase.map((item) => {
     let baseFinal = item.nombreBase;
     let baseFinalNormalizado = item.nombreBaseNormalizado;
@@ -155,33 +181,84 @@ function normalizarNombres(
         /^(Rana)\s+de\s+(cristal|casco|dedos\s+delgados|espuma)$/iu.test(baseFinal);
 
       if (!esDescriptivoCompuesto) {
-        // Estrategia 1: Remover "de [sustantivo común]"
-        let match =
-          /^(.+)\s+de(?:l)?\s+(bosque|pies|vientre|cabeza|dorso|disco|ojos|muslos|patas|dedos|flancos|ingle|ingles|líneas|manchas|puntos|rayas|saco|párpado|color|garganta|hocico|rostro|brazo|membrana|bigote|membranas|cara|gula|trasero|plano|rorso|anteojos|casco|charco|labio|labios|oriente)$/iu.exec(
-            baseFinal,
-          );
+        const palabras = baseFinal.split(/\s+/);
+        const primeraPalabra = palabras[0];
+        const baseSimpleNormalizado = normalizarTildes(primeraPalabra);
 
-        if (match) {
-          baseFinal = match[1].trim();
-          baseFinalNormalizado = normalizarTildes(baseFinal);
+        // Si la primera palabra es un nombre base común y hay múltiples variaciones
+        if (
+          nombresBaseSimples.has(baseSimpleNormalizado) &&
+          variacionesPorBaseSimple[baseSimpleNormalizado] > 1
+        ) {
+          // Agrupar bajo el nombre base simple
+          baseFinal = primeraPalabra;
+          baseFinalNormalizado = baseSimpleNormalizado;
         } else {
-          // Estrategia 2: Remover adjetivos específicos
-          match =
-            /^(.+)\s+(colilarga|óseo|yamba|lisa|confusa|picudita|ágata|ecuatoriana|minúscula|vertebral|punteada|naranja|rosada)$/iu.exec(
+          // Estrategia 1: Remover "de [sustantivo común]"
+          let match =
+            /^(.+)\s+de(?:l)?\s+(bosque|pies|vientre|cabeza|dorso|disco|ojos|muslos|patas|dedos|flancos|ingle|ingles|líneas|manchas|puntos|rayas|saco|párpado|color|garganta|hocico|rostro|brazo|membrana|bigote|membranas|cara|gula|trasero|plano|rorso|anteojos|casco|charco|labio|labios|oriente)$/iu.exec(
               baseFinal,
             );
+
           if (match) {
-            baseFinal = match[1].trim();
-            baseFinalNormalizado = normalizarTildes(baseFinal);
+            const baseSinDe = match[1].trim();
+            const baseSinDeNormalizado = normalizarTildes(baseSinDe);
+            const primeraPalabraSinDe = baseSinDe.split(/\s+/)[0];
+            const baseSimpleSinDeNormalizado = normalizarTildes(primeraPalabraSinDe);
+
+            // Si después de remover "de [sustantivo]" queda un nombre base simple con múltiples variaciones
+            if (
+              nombresBaseSimples.has(baseSimpleSinDeNormalizado) &&
+              variacionesPorBaseSimple[baseSimpleSinDeNormalizado] > 1
+            ) {
+              baseFinal = primeraPalabraSinDe;
+              baseFinalNormalizado = baseSimpleSinDeNormalizado;
+            } else {
+              baseFinal = baseSinDe;
+              baseFinalNormalizado = baseSinDeNormalizado;
+            }
           } else {
-            // Estrategia 3: Simplificar nombres largos (3+ palabras)
+            // Estrategia 2: Remover adjetivos específicos y nombres propios
             match =
-              /^(Ilulo|Sapo|Sapito|Cutín|Cutin|Rana|Ranita|Salamandra|Kayla|Pipa|Smilisca)\s+[\wáéíóúñü\s]+$/iu.exec(
+              /^(.+)\s+(colilarga|óseo|yamba|lisa|confusa|picudita|ágata|ecuatoriana|minúscula|vertebral|punteada|naranja|rosada|bufo|cofán|occidental|amazónico|andino|gigante|pequeño|grande|manchado|moteado|negro|verde|amarillo|azul|blanco|rojo|gris|marrones|anómala|salpicada|punteada|naranja|rosada|amarilla|azul|blanca)$/iu.exec(
                 baseFinal,
               );
-            if (match && baseFinal.split(" ").length >= 3) {
-              baseFinal = match[1];
-              baseFinalNormalizado = normalizarTildes(baseFinal);
+            if (match) {
+              const baseSinAdjetivo = match[1].trim();
+              const baseSinAdjetivoNormalizado = normalizarTildes(baseSinAdjetivo);
+              const primeraPalabraSinAdjetivo = baseSinAdjetivo.split(/\s+/)[0];
+              const baseSimpleSinAdjetivoNormalizado = normalizarTildes(primeraPalabraSinAdjetivo);
+
+              // Si después de remover el adjetivo queda un nombre base simple con múltiples variaciones
+              if (
+                nombresBaseSimples.has(baseSimpleSinAdjetivoNormalizado) &&
+                variacionesPorBaseSimple[baseSimpleSinAdjetivoNormalizado] > 1
+              ) {
+                baseFinal = primeraPalabraSinAdjetivo;
+                baseFinalNormalizado = baseSimpleSinAdjetivoNormalizado;
+              } else {
+                baseFinal = baseSinAdjetivo;
+                baseFinalNormalizado = baseSinAdjetivoNormalizado;
+              }
+            } else if (palabras.length >= 3) {
+              // Estrategia 3: Simplificar nombres largos (3+ palabras)
+              match =
+                /^(Ilulo|Sapo|Sapito|Cutín|Cutin|Rana|Ranita|Salamandra|Kayla|Pipa|Smilisca)\s+[\wáéíóúñü\s]+$/iu.exec(
+                  baseFinal,
+                );
+              if (match) {
+                const baseSimple = match[1];
+                const baseSimpleNormalizado = normalizarTildes(baseSimple);
+
+                // Si hay múltiples variaciones del mismo nombre base simple
+                if (
+                  nombresBaseSimples.has(baseSimpleNormalizado) &&
+                  variacionesPorBaseSimple[baseSimpleNormalizado] > 1
+                ) {
+                  baseFinal = baseSimple;
+                  baseFinalNormalizado = baseSimpleNormalizado;
+                }
+              }
             }
           }
         }

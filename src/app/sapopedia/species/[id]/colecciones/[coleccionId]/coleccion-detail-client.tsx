@@ -219,7 +219,7 @@ export default function ColeccionDetailClient({
                   <span
                     className={`rounded px-2 py-0.5 text-xs font-medium ${
                       coleccion.gbif
-                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                        ? "bg-green-100 text-green-700"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -605,9 +605,9 @@ export default function ColeccionDetailClient({
                           <span
                             className={`rounded px-2 py-0.5 text-xs font-medium ${
                               pc.prestamo?.estado === "Devuelto"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                                ? "bg-green-100 text-green-700"
                                 : pc.prestamo?.estado === "Pendiente"
-                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+                                  ? "bg-yellow-100 text-yellow-700"
                                   : "bg-muted text-muted-foreground"
                             }`}
                           >
@@ -704,9 +704,9 @@ export default function ColeccionDetailClient({
                           <span
                             className={`rounded px-2 py-0.5 text-xs font-medium ${
                               pt.prestamo?.estado === "Devuelto"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                                ? "bg-green-100 text-green-700"
                                 : pt.prestamo?.estado === "Pendiente"
-                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+                                  ? "bg-yellow-100 text-yellow-700"
                                   : "bg-muted text-muted-foreground"
                             }`}
                           >
