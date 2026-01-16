@@ -316,9 +316,9 @@ export default function FiltersPanel({
   };
 
   return (
-    <div className="sticky top-0 flex h-screen max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div className="sticky top-0 flex h-auto lg:h-screen lg:max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
       {/* Buscador */}
-      <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4">
+      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <div className="relative">
@@ -384,16 +384,16 @@ export default function FiltersPanel({
       </div>
 
       {/* Título y botón de limpiar */}
-      <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4">
+      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">Filtros</h3>
-          <Button size="sm" variant="outline" onClick={resetFilters}>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800">Filtros</h3>
+          <Button size="sm" variant="outline" onClick={resetFilters} className="text-xs sm:text-sm">
             Limpiar
           </Button>
         </div>
       </div>
 
-      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-6 py-4">
+      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 max-h-[60vh] lg:max-h-none">
         <Accordion className="w-full" type="multiple">
           {/* Provincias - desde Supabase */}
           {catalogs.provincias.length > 0 && (

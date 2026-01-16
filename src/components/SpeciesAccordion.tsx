@@ -94,9 +94,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       {/* Endémica */}
       <div className="w-12 text-center">
         {species.endemica ? (
-          <span className="text-lg text-gray-800">✓</span>
+          <span className="text-sm font-semibold text-gray-800">E</span>
         ) : (
-          <span className="text-lg text-gray-400">-</span>
+          <span className="text-sm font-semibold text-gray-500">NE</span>
         )}
       </div>
 

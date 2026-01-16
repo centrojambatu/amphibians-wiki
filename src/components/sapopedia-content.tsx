@@ -198,9 +198,9 @@ export function SapopediaContent({
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
       {/* Panel de filtros - lado izquierdo */}
-      <div className="w-80 flex-shrink-0">
+      <div className="w-full lg:w-80 flex-shrink-0 order-2 lg:order-1">
         <FiltersPanel
           catalogs={filterCatalogs}
           especies={especies}
@@ -209,31 +209,31 @@ export function SapopediaContent({
       </div>
 
       {/* Contenido principal */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 order-1 lg:order-2">
         <Tabs
           className="w-full"
           onValueChange={handleTabChange}
           value={selectedTab}
         >
-          <TabsList className="mb-6 inline-flex h-12 w-auto gap-1 rounded-lg bg-gray-100 p-1">
+          <TabsList className="mb-4 sm:mb-6 inline-flex h-10 sm:h-12 w-full sm:w-auto gap-1 rounded-lg bg-gray-100 p-1">
             <TabsTrigger
-              className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
+              className="rounded-md px-3 sm:px-6 py-2 text-xs sm:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md flex-1 sm:flex-initial"
               value="accordion"
             >
               Vista Jerárquica
             </TabsTrigger>
             <TabsTrigger
-              className="rounded-md px-6 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md"
+              className="rounded-md px-3 sm:px-6 py-2 text-xs sm:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md flex-1 sm:flex-initial"
               value="tree"
             >
               Árbol Filogenético
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="accordion">
+          <TabsContent value="accordion" className="mt-4 sm:mt-0">
             {/* Contador de resultados */}
             {filters && (
-              <p className="text-muted-foreground mb-4 text-sm">
+              <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm">
                 Mostrando {especiesFiltradas.length} de {especies.length}{" "}
                 especies
               </p>
@@ -242,7 +242,7 @@ export function SapopediaContent({
             <SpeciesAccordion orders={ordenesOrganizados} />
           </TabsContent>
 
-          <TabsContent className="mt-0" value="tree">
+          <TabsContent className="mt-4 sm:mt-0" value="tree">
             {/* Vista de árbol filogenético */}
             <PhylogeneticTreeReal orders={ordenesOrganizados} />
           </TabsContent>
