@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {SapopediaContent} from "@/components/sapopedia-content";
 
@@ -21,10 +22,10 @@ export default async function SapopediaPage() {
           <div className="flex flex-col items-center">
             <div className="mb-2 overflow-hidden rounded-lg">
               <Image
+                priority
                 alt="Anura"
                 className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
                 height={216}
-                priority
                 src="/assets/references/anura.jpg"
                 width={384}
               />
@@ -34,10 +35,10 @@ export default async function SapopediaPage() {
           <div className="flex flex-col items-center">
             <div className="mb-2 overflow-hidden rounded-lg">
               <Image
+                priority
                 alt="Caudata"
                 className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
                 height={216}
-                priority
                 src="/assets/references/caudata.jpg"
                 width={384}
               />
@@ -47,10 +48,10 @@ export default async function SapopediaPage() {
           <div className="flex flex-col items-center">
             <div className="mb-2 overflow-hidden rounded-lg">
               <Image
+                priority
                 alt="Gymnophiona"
                 className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
                 height={216}
-                priority
                 src="/assets/references/gymnophiona.jpg"
                 width={384}
               />
