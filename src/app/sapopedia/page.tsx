@@ -18,7 +18,7 @@ export default async function SapopediaPage() {
           SapoPedia Ecuador
         </h1>
         {/* Imágenes de los órdenes */}
-        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-4 px-2 sm:gap-6">
+        <div className="mx-auto flex max-w-7xl flex-nowrap justify-center gap-4 px-2 sm:gap-6">
           <div className="flex flex-col items-center">
             <div className="mb-2 overflow-hidden rounded-lg">
               <Image
