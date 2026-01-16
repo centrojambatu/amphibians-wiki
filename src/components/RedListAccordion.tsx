@@ -127,9 +127,9 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
       {/* Endémica */}
       <div className="w-12 text-center">
         {species.endemica ? (
-          <span className="text-lg text-gray-800">✓</span>
+          <span className="text-sm font-semibold text-gray-800">E</span>
         ) : (
-          <span className="text-lg text-gray-400">-</span>
+          <span className="text-sm font-semibold text-gray-500">NE</span>
         )}
       </div>
 
