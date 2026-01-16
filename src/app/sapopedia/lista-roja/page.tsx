@@ -27,7 +27,7 @@ export default async function ListaRojaPage() {
       <RedListChartSelector categorias={filterCatalogs.listaRoja} especies={especies} />
 
       {/* Acordeón de categorías */}
-      <div className="mb-8 mt-8">
+      <div className="mt-8 mb-8">
         <h2 className="mb-2 text-2xl font-bold">Categorías de Conservación</h2>
         <RedListAccordion categorias={filterCatalogs.listaRoja} especies={especies} />
       </div>

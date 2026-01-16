@@ -6,6 +6,7 @@ import {Menu} from "lucide-react";
 
 import {OrderGroup, FamilyGroup, GenusGroup, SpeciesData} from "@/types/taxonomy";
 import {processHTMLLinks} from "@/lib/process-html-links";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -105,19 +106,29 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         {species.lista_roja_iucn ? (
           <>
             {isPE(species.lista_roja_iucn) ? (
-              <div
-                className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
-                style={{
-                  backgroundColor: "#b71c1c",
-                  color: "#ffffff",
-                  borderRadius: "100% 0% 100% 100%",
-                  minWidth: "32px",
-                  minHeight: "32px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                }}
-              >
-                PE
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                      style={{
+                        backgroundColor: "#b71c1c",
+                        color: "#ffffff",
+                        borderRadius: "100% 0% 100% 100%",
+                        width: "36px",
+                        height: "36px",
+                        padding: "4px 9px",
+                        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                      }}
+                    >
+                      PE
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-semibold">Posiblemente Extinta</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ) : (
               (() => {
                 // Normalizar el valor: trim y uppercase
@@ -138,7 +149,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                 if (valoresValidos.includes(valorNormalizado)) {
                   return (
                     <RedListStatus
-                      showTooltip={false}
+                      showTooltip={true}
                       status={
                         valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
                       }
@@ -152,19 +163,29 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                 );
 
                 return (
-                  <div
-                    className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
-                    style={{
-                      backgroundColor: "#d1d1c6",
-                      color: "#666666",
-                      borderRadius: "100% 0% 100% 100%",
-                      minWidth: "32px",
-                      minHeight: "32px",
-                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                    }}
-                  >
-                    ?
-                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                          style={{
+                            backgroundColor: "#d1d1c6",
+                            color: "#666666",
+                            borderRadius: "100% 0% 100% 100%",
+                            width: "36px",
+                            height: "36px",
+                            padding: "4px 9px",
+                            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                          }}
+                        >
+                          ?
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-semibold">Valor de Lista Roja no válido</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 );
               })()
             )}

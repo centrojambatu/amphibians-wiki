@@ -99,13 +99,13 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
   const renderSpecies = (species: SpeciesListItem) => (
     <div
       key={species.id_taxon}
-      className="relative flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3 transition-all hover:border-border hover:bg-muted/50"
+      className="border-border bg-card hover:border-border hover:bg-muted/50 relative flex items-center gap-4 rounded-md border px-4 py-3 transition-all"
     >
       {/* Nombre científico */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Link
-            className="text-sm font-medium text-foreground italic hover:underline"
+            className="text-foreground text-sm font-medium italic hover:underline"
             href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
           >
             {species.nombre_cientifico}
@@ -120,7 +120,7 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-muted-foreground">{species.nombre_comun}</div>
+          <div className="text-muted-foreground mt-1 text-xs">{species.nombre_comun}</div>
         )}
       </div>
 
@@ -139,13 +139,14 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
           <>
             {isPE(species.lista_roja_iucn) ? (
               <div
-                className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                className="inline-flex items-center justify-center text-[11px] font-semibold"
                 style={{
                   backgroundColor: "#b71c1c",
                   color: "#ffffff",
                   borderRadius: "100% 0% 100% 100%",
-                  minWidth: "32px",
-                  minHeight: "32px",
+                  width: "36px",
+                  height: "36px",
+                  padding: "4px 9px",
                   boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
                 }}
               >
@@ -186,13 +187,14 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
 
                 return (
                   <div
-                    className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                    className="inline-flex items-center justify-center text-[11px] font-semibold"
                     style={{
                       backgroundColor: "#d1d1c6",
                       color: "#666666",
                       borderRadius: "100% 0% 100% 100%",
-                      minWidth: "32px",
-                      minHeight: "32px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "4px 9px",
                       boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
                     }}
                   >
@@ -242,7 +244,7 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     return (
       <div key={categoriaId} className="relative">
         <div
-          className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3"
+          className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
           role="button"
           tabIndex={0}
           onClick={() => toggleItem(categoriaId)}
@@ -255,9 +257,11 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
         >
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">{grupo.categoria.nombre}</span>
+              <span className="text-foreground text-sm font-semibold">
+                {grupo.categoria.nombre}
+              </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {grupo.especies.length} especie
               {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas} endémica
               {especiesEndemicas !== 1 ? "s" : ""})
@@ -271,11 +275,11 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="mt-3 rounded-lg bg-muted p-4">
+          <div className="bg-muted mt-3 rounded-lg p-4">
             {/* Header de la tabla */}
             <div className="mb-3 px-4 py-2">
-              <div className="mb-2 text-xs text-muted-foreground">Especies</div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="text-muted-foreground mb-2 text-xs">Especies</div>
+              <div className="text-muted-foreground flex items-center gap-4 text-xs">
                 <div className="flex-1">Nombre</div>
                 <div className="w-12 text-center">En</div>
                 <div className="w-16 text-center">LR</div>

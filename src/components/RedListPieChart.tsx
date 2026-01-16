@@ -204,13 +204,14 @@ export default function RedListPieChart({ especies, categorias }: RedListPieChar
                     <>
                       {isPE(dato.categoria.sigla) ? (
                         <div
-                          className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
+                          className="inline-flex items-center justify-center text-[11px] font-semibold"
                           style={{
                             backgroundColor: getColor(dato.categoria.sigla),
                             color: "#ffffff",
                             borderRadius: "100% 0% 100% 100%",
-                            minWidth: "32px",
-                            minHeight: "32px",
+                            width: "36px",
+                            height: "36px",
+                            padding: "4px 9px",
                             boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
                           }}
                         >
