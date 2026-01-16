@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
 import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
-import FiltersPanel, { FiltersState } from "@/components/FiltersPanel";
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
-import { FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
-import { organizeTaxonomyData } from "@/lib/organize-taxonomy";
-import { SpeciesData } from "@/types/taxonomy";
+import FiltersPanel, {FiltersState} from "@/components/FiltersPanel";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
+import {organizeTaxonomyData} from "@/lib/organize-taxonomy";
+import {SpeciesData} from "@/types/taxonomy";
 
 interface SapopediaContentProps {
   readonly especies: SpeciesListItem[];
@@ -18,10 +18,7 @@ interface SapopediaContentProps {
 
 const TAB_STORAGE_KEY = "sapopedia-selected-tab";
 
-export function SapopediaContent({
-  especies,
-  filterCatalogs,
-}: SapopediaContentProps) {
+export function SapopediaContent({especies, filterCatalogs}: SapopediaContentProps) {
   const [filters, setFilters] = useState<FiltersState | null>(null);
 
   // Cargar pestaña seleccionada desde localStorage
@@ -53,18 +50,13 @@ export function SapopediaContent({
   };
 
   // Función para filtrar especies basado en los filtros seleccionados
-  const filterEspecies = (
-    especiesList: SpeciesListItem[],
-  ): SpeciesListItem[] => {
+  const filterEspecies = (especiesList: SpeciesListItem[]): SpeciesListItem[] => {
     if (!filters) return especiesList;
 
     return especiesList.filter((especie) => {
       // Filtro por Lista Roja
       if (filters.listaRoja.length > 0) {
-        if (
-          !especie.lista_roja_iucn ||
-          !filters.listaRoja.includes(especie.lista_roja_iucn)
-        ) {
+        if (!especie.lista_roja_iucn || !filters.listaRoja.includes(especie.lista_roja_iucn)) {
           return false;
         }
       }
@@ -83,8 +75,7 @@ export function SapopediaContent({
       // Filtro por rango altitudinal
       // Solo aplicar si el rango no es el valor por defecto (0-4800)
       const isDefaultRange =
-        filters.rangoAltitudinal.min === 0 &&
-        filters.rangoAltitudinal.max === 4800;
+        filters.rangoAltitudinal.min === 0 && filters.rangoAltitudinal.max === 4800;
 
       if (!isDefaultRange) {
         const speciesMinAlt = especie.rango_altitudinal_min || 0;
@@ -93,17 +84,14 @@ export function SapopediaContent({
         const filterMax = filters.rangoAltitudinal.max;
 
         // Verificar si hay solapamiento entre el rango de la especie y el rango del filtro
-        const hasOverlap =
-          speciesMinAlt <= filterMax && speciesMaxAlt >= filterMin;
+        const hasOverlap = speciesMinAlt <= filterMax && speciesMaxAlt >= filterMin;
 
         if (!hasOverlap) return false;
       }
 
       // Filtro por provincias
       if (filters.provincia.length > 0) {
-        const hasMatch = filters.provincia.some((p) =>
-          especie.catalogos.provincias.includes(p),
-        );
+        const hasMatch = filters.provincia.some((p) => especie.catalogos.provincias.includes(p));
 
         if (!hasMatch) return false;
       }
@@ -119,9 +107,7 @@ export function SapopediaContent({
 
       // Filtro por ecosistemas
       if (filters.ecosistemas.length > 0) {
-        const hasMatch = filters.ecosistemas.some((e) =>
-          especie.catalogos.ecosistemas.includes(e),
-        );
+        const hasMatch = filters.ecosistemas.some((e) => especie.catalogos.ecosistemas.includes(e));
 
         if (!hasMatch) return false;
       }
@@ -171,6 +157,7 @@ export function SapopediaContent({
           if (d === "oriental") {
             return especie.has_distribucion_oriental;
           }
+
           return false;
         });
 
@@ -198,9 +185,9 @@ export function SapopediaContent({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
       {/* Panel de filtros - lado izquierdo */}
-      <div className="w-full lg:w-80 flex-shrink-0 order-2 lg:order-1">
+      <div className="order-2 w-full flex-shrink-0 lg:order-1 lg:w-80">
         <FiltersPanel
           catalogs={filterCatalogs}
           especies={especies}
@@ -209,33 +196,28 @@ export function SapopediaContent({
       </div>
 
       {/* Contenido principal */}
-      <div className="min-w-0 flex-1 order-1 lg:order-2">
-        <Tabs
-          className="w-full"
-          onValueChange={handleTabChange}
-          value={selectedTab}
-        >
-          <TabsList className="mb-4 sm:mb-6 inline-flex h-10 sm:h-12 w-full sm:w-auto gap-1 rounded-lg bg-gray-100 p-1">
+      <div className="order-1 min-w-0 flex-1 lg:order-2">
+        <Tabs className="w-full" value={selectedTab} onValueChange={handleTabChange}>
+          <TabsList className="mb-4 inline-flex h-10 w-full gap-1 rounded-lg bg-gray-100 p-1 sm:mb-6 sm:h-12 sm:w-auto">
             <TabsTrigger
-              className="rounded-md px-3 sm:px-6 py-2 text-xs sm:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md flex-1 sm:flex-initial"
+              className="flex-1 rounded-md px-3 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md sm:flex-initial sm:px-6 sm:text-sm"
               value="accordion"
             >
               Vista Jerárquica
             </TabsTrigger>
             <TabsTrigger
-              className="rounded-md px-3 sm:px-6 py-2 text-xs sm:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md flex-1 sm:flex-initial"
+              className="flex-1 rounded-md px-3 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md sm:flex-initial sm:px-6 sm:text-sm"
               value="tree"
             >
               Árbol Filogenético
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="accordion" className="mt-4 sm:mt-0">
+          <TabsContent className="mt-4 sm:mt-0" value="accordion">
             {/* Contador de resultados */}
             {filters && (
-              <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm">
-                Mostrando {especiesFiltradas.length} de {especies.length}{" "}
-                especies
+              <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
+                Mostrando {especiesFiltradas.length} de {especies.length} especies
               </p>
             )}
             {/* Vista de accordion */}

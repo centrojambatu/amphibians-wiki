@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
     // cacheComponents: false,
   },
+  images: {
+    unoptimized: false,
+  },
   logging: {
     fetches: {
       fullUrl: true,

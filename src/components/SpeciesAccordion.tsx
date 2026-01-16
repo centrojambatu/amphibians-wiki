@@ -66,13 +66,13 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="relative flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3 transition-all hover:border-border hover:bg-muted/50"
+      className="border-border bg-card hover:border-border hover:bg-muted/50 relative flex items-center gap-4 rounded-md border px-4 py-3 transition-all"
     >
       {/* Nombre científico */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Link
-            className="text-sm font-medium text-foreground italic hover:underline"
+            className="text-foreground text-sm font-medium italic hover:underline"
             href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
           >
             {species.nombre_cientifico}
@@ -87,7 +87,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
           )}
         </div>
         {species.nombre_comun && (
-          <div className="mt-1 text-xs text-muted-foreground">{species.nombre_comun}</div>
+          <div className="text-muted-foreground mt-1 text-xs">{species.nombre_comun}</div>
         )}
       </div>
 
@@ -205,7 +205,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderGenus = (genus: GenusGroup) => (
     <div key={genus.id} className="relative">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3"
+        className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`genus-${genus.id}`)}
@@ -218,9 +218,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       >
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-foreground italic">{genus.name}</span>
+            <span className="text-foreground text-sm italic">{genus.name}</span>
             {genus.nombre_comun && (
-              <span className="text-xs text-muted-foreground">{genus.nombre_comun}</span>
+              <span className="text-muted-foreground text-xs">{genus.nombre_comun}</span>
             )}
           </div>
           <p className="text-xs text-gray-400">
@@ -232,17 +232,17 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-muted-foreground">
+        <div className="text-muted-foreground ml-3 flex-shrink-0">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(`genus-${genus.id}`) && (
-        <div className="mt-3 rounded-lg bg-muted p-4">
+        <div className="bg-muted mt-3 rounded-lg p-4">
           {/* Header de la tabla */}
           <div className="mb-3 px-4 py-2">
-            <div className="mb-2 text-xs text-muted-foreground">Especies</div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mb-2 text-xs">Especies</div>
+            <div className="text-muted-foreground flex items-center gap-4 text-xs">
               <div className="flex-1">Nombre</div>
               <div className="w-12 text-center">En</div>
               <div className="w-16 text-center">LR</div>
@@ -259,7 +259,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderFamily = (family: FamilyGroup) => (
     <div key={family.id} className="relative">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3"
+        className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`family-${family.id}`)}
@@ -282,16 +282,16 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-muted-foreground">
+        <div className="text-muted-foreground ml-3 flex-shrink-0">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(`family-${family.id}`) && (
-        <div className="mt-3 rounded-lg bg-muted p-4">
+        <div className="bg-muted mt-3 rounded-lg p-4">
           {/* Header de géneros */}
           <div className="mb-3 px-4 py-2">
-            <div className="text-xs text-muted-foreground">Géneros</div>
+            <div className="text-muted-foreground text-xs">Géneros</div>
           </div>
           {/* Lista de géneros */}
           <div className="space-y-2">{family.genera.map((genus) => renderGenus(genus))}</div>
@@ -303,7 +303,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderOrder = (order: OrderGroup) => (
     <div key={order.id} className="relative mb-4">
       <div
-        className="relative flex w-full cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3"
+        className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
         role="button"
         tabIndex={0}
         onClick={() => toggleItem(`order-${order.id}`)}
@@ -323,13 +323,13 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         </div>
 
         {/* Icono de barras */}
-        <div className="ml-3 flex-shrink-0 text-muted-foreground">
+        <div className="text-muted-foreground ml-3 flex-shrink-0">
           <Menu className="h-4 w-4" />
         </div>
       </div>
 
       {isOpen(`order-${order.id}`) && (
-        <div className="mt-3 rounded-lg bg-muted p-4">
+        <div className="bg-muted mt-3 rounded-lg p-4">
           {/* Header de familias */}
           <div className="mb-3 px-4 py-2">
             <div className="text-xs text-gray-400">Familias</div>
@@ -345,7 +345,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
     <div className="relative w-full">
       {/* Header de órdenes */}
       <div className="mb-4 px-4 py-2">
-        <div className="text-xs text-muted-foreground">Órdenes</div>
+        <div className="text-muted-foreground text-xs">Órdenes</div>
       </div>
 
       <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
