@@ -49,7 +49,7 @@ export default async function BibliographyPage({params}: PageProps) {
   return (
     <div className="bg-background min-h-screen">
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <article className="prose prose-lg dark:prose-invert max-w-none">
+        <article className="prose prose-lg max-w-none">
           {/* Título principal */}
           <h1 className="mb-2 text-2xl font-bold">
             {publicacion.titulo ? (
@@ -182,7 +182,7 @@ export default async function BibliographyPage({params}: PageProps) {
               {publicacion.resumen ? (
                 <div
                   dangerouslySetInnerHTML={{__html: publicacion.resumen}}
-                  className="prose dark:prose-invert"
+                  className="prose"
                 />
               ) : (
                 <p className="text-muted-foreground">No disponible</p>
@@ -199,7 +199,7 @@ export default async function BibliographyPage({params}: PageProps) {
               {publicacion.observaciones ? (
                 <div
                   dangerouslySetInnerHTML={{__html: publicacion.observaciones}}
-                  className="prose dark:prose-invert"
+                  className="prose"
                 />
               ) : (
                 <p className="text-muted-foreground">No disponible</p>

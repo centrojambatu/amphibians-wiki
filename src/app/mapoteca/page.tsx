@@ -21,7 +21,7 @@ import {
 const MapotecaMap = dynamic(() => import("@/components/MapotecaMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+    <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
       <div className="text-center">
         <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
         <p className="text-muted-foreground">Cargando mapa...</p>
@@ -116,7 +116,7 @@ function MapotecaContent() {
       {/* Contenido principal */}
       <div className="container mx-auto px-4 py-6">
         {/* Panel de filtros */}
-        <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
+        <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Button
@@ -170,7 +170,7 @@ function MapotecaContent() {
             <div className="mt-4 grid gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3">
               {/* Búsqueda por especie */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-gray-700">
                   Buscar especie
                 </label>
                 <div className="relative">
@@ -187,7 +187,7 @@ function MapotecaContent() {
 
               {/* Filtro por provincia */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-gray-700">
                   Provincia
                 </label>
                 <Select
@@ -210,7 +210,7 @@ function MapotecaContent() {
 
               {/* Slider de puntos máximos */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-gray-700">
                   Puntos a mostrar: <span className="font-bold text-green-600">{maxPoints.toLocaleString()}</span>
                 </label>
                 <Slider
@@ -240,22 +240,22 @@ function MapotecaContent() {
 
         {/* Información adicional */}
         <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
+          <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <h3 className="mb-2 font-semibold text-gray-900">
               🗺️ Sobre el mapa
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               Este mapa muestra las ubicaciones geográficas de registros de
               anfibios en Ecuador. Cada punto representa una localidad donde se
               ha registrado una especie.
             </p>
           </div>
 
-          <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
+          <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <h3 className="mb-2 font-semibold text-gray-900">
               🔍 Cómo usar
             </h3>
-            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-1 text-sm text-gray-600">
               <li>• Usa la rueda del mouse para hacer zoom</li>
               <li>• Arrastra para moverte por el mapa</li>
               <li>• Pasa el mouse sobre un punto para ver detalles</li>
@@ -263,11 +263,11 @@ function MapotecaContent() {
             </ul>
           </div>
 
-          <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
+          <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <h3 className="mb-2 font-semibold text-gray-900">
               📊 Datos
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               Los datos provienen de la colección del Centro Jambatu y
               literatura científica. Los registros incluyen coordenadas,
               elevación y vouchers de referencia.
@@ -283,7 +283,7 @@ function MapotecaContent() {
 function MapotecaLoading() {
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
           <p className="text-muted-foreground">Cargando mapa...</p>
@@ -300,7 +300,7 @@ export default function MapotecaPage() {
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900">
             Mapoteca
           </h1>
           <p className="text-muted-foreground mt-1">

@@ -53,13 +53,13 @@ export function AmphibianOrders({ orders }: AmphibianOrdersProps) {
             <div className="flex items-center justify-between">
               <div className="text-4xl">{getOrderIcon(order.name)}</div>
               <div className="text-right">
-                <div className="text-primary text-2xl font-bold dark:text-black">
+                <div className="text-primary text-2xl font-bold">
                   {order.species_count}
                 </div>
                 <div className="text-muted-foreground text-sm">especies</div>
               </div>
             </div>
-            <CardTitle className="text-xl dark:text-black">
+            <CardTitle className="text-xl">
               {order.name}
             </CardTitle>
             <p className="text-muted-foreground text-sm italic">

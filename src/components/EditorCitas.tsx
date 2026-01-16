@@ -252,7 +252,7 @@ export default function EditorCitas({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-a:text-primary dark:prose-invert",
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-a:text-primary",
       },
     },
     onSelectionUpdate: ({editor: editorInstance}) => {
@@ -1251,7 +1251,7 @@ export default function EditorCitas({
             <div className="flex items-center gap-4">
               {saveMessage && (
                 <span
-                  className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-destructive" : "text-green-600 dark:text-green-400"}`}
+                  className={`text-sm font-medium ${saveMessage.includes("Error") ? "text-destructive" : "text-green-600"}`}
                 >
                   {saveMessage}
                 </span>
