@@ -46,7 +46,7 @@ export default async function Page({
   const { data: taxons, error } = await supabaseClient
     .from("ficha_especie")
     .select("*")
-    .eq("id_taxon", Number(id));
+    .eq("taxon_id", Number(id));
 
   if (error) {
     console.error(error);

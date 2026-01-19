@@ -86,13 +86,14 @@ export default function RedListStatus({
 
   const badge = (
     <div
-      className={`inline-flex items-center justify-center font-semibold text-[10px] px-2 py-1 ${showTooltip ? "transition-all duration-200 hover:scale-105 cursor-pointer" : ""}`}
+      className={`inline-flex items-center justify-center font-semibold text-[11px] px-2 py-1 ${showTooltip ? "transition-all duration-200 hover:scale-105 cursor-pointer" : ""}`}
       style={{
         backgroundColor: statusInfo.backgroundColor,
         color: statusInfo.textColor,
         borderRadius: "100% 0% 100% 100%",
-        minWidth: "32px",
-        minHeight: "32px",
+        width: "36px",
+        height: "36px",
+        padding: "4px 9px",
         boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
       }}
     >

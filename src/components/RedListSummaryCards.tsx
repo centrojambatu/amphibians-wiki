@@ -1,6 +1,7 @@
 "use client";
 
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface RedListSummaryCardsProps {
   readonly especies: SpeciesListItem[];
@@ -47,34 +48,55 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
   const porcentajeNoAmenazadas =
     especiesConCategoria > 0 ? ((totalNoAmenazadas / especiesConCategoria) * 100).toFixed(1) : "0";
 
-  // Función para obtener el color de cada categoría
+  // Función para obtener el color de cada categoría (mismos colores que RedListStatus)
   const getColor = (sigla: string) => {
     if (isPE(sigla)) {
       return "#b71c1c"; // Rojo intenso para Posiblemente extinta
     }
     switch (sigla) {
       case "CR":
-        return "#d32f2f";
+        return "#d81e05";
       case "EN":
-        return "#f57c00";
+        return "#fc7f3f";
       case "VU":
-        return "#fbc02d";
+        return "#f9e814";
       case "NT":
-        return "#f9a825";
+        return "#cce226";
       case "LC":
-        return "#388e3c";
+        return "#60c659";
       default:
         return "#9e9e9e";
     }
   };
 
-  // Función para obtener el color del texto según el fondo
+  // Función para obtener el color del texto según el fondo (mismos que RedListStatus)
   const getTextColor = (sigla: string) => {
     if (isPE(sigla) || sigla === "CR" || sigla === "EN") {
       return "#ffffff";
     }
 
     return "#000000";
+  };
+
+  // Función para obtener el nombre completo de cada categoría
+  const getFullName = (sigla: string) => {
+    if (isPE(sigla)) {
+      return "Posiblemente Extinta";
+    }
+    switch (sigla) {
+      case "CR":
+        return "Críticamente Amenazado";
+      case "EN":
+        return "En Peligro";
+      case "VU":
+        return "Vulnerable";
+      case "NT":
+        return "Casi Amenazado";
+      case "LC":
+        return "Preocupación Menor";
+      default:
+        return sigla;
+    }
   };
 
   return (
@@ -86,36 +108,53 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
         </div>
         <div className="mb-1 flex flex-wrap items-center gap-2">
           {["CR", "EN", "VU"].map((sigla) => (
-            <div
-              key={sigla}
-              className="inline-flex items-center justify-center text-[8px] font-semibold"
-              style={{
-                backgroundColor: getColor(sigla),
-                color: getTextColor(sigla),
-                borderRadius: "100% 0% 100% 100%",
-                minWidth: "24px",
-                minHeight: "24px",
-                padding: "2px 6px",
-                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              {sigla}
-            </div>
+            <TooltipProvider key={sigla}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                    style={{
+                      backgroundColor: getColor(sigla),
+                      color: getTextColor(sigla),
+                      borderRadius: "100% 0% 100% 100%",
+                      width: "36px",
+                      height: "36px",
+                      padding: "4px 9px",
+                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    {sigla}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="font-semibold">{getFullName(sigla)}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
-          <div
-            className="inline-flex items-center justify-center text-[8px] font-semibold"
-            style={{
-              backgroundColor: getColor("CR (PE)"),
-              color: getTextColor("CR (PE)"),
-              borderRadius: "100% 0% 100% 100%",
-              minWidth: "24px",
-              minHeight: "24px",
-              padding: "2px 6px",
-              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            PE
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                  style={{
+                    backgroundColor: getColor("CR (PE)"),
+                    color: getTextColor("CR (PE)"),
+                    borderRadius: "100% 0% 100% 100%",
+                    width: "36px",
+                    height: "36px",
+                    padding: "4px 9px",
+                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  PE
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-semibold">{getFullName("CR (PE)")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="mt-4">
           <div className="flex items-baseline gap-2">
@@ -133,21 +172,29 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
         </div>
         <div className="mb-1 flex flex-wrap items-center gap-2">
           {["NT", "LC"].map((sigla) => (
-            <div
-              key={sigla}
-              className="inline-flex items-center justify-center text-[8px] font-semibold"
-              style={{
-                backgroundColor: getColor(sigla),
-                color: getTextColor(sigla),
-                borderRadius: "100% 0% 100% 100%",
-                minWidth: "24px",
-                minHeight: "24px",
-                padding: "2px 6px",
-                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              {sigla}
-            </div>
+            <TooltipProvider key={sigla}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                    style={{
+                      backgroundColor: getColor(sigla),
+                      color: getTextColor(sigla),
+                      borderRadius: "100% 0% 100% 100%",
+                      width: "36px",
+                      height: "36px",
+                      padding: "4px 9px",
+                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    {sigla}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="font-semibold">{getFullName(sigla)}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
         <div className="mt-4">
