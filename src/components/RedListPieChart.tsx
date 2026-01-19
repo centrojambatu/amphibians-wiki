@@ -1,8 +1,9 @@
 "use client";
 
-import { CatalogOption } from "@/app/sapopedia/get-filter-catalogs";
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+
 import RedListStatus from "./RedListStatus";
 
 interface RedListPieChartProps {
@@ -10,7 +11,7 @@ interface RedListPieChartProps {
   readonly categorias: CatalogOption[];
 }
 
-export default function RedListPieChart({ especies, categorias }: RedListPieChartProps) {
+export default function RedListPieChart({especies, categorias}: RedListPieChartProps) {
   // Obtener todas las categorías únicas de las especies
   const categoriasUnicas = new Set(
     especies
@@ -22,9 +23,11 @@ export default function RedListPieChart({ especies, categorias }: RedListPieChar
   const todasLasCategorias = Array.from(categoriasUnicas)
     .map((sigla) => {
       const categoriaEncontrada = categorias.find((c) => c.sigla === sigla);
+
       if (categoriaEncontrada) {
         return categoriaEncontrada;
       }
+
       return {
         id: 0,
         nombre: sigla,
@@ -80,6 +83,7 @@ export default function RedListPieChart({ especies, categorias }: RedListPieChar
 
   const isPE = (sigla: string | null) => {
     if (!sigla) return false;
+
     return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
   };
 
@@ -149,13 +153,13 @@ export default function RedListPieChart({ especies, categorias }: RedListPieChar
   });
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col">
+    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Distribución por Categorías</h3>
         <p className="text-muted-foreground text-sm">Total: {totalEspecies} especies</p>
       </div>
 
-      <div className="flex flex-col items-center gap-8 md:flex-row md:items-start flex-1">
+      <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-start">
         {/* Diagrama de pastel */}
         <div className="flex-shrink-0">
           <TooltipProvider>

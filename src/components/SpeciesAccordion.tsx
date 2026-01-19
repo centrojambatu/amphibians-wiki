@@ -110,7 +110,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div
-                      className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                      className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
                       style={{
                         backgroundColor: "#b71c1c",
                         color: "#ffffff",
@@ -167,7 +167,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className="inline-flex items-center justify-center text-[11px] font-semibold cursor-pointer"
+                          className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
                           style={{
                             backgroundColor: "#d1d1c6",
                             color: "#666666",
