@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import type {EspecieMapoteca} from "@/app/api/mapoteca/especies/route";
+
+import {useState, useEffect, Suspense} from "react";
+import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Filter, Search, X, Mountain, ArrowLeft } from "lucide-react";
+import {Filter, Search, X, Mountain, ArrowLeft} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Slider} from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -16,22 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import RedListStatus from "@/components/RedListStatus";
-import type { EspecieMapoteca } from "@/app/api/mapoteca/especies/route";
 
 // Cargar el mapa dinámicamente para evitar SSR con Leaflet
 const MapotecaMap = dynamic(() => import("@/components/MapotecaMap"), {
@@ -39,7 +28,7 @@ const MapotecaMap = dynamic(() => import("@/components/MapotecaMap"), {
   loading: () => (
     <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
       <div className="text-center">
-        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
         <p className="text-muted-foreground">Cargando mapa...</p>
       </div>
     </div>
@@ -56,11 +45,12 @@ interface ProvinciaOption {
 function MapotecaContent() {
   const searchParams = useSearchParams();
   const especieFromUrl = searchParams.get("especie") || "";
-  
+
   // Restaurar estado desde sessionStorage si existe
   const getStoredState = () => {
     if (typeof window === "undefined") return null;
     const stored = sessionStorage.getItem("mapotecaState");
+
     if (stored) {
       try {
         return JSON.parse(stored);
@@ -68,28 +58,29 @@ function MapotecaContent() {
         return null;
       }
     }
+
     return null;
   };
 
   const storedState = getStoredState();
-  
+
   const [provinciaFilter, setProvinciaFilter] = useState<string>(
-    storedState?.provinciaFilter || ""
+    storedState?.provinciaFilter || "",
   );
   const [especieFilter, setEspecieFilter] = useState<string>(
-    storedState?.especieFilter || especieFromUrl
+    storedState?.especieFilter || especieFromUrl,
   );
   const [searchInput, setSearchInput] = useState<string>(
-    storedState?.searchInput || especieFromUrl
+    storedState?.searchInput || especieFromUrl,
   );
-  const [mapType, setMapType] = useState<"relief" | "terrain" | "provinces" | "satellite" | "streets">(
-    storedState?.mapType || "provinces"
-  );
+  const [mapType, setMapType] = useState<
+    "relief" | "terrain" | "provinces" | "satellite" | "streets"
+  >(storedState?.mapType || "provinces");
   const [showFilters, setShowFilters] = useState<boolean>(
-    storedState?.showFilters !== undefined ? storedState.showFilters : true
+    storedState?.showFilters !== undefined ? storedState.showFilters : true,
   );
   const [maxPoints, setMaxPoints] = useState<number>(
-    storedState?.maxPoints || (especieFromUrl ? 11000 : 1000)
+    storedState?.maxPoints || (especieFromUrl ? 11000 : 1000),
   );
   const [especies, setEspecies] = useState<EspecieMapoteca[]>([]);
   const [loadingEspecies, setLoadingEspecies] = useState(false);
@@ -107,8 +98,10 @@ function MapotecaContent() {
     const fetchProvincias = async () => {
       try {
         const response = await fetch("/api/mapoteca/provincias");
+
         if (!response.ok) throw new Error("Error al cargar provincias");
         const data = await response.json();
+
         setProvincias(data);
       } catch (err) {
         console.error("Error al obtener provincias:", err);
@@ -133,6 +126,7 @@ function MapotecaContent() {
       setLoadingEspecies(true);
       try {
         const params = new URLSearchParams();
+
         if (provinciaFilter && provinciaFilter !== "all") {
           params.set("provincia", provinciaFilter);
         }
@@ -141,9 +135,11 @@ function MapotecaContent() {
         }
 
         const response = await fetch(`/api/mapoteca/especies?${params.toString()}`);
+
         if (!response.ok) throw new Error("Error al cargar especies");
 
         const data = await response.json();
+
         setEspecies(data);
       } catch (err) {
         console.error("Error al obtener especies:", err);
@@ -173,8 +169,8 @@ function MapotecaContent() {
       {especieFromUrl && (
         <div className="container mx-auto px-4 pb-4">
           <Link
-            href={`/sapopedia/species/${speciesSlug}`}
             className="inline-flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-80"
+            href={`/sapopedia/species/${speciesSlug}`}
             style={{
               color: "#16a34a",
               fontFamily:
@@ -196,10 +192,10 @@ function MapotecaContent() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Button
-                variant={showFilters ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
                 className="gap-2"
+                size="sm"
+                variant={showFilters ? "default" : "outline"}
+                onClick={() => setShowFilters(!showFilters)}
               >
                 <Filter className="h-4 w-4" />
                 Filtros
@@ -207,10 +203,10 @@ function MapotecaContent() {
 
               {hasActiveFilters && (
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
                   className="gap-1 text-red-600 hover:text-red-700"
+                  size="sm"
+                  variant="ghost"
+                  onClick={clearFilters}
                 >
                   <X className="h-4 w-4" />
                   Limpiar
@@ -220,12 +216,12 @@ function MapotecaContent() {
 
             {/* Selector de tipo de mapa */}
             <div className="flex items-center gap-2">
-              <Mountain className="h-4 w-4 text-muted-foreground" />
+              <Mountain className="text-muted-foreground h-4 w-4" />
               <Select
                 value={mapType}
-                onValueChange={(value: "relief" | "terrain" | "provinces" | "satellite" | "streets") =>
-                  setMapType(value)
-                }
+                onValueChange={(
+                  value: "relief" | "terrain" | "provinces" | "satellite" | "streets",
+                ) => setMapType(value)}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Tipo de mapa" />
@@ -246,30 +242,23 @@ function MapotecaContent() {
             <div className="mt-4 grid gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3">
               {/* Búsqueda por especie */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Buscar especie
-                </label>
+                <label className="text-sm font-medium text-gray-700">Buscar especie</label>
                 <div className="relative">
-                  <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                   <Input
-                    type="text"
+                    className="pl-10"
                     placeholder="Ej: Atelopus, Pristimantis..."
+                    type="text"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-10"
                   />
                 </div>
               </div>
 
               {/* Filtro por provincia */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Provincia
-                </label>
-                <Select
-                  value={provinciaFilter}
-                  onValueChange={setProvinciaFilter}
-                >
+                <label className="text-sm font-medium text-gray-700">Provincia</label>
+                <Select value={provinciaFilter} onValueChange={setProvinciaFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Todas las provincias" />
                   </SelectTrigger>
@@ -287,15 +276,16 @@ function MapotecaContent() {
               {/* Slider de puntos máximos */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Puntos a mostrar: <span className="font-bold text-green-600">{maxPoints.toLocaleString()}</span>
+                  Puntos a mostrar:{" "}
+                  <span className="font-bold text-green-600">{maxPoints.toLocaleString()}</span>
                 </label>
                 <Slider
+                  className="w-full"
+                  max={11000}
+                  min={100}
+                  step={100}
                   value={[maxPoints]}
                   onValueChange={(value) => setMaxPoints(value[0])}
-                  min={100}
-                  max={11000}
-                  step={100}
-                  className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>100</span>
@@ -308,10 +298,10 @@ function MapotecaContent() {
 
         {/* Mapa */}
         <MapotecaMap
-          provinciaFilter={provinciaFilter === "all" ? "" : provinciaFilter}
           especieFilter={especieFilter}
           mapType={mapType}
           maxPoints={maxPoints}
+          provinciaFilter={provinciaFilter === "all" ? "" : provinciaFilter}
           onNavigateToSpecies={() => {
             // Guardar estado completo antes de navegar
             if (typeof window !== "undefined") {
@@ -324,7 +314,7 @@ function MapotecaContent() {
                   mapType,
                   showFilters,
                   maxPoints,
-                })
+                }),
               );
             }
           }}
@@ -333,9 +323,7 @@ function MapotecaContent() {
         {/* Tabla de especies */}
         <div className="mt-6 rounded-lg border bg-white shadow-sm">
           <div className="border-b p-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Especies en el mapa
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">Especies en el mapa</h2>
             <p className="mt-1 text-sm text-gray-600">
               {loadingEspecies
                 ? "Cargando..."
@@ -344,7 +332,7 @@ function MapotecaContent() {
           </div>
           {loadingEspecies ? (
             <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
             </div>
           ) : especies.length > 0 ? (
             <div className="overflow-x-auto">
@@ -363,8 +351,8 @@ function MapotecaContent() {
                     <TableRow key={especie.id_taxon}>
                       <TableCell className="font-medium">
                         <Link
+                          className="text-green-600 italic hover:text-green-700 hover:underline"
                           href={`/sapopedia/species/${especie.nombre_cientifico.replaceAll(" ", "-")}`}
-                          className="text-green-600 hover:text-green-700 hover:underline italic"
                           onClick={() => {
                             // Guardar estado antes de navegar
                             if (typeof window !== "undefined") {
@@ -377,7 +365,7 @@ function MapotecaContent() {
                                   mapType,
                                   showFilters,
                                   maxPoints,
-                                })
+                                }),
                               );
                             }
                           }}
@@ -397,55 +385,68 @@ function MapotecaContent() {
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {especie.lista_roja_iucn ? (
-                          (() => {
-                            const sigla = especie.lista_roja_iucn.trim().toUpperCase();
-                            const isPE = sigla === "PE" || sigla.includes("PE") || sigla.includes("POSIBLEMENTE EXTINTA");
-                            
-                            if (isPE) {
-                              return (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div
-                                        className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold transition-all duration-200 hover:scale-105"
-                                        style={{
-                                          backgroundColor: "#b71c1c",
-                                          color: "#ffffff",
-                                          borderRadius: "100% 0% 100% 100%",
-                                          width: "36px",
-                                          height: "36px",
-                                          padding: "4px 9px",
-                                          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                                        }}
-                                      >
-                                        PE
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p className="font-semibold">Posiblemente Extinta</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              );
-                            }
-                            
-                            // Validar que sea un status válido para RedListStatus
-                            const validStatuses = ["LC", "NT", "VU", "EN", "CR", "EW", "EX", "DD"];
-                            if (validStatuses.includes(sigla)) {
-                              return (
-                                <RedListStatus
-                                  status={sigla as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"}
-                                  showTooltip={true}
-                                />
-                              );
-                            }
-                            
-                            return <span className="text-gray-500">-</span>;
-                          })()
-                        ) : (
-                          "-"
-                        )}
+                        {especie.lista_roja_iucn
+                          ? (() => {
+                              const sigla = especie.lista_roja_iucn.trim().toUpperCase();
+                              const isPE =
+                                sigla === "PE" ||
+                                sigla.includes("PE") ||
+                                sigla.includes("POSIBLEMENTE EXTINTA");
+
+                              if (isPE) {
+                                return (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div
+                                          className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold transition-all duration-200 hover:scale-105"
+                                          style={{
+                                            backgroundColor: "#b71c1c",
+                                            color: "#ffffff",
+                                            borderRadius: "100% 0% 100% 100%",
+                                            width: "36px",
+                                            height: "36px",
+                                            padding: "4px 9px",
+                                            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                                          }}
+                                        >
+                                          PE
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="font-semibold">Posiblemente Extinta</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                );
+                              }
+
+                              // Validar que sea un status válido para RedListStatus
+                              const validStatuses = [
+                                "LC",
+                                "NT",
+                                "VU",
+                                "EN",
+                                "CR",
+                                "EW",
+                                "EX",
+                                "DD",
+                              ];
+
+                              if (validStatuses.includes(sigla)) {
+                                return (
+                                  <RedListStatus
+                                    showTooltip={true}
+                                    status={
+                                      sigla as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
+                                    }
+                                  />
+                                );
+                              }
+
+                              return <span className="text-gray-500">-</span>;
+                            })()
+                          : "-"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -462,20 +463,15 @@ function MapotecaContent() {
         {/* Información adicional */}
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h3 className="mb-2 font-semibold text-gray-900">
-              🗺️ Sobre el mapa
-            </h3>
+            <h3 className="mb-2 font-semibold text-gray-900">🗺️ Sobre el mapa</h3>
             <p className="text-sm text-gray-600">
-              Este mapa muestra las ubicaciones geográficas de registros de
-              anfibios en Ecuador. Cada punto representa una localidad donde se
-              ha registrado una especie.
+              Este mapa muestra las ubicaciones geográficas de registros de anfibios en Ecuador.
+              Cada punto representa una localidad donde se ha registrado una especie.
             </p>
           </div>
 
           <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h3 className="mb-2 font-semibold text-gray-900">
-              🔍 Cómo usar
-            </h3>
+            <h3 className="mb-2 font-semibold text-gray-900">🔍 Cómo usar</h3>
             <ul className="space-y-1 text-sm text-gray-600">
               <li>• Usa la rueda del mouse para hacer zoom</li>
               <li>• Arrastra para moverte por el mapa</li>
@@ -485,13 +481,10 @@ function MapotecaContent() {
           </div>
 
           <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h3 className="mb-2 font-semibold text-gray-900">
-              📊 Datos
-            </h3>
+            <h3 className="mb-2 font-semibold text-gray-900">📊 Datos</h3>
             <p className="text-sm text-gray-600">
-              Los datos provienen de la colección del Centro Jambatu y
-              literatura científica. Los registros incluyen coordenadas,
-              elevación y vouchers de referencia.
+              Los datos provienen de la colección del Centro Jambatu y literatura científica. Los
+              registros incluyen coordenadas, elevación y vouchers de referencia.
             </p>
           </div>
         </div>
@@ -506,7 +499,7 @@ function MapotecaLoading() {
     <div className="container mx-auto px-4 py-6">
       <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
           <p className="text-muted-foreground">Cargando mapa...</p>
         </div>
       </div>
@@ -521,9 +514,7 @@ export default function MapotecaPage() {
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Mapoteca
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Mapoteca</h1>
           <p className="text-muted-foreground mt-1">
             Mapa interactivo de distribución de anfibios en Ecuador
           </p>
