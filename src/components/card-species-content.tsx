@@ -1606,6 +1606,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       </a>
                     </Button>
                   )}
+
+                  {fichaEspecie.morphosource && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.morphosource} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="MorphoSource Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/morphosource.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </section>
             </CardContent>

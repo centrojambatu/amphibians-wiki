@@ -41,6 +41,7 @@ interface SpeciesTechnicalSheetProps {
     max: number;
   };
   climaticFloors?: string[];
+  morphosource?: string;
 }
 
 export default function SpeciesTechnicalSheet({
@@ -65,6 +66,7 @@ export default function SpeciesTechnicalSheet({
   redListStatus,
   altitudinalRange,
   climaticFloors,
+  morphosource,
 }: SpeciesTechnicalSheetProps) {
   return (
     <Card
@@ -751,6 +753,33 @@ export default function SpeciesTechnicalSheet({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+
+                  {morphosource && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{ backgroundColor: "#f9f9f9" }}
+                            variant="outline"
+                          >
+                            <a href={morphosource} rel="noopener noreferrer" target="_blank">
+                              <img
+                                alt="MorphoSource Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/morphosource.png"
+                                style={{ width: "100%", height: "auto" }}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>MorphoSource</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
 
                   <TooltipProvider>
                     <Tooltip>
