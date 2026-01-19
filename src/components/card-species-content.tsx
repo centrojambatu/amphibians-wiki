@@ -285,8 +285,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   </div>
                 )}
 
-                {/* Color en preservación */}
-                {fichaEspecie.color_en_preservacion && (
+                {/* Color en preservación - OCULTO */}
+                {/* {fichaEspecie.color_en_preservacion && (
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Color en preservación</h4>
                     <div
@@ -296,7 +296,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       className="text-muted-foreground text-sm"
                     />
                   </div>
-                )}
+                )} */}
 
                 {/* Especies Similares */}
                 {/* {fichaEspecie.sinonimia && (
