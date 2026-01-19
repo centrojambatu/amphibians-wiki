@@ -47,7 +47,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
                 </Link>
                 <Link href="/sapoteca">
                   <Button className="cursor-pointer" variant="ghost">
-                    Sapoteca
+                    Biblioteca
                   </Button>
                 </Link>
                 <Link href="/mapoteca">
