@@ -55,6 +55,11 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
                     Mapoteca
                   </Button>
                 </Link>
+                <Link href="/videoteca">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Videoteca
+                  </Button>
+                </Link>
                 <Link href="/sapopedia/editor-citas">
                   <Button className="cursor-pointer" variant="ghost">
                     Editor Ficha Especie

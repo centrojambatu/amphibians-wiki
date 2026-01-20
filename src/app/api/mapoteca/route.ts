@@ -52,7 +52,7 @@ export async function GET(request: Request) {
         .range(page * pageSize, (page + 1) * pageSize - 1)
         .order("id_ubicacion_especie");
 
-      // Filtrar por provincia si se especifica
+      // Filtrar por provincia si se especifica (usando el campo provincia de ubicacion_especie)
       if (provincia) {
         query = query.ilike("provincia", `%${provincia}%`);
       }

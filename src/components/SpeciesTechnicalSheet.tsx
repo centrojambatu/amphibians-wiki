@@ -1,18 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Camera, Volume2, MapPin } from "lucide-react";
+import {Camera, Volume2, MapPin} from "lucide-react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import { processHTMLLinks } from "@/lib/process-html-links";
+import {Card, CardContent, CardHeader} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {Separator} from "@/components/ui/separator";
+import {processHTMLLinks} from "@/lib/process-html-links";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 
@@ -41,6 +36,7 @@ interface SpeciesTechnicalSheetProps {
     max: number;
   };
   climaticFloors?: string[];
+  morphosource?: string;
 }
 
 export default function SpeciesTechnicalSheet({
@@ -65,6 +61,7 @@ export default function SpeciesTechnicalSheet({
   redListStatus,
   altitudinalRange,
   climaticFloors,
+  morphosource,
 }: SpeciesTechnicalSheetProps) {
   return (
     <Card
@@ -78,9 +75,9 @@ export default function SpeciesTechnicalSheet({
       {/* Encabezado */}
       <CardHeader
         className="sticky top-0 z-30 text-center text-gray-900"
-        style={{ padding: "0", backgroundColor: "#ffffff" }}
+        style={{padding: "0", backgroundColor: "#ffffff"}}
       >
-        <div className="space-y-4" style={{ padding: "40px 30px 30px" }}>
+        <div className="space-y-4" style={{padding: "40px 30px 30px"}}>
           {/* Título principal - Jerarquía taxonómica completa */}
           <div className="flex flex-wrap items-baseline justify-center gap-2">
             {/* Orden - PEQUEÑO con link */}
@@ -95,10 +92,7 @@ export default function SpeciesTechnicalSheet({
             >
               {order}
             </Link>
-            <span
-              className="text-sm"
-              style={{ color: "#cccccc", fontWeight: "300" }}
-            >
+            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
               |
             </span>
 
@@ -114,10 +108,7 @@ export default function SpeciesTechnicalSheet({
             >
               {family}
             </Link>
-            <span
-              className="text-sm"
-              style={{ color: "#cccccc", fontWeight: "300" }}
-            >
+            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
               |
             </span>
 
@@ -133,10 +124,7 @@ export default function SpeciesTechnicalSheet({
             >
               {genus}
             </Link>
-            <span
-              className="text-sm"
-              style={{ color: "#cccccc", fontWeight: "300" }}
-            >
+            <span className="text-sm" style={{color: "#cccccc", fontWeight: "300"}}>
               |
             </span>
 
@@ -181,7 +169,7 @@ export default function SpeciesTechnicalSheet({
         </div>
 
         {/* Línea divisoria horizontal - extremo a extremo */}
-        <Separator className="bg-gray-200" style={{ margin: "0" }} />
+        <Separator className="bg-gray-200" style={{margin: "0"}} />
       </CardHeader>
 
       {/* Cuerpo - Layout con sidebar fijo y contenido con scroll */}
@@ -467,7 +455,7 @@ export default function SpeciesTechnicalSheet({
 
           {/* Columna derecha - Sidebar fijo */}
           <div className="sticky top-0 h-screen w-96 overflow-y-auto border-l">
-            <div className="space-y-8" style={{ padding: "25px 30px" }}>
+            <div className="space-y-8" style={{padding: "25px 30px"}}>
               {/* Distribución Altitudinal */}
               {altitudinalRange && climaticFloors && (
                 <section>
@@ -535,7 +523,7 @@ export default function SpeciesTechnicalSheet({
                     </h4>
                     <span
                       className="text-center text-sm font-semibold"
-                      style={{ color: isEndemic ? "#16a34a" : "#6b7280" }}
+                      style={{color: isEndemic ? "#16a34a" : "#6b7280"}}
                     >
                       {isEndemic ? "Endémica" : "No endémica"}
                     </span>
@@ -661,7 +649,7 @@ export default function SpeciesTechnicalSheet({
                       borderColor: "#dddddd",
                     }}
                   >
-                    <Camera className="h-8 w-8" style={{ color: "#333333" }} />
+                    <Camera className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
 
                   <div
@@ -671,7 +659,7 @@ export default function SpeciesTechnicalSheet({
                       borderColor: "#dddddd",
                     }}
                   >
-                    <Volume2 className="h-8 w-8" style={{ color: "#333333" }} />
+                    <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
 
                   <div
@@ -681,7 +669,7 @@ export default function SpeciesTechnicalSheet({
                       borderColor: "#dddddd",
                     }}
                   >
-                    <MapPin className="h-8 w-8" style={{ color: "#333333" }} />
+                    <MapPin className="h-8 w-8" style={{color: "#333333"}} />
                   </div>
                 </div>
               </section>
@@ -708,7 +696,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -716,7 +704,7 @@ export default function SpeciesTechnicalSheet({
                               alt="ASW Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/wikipedia.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>
@@ -733,7 +721,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -741,7 +729,7 @@ export default function SpeciesTechnicalSheet({
                               alt="AmphibiaWeb Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/amphibiaweb.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>
@@ -752,13 +740,40 @@ export default function SpeciesTechnicalSheet({
                     </Tooltip>
                   </TooltipProvider>
 
+                  {morphosource && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            className="group h-auto rounded-none border p-2 hover:bg-gray-50"
+                            style={{backgroundColor: "#f9f9f9"}}
+                            variant="outline"
+                          >
+                            <a href={morphosource} rel="noopener noreferrer" target="_blank">
+                              <img
+                                alt="MorphoSource Logo"
+                                className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
+                                src="/assets/references/morphosource.png"
+                                style={{width: "100%", height: "auto"}}
+                              />
+                            </a>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>MorphoSource</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -766,15 +781,13 @@ export default function SpeciesTechnicalSheet({
                               alt="NCBI Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/ncbi.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>
-                          NCBI - National Center for Biotechnology Information
-                        </p>
+                        <p>NCBI - National Center for Biotechnology Information</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -785,7 +798,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -793,7 +806,7 @@ export default function SpeciesTechnicalSheet({
                               alt="VertNet Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/vertnet.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>
@@ -810,7 +823,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -818,7 +831,7 @@ export default function SpeciesTechnicalSheet({
                               alt="iNaturalist Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/iNaturalist.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>
@@ -835,7 +848,7 @@ export default function SpeciesTechnicalSheet({
                         <Button
                           asChild
                           className="group h-auto rounded-none border p-2 hover:bg-gray-50"
-                          style={{ backgroundColor: "#f9f9f9" }}
+                          style={{backgroundColor: "#f9f9f9"}}
                           variant="outline"
                         >
                           <a href="#">
@@ -843,7 +856,7 @@ export default function SpeciesTechnicalSheet({
                               alt="IUCN Logo"
                               className="mx-auto grayscale transition-all duration-300 group-hover:scale-110 group-hover:grayscale-0"
                               src="/assets/references/redlist.png"
-                              style={{ width: "100%", height: "auto" }}
+                              style={{width: "100%", height: "auto"}}
                             />
                           </a>
                         </Button>

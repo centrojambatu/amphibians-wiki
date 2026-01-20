@@ -285,8 +285,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   </div>
                 )}
 
-                {/* Color en preservación */}
-                {fichaEspecie.color_en_preservacion && (
+                {/* Color en preservación - OCULTO */}
+                {/* {fichaEspecie.color_en_preservacion && (
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Color en preservación</h4>
                     <div
@@ -296,7 +296,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       className="text-muted-foreground text-sm"
                     />
                   </div>
-                )}
+                )} */}
 
                 {/* Especies Similares */}
                 {/* {fichaEspecie.sinonimia && (
@@ -425,7 +425,34 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* 1. Distribución Global */}
+                  {/* 0. Distribución Altitudinal */}
+                  <div className="-mx-6">
+                    <h4 className="mb-2 px-6 text-sm font-semibold">Distribución Altitudinal</h4>
+                    {fichaEspecie.altitudinalRange ? (
+                      <div className="mb-4 w-full">
+                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mb-4 px-6 text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 1. Rango Altitudinal */}
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Rango Altitudinal</h4>
+                    <p className="text-muted-foreground text-xs">
+                      {fichaEspecie.rango_altitudinal_min != null &&
+                      fichaEspecie.rango_altitudinal_max != null
+                        ? `${fichaEspecie.rango_altitudinal_min} - ${fichaEspecie.rango_altitudinal_max} m`
+                        : fichaEspecie.rango_altitudinal_min != null
+                          ? `Mín: ${fichaEspecie.rango_altitudinal_min} m`
+                          : fichaEspecie.rango_altitudinal_max != null
+                            ? `Máx: ${fichaEspecie.rango_altitudinal_max} m`
+                            : "No disponible"}
+                    </p>
+                  </div>
+
+                  {/* 2. Distribución Global */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Distribución Global</h4>
 
@@ -489,7 +516,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                   </div>
 
-                  {/* 3. Temperatura */}
+                  {/* 4. Temperatura */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Temperatura</h4>
                     <p className="text-muted-foreground text-xs">
@@ -503,7 +530,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     </p>
                   </div>
 
-                  {/* 4. Pluviocidad */}
+                  {/* 5. Pluviocidad */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Pluviocidad</h4>
                     <p className="text-muted-foreground text-xs">
@@ -517,7 +544,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     </p>
                   </div>
 
-                  {/* 5. Zonas Altitudinales */}
+                  {/* 6. Zonas Altitudinales */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
                     {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 ? (
@@ -553,34 +580,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                   </div>
 
-                  {/* 6. Rango Altitudinal */}
-                  <div>
-                    <h4 className="mb-2 text-sm font-semibold">Rango Altitudinal</h4>
-                    <p className="text-muted-foreground text-xs">
-                      {fichaEspecie.rango_altitudinal_min != null &&
-                      fichaEspecie.rango_altitudinal_max != null
-                        ? `${fichaEspecie.rango_altitudinal_min} - ${fichaEspecie.rango_altitudinal_max} m`
-                        : fichaEspecie.rango_altitudinal_min != null
-                          ? `Mín: ${fichaEspecie.rango_altitudinal_min} m`
-                          : fichaEspecie.rango_altitudinal_max != null
-                            ? `Máx: ${fichaEspecie.rango_altitudinal_max} m`
-                            : "No disponible"}
-                    </p>
-                  </div>
-
-                  {/* 7. Distribución Altitudinal */}
-                  <div className="-mx-6">
-                    <h4 className="mb-2 px-6 text-sm font-semibold">Distribución Altitudinal</h4>
-                    {fichaEspecie.altitudinalRange ? (
-                      <div className="mb-8 w-full">
-                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground mb-8 px-6 text-sm">No disponible</p>
-                    )}
-                  </div>
-
-                  {/* 8. Ecosistemas */}
+                  {/* 7. Ecosistemas */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Ecosistemas</h4>
                     {(() => {
@@ -610,7 +610,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 9. Regiones Biogeográficas */}
+                  {/* 8. Regiones Biogeográficas */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
                     {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
@@ -628,7 +628,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                   </div>
 
-                  {/* 10. Reservas de la Biosfera */}
+                  {/* 9. Reservas de la Biosfera */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Reservas de la Biosfera</h4>
                     {(() => {
@@ -659,7 +659,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 11. Bosques Protegidos */}
+                  {/* 10. Bosques Protegidos */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Bosques Protegidos</h4>
                     {(() => {
@@ -690,7 +690,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 12. Áreas Protegidas */}
+                  {/* 11. Áreas Protegidas */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Áreas Protegidas</h4>
                     {(() => {
@@ -1601,6 +1601,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           alt="IUCN Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
                           src="/assets/references/redlist.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
+
+                  {fichaEspecie.morphosource && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.morphosource} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="MorphoSource Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/morphosource.png"
                           style={{width: "100%", height: "auto"}}
                         />
                       </a>

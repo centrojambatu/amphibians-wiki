@@ -115,6 +115,7 @@ interface MapotecaMapProps {
   colorMode?: "genus" | "elevation";
   mapType?: MapTileType;
   maxPoints?: number;
+  onNavigateToSpecies?: () => void; // Callback para guardar estado antes de navegar
 }
 
 export default function MapotecaMap({
@@ -123,6 +124,7 @@ export default function MapotecaMap({
   colorMode = "elevation",
   mapType = "provinces",
   maxPoints = 11000,
+  onNavigateToSpecies,
 }: MapotecaMapProps) {
   const [ubicaciones, setUbicaciones] = useState<UbicacionEspecie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,10 +180,14 @@ export default function MapotecaMap({
   // Navegar a la ficha de especie
   const handleSpeciesClick = useCallback(
     (ubicacion: UbicacionEspecie) => {
+      // Llamar al callback para guardar estado antes de navegar
+      if (onNavigateToSpecies) {
+        onNavigateToSpecies();
+      }
       const speciesSlug = ubicacion.nombre_cientifico.replaceAll(" ", "-");
       router.push(`/sapopedia/species/${speciesSlug}`);
     },
-    [router]
+    [router, onNavigateToSpecies]
   );
 
   if (loading) {
