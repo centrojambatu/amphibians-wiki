@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-types": "node src/genSupaTypes.ts"
+    "generate-types": "node src/genSupaTypes.ts",
+    "update-videos": "tsx scripts/update-videos-data.ts",
+    "fetch-videos": "tsx scripts/fetch-videos-oembed.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
@@ -42,7 +44,9 @@
     "react-leaflet": "^5.0.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "4.0.9",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "jspdf": "^2.5.2",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^1.52.3",

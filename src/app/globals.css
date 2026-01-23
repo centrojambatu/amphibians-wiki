@@ -115,6 +115,136 @@ a:active {
   text-decoration: underline !important;
 }
 
+/* Excepción para botones de videoteca - mantener color gris y sin subrayado */
+a.videoteca-play-button,
+a.videoteca-play-button:link,
+a.videoteca-play-button:visited,
+a.videoteca-play-button:hover,
+a.videoteca-play-button:active,
+a.videoteca-play-button:focus,
+a.videoteca-play-button *,
+a.videoteca-play-button:hover *,
+a.videoteca-play-button:active * {
+  color: #1f2937 !important;
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para enlaces de especies en videoteca - sin subrayado */
+a.videoteca-species-link,
+a.videoteca-species-link:link,
+a.videoteca-species-link:visited,
+a.videoteca-species-link:hover,
+a.videoteca-species-link:active,
+a.videoteca-species-link:focus,
+a.videoteca-species-link *,
+a.videoteca-species-link:hover *,
+a.videoteca-species-link:active * {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para enlaces de videos en videoteca - sin subrayado */
+a.videoteca-video-link,
+a.videoteca-video-link:link,
+a.videoteca-video-link:visited,
+a.videoteca-video-link:hover,
+a.videoteca-video-link:active,
+a.videoteca-video-link:focus,
+a.videoteca-video-link *,
+a.videoteca-video-link:hover *,
+a.videoteca-video-link:active * {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para botones de navegación en página de videos - sin subrayado */
+a.videoteca-back-link,
+a.videoteca-back-link:link,
+a.videoteca-back-link:visited,
+a.videoteca-back-link:hover,
+a.videoteca-back-link:active,
+a.videoteca-back-link:focus,
+a.videoteca-view-species-link,
+a.videoteca-view-species-link:link,
+a.videoteca-view-species-link:visited,
+a.videoteca-view-species-link:hover,
+a.videoteca-view-species-link:active,
+a.videoteca-view-species-link:focus {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para enlaces de especies en fonoteca - sin subrayado */
+a.fonoteca-species-link,
+a.fonoteca-species-link:link,
+a.fonoteca-species-link:visited,
+a.fonoteca-species-link:hover,
+a.fonoteca-species-link:active,
+a.fonoteca-species-link:focus,
+a.fonoteca-species-link *,
+a.fonoteca-species-link:hover *,
+a.fonoteca-species-link:active * {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para botones de navegación en página de audios - sin subrayado */
+a.fonoteca-back-link,
+a.fonoteca-back-link:link,
+a.fonoteca-back-link:visited,
+a.fonoteca-back-link:hover,
+a.fonoteca-back-link:active,
+a.fonoteca-back-link:focus,
+a.fonoteca-view-species-link,
+a.fonoteca-view-species-link:link,
+a.fonoteca-view-species-link:visited,
+a.fonoteca-view-species-link:hover,
+a.fonoteca-view-species-link:active,
+a.fonoteca-view-species-link:focus {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para enlaces de especies en fototeca - sin subrayado */
+a.fototeca-species-link,
+a.fototeca-species-link:link,
+a.fototeca-species-link:visited,
+a.fototeca-species-link:hover,
+a.fototeca-species-link:active,
+a.fototeca-species-link:focus,
+a.fototeca-species-link *,
+a.fototeca-species-link:hover *,
+a.fototeca-species-link:active * {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
+/* Excepción para botones de navegación en página de fotos - sin subrayado */
+a.fototeca-back-link,
+a.fototeca-back-link:link,
+a.fototeca-back-link:visited,
+a.fototeca-back-link:hover,
+a.fototeca-back-link:active,
+a.fototeca-back-link:focus,
+a.fototeca-view-species-link,
+a.fototeca-view-species-link:link,
+a.fototeca-view-species-link:visited,
+a.fototeca-view-species-link:hover,
+a.fototeca-view-species-link:active,
+a.fototeca-view-species-link:focus {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
+}
+
 /* Enlaces de Sapoteca - sin subrayado en hover */
 a.sapoteca-link,
 a.sapoteca-link:hover,
@@ -350,4 +480,18 @@ a.processed-link.processed-link-no-underline:active {
 .leaflet-interactive:hover {
   stroke-width: 3 !important;
   filter: brightness(1.1);
+}
+
+/* Fototeca: no subrayar cards en hover (refuerzo) */
+.fototeca-species-link,
+.fototeca-species-link:hover,
+.fototeca-species-link:active,
+.fototeca-species-link:focus,
+.fototeca-species-link *,
+.fototeca-species-link:hover *,
+.fototeca-species-link:active *,
+.fototeca-species-link:focus * {
+  text-decoration: none !important;
+  text-underline-offset: 0 !important;
+  text-decoration-line: none !important;
 }

@@ -319,6 +319,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.comparacion ?? null,
     fichaEspecie?.usos ?? null,
     fichaEspecie?.agradecimiento ?? null,
+    fichaEspecie?.historial ?? null,
     vistaDataTyped?.distribucion_global ?? null,
   ];
 
@@ -333,8 +334,43 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     }
   });
 
+  // Identificar los id_publicacion que ya tenemos en publicacionesOrdenadas
+  const idsPublicacionesExistentes = new Set<number>(
+    publicacionesOrdenadas
+      .map((pub) => pub.publicacion?.id_publicacion)
+      .filter((id): id is number => id !== undefined && id !== null)
+  );
+
+  // Identificar las referencias que NO están en las publicaciones existentes
+  const referenciasFaltantes = Array.from(referenciasEncontradas).filter(
+    (id) => !idsPublicacionesExistentes.has(id)
+  );
+
+  // Cargar las publicaciones faltantes directamente de la tabla publicacion
+  let publicacionesAdicionales: any[] = [];
+  if (referenciasFaltantes.length > 0) {
+    const { data: pubsAdicionales, error: errorPubsAdicionales } = await supabaseClient
+      .from("publicacion")
+      .select("*")
+      .in("id_publicacion", referenciasFaltantes);
+
+    if (errorPubsAdicionales) {
+      console.error("Error al cargar publicaciones adicionales:", errorPubsAdicionales);
+    } else if (pubsAdicionales) {
+      // Convertir al mismo formato que las publicaciones de taxon_publicacion
+      publicacionesAdicionales = pubsAdicionales.map((pub) => ({
+        id_taxon_publicacion: `adicional_${pub.id_publicacion}`,
+        taxon_id: taxonId,
+        publicacion: pub,
+      }));
+    }
+  }
+
+  // Combinar publicaciones existentes con las adicionales
+  const todasLasPublicaciones = [...publicacionesOrdenadas, ...publicacionesAdicionales];
+
   // Filtrar publicaciones: solo las que están referenciadas por id_publicacion
-  const publicacionesReferenciadas = publicacionesOrdenadas.filter((pub) =>
+  const publicacionesReferenciadas = todasLasPublicaciones.filter((pub) =>
     pub.publicacion?.id_publicacion
       ? referenciasEncontradas.has(pub.publicacion.id_publicacion)
       : false,
@@ -348,6 +384,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   if (process.env.NODE_ENV === "development") {
     console.log("🔍 Referencias encontradas en textos:", Array.from(referenciasEncontradas));
     console.log("📚 Total de publicaciones ordenadas:", publicacionesOrdenadas.length);
+    console.log("📥 Referencias faltantes:", referenciasFaltantes);
+    console.log("➕ Publicaciones adicionales cargadas:", publicacionesAdicionales.length);
     console.log("✅ Publicaciones referenciadas encontradas:", publicacionesReferenciadas.length);
     console.log("📖 Publicaciones que se mostrarán:", publicacionesParaMostrar.length);
 
@@ -359,12 +397,12 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       console.log("📝 Etimología (primeros 200 chars):", fichaEspecie.etimologia.substring(0, 200));
     }
 
-    if (publicacionesOrdenadas.length > 0) {
+    if (todasLasPublicaciones.length > 0) {
       console.log("📄 Primera publicación ejemplo:", {
-        id_taxon_publicacion: publicacionesOrdenadas[0]?.id_taxon_publicacion,
-        tiene_publicacion: !!publicacionesOrdenadas[0]?.publicacion,
-        titulo: publicacionesOrdenadas[0]?.publicacion?.titulo,
-        cita_corta: publicacionesOrdenadas[0]?.publicacion?.cita_corta,
+        id_taxon_publicacion: todasLasPublicaciones[0]?.id_taxon_publicacion,
+        tiene_publicacion: !!todasLasPublicaciones[0]?.publicacion,
+        titulo: todasLasPublicaciones[0]?.publicacion?.titulo,
+        cita_corta: todasLasPublicaciones[0]?.publicacion?.cita_corta,
       });
     }
   }
@@ -444,7 +482,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     dataRegionBio: Array.isArray(dataRegionBio) ? dataRegionBio : [],
     geoPolitica: Array.isArray(geoPolitica) ? geoPolitica : [],
     publicaciones: publicacionesParaMostrar,
-    publicacionesOrdenadas: publicacionesOrdenadas, // Todas las publicaciones ordenadas para procesar citas
+    publicacionesOrdenadas: todasLasPublicaciones, // Todas las publicaciones (incluyendo adicionales) para procesar citas
     taxones: taxonesArray,
     listaRojaIUCN: listaRojaIUCN ?? null,
     lineage: lineageArray,
