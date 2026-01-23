@@ -249,8 +249,21 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         await new Promise((resolve) => {
           logoImg.onload = () => {
             try {
-              pdf.addImage(logoImg, "PNG", margin, yPosition, 50, 15);
-              yPosition += 25;
+              // Calcular proporciones para mantener el aspecto original
+              const originalWidth = logoImg.naturalWidth;
+              const originalHeight = logoImg.naturalHeight;
+              const aspectRatio = originalWidth / originalHeight;
+              
+              // Definir altura máxima deseada y calcular ancho proporcional
+              const maxHeight = 20; // mm
+              const calculatedWidth = maxHeight * aspectRatio;
+              
+              // Limitar el ancho máximo a 60mm
+              const finalWidth = Math.min(calculatedWidth, 60);
+              const finalHeight = finalWidth / aspectRatio;
+              
+              pdf.addImage(logoImg, "PNG", margin, yPosition, finalWidth, finalHeight);
+              yPosition += finalHeight + 10;
             } catch (err) {
               console.warn("Error al agregar logo:", err);
             }
@@ -266,6 +279,61 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       // Título principal
       addText(nombreCientifico, 16, true, 1.3);
       yPosition += 3;
+
+      // Agregar fotografía de la especie si existe
+      if (fichaEspecie.fotografia_ficha) {
+        try {
+          const speciesImg = new Image();
+          speciesImg.crossOrigin = "anonymous";
+          speciesImg.src = fichaEspecie.fotografia_ficha;
+          
+          await new Promise((resolve) => {
+            speciesImg.onload = () => {
+              try {
+                // Calcular proporciones para mantener el aspecto original
+                const originalWidth = speciesImg.naturalWidth;
+                const originalHeight = speciesImg.naturalHeight;
+                const aspectRatio = originalWidth / originalHeight;
+                
+                // Definir ancho máximo y calcular altura proporcional
+                const maxImgWidth = 80; // mm
+                const maxImgHeight = 60; // mm
+                
+                let imgWidth = maxImgWidth;
+                let imgHeight = imgWidth / aspectRatio;
+                
+                // Si la altura excede el máximo, ajustar
+                if (imgHeight > maxImgHeight) {
+                  imgHeight = maxImgHeight;
+                  imgWidth = imgHeight * aspectRatio;
+                }
+                
+                // Alinear la imagen a la izquierda
+                const imgX = margin;
+                
+                // Verificar si hay espacio en la página actual
+                if (yPosition + imgHeight > pageHeight - margin - 15) {
+                  pdf.addPage();
+                  yPosition = margin;
+                }
+                
+                pdf.addImage(speciesImg, "JPEG", imgX, yPosition, imgWidth, imgHeight);
+                yPosition += imgHeight + 5;
+              } catch (err) {
+                console.warn("Error al agregar fotografía:", err);
+              }
+              resolve(null);
+            };
+            speciesImg.onerror = () => {
+              console.warn("Error al cargar fotografía de la especie");
+              resolve(null);
+            };
+            setTimeout(() => resolve(null), 5000); // Timeout más largo para imágenes grandes
+          });
+        } catch (err) {
+          console.warn("Error al procesar fotografía:", err);
+        }
+      }
 
       // Información taxonómica (Orden, Familia, Género)
       const orden = formatValue(fichaEspecie.lineage?.find((item: any) => item.rank_id === 4)?.taxon);
