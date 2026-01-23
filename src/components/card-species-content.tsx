@@ -2,7 +2,8 @@
 
 import {useMemo} from "react";
 import Link from "next/link";
-import {Camera, MapPin, Video, Volume2} from "lucide-react";
+import {Camera, Download, MapPin, Video, Volume2} from "lucide-react";
+import jsPDF from "jspdf";
 
 import {
   processHTMLLinks,
@@ -107,6 +108,605 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     [publicaciones],
   );
 
+  // Función para extraer texto de un elemento HTML
+  const extractTextFromElement = (element: HTMLElement): string => {
+    let text = "";
+    
+    // Obtener texto directo del nodo
+    if (element.nodeType === Node.TEXT_NODE) {
+      text += element.textContent?.trim() || "";
+    } else {
+      // Procesar hijos
+      element.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const nodeText = node.textContent?.trim();
+          if (nodeText) {
+            text += nodeText + " ";
+          }
+        } else if (node instanceof HTMLElement) {
+          // Ignorar imágenes y elementos ocultos
+          if (
+            node.tagName === "IMG" ||
+            node.style.display === "none" ||
+            node.style.visibility === "hidden"
+          ) {
+            return;
+          }
+          
+          // Agregar saltos de línea para elementos de bloque
+          const blockElements = ["DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BR"];
+          if (blockElements.includes(node.tagName)) {
+            const childText = extractTextFromElement(node);
+            if (childText) {
+              text += childText + "\n";
+            }
+          } else {
+            text += extractTextFromElement(node);
+          }
+        }
+      });
+    }
+    
+    return text.trim();
+  };
+
+  // Función para limpiar HTML y obtener texto plano
+  const stripHTML = (html: string | null | undefined): string => {
+    if (!html || html === "undefined" || html === "null") return "";
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    const text = tmp.textContent || tmp.innerText || "";
+    return text.trim();
+  };
+
+  // Función para validar y formatear valores
+  const formatValue = (value: any): string => {
+    if (value === null || value === undefined || value === "undefined" || value === "null") {
+      return "";
+    }
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    return String(value).trim();
+  };
+
+  // Función para descargar la ficha como PDF (solo texto)
+  const handleDownloadPDF = async () => {
+    try {
+      // Obtener el nombre científico para el nombre del archivo
+      const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
+        ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
+        : "especie";
+
+      // Mostrar mensaje de carga
+      const loadingMessage = document.createElement("div");
+      loadingMessage.textContent = "Generando PDF...";
+      loadingMessage.style.cssText =
+        "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 10000;";
+      document.body.appendChild(loadingMessage);
+
+      // Crear PDF
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = 210; // Ancho A4 en mm
+      const pageHeight = 297; // Alto A4 en mm
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
+
+      // Función para agregar texto con salto de página automático
+      // Factor de conversión: 1 punto = 0.352778 mm, con lineHeight aplicado
+      const ptToMm = 0.352778;
+      const addText = (text: string, fontSize: number = 10, isBold: boolean = false, lineHeight: number = 1.2) => {
+        if (!text || text.trim() === "" || text === "undefined" || text === "null") {
+          return;
+        }
+        
+        pdf.setFontSize(fontSize);
+        pdf.setFont("helvetica", isBold ? "bold" : "normal");
+        
+        const lines = pdf.splitTextToSize(text.trim(), maxWidth);
+        
+        lines.forEach((line: string) => {
+          if (yPosition > pageHeight - margin - 15) {
+            pdf.addPage();
+            yPosition = margin;
+          }
+          pdf.text(line, margin, yPosition);
+          yPosition += fontSize * ptToMm * lineHeight;
+        });
+      };
+
+      // Función para procesar citas {{id}} en el texto
+      const procesarCitas = (texto: string | null | undefined): string => {
+        if (!texto) return "";
+        return processCitationReferences(texto, publicaciones);
+      };
+
+      // Función para agregar una sección con título
+      const addSection = (title: string, content: string | null | undefined) => {
+        // Primero procesar las citas, luego limpiar HTML
+        const contentConCitas = procesarCitas(content);
+        const cleanContent = formatValue(stripHTML(contentConCitas));
+        if (!cleanContent) return;
+        
+        yPosition += 3;
+        addText(title, 12, true, 1.2);
+        yPosition += 1;
+        addText(cleanContent, 10, false, 1.2);
+      };
+
+      // Cargar y agregar logo
+      try {
+        const logoImg = new Image();
+        logoImg.crossOrigin = "anonymous";
+        logoImg.src = "/assets/references/logo.png";
+        
+        await new Promise((resolve) => {
+          logoImg.onload = () => {
+            try {
+              pdf.addImage(logoImg, "PNG", margin, yPosition, 50, 15);
+              yPosition += 25;
+            } catch (err) {
+              console.warn("Error al agregar logo:", err);
+            }
+            resolve(null);
+          };
+          logoImg.onerror = () => resolve(null);
+          setTimeout(() => resolve(null), 2000);
+        });
+      } catch (err) {
+        console.warn("Error al cargar logo:", err);
+      }
+
+      // Título principal
+      addText(nombreCientifico, 16, true, 1.3);
+      yPosition += 3;
+
+      // Información taxonómica (Orden, Familia, Género)
+      const orden = formatValue(fichaEspecie.lineage?.find((item: any) => item.rank_id === 4)?.taxon);
+      const familia = formatValue(fichaEspecie.lineage?.find((item: any) => item.rank_id === 5)?.taxon);
+      const genero = formatValue(
+        fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || 
+        fichaEspecie.lineage?.find((item: any) => item.rank_id === 6)?.taxon
+      );
+      const nombreComun = formatValue(fichaEspecie.taxones?.[0]?.nombre_comun);
+
+      if (orden || familia || genero || nombreComun) {
+        addText("Clasificación Taxonómica", 11, true, 1.2);
+        yPosition += 1;
+        if (orden) {
+          addText(`Orden: ${orden}`, 10, false, 1.2);
+        }
+        if (familia) {
+          addText(`Familia: ${familia}`, 10, false, 1.2);
+        }
+        if (genero) {
+          addText(`Género: ${genero}`, 10, false, 1.2);
+        }
+        if (nombreComun) {
+          addText(`Nombre común: ${nombreComun}`, 10, false, 1.2);
+        }
+        yPosition += 2;
+      }
+
+      // Agregar contenido de la ficha
+      const sections = [
+        {title: "Primer(os) colector(es)", content: fichaEspecie.descubridor},
+        {title: "Sinonimia", content: fichaEspecie.sinonimia},
+        {title: "Etimología", content: fichaEspecie.etimologia},
+        {title: "Taxonomía", content: fichaEspecie.taxonomia},
+        {title: "Identificación", content: fichaEspecie.identificacion},
+        {title: "Descripción", content: fichaEspecie.descripcion},
+        {title: "Diagnosis", content: fichaEspecie.diagnosis},
+        {title: "Morfometría", content: fichaEspecie.morfometria},
+        {title: "Color en Vida", content: fichaEspecie.color_en_vida},
+        {title: "Color en Preservación", content: fichaEspecie.color_en_preservacion},
+        {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
+        {title: "Reproducción", content: fichaEspecie.reproduccion},
+        {title: "Dieta", content: fichaEspecie.dieta},
+        {title: "Canto", content: fichaEspecie.canto},
+        {title: "Larva", content: fichaEspecie.larva},
+        {title: "Distribución", content: fichaEspecie.distribucion},
+        {title: "Rango Altitudinal (Texto)", content: fichaEspecie.rango_altitudinal},
+        {title: "Observación Zona Altitudinal", content: fichaEspecie.observacion_zona_altitudinal},
+        {title: "Referencia Área Protegida", content: fichaEspecie.referencia_area_protegida},
+        {title: "Comentario Estatus Poblacional", content: fichaEspecie.comentario_estatus_poblacional},
+        {title: "Usos", content: fichaEspecie.usos},
+        {title: "Información Adicional", content: fichaEspecie.informacion_adicional},
+        {title: "Agradecimiento", content: fichaEspecie.agradecimiento},
+      ];
+
+      sections.forEach((section) => {
+        // addSection ahora procesa citas y limpia HTML internamente
+        addSection(section.title, section.content);
+      });
+
+      // Agregar información de distribución detallada
+      yPosition += 3;
+      addText("Distribución y Ecología", 11, true, 1.2);
+      yPosition += 1;
+
+      // Rango Altitudinal numérico
+      const minAlt = fichaEspecie.rango_altitudinal_min;
+      const maxAlt = fichaEspecie.rango_altitudinal_max;
+      if (minAlt !== null && minAlt !== undefined || maxAlt !== null && maxAlt !== undefined) {
+        addText("Rango Altitudinal", 10, true, 1.2);
+        yPosition += 1;
+        if (minAlt !== null && minAlt !== undefined && maxAlt !== null && maxAlt !== undefined) {
+          addText(`${minAlt} - ${maxAlt} m`, 10, false, 1.2);
+        } else if (minAlt !== null && minAlt !== undefined) {
+          addText(`Mínimo: ${minAlt} m`, 10, false, 1.2);
+        } else if (maxAlt !== null && maxAlt !== undefined) {
+          addText(`Máximo: ${maxAlt} m`, 10, false, 1.2);
+        }
+        yPosition += 1.5;
+      }
+
+      // Distribución Global con Geopolítica
+      const distribucionGlobal = stripHTML(procesarCitas(fichaEspecie.distribucion_global));
+      const geoPoliticaData = fichaEspecie.geoPolitica;
+      if (distribucionGlobal || (geoPoliticaData && geoPoliticaData.length > 0)) {
+        addText("Distribución Global", 10, true, 1.2);
+        yPosition += 1;
+        
+        // Geopolítica
+        if (geoPoliticaData && geoPoliticaData.length > 0) {
+          addText("Geopolítica:", 10, false, 1.2);
+          yPosition += 0.5;
+          const grouped = groupGeoPoliticalData(geoPoliticaData);
+          Object.entries(grouped).forEach(([continente, continenteData]: [string, any]) => {
+            Object.entries(continenteData.paises).forEach(([pais, paisData]: [string, any]) => {
+              let geoText = `${continente} > ${pais}`;
+              if (paisData.provincias && paisData.provincias.length > 0) {
+                geoText += ` > ${paisData.provincias.join(", ")}`;
+              }
+              addText(geoText, 10, false, 1.2);
+            });
+          });
+          yPosition += 0.5;
+        }
+        
+        // Descripción de distribución global
+        if (distribucionGlobal) {
+          addText(distribucionGlobal, 10, false, 1.2);
+        }
+        yPosition += 1.5;
+      }
+
+      // Zonas Altitudinales
+      const zonasAltitudinales = fichaEspecie.distributions;
+      if (zonasAltitudinales && zonasAltitudinales.length > 0) {
+        const uniqueZonas = new Map();
+        zonasAltitudinales.forEach((categoria: any) => {
+          const key = categoria.id_taxon_catalogo_awe || categoria.catalogo_awe_id;
+          if (!uniqueZonas.has(key) && categoria.catalogo_awe?.nombre) {
+            uniqueZonas.set(key, categoria.catalogo_awe.nombre);
+          }
+        });
+        if (uniqueZonas.size > 0) {
+          addText("Zonas Altitudinales", 10, true, 1.2);
+          yPosition += 1;
+          Array.from(uniqueZonas.values()).forEach((nombre: string) => {
+            addText(`• ${nombre}`, 10, false, 1.2);
+          });
+          yPosition += 1.5;
+        }
+      }
+
+      // Ecosistemas
+      const ecosistemas = fichaEspecie.taxon_catalogo_awe_results?.filter(
+        (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Ecosistemas"
+      ) || [];
+      if (ecosistemas.length > 0) {
+        addText("Ecosistemas", 10, true, 1.2);
+        yPosition += 1;
+        ecosistemas.forEach((categoria: any) => {
+          if (categoria.catalogo_awe?.nombre) {
+            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
+          }
+        });
+        yPosition += 1.5;
+      }
+
+      // Regiones Biogeográficas
+      const regionesBio = fichaEspecie.dataRegionBio;
+      if (regionesBio && regionesBio.length > 0) {
+        addText("Regiones Biogeográficas", 10, true, 1.2);
+        yPosition += 1;
+        regionesBio.forEach((region: any) => {
+          if (region.catalogo_awe?.nombre) {
+            addText(`• ${region.catalogo_awe.nombre}`, 10, false, 1.2);
+          }
+        });
+        yPosition += 1.5;
+      }
+
+      // Reservas de la Biosfera
+      const reservasBiosfera = fichaEspecie.taxon_catalogo_awe_results?.filter(
+        (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Reservas de la Biósfera"
+      ) || [];
+      if (reservasBiosfera.length > 0) {
+        addText("Reservas de la Biosfera", 10, true, 1.2);
+        yPosition += 1;
+        reservasBiosfera.forEach((categoria: any) => {
+          if (categoria.catalogo_awe?.nombre) {
+            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
+          }
+        });
+        yPosition += 1.5;
+      }
+
+      // Bosques Protegidos
+      const bosquesProtegidos = fichaEspecie.taxon_catalogo_awe_results?.filter(
+        (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Bosques Protegidos"
+      ) || [];
+      if (bosquesProtegidos.length > 0) {
+        addText("Bosques Protegidos", 10, true, 1.2);
+        yPosition += 1;
+        bosquesProtegidos.forEach((categoria: any) => {
+          if (categoria.catalogo_awe?.nombre) {
+            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
+          }
+        });
+        yPosition += 1.5;
+      }
+
+      // Áreas Protegidas
+      const areasProtegidas = fichaEspecie.taxon_catalogo_awe_results?.filter(
+        (categoria: any) =>
+          categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas del Estado" ||
+          categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas Privadas"
+      ) || [];
+      if (areasProtegidas.length > 0) {
+        // Eliminar duplicados
+        const uniqueAreas = new Map();
+        areasProtegidas.forEach((categoria: any) => {
+          const key = categoria.catalogo_awe_id;
+          if (!uniqueAreas.has(key) && categoria.catalogo_awe?.nombre) {
+            uniqueAreas.set(key, categoria);
+          }
+        });
+        const areasUnicas = Array.from(uniqueAreas.values());
+        
+        if (areasUnicas.length > 0) {
+          addText("Áreas Protegidas", 10, true, 1.2);
+          yPosition += 1;
+          
+          const areasEstado = areasUnicas.filter(
+            (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas del Estado"
+          );
+          const areasPrivadas = areasUnicas.filter(
+            (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas Privadas"
+          );
+          
+          if (areasEstado.length > 0) {
+            addText("Áreas protegidas del Estado:", 10, false, 1.2);
+            yPosition += 0.5;
+            areasEstado.forEach((categoria: any) => {
+              addText(`  • ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
+            });
+            yPosition += 0.5;
+          }
+          
+          if (areasPrivadas.length > 0) {
+            addText("Áreas protegidas Privadas:", 10, false, 1.2);
+            yPosition += 0.5;
+            areasPrivadas.forEach((categoria: any) => {
+              addText(`  • ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
+            });
+            yPosition += 0.5;
+          }
+        }
+      }
+
+      // Agregar información de SVL si existe
+      const svlMacho = formatValue(fichaEspecie.svl_macho);
+      const svlHembra = formatValue(fichaEspecie.svl_hembra);
+      if (svlMacho || svlHembra) {
+        yPosition += 3;
+        addText("Tamaño", 11, true, 1.2);
+        yPosition += 1;
+        if (svlMacho) {
+          addText(`SVL Macho: ${svlMacho}`, 10, false, 1.2);
+        }
+        if (svlHembra) {
+          addText(`SVL Hembra: ${svlHembra}`, 10, false, 1.2);
+        }
+      }
+
+      // Agregar información de temperatura si existe
+      const temp = fichaEspecie.temperatura;
+      const tempMin = fichaEspecie.temperatura_min;
+      const tempMax = fichaEspecie.temperatura_max;
+      if (temp !== null && temp !== undefined || tempMin !== null && tempMin !== undefined || tempMax !== null && tempMax !== undefined) {
+        yPosition += 3;
+        addText("Temperatura", 11, true, 1.2);
+        yPosition += 1;
+        if (temp !== null && temp !== undefined) {
+          addText(`Temperatura: ${temp}°C`, 10, false, 1.2);
+        }
+        if (tempMin !== null && tempMin !== undefined) {
+          addText(`Temperatura mínima: ${tempMin}°C`, 10, false, 1.2);
+        }
+        if (tempMax !== null && tempMax !== undefined) {
+          addText(`Temperatura máxima: ${tempMax}°C`, 10, false, 1.2);
+        }
+      }
+
+      // Agregar información de pluviocidad si existe
+      const pluv = fichaEspecie.pluviocidad;
+      const pluvMin = fichaEspecie.pluviocidad_min;
+      const pluvMax = fichaEspecie.pluviocidad_max;
+      if (pluv !== null && pluv !== undefined || pluvMin !== null && pluvMin !== undefined || pluvMax !== null && pluvMax !== undefined) {
+        yPosition += 3;
+        addText("Pluviocidad", 11, true, 1.2);
+        yPosition += 1;
+        if (pluv !== null && pluv !== undefined) {
+          addText(`Pluviocidad: ${pluv} mm`, 10, false, 1.2);
+        }
+        if (pluvMin !== null && pluvMin !== undefined) {
+          addText(`Pluviocidad mínima: ${pluvMin} mm`, 10, false, 1.2);
+        }
+        if (pluvMax !== null && pluvMax !== undefined) {
+          addText(`Pluviocidad máxima: ${pluvMax} mm`, 10, false, 1.2);
+        }
+      }
+
+      // Agregar información de Lista Roja si existe
+      const listaRojaSigla = formatValue(fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla);
+      const listaRojaNombre = formatValue(fichaEspecie.listaRojaIUCN?.catalogo_awe?.nombre);
+      if (listaRojaSigla) {
+        yPosition += 3;
+        addText("Lista Roja IUCN", 11, true, 1.2);
+        yPosition += 1;
+        addText(`Estado: ${listaRojaSigla}`, 10, false, 1.2);
+        if (listaRojaNombre) {
+          addText(`Categoría: ${listaRojaNombre}`, 10, false, 1.2);
+        }
+      }
+
+      // Agregar información de endemismo
+      const endemica = fichaEspecie.taxones?.[0]?.endemica;
+      if (endemica !== undefined && endemica !== null) {
+        yPosition += 3;
+        addText("Endemismo", 11, true, 1.2);
+        yPosition += 1;
+        addText(endemica ? "Endémica" : "No endémica", 10, false, 1.2);
+      }
+
+      // Agregar información de compilador y editor
+      const compilador = formatValue(fichaEspecie.compilador);
+      const editor = formatValue(fichaEspecie.editor);
+      if (compilador || editor) {
+        yPosition += 3;
+        addText("Créditos", 11, true, 1.2);
+        yPosition += 1;
+        if (compilador) {
+          addText(`Compilador: ${compilador}`, 10, false, 1.2);
+          const autoriaComp = formatValue(fichaEspecie.autoria_compilador);
+          if (autoriaComp) {
+            addText(`Autoría compilador: ${autoriaComp}`, 10, false, 1.2);
+          }
+          const fechaComp = formatValue(fichaEspecie.fecha_compilacion);
+          if (fechaComp) {
+            addText(`Fecha compilación: ${fechaComp}`, 10, false, 1.2);
+          }
+        }
+        if (editor) {
+          addText(`Editor: ${editor}`, 10, false, 1.2);
+          const autoriaEdit = formatValue(fichaEspecie.autoria_editor);
+          if (autoriaEdit) {
+            addText(`Autoría editor: ${autoriaEdit}`, 10, false, 1.2);
+          }
+          const fechaEdit = formatValue(fichaEspecie.fecha_edicion);
+          if (fechaEdit) {
+            addText(`Fecha edición: ${fechaEdit}`, 10, false, 1.2);
+          }
+        }
+      }
+
+      // Agregar historial
+      const historial = formatValue(fichaEspecie.historial);
+      if (historial) {
+        yPosition += 3;
+        addText("Historial", 11, true, 1.2);
+        yPosition += 1;
+        const cleanHistorial = stripHTML(procesarCitas(historial));
+        if (cleanHistorial) {
+          addText(cleanHistorial, 10, false, 1.2);
+        }
+      }
+
+      // Agregar fecha de actualización
+      const fechaActualizacion = formatValue(fichaEspecie.fecha_actualizacion);
+      if (fechaActualizacion) {
+        yPosition += 3;
+        addText("Fecha de Actualización", 11, true, 1.2);
+        yPosition += 1;
+        addText(fechaActualizacion, 10, false, 1.2);
+      }
+
+      // Agregar Literatura Citada
+      if (publicaciones && publicaciones.length > 0) {
+        yPosition += 5;
+        addText("Literatura Citada", 12, true, 1.2);
+        yPosition += 2;
+        
+        publicaciones.forEach((pub: any) => {
+          if (!pub.publicacion) return;
+          
+          // Construir cita completa
+          let citaCompleta = "";
+          
+          if (pub.publicacion.cita_larga) {
+            citaCompleta = pub.publicacion.cita_larga;
+          } else if (pub.publicacion.cita_corta) {
+            const partes: string[] = [];
+            partes.push(pub.publicacion.cita_corta);
+            
+            if (pub.publicacion.titulo && !pub.publicacion.cita_corta.includes(pub.publicacion.titulo)) {
+              partes.push(pub.publicacion.titulo);
+            }
+            if (pub.publicacion.editorial) {
+              partes.push(pub.publicacion.editorial);
+            }
+            if (pub.publicacion.volumen) {
+              partes.push(`Vol. ${pub.publicacion.volumen}`);
+            }
+            if (pub.publicacion.numero) {
+              partes.push(`No. ${pub.publicacion.numero}`);
+            }
+            if (pub.publicacion.pagina) {
+              partes.push(`pp. ${pub.publicacion.pagina}`);
+            }
+            if (pub.publicacion.numero_publicacion_ano) {
+              const añoStr = String(pub.publicacion.numero_publicacion_ano);
+              if (!pub.publicacion.cita_corta.includes(añoStr)) {
+                partes.push(`(${añoStr})`);
+              }
+            }
+            citaCompleta = partes.join(", ");
+          } else if (pub.publicacion.cita) {
+            citaCompleta = pub.publicacion.cita;
+          }
+          
+          if (citaCompleta) {
+            // Limpiar HTML de la cita
+            const citaLimpia = stripHTML(citaCompleta);
+            if (citaLimpia) {
+              addText(`• ${citaLimpia}`, 9, false, 1.2);
+              yPosition += 1;
+            }
+          }
+        });
+      }
+
+      // Remover mensaje de carga
+      if (document.body.contains(loadingMessage)) {
+        document.body.removeChild(loadingMessage);
+      }
+
+      // Descargar el PDF
+      pdf.save(`Ficha_${nombreCientifico.replace(/\s+/g, "_")}.pdf`);
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido al generar el PDF";
+      alert(`Error al generar el PDF: ${errorMessage}\n\nPor favor, verifica la consola para más detalles.`);
+      
+      // Remover mensaje de carga en caso de error
+      const loadingMessage = document.getElementById("pdf-loading-message");
+      if (loadingMessage) {
+        document.body.removeChild(loadingMessage);
+      }
+    }
+  };
+
   // Log solo en desarrollo
   if (process.env.NODE_ENV === "development") {
     console.log("✅ CardSpeciesContent recibió fichaEspecie:", {
@@ -151,7 +751,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {fichaEspecie.descubridor ? (
                   <div
-                    dangerouslySetInnerHTML={{
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.descubridor),
                     }}
                     className="text-muted-foreground text-sm italic"
@@ -162,7 +762,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 {fichaEspecie.sinonimia && (
                   <div className="mt-4">
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.sinonimia),
                       }}
                       className="text-muted-foreground text-xs"
@@ -179,7 +779,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {fichaEspecie.etimologia ? (
                   <div
-                    dangerouslySetInnerHTML={{
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.etimologia),
                     }}
                     className="text-muted-foreground text-sm"
@@ -199,7 +799,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 {fichaEspecie.identificacion && (
                   <div className="mt-4">
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.identificacion),
                       }}
                       className="text-muted-foreground text-sm"
@@ -238,7 +838,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Morfometría</h4>
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.morfometria),
                       }}
                       className="text-muted-foreground text-sm"
@@ -251,7 +851,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Diagnosis</h4>
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.diagnosis),
                       }}
                       className="text-muted-foreground text-sm"
@@ -264,7 +864,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Descripción</h4>
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.descripcion),
                       }}
                       className="text-muted-foreground text-sm"
@@ -277,7 +877,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Color en vida</h4>
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.color_en_vida),
                       }}
                       className="text-muted-foreground text-sm"
@@ -290,7 +890,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Color en preservación</h4>
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.color_en_preservacion),
                       }}
                       className="text-muted-foreground text-sm"
@@ -303,7 +903,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className="mt-4">
                     <h4 className="mb-2 font-semibold">Especies similares</h4>
                     <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: processHTMLLinks(
                             processCitationReferences(
                               fichaEspecie.sinonimia,
@@ -325,7 +925,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {fichaEspecie.comparacion ? (
                   <div
-                    dangerouslySetInnerHTML={{
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.comparacion),
                     }}
                     className="text-muted-foreground text-sm"
@@ -344,7 +944,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <div className="space-y-4">
                   {fichaEspecie.habitat_biologia ? (
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.habitat_biologia),
                       }}
                       className="text-muted-foreground text-sm"
@@ -355,7 +955,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                   {/* {fichaEspecie.informacion_adicional && (
                     <div
-                      dangerouslySetInnerHTML={{
+                      suppressHydrationWarning dangerouslySetInnerHTML={{
                         __html: procesarHTML(fichaEspecie.informacion_adicional),
                       }}
                       className="text-muted-foreground text-sm"
@@ -366,7 +966,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <div className="mt-4">
                       <h4 className="mb-2 text-sm font-semibold">Reproducción</h4>
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.reproduccion),
                         }}
                         className="text-muted-foreground text-sm"
@@ -378,7 +978,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <div className="mt-4">
                       <h4 className="mb-2 text-sm font-semibold">Dieta</h4>
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.dieta),
                         }}
                         className="text-muted-foreground text-sm"
@@ -390,7 +990,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <div className="mt-4">
                       <h4 className="mb-2 text-sm font-semibold">Canto</h4>
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.canto),
                         }}
                         className="text-muted-foreground text-sm"
@@ -408,7 +1008,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {fichaEspecie.larva ? (
                   <div
-                    dangerouslySetInnerHTML={{
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.larva),
                     }}
                     className="text-muted-foreground text-sm"
@@ -505,7 +1105,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     {fichaEspecie.distribucion_global ? (
                       <div className="mt-4">
                         <div
-                          dangerouslySetInnerHTML={{
+                          suppressHydrationWarning dangerouslySetInnerHTML={{
                             __html: procesarHTML(fichaEspecie.distribucion_global),
                           }}
                           className="text-muted-foreground text-sm"
@@ -861,7 +1461,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <h4 className="mb-2 text-sm font-semibold">Estatus Poblacional</h4>
                     {fichaEspecie.comentario_estatus_poblacional ? (
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
                         }}
                         className="text-muted-foreground text-sm"
@@ -1045,7 +1645,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {fichaEspecie.taxonomia ? (
                   <div
-                    dangerouslySetInnerHTML={{
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.taxonomia),
                     }}
                     className="text-muted-foreground text-sm"
@@ -1067,7 +1667,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <h4 className="mb-2 text-sm font-semibold">Usos</h4>
                     {fichaEspecie.usos ? (
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.usos),
                         }}
                         className="text-muted-foreground text-sm"
@@ -1082,7 +1682,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <h4 className="mb-2 text-sm font-semibold">Información Adicional</h4>
                     {fichaEspecie.informacion_adicional ? (
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.informacion_adicional),
                         }}
                         className="text-muted-foreground text-sm"
@@ -1177,14 +1777,14 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         >
                           {pub.publicacion?.titulo && (
                             <div
-                              dangerouslySetInnerHTML={{
+                              suppressHydrationWarning dangerouslySetInnerHTML={{
                                 __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
                               }}
                               className="hover:text-primary text-sm font-medium"
                             />
                           )}
                           <div
-                            dangerouslySetInnerHTML={{
+                            suppressHydrationWarning dangerouslySetInnerHTML={{
                               __html: processHTMLLinksNoUnderline(citaParaMostrar),
                             }}
                             className="text-muted-foreground text-xs"
@@ -1208,13 +1808,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Historial</h4>
                     {fichaEspecie.historial ? (
-                      <div className="text-muted-foreground text-sm">
-                        {fichaEspecie.historial
-                          .split(/\r\n?|\n/)
-                          .map((line: string, idx: number) => (
-                            <div key={idx}>{line}</div>
-                          ))}
-                      </div>
+                      <div
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.historial.replace(/\r\n?|\n/g, "<br />")),
+                        }}
+                        className="text-muted-foreground text-sm"
+                      />
                     ) : (
                       <p className="text-muted-foreground text-sm">No disponible</p>
                     )}
@@ -1225,7 +1824,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <h4 className="mb-2 text-sm font-semibold">Agradecimiento</h4>
                     {fichaEspecie.agradecimiento ? (
                       <div
-                        dangerouslySetInnerHTML={{
+                        suppressHydrationWarning dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.agradecimiento),
                         }}
                         className="text-muted-foreground text-sm"
@@ -1256,6 +1855,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
         {/* Columna derecha - Sidebar fijo */}
         <div className="sticky top-0 py-4 pr-8 pl-4" style={{width: "20%", maxHeight: "100vh"}}>
+          {/* Botón de descarga */}
+          <div className="mb-4">
+            <Button
+              className="flex w-full items-center justify-center gap-2"
+              onClick={handleDownloadPDF}
+              variant="outline"
+            >
+              <Download className="h-4 w-4" />
+              Descargar ficha
+            </Button>
+          </div>
           <Card className="h-fit">
             <CardContent className="space-y-2 p-4">
               {/* Información General */}
