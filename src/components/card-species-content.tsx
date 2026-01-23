@@ -1431,38 +1431,59 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               {/* Recursos */}
               <section>
                 <div className="grid grid-cols-1 gap-2">
-                  <div
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      borderColor: "#dddddd",
-                    }}
-                  >
-                    <Camera className="h-8 w-8" style={{color: "#333333"}} />
-                    <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
-                  </div>
+                  {(() => {
+                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/fotos`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Camera className="h-8 w-8" style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
+                      </Link>
+                    );
+                  })()}
 
-                  <div
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      borderColor: "#dddddd",
-                    }}
-                  >
-                    <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
-                    <span className="mt-1 text-xs font-medium text-gray-600">Fonoteca</span>
-                  </div>
+                  {(() => {
+                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/audios`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Fonoteca</span>
+                      </Link>
+                    );
+                  })()}
 
-                  <div
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:border-gray-400 hover:bg-gray-200"
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      borderColor: "#dddddd",
-                    }}
-                  >
-                    <Video className="h-8 w-8" style={{color: "#333333"}} />
-                    <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
-                  </div>
+                  {(() => {
+                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/videos`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Video className="h-8 w-8" style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
+                      </Link>
+                    );
+                  })()}
 
                   <Link
                     className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"

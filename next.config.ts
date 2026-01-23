@@ -11,6 +11,32 @@ const nextConfig: NextConfig = {
   },
   images: {
     unoptimized: false,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+      },
+      {
+        protocol: "https",
+        hostname: "multimedia20stg.blob.core.windows.net",
+      },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "inaturalist-open-data.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "static.inaturalist.org",
+      },
+    ],
   },
   logging: {
     fetches: {
