@@ -35,7 +35,7 @@ async function getVideoInfo(videoId: string): Promise<VideoInfo | null> {
   try {
     // Usar oEmbed de YouTube (no requiere API key)
     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-    
+
     const response = await fetch(oembedUrl);
 
     if (!response.ok) {
@@ -54,6 +54,7 @@ async function getVideoInfo(videoId: string): Promise<VideoInfo | null> {
     };
   } catch (error) {
     console.error(`❌ Error al obtener información del video ${videoId}:`, error);
+
     // Retornar información básica si falla
     return {
       id: videoId,
@@ -66,7 +67,7 @@ async function getVideoInfo(videoId: string): Promise<VideoInfo | null> {
 
 function generateTypeScriptCode(videos: VideoInfo[]): string {
   let code = "export const videosEcuador: VideoData[] = [\n";
-  
+
   videos.forEach((video) => {
     code += "  {\n";
     code += `    id: "${video.id}",\n`;
@@ -86,8 +87,9 @@ function generateTypeScriptCode(videos: VideoInfo[]): string {
     }
     code += "  },\n";
   });
-  
+
   code += "];\n";
+
   return code;
 }
 
@@ -98,8 +100,10 @@ async function main() {
 
   for (let i = 0; i < videoIdsEcuador.length; i++) {
     const videoId = videoIdsEcuador[i];
+
     console.log(`📹 [${i + 1}/${videoIdsEcuador.length}] Procesando: ${videoId}...`);
     const info = await getVideoInfo(videoId);
+
     if (info) {
       videos.push(info);
       console.log(`   ✅ ${info.title.substring(0, 60)}${info.title.length > 60 ? "..." : ""}`);
@@ -119,12 +123,12 @@ async function main() {
 
   // Leer el archivo actual
   const filePath = path.join(process.cwd(), "src/app/videoteca/videos-data.ts");
-  let fileContent = fs.readFileSync(filePath, "utf-8");
+  const fileContent = fs.readFileSync(filePath, "utf-8");
 
   // Reemplazar el array videosEcuador
   const startMarker = "export const videosEcuador: VideoData[] = [";
   const endMarker = "];";
-  
+
   const startIndex = fileContent.indexOf(startMarker);
   const endIndex = fileContent.indexOf(endMarker, startIndex);
 
@@ -146,7 +150,9 @@ async function main() {
   console.log(`\n📊 Resumen:`);
   console.log(`   - Videos procesados: ${videos.length}`);
   console.log(`   - Archivo actualizado: ${filePath}\n`);
-  console.log("ℹ️  Nota: oEmbed solo proporciona título y autor. Para obtener duración, visualizaciones y fecha, necesitarías la API de YouTube.");
+  console.log(
+    "ℹ️  Nota: oEmbed solo proporciona título y autor. Para obtener duración, visualizaciones y fecha, necesitarías la API de YouTube.",
+  );
 }
 
 main().catch((error) => {

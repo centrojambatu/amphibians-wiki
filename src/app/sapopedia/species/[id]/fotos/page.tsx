@@ -1,8 +1,11 @@
 import {notFound} from "next/navigation";
 import {ArrowLeft, Eye} from "lucide-react";
 import Link from "next/link";
-import getFichaEspecie from "../get-ficha-especie";
+
 import {FotoData} from "@/app/fototeca/fotos-data";
+
+import getFichaEspecie from "../get-ficha-especie";
+
 import SpeciesFotosClient from "./SpeciesFotosClient";
 
 interface PageProps {
@@ -64,11 +67,9 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
 
   // Usar el id original de la URL para mantener la consistencia
   const especieUrl = `/sapopedia/species/${id}`;
-  
+
   // Construir URL de regreso a fototeca con el estado de búsqueda
-  const fototecaUrl = search
-    ? `/fototeca?search=${encodeURIComponent(search)}`
-    : "/fototeca";
+  const fototecaUrl = search ? `/fototeca?search=${encodeURIComponent(search)}` : "/fototeca";
 
   // Filtrar fotos por especie (en producción, esto vendría de la base de datos)
   const fotosExternos = fotosExternasMuestra;
@@ -76,12 +77,12 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
 
   return (
     <SpeciesFotosClient
-      nombreCientifico={nombreCientifico}
       especieUrl={especieUrl}
-      fromFototeca={fromFototeca}
-      fototecaUrl={fototecaUrl}
       fotosExternos={fotosExternos}
       fotosPropios={fotosPropios}
+      fototecaUrl={fototecaUrl}
+      fromFototeca={fromFototeca}
+      nombreCientifico={nombreCientifico}
     />
   );
 }

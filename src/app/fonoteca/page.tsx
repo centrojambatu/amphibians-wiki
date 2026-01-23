@@ -2,8 +2,10 @@
 
 import {useEffect, useRef, useState} from "react";
 import {ChevronLeft, ChevronRight, Search, Volume2} from "lucide-react";
-import {audiosEcuador, audiosMundo, AudioData} from "./audios-data";
+
 import AudioSpectrogram from "@/components/AudioSpectrogram";
+
+import {audiosEcuador, audiosMundo, AudioData} from "./audios-data";
 
 interface EspecieItem {
   id: number;
@@ -26,7 +28,9 @@ export default function FonotecaPage() {
     if (!ref.current) return;
     const scrollAmount = 400; // Pixels a desplazar
     const currentScroll = ref.current.scrollLeft;
-    const newScroll = direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+    const newScroll =
+      direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+
     ref.current.scrollTo({left: newScroll, behavior: "smooth"});
   };
 
@@ -35,9 +39,14 @@ export default function FonotecaPage() {
   const [showMundoLeft, setShowMundoLeft] = useState(false);
   const [showMundoRight, setShowMundoRight] = useState(true);
 
-  const checkScrollButtons = (ref: React.RefObject<HTMLDivElement>, setLeft: (v: boolean) => void, setRight: (v: boolean) => void) => {
+  const checkScrollButtons = (
+    ref: React.RefObject<HTMLDivElement>,
+    setLeft: (v: boolean) => void,
+    setRight: (v: boolean) => void,
+  ) => {
     if (!ref.current) return;
     const {scrollLeft, scrollWidth, clientWidth} = ref.current;
+
     setLeft(scrollLeft > 0);
     setRight(scrollLeft < scrollWidth - clientWidth - 10);
   };
@@ -63,6 +72,7 @@ export default function FonotecaPage() {
       setLoadingEspecies(true);
       try {
         const params = new URLSearchParams();
+
         if (searchInput.trim()) {
           params.set("search", searchInput.trim());
         }
@@ -72,6 +82,7 @@ export default function FonotecaPage() {
         if (!response.ok) throw new Error("Error al cargar especies");
 
         const data = await response.json();
+
         setEspecies(data);
       } catch (err) {
         console.error("Error al obtener especies:", err);
@@ -86,9 +97,9 @@ export default function FonotecaPage() {
 
   return (
     <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900">Fonoteca</h1>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900">Fonoteca</h1>
           <p className="mt-2 text-gray-600">
             Audios destacados sobre anfibios de Ecuador y del mundo
           </p>
@@ -108,9 +119,9 @@ export default function FonotecaPage() {
               {/* Botón izquierda */}
               {showMundoLeft && (
                 <button
-                  className="group absolute left-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(mundoScrollRef, "left")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] left-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(mundoScrollRef, "left")}
                 >
                   <ChevronLeft className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
@@ -118,17 +129,19 @@ export default function FonotecaPage() {
               {/* Botón derecha */}
               {showMundoRight && (
                 <button
-                  className="group absolute right-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(mundoScrollRef, "right")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] right-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(mundoScrollRef, "right")}
                 >
                   <ChevronRight className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
               )}
               <div
-                className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                onScroll={() => checkScrollButtons(mundoScrollRef, setShowMundoLeft, setShowMundoRight)}
                 ref={mundoScrollRef}
+                className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onScroll={() =>
+                  checkScrollButtons(mundoScrollRef, setShowMundoLeft, setShowMundoRight)
+                }
               >
                 {audiosMundo.map((audio) => (
                   <AudioCard key={audio.id} audio={audio} />
@@ -139,7 +152,9 @@ export default function FonotecaPage() {
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
               <p className="text-gray-600">
                 No hay audios configurados. Agrega audios en{" "}
-                <code className="rounded bg-gray-200 px-2 py-1 text-sm">src/app/fonoteca/audios-data.ts</code>
+                <code className="rounded bg-gray-200 px-2 py-1 text-sm">
+                  src/app/fonoteca/audios-data.ts
+                </code>
               </p>
             </div>
           )}
@@ -150,9 +165,7 @@ export default function FonotecaPage() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Audios Centro Jambatu</h2>
-              <p className="mt-1 text-sm text-gray-600">
-                Audios producidos por el Centro Jambatu
-              </p>
+              <p className="mt-1 text-sm text-gray-600">Audios producidos por el Centro Jambatu</p>
             </div>
           </div>
 
@@ -161,9 +174,9 @@ export default function FonotecaPage() {
               {/* Botón izquierda */}
               {showEcuadorLeft && (
                 <button
-                  className="group absolute left-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(ecuadorScrollRef, "left")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] left-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(ecuadorScrollRef, "left")}
                 >
                   <ChevronLeft className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
@@ -171,17 +184,19 @@ export default function FonotecaPage() {
               {/* Botón derecha */}
               {showEcuadorRight && (
                 <button
-                  className="group absolute right-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(ecuadorScrollRef, "right")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] right-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(ecuadorScrollRef, "right")}
                 >
                   <ChevronRight className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
               )}
               <div
-                className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                onScroll={() => checkScrollButtons(ecuadorScrollRef, setShowEcuadorLeft, setShowEcuadorRight)}
                 ref={ecuadorScrollRef}
+                className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onScroll={() =>
+                  checkScrollButtons(ecuadorScrollRef, setShowEcuadorLeft, setShowEcuadorRight)
+                }
               >
                 {audiosEcuador.map((audio) => (
                   <AudioCard key={audio.id} audio={audio} />
@@ -192,7 +207,9 @@ export default function FonotecaPage() {
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
               <p className="text-gray-600">
                 No hay audios configurados. Agrega audios en{" "}
-                <code className="rounded bg-gray-200 px-2 py-1 text-sm">src/app/fonoteca/audios-data.ts</code>
+                <code className="rounded bg-gray-200 px-2 py-1 text-sm">
+                  src/app/fonoteca/audios-data.ts
+                </code>
               </p>
             </div>
           )}
@@ -208,13 +225,13 @@ export default function FonotecaPage() {
           {/* Filtro de búsqueda */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
-                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                onChange={(e) => setSearchInput(e.target.value)}
+                className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-sm focus:ring-2 focus:outline-none"
                 placeholder="Buscar por nombre científico o común..."
                 type="text"
                 value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
             </div>
           </div>
@@ -229,14 +246,14 @@ export default function FonotecaPage() {
               {especies.map((especie) => (
                 <a
                   key={especie.id}
-                  className="fonoteca-species-link group flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary hover:shadow-md no-underline"
+                  className="fonoteca-species-link group hover:border-primary flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 no-underline transition-all hover:shadow-md"
                   href={`/sapopedia/species/${especie.slug}/audios?from=fonoteca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                  <div className="bg-primary/10 text-primary group-hover:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors">
                     <Volume2 className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-medium text-gray-900 group-hover:text-primary">
+                    <h3 className="group-hover:text-primary truncate font-medium text-gray-900">
                       {especie.nombre_cientifico}
                     </h3>
                     {especie.nombre_comun && (
@@ -248,7 +265,9 @@ export default function FonotecaPage() {
             </div>
           ) : searchInput.trim() ? (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-              <p className="text-gray-600">No se encontraron especies con ese criterio de búsqueda.</p>
+              <p className="text-gray-600">
+                No se encontraron especies con ese criterio de búsqueda.
+              </p>
             </div>
           ) : (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
@@ -256,8 +275,8 @@ export default function FonotecaPage() {
             </div>
           )}
         </section>
-        </div>
       </div>
+    </div>
   );
 }
 
@@ -268,12 +287,13 @@ function AudioCard({audio}: {audio: AudioData}) {
 
   useEffect(() => {
     const audioEl = audioRef.current;
+
     if (audioEl) {
       // Esperar a que el audio esté listo
       const handleCanPlay = () => {
         setAudioElement(audioEl);
       };
-      
+
       if (audioEl.readyState >= 2) {
         // Si ya está cargado, establecer inmediatamente
         setAudioElement(audioEl);
@@ -289,22 +309,22 @@ function AudioCard({audio}: {audio: AudioData}) {
 
   return (
     <div className="flex-shrink-0" style={{width: "320px"}}>
-      <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary hover:shadow-md">
+      <div className="group hover:border-primary relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-md">
         {/* Reproductor de audio */}
         <div className="mb-3">
           <audio
             ref={audioRef}
-            className="w-full"
             controls
+            className="w-full"
             crossOrigin="anonymous"
+            preload="metadata"
+            src={audio.url}
             onError={(e) => {
               console.error("Error cargando audio:", e);
             }}
             onLoadedMetadata={() => {
               console.log("Audio metadata cargada:", audio.url);
             }}
-            preload="metadata"
-            src={audio.url}
           >
             Tu navegador no soporta el elemento de audio.
           </audio>
@@ -317,23 +337,15 @@ function AudioCard({audio}: {audio: AudioData}) {
 
         {/* Información del audio */}
         <div>
-          <h3 className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary">
+          <h3 className="group-hover:text-primary line-clamp-2 text-sm font-medium text-gray-900">
             {audio.title}
           </h3>
           <p className="mt-1 text-xs text-gray-600">{audio.source}</p>
-          {audio.species && (
-            <p className="mt-1 text-xs text-gray-500 italic">{audio.species}</p>
-          )}
+          {audio.species && <p className="mt-1 text-xs text-gray-500 italic">{audio.species}</p>}
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
-            {audio.duration && (
-              <span>Duración: {audio.duration}</span>
-            )}
-            {audio.location && (
-              <span>• {audio.location}</span>
-            )}
-            {audio.date && (
-              <span>• {audio.date}</span>
-            )}
+            {audio.duration && <span>Duración: {audio.duration}</span>}
+            {audio.location && <span>• {audio.location}</span>}
+            {audio.date && <span>• {audio.date}</span>}
           </div>
         </div>
       </div>

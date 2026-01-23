@@ -1432,8 +1432,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <section>
                 <div className="grid grid-cols-1 gap-2">
                   {(() => {
-                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
                     const slug = nombreCientifico.replace(/\s+/g, "-");
+
                     return (
                       <Link
                         className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
@@ -1450,8 +1452,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   })()}
 
                   {(() => {
-                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
                     const slug = nombreCientifico.replace(/\s+/g, "-");
+
                     return (
                       <Link
                         className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
@@ -1468,8 +1472,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   })()}
 
                   {(() => {
-                    const nombreCientifico = `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
                     const slug = nombreCientifico.replace(/\s+/g, "-");
+
                     return (
                       <Link
                         className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"

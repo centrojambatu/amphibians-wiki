@@ -86,9 +86,6 @@ export const videosEcuador: VideoData[] = [
   },
 ];
 
-
-
-
 export const videosMundo: VideoData[] = [
   {
     id: "kgtKCaB3zQc",
@@ -157,5 +154,3 @@ export const videosMundo: VideoData[] = [
     thumbnail: "https://img.youtube.com/vi/_YIK6rKLWto/maxresdefault.jpg",
   },
 ];
-
-

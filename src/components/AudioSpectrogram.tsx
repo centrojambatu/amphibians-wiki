@@ -8,11 +8,15 @@ interface AudioSpectrogramProps {
   height?: number;
 }
 
-export default function AudioSpectrogram({audioElement, width = 320, height = 150}: AudioSpectrogramProps) {
+export default function AudioSpectrogram({
+  audioElement,
+  width = 320,
+  height = 150,
+}: AudioSpectrogramProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -23,25 +27,28 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
 
   useEffect(() => {
     const canvas = canvasRef.current;
+
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext("2d");
+
     if (!ctx) return;
 
     // Configurar canvas
     canvas.width = width;
     canvas.height = height;
-    
+
     // Dibujar fondo negro inicial
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     if (!audioElement) {
       ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
       ctx.font = "12px monospace";
       ctx.textAlign = "center";
       ctx.fillText("Esperando audio...", canvas.width / 2, canvas.height / 2);
       setIsLoading(false);
+
       return;
     }
 
@@ -50,6 +57,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
     // Si ya se inicializó para este elemento, no hacerlo de nuevo
     if (initializedRef.current === audio && audioContextRef.current) {
       setIsLoading(false);
+
       return;
     }
 
@@ -79,6 +87,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
               audio.removeEventListener("canplay", handleCanPlay);
               resolve();
             };
+
             audio.addEventListener("canplay", handleCanPlay);
             setTimeout(() => {
               audio.removeEventListener("canplay", handleCanPlay);
@@ -89,13 +98,14 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
 
         // Crear AudioContext
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        
+
         if (audioContext.state === "suspended") {
           await audioContext.resume();
         }
 
         // Verificar si el audio ya tiene una fuente conectada
         let source: MediaElementAudioSourceNode;
+
         try {
           source = audioContext.createMediaElementSource(audio);
         } catch (err) {
@@ -104,6 +114,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
         }
 
         const analyser = audioContext.createAnalyser();
+
         analyser.fftSize = 2048; // Mayor resolución
         analyser.smoothingTimeConstant = 0.3; // Menos suavizado para más detalle
         source.connect(analyser);
@@ -122,17 +133,19 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
         const drawSpectrogram = () => {
           const currentAnalyser = analyserRef.current;
           const currentDataArray = dataArrayRef.current;
-          
+
           if (!currentAnalyser || !currentDataArray || !ctx || !canvas) return;
 
           currentAnalyser.getByteFrequencyData(currentDataArray);
 
           // Agregar nueva columna de datos
           const normalizedData = Array.from(currentDataArray).map((value) => value / 255);
+
           spectrogramDataRef.current.push(normalizedData);
 
           // Mantener solo las últimas columnas que caben en el canvas
           const maxColumns = Math.floor(canvas.width / 2);
+
           if (spectrogramDataRef.current.length > maxColumns) {
             spectrogramDataRef.current.shift();
           }
@@ -142,12 +155,18 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           const data = spectrogramDataRef.current;
+
           if (data.length === 0) {
             // Mostrar mensaje si no hay datos aún
             ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
             ctx.font = "11px monospace";
             ctx.textAlign = "center";
-            ctx.fillText("Reproduce el audio para ver el espectrograma", canvas.width / 2, canvas.height / 2);
+            ctx.fillText(
+              "Reproduce el audio para ver el espectrograma",
+              canvas.width / 2,
+              canvas.height / 2,
+            );
+
             return;
           }
 
@@ -157,7 +176,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
           // Dibujar cada columna del espectrograma (optimizado)
           data.forEach((column, xIndex) => {
             const x = xIndex * columnWidth;
-            
+
             // Usar ImageData para mejor rendimiento
             column.forEach((value, yIndex) => {
               const y = canvas.height - (yIndex / frequencyBins) * canvas.height;
@@ -181,6 +200,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
           // Líneas horizontales (frecuencias) - solo 3 líneas
           for (let i = 1; i < 3; i++) {
             const y = (canvas.height / 3) * i;
+
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(canvas.width, y);
@@ -194,6 +214,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
           for (let i = 0; i <= 2; i++) {
             const y = (canvas.height / 2) * (2 - i);
             const freq = (i * 10) / 2;
+
             ctx.fillText(`${freq.toFixed(0)} kHz`, canvas.width - 5, y - 2);
           }
         };
@@ -241,7 +262,7 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
 
         // Dibujar espectrograma inicial
         drawSpectrogram();
-        
+
         // Iniciar actualización continua si el audio ya está reproduciéndose
         if (!audio.paused && !audio.ended) {
           updateSpectrogram();
@@ -250,10 +271,12 @@ export default function AudioSpectrogram({audioElement, width = 320, height = 15
         setIsLoading(false);
       } catch (err) {
         console.error("Error inicializando audio:", err);
-        const errorMessage = err instanceof Error ? err.message : "Error al cargar el espectrograma";
+        const errorMessage =
+          err instanceof Error ? err.message : "Error al cargar el espectrograma";
+
         setError(errorMessage);
         setIsLoading(false);
-        
+
         if (ctx && canvas) {
           ctx.fillStyle = "#000000";
           ctx.fillRect(0, 0, canvas.width, canvas.height);

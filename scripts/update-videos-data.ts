@@ -1,6 +1,6 @@
 /**
  * Script para actualizar automáticamente videos-data.ts con información de YouTube
- * 
+ *
  * Uso:
  * 1. Configura YOUTUBE_API_KEY en tu archivo .env.local
  * 2. Ejecuta: npx tsx scripts/update-videos-data.ts
@@ -42,6 +42,7 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
 
     if (!response.ok) {
       const errorData = await response.json();
+
       throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
     }
 
@@ -49,6 +50,7 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
 
     if (!data.items || data.items.length === 0) {
       console.warn(`⚠️ Video ${videoId} no encontrado`);
+
       return null;
     }
 
@@ -59,7 +61,8 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
 
     // Formatear duración (ISO 8601 a MM:SS o HH:MM:SS)
     const formatDuration = (duration: string): string => {
-      const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      const match = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(duration);
+
       if (!match) return "";
 
       const hours = parseInt(match[1] || "0", 10);
@@ -69,6 +72,7 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
       if (hours > 0) {
         return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
       }
+
       return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
@@ -84,9 +88,11 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
       }
       if (diffDays < 365) {
         const months = Math.floor(diffDays / 30);
+
         return `hace ${months} ${months === 1 ? "mes" : "meses"}`;
       }
       const years = Math.floor(diffDays / 365);
+
       return `hace ${years} ${years === 1 ? "año" : "años"}`;
     };
 
@@ -103,13 +109,14 @@ async function getVideoInfo(videoId: string, apiKey: string): Promise<VideoInfo 
     };
   } catch (error) {
     console.error(`❌ Error al obtener información del video ${videoId}:`, error);
+
     return null;
   }
 }
 
 function generateTypeScriptCode(videos: VideoInfo[]): string {
   let code = "export const videosEcuador: VideoData[] = [\n";
-  
+
   videos.forEach((video) => {
     code += "  {\n";
     code += `    id: "${video.id}",\n`;
@@ -129,8 +136,9 @@ function generateTypeScriptCode(videos: VideoInfo[]): string {
     }
     code += "  },\n";
   });
-  
+
   code += "];\n";
+
   return code;
 }
 
@@ -154,8 +162,10 @@ async function main() {
 
   for (let i = 0; i < videoIdsEcuador.length; i++) {
     const videoId = videoIdsEcuador[i];
+
     console.log(`📹 [${i + 1}/${videoIdsEcuador.length}] Procesando: ${videoId}...`);
     const info = await getVideoInfo(videoId, apiKey);
+
     if (info) {
       videos.push(info);
       console.log(`   ✅ ${info.title.substring(0, 60)}${info.title.length > 60 ? "..." : ""}`);
@@ -175,12 +185,12 @@ async function main() {
 
   // Leer el archivo actual
   const filePath = path.join(process.cwd(), "src/app/videoteca/videos-data.ts");
-  let fileContent = fs.readFileSync(filePath, "utf-8");
+  const fileContent = fs.readFileSync(filePath, "utf-8");
 
   // Reemplazar el array videosEcuador
   const startMarker = "export const videosEcuador: VideoData[] = [";
   const endMarker = "];";
-  
+
   const startIndex = fileContent.indexOf(startMarker);
   const endIndex = fileContent.indexOf(endMarker, startIndex);
 

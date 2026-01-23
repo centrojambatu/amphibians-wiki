@@ -2,6 +2,7 @@
 
 import {useEffect, useRef, useState} from "react";
 import {ChevronLeft, ChevronRight, Search, Video} from "lucide-react";
+
 import {videosEcuador, videosMundo, VideoData} from "./videos-data";
 
 interface EspecieItem {
@@ -25,7 +26,9 @@ export default function VideotecaPage() {
     if (!ref.current) return;
     const scrollAmount = 400; // Pixels a desplazar
     const currentScroll = ref.current.scrollLeft;
-    const newScroll = direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+    const newScroll =
+      direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+
     ref.current.scrollTo({left: newScroll, behavior: "smooth"});
   };
 
@@ -34,9 +37,14 @@ export default function VideotecaPage() {
   const [showMundoLeft, setShowMundoLeft] = useState(false);
   const [showMundoRight, setShowMundoRight] = useState(true);
 
-  const checkScrollButtons = (ref: React.RefObject<HTMLDivElement>, setLeft: (v: boolean) => void, setRight: (v: boolean) => void) => {
+  const checkScrollButtons = (
+    ref: React.RefObject<HTMLDivElement>,
+    setLeft: (v: boolean) => void,
+    setRight: (v: boolean) => void,
+  ) => {
     if (!ref.current) return;
     const {scrollLeft, scrollWidth, clientWidth} = ref.current;
+
     setLeft(scrollLeft > 0);
     setRight(scrollLeft < scrollWidth - clientWidth - 10);
   };
@@ -62,6 +70,7 @@ export default function VideotecaPage() {
       setLoadingEspecies(true);
       try {
         const params = new URLSearchParams();
+
         if (searchInput.trim()) {
           params.set("search", searchInput.trim());
         }
@@ -71,6 +80,7 @@ export default function VideotecaPage() {
         if (!response.ok) throw new Error("Error al cargar especies");
 
         const data = await response.json();
+
         setEspecies(data);
       } catch (err) {
         console.error("Error al obtener especies:", err);
@@ -85,9 +95,9 @@ export default function VideotecaPage() {
 
   return (
     <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900">Videoteca</h1>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900">Videoteca</h1>
           <p className="mt-2 text-gray-600">
             Videos destacados sobre anfibios de Ecuador y del mundo del canal{" "}
             <a
@@ -106,11 +116,13 @@ export default function VideotecaPage() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Anfibios mundo</h2>
-              <p className="mt-1 text-sm text-gray-600">Videos destacados sobre Anfibios del mundo</p>
+              <p className="mt-1 text-sm text-gray-600">
+                Videos destacados sobre Anfibios del mundo
+              </p>
             </div>
             {videosMundo.length > 0 && (
               <a
-                className="videoteca-play-button group flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 shadow-md transition-all duration-200 hover:bg-gray-300 hover:shadow-lg no-underline"
+                className="videoteca-play-button group flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 no-underline shadow-md transition-all duration-200 hover:bg-gray-300 hover:shadow-lg"
                 href="https://www.youtube.com/watch?v=kgtKCaB3zQc&list=PLWUDkVqYfUaqa0w8IHj9P33YJ6Ioc6Osr"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -133,9 +145,9 @@ export default function VideotecaPage() {
               {/* Botón izquierda */}
               {showMundoLeft && (
                 <button
-                  className="group absolute left-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(mundoScrollRef, "left")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] left-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(mundoScrollRef, "left")}
                 >
                   <ChevronLeft className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
@@ -143,17 +155,19 @@ export default function VideotecaPage() {
               {/* Botón derecha */}
               {showMundoRight && (
                 <button
-                  className="group absolute right-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(mundoScrollRef, "right")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] right-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(mundoScrollRef, "right")}
                 >
                   <ChevronRight className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
               )}
               <div
-                className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                onScroll={() => checkScrollButtons(mundoScrollRef, setShowMundoLeft, setShowMundoRight)}
                 ref={mundoScrollRef}
+                className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onScroll={() =>
+                  checkScrollButtons(mundoScrollRef, setShowMundoLeft, setShowMundoRight)
+                }
               >
                 {videosMundo.map((video) => (
                   <VideoCard key={video.id} video={video} />
@@ -164,7 +178,9 @@ export default function VideotecaPage() {
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
               <p className="text-gray-600">
                 No hay videos configurados. Agrega videos en{" "}
-                <code className="rounded bg-gray-200 px-2 py-1 text-sm">src/app/videoteca/videos-data.ts</code>
+                <code className="rounded bg-gray-200 px-2 py-1 text-sm">
+                  src/app/videoteca/videos-data.ts
+                </code>
               </p>
             </div>
           )}
@@ -182,7 +198,7 @@ export default function VideotecaPage() {
             </div>
             {videosEcuador.length > 0 && (
               <a
-                className="videoteca-play-button group flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 shadow-md transition-all duration-200 hover:bg-gray-300 hover:shadow-lg no-underline"
+                className="videoteca-play-button group flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 no-underline shadow-md transition-all duration-200 hover:bg-gray-300 hover:shadow-lg"
                 href="https://www.youtube.com/watch?v=RItLaaBXezE&list=PL924D25DF138308ED"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -205,9 +221,9 @@ export default function VideotecaPage() {
               {/* Botón izquierda */}
               {showEcuadorLeft && (
                 <button
-                  className="group absolute left-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(ecuadorScrollRef, "left")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] left-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(ecuadorScrollRef, "left")}
                 >
                   <ChevronLeft className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
@@ -215,17 +231,19 @@ export default function VideotecaPage() {
               {/* Botón derecha */}
               {showEcuadorRight && (
                 <button
-                  className="group absolute right-2 top-[calc(50%-24px)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => scroll(ecuadorScrollRef, "right")}
+                  className="group focus-visible:ring-ring absolute top-[calc(50%-24px)] right-2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 p-0 text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => scroll(ecuadorScrollRef, "right")}
                 >
                   <ChevronRight className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
                 </button>
               )}
               <div
-                className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                onScroll={() => checkScrollButtons(ecuadorScrollRef, setShowEcuadorLeft, setShowEcuadorRight)}
                 ref={ecuadorScrollRef}
+                className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onScroll={() =>
+                  checkScrollButtons(ecuadorScrollRef, setShowEcuadorLeft, setShowEcuadorRight)
+                }
               >
                 {videosEcuador.map((video) => (
                   <VideoCard key={video.id} video={video} />
@@ -236,7 +254,9 @@ export default function VideotecaPage() {
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
               <p className="text-gray-600">
                 No hay videos configurados. Agrega videos en{" "}
-                <code className="rounded bg-gray-200 px-2 py-1 text-sm">src/app/videoteca/videos-data.ts</code>
+                <code className="rounded bg-gray-200 px-2 py-1 text-sm">
+                  src/app/videoteca/videos-data.ts
+                </code>
               </p>
             </div>
           )}
@@ -252,13 +272,13 @@ export default function VideotecaPage() {
           {/* Filtro de búsqueda */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
-                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                onChange={(e) => setSearchInput(e.target.value)}
+                className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-sm focus:ring-2 focus:outline-none"
                 placeholder="Buscar por nombre científico o común..."
                 type="text"
                 value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
             </div>
           </div>
@@ -273,14 +293,14 @@ export default function VideotecaPage() {
               {especies.map((especie) => (
                 <a
                   key={especie.id}
-                  className="videoteca-species-link group flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary hover:shadow-md no-underline"
+                  className="videoteca-species-link group hover:border-primary flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 no-underline transition-all hover:shadow-md"
                   href={`/sapopedia/species/${especie.slug}/videos?from=videoteca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                  <div className="bg-primary/10 text-primary group-hover:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors">
                     <Video className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-medium text-gray-900 group-hover:text-primary">
+                    <h3 className="group-hover:text-primary truncate font-medium text-gray-900">
                       {especie.nombre_cientifico}
                     </h3>
                     {especie.nombre_comun && (
@@ -292,7 +312,9 @@ export default function VideotecaPage() {
             </div>
           ) : searchInput.trim() ? (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-              <p className="text-gray-600">No se encontraron especies con ese criterio de búsqueda.</p>
+              <p className="text-gray-600">
+                No se encontraron especies con ese criterio de búsqueda.
+              </p>
             </div>
           ) : (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
@@ -300,8 +322,8 @@ export default function VideotecaPage() {
             </div>
           )}
         </section>
-        </div>
       </div>
+    </div>
   );
 }
 
@@ -315,6 +337,7 @@ function VideoCard({video}: {video: VideoData}) {
     if (views >= 1000) {
       return `${(views / 1000).toFixed(1)} K`;
     }
+
     return views.toString();
   };
 
@@ -336,7 +359,7 @@ function VideoCard({video}: {video: VideoData}) {
             />
             {/* Duración */}
             {video.duration && (
-              <div className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white">
+              <div className="absolute right-2 bottom-2 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white">
                 {video.duration}
               </div>
             )}
@@ -344,7 +367,7 @@ function VideoCard({video}: {video: VideoData}) {
 
           {/* Información del video */}
           <div className="mt-2">
-            <h3 className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary">
+            <h3 className="group-hover:text-primary line-clamp-2 text-sm font-medium text-gray-900">
               {video.title}
             </h3>
             <p className="mt-1 text-xs text-gray-600">{video.channelTitle}</p>
