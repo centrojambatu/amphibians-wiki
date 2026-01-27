@@ -6,12 +6,16 @@ import {ChevronLeft, ChevronRight, Search, Volume2} from "lucide-react";
 import AudioSpectrogram from "@/components/AudioSpectrogram";
 
 import {audiosEcuador, audiosMundo, AudioData} from "./audios-data";
+import {CompactSpeciesCard} from "@/components/compact-species-card";
 
 interface EspecieItem {
   id: number;
   nombre_cientifico: string;
   nombre_comun: string | null;
   slug: string;
+  orden?: string | null;
+  familia?: string | null;
+  genero?: string | null;
 }
 
 export default function FonotecaPage() {
@@ -242,25 +246,19 @@ export default function FonotecaPage() {
               <p className="text-gray-600">Cargando especies...</p>
             </div>
           ) : especies.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {especies.map((especie) => (
-                <a
+                <CompactSpeciesCard
                   key={especie.id}
-                  className="fonoteca-species-link group hover:border-primary flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 no-underline transition-all hover:shadow-md"
+                  especie={especie}
                   href={`/sapopedia/species/${especie.slug}/audios?from=fonoteca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`}
-                >
-                  <div className="bg-primary/10 text-primary group-hover:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors">
-                    <Volume2 className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="group-hover:text-primary truncate font-medium text-gray-900">
-                      {especie.nombre_cientifico}
-                    </h3>
-                    {especie.nombre_comun && (
-                      <p className="truncate text-sm text-gray-600">{especie.nombre_comun}</p>
-                    )}
-                  </div>
-                </a>
+                  iconPosition="top-right"
+                  icon={
+                    <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-primary/20">
+                      <Volume2 className="h-4 w-4" />
+                    </div>
+                  }
+                />
               ))}
             </div>
           ) : searchInput.trim() ? (

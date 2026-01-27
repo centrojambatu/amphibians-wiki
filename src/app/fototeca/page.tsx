@@ -4,6 +4,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {ChevronLeft, ChevronRight, Search, Image as ImageIcon, X} from "lucide-react";
 import {fotosExternas, fotosCentroJambatu, FotoData} from "./fotos-data";
 import Image from "next/image";
+import {CompactSpeciesCard} from "@/components/compact-species-card";
 
 interface EspecieItem {
   id: number;
@@ -11,6 +12,9 @@ interface EspecieItem {
   nombre_comun: string | null;
   slug: string;
   fotografia_ficha: string | null;
+  orden?: string | null;
+  familia?: string | null;
+  genero?: string | null;
 }
 
 export default function FototecaPage() {
@@ -219,35 +223,14 @@ export default function FototecaPage() {
               <p className="text-gray-600">Cargando especies...</p>
             </div>
           ) : especies.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {especies.map((especie) => (
-                <a
+                <CompactSpeciesCard
                   key={especie.id}
-                  className="fototeca-species-link group flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary hover:shadow-md no-underline"
+                  especie={especie}
                   href={`/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`}
-                >
-                  {especie.fotografia_ficha ? (
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-                      <img
-                        alt={especie.nombre_cientifico}
-                        className="h-full w-full object-cover grayscale transition-all duration-[800ms] ease-in-out group-hover:scale-105 group-hover:grayscale-0"
-                        src={especie.fotografia_ficha}
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-primary/10 transition-colors group-hover:bg-primary/20">
-                      <ImageIcon className="h-6 w-6 text-primary" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-medium text-gray-900 group-hover:text-primary">
-                      {especie.nombre_cientifico}
-                    </h3>
-                    {especie.nombre_comun && (
-                      <p className="truncate text-sm text-gray-600">{especie.nombre_comun}</p>
-                    )}
-                  </div>
-                </a>
+                  imageUrl={especie.fotografia_ficha}
+                />
               ))}
             </div>
           ) : searchInput.trim() ? (

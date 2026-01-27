@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     // Primero obtener las especies de la vista
     let query = supabase
       .from("vw_ficha_especie_completa")
-      .select("especie_taxon_id, nombre_cientifico, nombre_comun, id_ficha_especie")
+      .select("especie_taxon_id, nombre_cientifico, nombre_comun, id_ficha_especie, orden, familia, genero")
       .not("especie_taxon_id", "is", null)
       .order("nombre_cientifico", {ascending: true});
 
@@ -52,6 +52,9 @@ export async function GET(request: Request) {
       nombre_comun: especie.nombre_comun,
       slug: especie.nombre_cientifico?.replace(/\s+/g, "-") || "",
       fotografia_ficha: especie.id_ficha_especie ? fotosMap[especie.id_ficha_especie] || null : null,
+      orden: especie.orden || null,
+      familia: especie.familia || null,
+      genero: especie.genero || null,
     }));
 
     return NextResponse.json(especiesFormateadas);
