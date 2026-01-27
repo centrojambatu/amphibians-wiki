@@ -10,14 +10,21 @@ interface Post {
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const posts: Post[] = await fetch("https://api.vercel.app/blog").then((res) =>
-    res.json(),
-  );
+  try {
+    const posts: Post[] = await fetch("https://api.vercel.app/blog").then((res) =>
+      res.json(),
+    );
 
-  return posts.map((post) => ({
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
-    id: String(post.id),
-  }));
+    return posts.map((post) => ({
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      id: String(post.id),
+    }));
+  } catch (error) {
+    // Si falla el fetch durante el build, retornar array vacío
+    // La página se generará dinámicamente cuando se acceda
+    console.warn("Failed to fetch blog posts during build:", error);
+    return [];
+  }
 }
 
 export default async function Page({
@@ -26,14 +33,24 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post: Post = await fetch(`https://api.vercel.app/blog/${id}`).then(
-    (res) => res.json(),
-  );
+  
+  try {
+    const post: Post = await fetch(`https://api.vercel.app/blog/${id}`).then(
+      (res) => res.json(),
+    );
 
-  return (
-    <main>
-      <h1>{post.title}</h1>
-      <p>{post.content}</p>
-    </main>
-  );
+    return (
+      <main>
+        <h1>{post.title}</h1>
+        <p>{post.content}</p>
+      </main>
+    );
+  } catch (error) {
+    return (
+      <main>
+        <h1>Post no encontrado</h1>
+        <p>No se pudo cargar el contenido del blog.</p>
+      </main>
+    );
+  }
 }
