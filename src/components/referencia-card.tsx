@@ -36,7 +36,7 @@ export default function ReferenciaCard({ publicacion }: ReferenciaCardProps) {
   const primerEnlace = publicacion.primer_enlace;
 
   return (
-    <div className="sapoteca-link relative block rounded-lg border bg-card p-4 transition-all hover:border-primary hover:shadow-md">
+    <div className="sapoteca-link relative overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-md py-2 gap-2">
       <Link
         href={bibliographyUrl}
         className="group block"
@@ -50,7 +50,7 @@ export default function ReferenciaCard({ publicacion }: ReferenciaCardProps) {
               e.stopPropagation();
               window.open(primerEnlace, "_blank", "noopener,noreferrer");
             }}
-            className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded transition-all hover:bg-muted/80 hover:scale-110"
+            className="absolute right-3 top-1 z-10 flex h-6 w-6 items-center justify-center rounded transition-all hover:bg-muted/80 hover:scale-110"
             aria-label="Abrir enlace externo"
             onMouseEnter={(e) => {
               e.stopPropagation();
@@ -61,22 +61,26 @@ export default function ReferenciaCard({ publicacion }: ReferenciaCardProps) {
         )}
 
         {/* Título */}
-        <h3
-          className="mb-2 text-base font-semibold text-[#006d1b]"
-          dangerouslySetInnerHTML={{
-            __html: processHTMLLinks(titulo),
-          }}
-          suppressHydrationWarning
-        />
+        <div className="relative px-3 py-1">
+          <h3
+            className={`text-sm font-semibold text-[#006d1b] leading-tight ${tieneEnlacesExternos && primerEnlace ? "pr-10" : ""}`}
+            dangerouslySetInnerHTML={{
+              __html: processHTMLLinks(titulo),
+            }}
+            suppressHydrationWarning
+          />
+        </div>
 
         {/* Cita */}
-        <p
-          className="text-sm text-muted-foreground"
-          dangerouslySetInnerHTML={{
-            __html: processHTMLLinks(citaParaMostrar),
-          }}
-          suppressHydrationWarning
-        />
+        <div className="px-3 pb-0.5 pt-1">
+          <p
+            className="text-[10px] leading-tight text-muted-foreground"
+            dangerouslySetInnerHTML={{
+              __html: processHTMLLinks(citaParaMostrar),
+            }}
+            suppressHydrationWarning
+          />
+        </div>
       </Link>
     </div>
   );

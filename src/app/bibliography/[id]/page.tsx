@@ -1,7 +1,9 @@
 import {notFound} from "next/navigation";
-import {ExternalLink, Users} from "lucide-react";
+import Link from "next/link";
+import {ArrowLeft, ExternalLink, Users} from "lucide-react";
 
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
 import CopyButton from "@/components/copy-button";
 
 import getPublicacionById, {getAllPublicacionIds} from "../get-publicacion-by-id";
@@ -50,7 +52,17 @@ export default async function BibliographyPage({params}: PageProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="container mx-auto px-4 py-8">
+        {/* Botón de regreso */}
+        <div className="mb-6">
+          <Link href="/sapoteca">
+            <Button variant="ghost" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Volver a la Biblioteca
+            </Button>
+          </Link>
+        </div>
+
         <article className="prose prose-lg max-w-none">
           {/* Título principal */}
           <h1 className="mb-2 text-2xl font-bold">
@@ -74,36 +86,38 @@ export default async function BibliographyPage({params}: PageProps) {
           </h2>
 
           {/* Cita completa */}
-          <div className="bg-muted mb-6 rounded-lg p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Cita completa</h2>
+          <div className="bg-muted mb-4 overflow-hidden rounded-xl border shadow-sm py-2 gap-2">
+            <div className="px-3 py-1 flex items-center justify-between">
+              <h2 className="text-base font-semibold">Cita completa</h2>
               {(publicacion.cita_larga || publicacion.cita) && (
                 <CopyButton text={publicacion.cita_larga || publicacion.cita || ""} />
               )}
             </div>
-            {publicacion.cita_larga ? (
-              <div
-                dangerouslySetInnerHTML={{__html: publicacion.cita_larga}}
-                className="text-sm leading-normal"
-              />
-            ) : publicacion.cita ? (
-              <div
-                dangerouslySetInnerHTML={{__html: publicacion.cita}}
-                className="text-sm leading-normal"
-              />
-            ) : (
-              <p className="text-muted-foreground text-sm">Cita no disponible</p>
-            )}
+            <div className="px-3 pb-0.5 pt-1">
+              {publicacion.cita_larga ? (
+                <div
+                  dangerouslySetInnerHTML={{__html: publicacion.cita_larga}}
+                  className="text-xs leading-relaxed"
+                />
+              ) : publicacion.cita ? (
+                <div
+                  dangerouslySetInnerHTML={{__html: publicacion.cita}}
+                  className="text-xs leading-relaxed"
+                />
+              ) : (
+                <p className="text-muted-foreground text-xs">Cita no disponible</p>
+              )}
+            </div>
           </div>
 
           {/* Información bibliográfica */}
-          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Información bibliográfica</CardTitle>
+          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Card className="overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+              <CardHeader className="px-3 py-1">
+                <CardTitle className="text-base font-semibold">Información bibliográfica</CardTitle>
               </CardHeader>
-              <CardContent>
-                <dl className="space-y-2 text-sm">
+              <CardContent className="px-3 pb-0.5 pt-1">
+                <dl className="space-y-1 text-xs leading-tight">
                   <dt className="font-medium">Cita corta:</dt>
                   <dd className="text-muted-foreground">
                     {publicacion.cita_corta || "No disponible"}
@@ -142,12 +156,12 @@ export default async function BibliographyPage({params}: PageProps) {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Detalles adicionales</CardTitle>
+            <Card className="overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+              <CardHeader className="px-3 py-1">
+                <CardTitle className="text-base font-semibold">Detalles adicionales</CardTitle>
               </CardHeader>
-              <CardContent>
-                <dl className="space-y-2 text-sm">
+              <CardContent className="px-3 pb-0.5 pt-1">
+                <dl className="space-y-1 text-xs leading-tight">
                   <dt className="font-medium">Palabras clave:</dt>
                   <dd className="text-muted-foreground">
                     {publicacion.palabras_clave || "No disponible"}
@@ -181,88 +195,88 @@ export default async function BibliographyPage({params}: PageProps) {
           </div>
 
           {/* Resumen */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl">Resumen</CardTitle>
+          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+            <CardHeader className="px-3 py-1">
+              <CardTitle className="text-base font-semibold">Resumen</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 pb-0.5 pt-1">
               {publicacion.resumen ? (
                 <div
                   dangerouslySetInnerHTML={{__html: publicacion.resumen}}
-                  className="prose"
+                  className="text-xs leading-relaxed prose prose-sm max-w-none"
                 />
               ) : (
-                <p className="text-muted-foreground">No disponible</p>
+                <p className="text-muted-foreground text-xs">No disponible</p>
               )}
             </CardContent>
           </Card>
 
           {/* Observaciones */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl">Observaciones</CardTitle>
+          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+            <CardHeader className="px-3 py-1">
+              <CardTitle className="text-base font-semibold">Observaciones</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 pb-0.5 pt-1">
               {publicacion.observaciones ? (
                 <div
                   dangerouslySetInnerHTML={{__html: publicacion.observaciones}}
-                  className="prose"
+                  className="text-xs leading-relaxed prose prose-sm max-w-none"
                 />
               ) : (
-                <p className="text-muted-foreground">No disponible</p>
+                <p className="text-muted-foreground text-xs">No disponible</p>
               )}
             </CardContent>
           </Card>
 
           {/* Enlaces externos */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl">Enlaces externos</CardTitle>
+          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+            <CardHeader className="px-3 py-1">
+              <CardTitle className="text-base font-semibold">Enlaces externos</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 pb-0.5 pt-1">
               {publicacion.enlaces && publicacion.enlaces.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {publicacion.enlaces.map((enlace) => (
                     <a
                       key={enlace.id_publicacion_enlace}
-                      className="text-primary flex items-center gap-2 hover:underline"
+                      className="text-primary flex items-center gap-1.5 hover:underline text-xs"
                       href={enlace.enlace}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="h-3.5 w-3.5" />
                       <span>{enlace.texto_enlace || "Enlace externo"}</span>
                       {enlace.exclusivo_cj && (
-                        <span className="text-muted-foreground text-xs">(CJ)</span>
+                        <span className="text-muted-foreground text-[10px]">(CJ)</span>
                       )}
                     </a>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No disponible</p>
+                <p className="text-muted-foreground text-xs">No disponible</p>
               )}
             </CardContent>
           </Card>
 
           {/* Autores */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Users className="h-5 w-5" />
+          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
+            <CardHeader className="px-3 py-1">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                <Users className="h-4 w-4" />
                 Autores
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 pb-0.5 pt-1">
               {publicacion.autores && publicacion.autores.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {publicacion.autores.map((autor) => (
-                    <div key={autor.id_autor} className="text-sm">
+                    <div key={autor.id_autor} className="text-xs leading-tight">
                       {autor.nombres} {autor.apellidos}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No disponible</p>
+                <p className="text-muted-foreground text-xs">No disponible</p>
               )}
             </CardContent>
           </Card>
