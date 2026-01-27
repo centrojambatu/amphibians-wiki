@@ -248,7 +248,10 @@ a.fototeca-view-species-link:focus {
 /* Enlaces de Sapoteca - sin subrayado en hover */
 a.sapoteca-link,
 a.sapoteca-link:hover,
-a.sapoteca-link:active {
+a.sapoteca-link:active,
+.sapoteca-link a,
+.sapoteca-link a:hover,
+.sapoteca-link a:active {
   text-decoration: none !important;
 }
 

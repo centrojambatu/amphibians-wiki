@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   return (
-    <html lang="es">
-      <body className="bg-background min-h-screen font-sans antialiased">
+    <html lang="es" suppressHydrationWarning>
+      <body className="bg-background min-h-screen font-sans antialiased" suppressHydrationWarning>
         <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
@@ -68,6 +68,11 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
                 <Link href="/fototeca">
                   <Button className="cursor-pointer" variant="ghost">
                     Fototeca
+                  </Button>
+                </Link>
+                <Link href="/moleculoteca">
+                  <Button className="cursor-pointer" variant="ghost">
+                    Moleculoteca
                   </Button>
                 </Link>
                 <Link href="/sapopedia/editor-citas">

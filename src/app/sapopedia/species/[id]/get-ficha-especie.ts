@@ -462,6 +462,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     genbank: fichaEspecie?.genbank ?? null,
     herpnet: fichaEspecie?.herpnet ?? null,
     morphosource: fichaEspecie?.morphosource ?? null,
+    gbif: fichaEspecie?.gbif ?? null,
     // Datos relacionados - asegurar que siempre sean arrays y eliminar duplicados
     taxon_catalogo_awe_results: (() => {
       if (!Array.isArray(taxon_catalogo_awe_results)) return [];

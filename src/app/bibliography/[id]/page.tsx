@@ -2,12 +2,13 @@ import {notFound} from "next/navigation";
 import {ExternalLink, Users} from "lucide-react";
 
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import CopyButton from "@/components/copy-button";
 
-import getPublicacionBySlug, {getAllPublicacionesWithSlugs} from "../get-publicacion-by-slug";
+import getPublicacionById, {getAllPublicacionIds} from "../get-publicacion-by-id";
 
 interface PageProps {
   params: Promise<{
-    slug: string;
+    id: string;
   }>;
 }
 
@@ -15,29 +16,30 @@ interface PageProps {
 export const revalidate = 86400;
 
 // Generar parámetros estáticos para todas las publicaciones
-// En desarrollo, Next.js generará las rutas bajo demanda
 export async function generateStaticParams() {
   try {
-    const publicaciones = await getAllPublicacionesWithSlugs();
+    const publicaciones = await getAllPublicacionIds();
 
     // Limitar a las primeras 100 en desarrollo para evitar builds lentos
     const limit = process.env.NODE_ENV === "development" ? 100 : undefined;
     const publicacionesLimitadas = limit ? publicaciones.slice(0, limit) : publicaciones;
 
-    return publicacionesLimitadas.map((pub) => ({
-      slug: pub.slug,
-    }));
+    return publicacionesLimitadas;
   } catch (error) {
     console.error("Error en generateStaticParams:", error);
-
     return [];
   }
 }
 
 export default async function BibliographyPage({params}: PageProps) {
-  const {slug} = await params;
+  const {id} = await params;
+  const idNumber = Number.parseInt(id, 10);
 
-  const publicacion = await getPublicacionBySlug(slug);
+  if (Number.isNaN(idNumber) || idNumber <= 0) {
+    notFound();
+  }
+
+  const publicacion = await getPublicacionById(idNumber);
 
   if (!publicacion) {
     notFound();
@@ -73,7 +75,12 @@ export default async function BibliographyPage({params}: PageProps) {
 
           {/* Cita completa */}
           <div className="bg-muted mb-6 rounded-lg p-4">
-            <h2 className="mb-2 text-lg font-semibold">Cita completa</h2>
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Cita completa</h2>
+              {(publicacion.cita_larga || publicacion.cita) && (
+                <CopyButton text={publicacion.cita_larga || publicacion.cita || ""} />
+              )}
+            </div>
             {publicacion.cita_larga ? (
               <div
                 dangerouslySetInnerHTML={{__html: publicacion.cita_larga}}

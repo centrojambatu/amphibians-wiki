@@ -716,6 +716,7 @@ export type Database = {
           fecha_edicion: string | null;
           fotografia_ficha: string | null;
           fuente_lista_roja: string | null;
+          gbif: string | null;
           genbank: string | null;
           habitat_biologia: string | null;
           herpnet: string | null;
@@ -775,6 +776,7 @@ export type Database = {
           fecha_edicion?: string | null;
           fotografia_ficha?: string | null;
           fuente_lista_roja?: string | null;
+          gbif?: string | null;
           genbank?: string | null;
           habitat_biologia?: string | null;
           herpnet?: string | null;
@@ -834,6 +836,7 @@ export type Database = {
           fecha_edicion?: string | null;
           fotografia_ficha?: string | null;
           fuente_lista_roja?: string | null;
+          gbif?: string | null;
           genbank?: string | null;
           habitat_biologia?: string | null;
           herpnet?: string | null;

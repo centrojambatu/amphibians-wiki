@@ -49,7 +49,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-4xl font-bold">Sapoteca</h1>
+        <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
         <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
           Catálogo completo de referencias bibliográficas relacionadas con
           anfibios de Ecuador

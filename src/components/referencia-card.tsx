@@ -36,7 +36,7 @@ export default function ReferenciaCard({ publicacion }: ReferenciaCardProps) {
   const primerEnlace = publicacion.primer_enlace;
 
   return (
-    <div className="sapoteca-link relative block rounded-lg border bg-card p-4">
+    <div className="sapoteca-link relative block rounded-lg border bg-card p-4 transition-all hover:border-primary hover:shadow-md">
       <Link
         href={bibliographyUrl}
         className="group block"

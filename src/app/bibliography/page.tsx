@@ -4,7 +4,6 @@ import { ExternalLink, BookOpen, Users, Link2, Calendar } from "lucide-react";
 import getAllPublicaciones, {
   getAñosPublicaciones,
 } from "./get-all-publicaciones";
-import { getBibliographyUrl } from "@/lib/get-bibliography-url";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -227,7 +226,7 @@ export default async function BibliographyIndexPage({
                       {/* Título y enlace */}
                       <div>
                         <Link
-                          href={`/bibliography/${pub.slug}`}
+                          href={`/bibliography/${pub.id_publicacion}`}
                           className="text-lg font-semibold hover:text-primary transition-colors"
                         >
                           {pub.titulo && (

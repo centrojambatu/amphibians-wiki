@@ -1,7 +1,6 @@
 import {notFound} from "next/navigation";
 
-import {createServiceClient} from "@/utils/supabase/server";
-
+import getFichaEspecie from "../../get-ficha-especie";
 import getColeccionById from "./get-coleccion-by-id";
 import {
   getCantosByColeccion,
@@ -25,11 +24,23 @@ export default async function ColeccionDetailPage({params}: PageProps) {
   const {id, coleccionId} = await params;
 
   const coleccionIdNum = Number.parseInt(coleccionId, 10);
-  const taxonIdNum = Number.parseInt(id, 10);
 
-  if (isNaN(coleccionIdNum) || isNaN(taxonIdNum)) {
+  if (isNaN(coleccionIdNum)) {
     notFound();
   }
+
+  // Decodificar el id de la URL (puede ser número o nombre científico)
+  const decodedId = decodeURIComponent(id);
+  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+
+  // Obtener la ficha de especie para validar y obtener datos
+  const fichaEspecie = await getFichaEspecie(sanitizedId);
+
+  if (!fichaEspecie) {
+    notFound();
+  }
+
+  const taxonIdNum = fichaEspecie.taxon_id;
 
   // Fetch colección y todos los datos relacionados en paralelo
   const [
@@ -56,43 +67,16 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     notFound();
   }
 
+  // Obtener el nombre científico completo de la especie
+  const nombreCientificoCompleto = fichaEspecie.taxones?.[0]?.taxonPadre?.taxon
+    ? `${fichaEspecie.taxones[0].taxonPadre.taxon} ${fichaEspecie.taxones[0].taxon}`
+    : fichaEspecie.taxones?.[0]?.taxon || "";
+
   // Validar que la colección pertenece a la especie indicada en la URL
-  // Como taxon_id está NULL en todas las colecciones, validamos por taxon_nombre
-  // que contiene el nombre científico completo de la especie
-  const supabaseClient = createServiceClient();
-
-  // Obtener el nombre científico completo de la especie (género + especie)
-  const {data: taxonData, error: taxonError} = await supabaseClient
-    .from("taxon")
-    .select("taxon, taxon_id")
-    .eq("id_taxon", taxonIdNum)
-    .single();
-
-  if (taxonError || !taxonData) {
-    notFound();
-  }
-
-  // Obtener el género (taxon padre)
-  let nombreCientificoCompleto = taxonData.taxon || "";
-
-  if (taxonData.taxon_id) {
-    const {data: generoData} = await supabaseClient
-      .from("taxon")
-      .select("taxon")
-      .eq("id_taxon", taxonData.taxon_id)
-      .single();
-
-    if (generoData?.taxon) {
-      nombreCientificoCompleto = `${generoData.taxon} ${nombreCientificoCompleto}`;
-    }
-  }
-
-  // Validar que el taxon_nombre de la colección coincida con el nombre científico
-  // Primero verificar si taxon_id coincide (por si acaso se llena en el futuro)
+  // Primero verificar si taxon_id coincide
   const taxonIdCoincide = coleccion.taxon_id === taxonIdNum;
 
   // Si taxon_id no coincide, validar por taxon_nombre usando comparación flexible
-  // (case-insensitive, parcial) como en getColeccionesEspecie
   if (!taxonIdCoincide) {
     const coleccionTaxonNombre = coleccion.taxon_nombre?.toLowerCase().trim() || "";
     const nombreCientificoLower = nombreCientificoCompleto.toLowerCase().trim();

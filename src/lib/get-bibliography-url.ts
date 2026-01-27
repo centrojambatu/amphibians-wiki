@@ -1,14 +1,11 @@
-import { generatePublicacionSlug } from "./generate-publicacion-slug";
-
 /**
- * Genera la URL para una página de bibliografía
+ * Genera la URL para una página de bibliografía usando el ID
  */
 export function getBibliographyUrl(
-  citaCorta: string | null,
-  año: number | null,
-  titulo: string | null,
+  _citaCorta: string | null,
+  _año: number | null,
+  _titulo: string | null,
   idPublicacion: number,
 ): string {
-  const slug = generatePublicacionSlug(citaCorta, año, titulo, idPublicacion);
-  return `/bibliography/${slug}`;
+  return `/bibliography/${idPublicacion}`;
 }

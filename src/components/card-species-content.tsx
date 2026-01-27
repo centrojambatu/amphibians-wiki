@@ -2329,6 +2329,24 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       </a>
                     </Button>
                   )}
+
+                  {fichaEspecie.gbif && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.gbif} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="GBIF Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/gbif.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </section>
             </CardContent>
