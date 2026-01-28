@@ -16,17 +16,25 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
       <div className="space-y-4" style={{padding: "20px 30px 30px"}}>
         {/* Título principal - Jerarquía taxonómica completa */}
         <div className="flex flex-wrap items-baseline justify-center gap-2">
-          {/* Orden - PEQUEÑO sin link */}
-          {fichaEspecie.lineage?.[3]?.taxon && (
-            <>
-              <span className="text-sm font-medium" style={{color: "#006d1b"}}>
-                {fichaEspecie.lineage[3].taxon}
-              </span>
-              <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
-                |
-              </span>
-            </>
-          )}
+          {/* Orden - PEQUEÑO con link (rank_id = 4) */}
+          {(() => {
+            const orden = fichaEspecie.lineage?.find((item: any) => item.rank_id === 4);
+
+            return orden?.taxon ? (
+              <>
+                <Link
+                  className="text-sm font-medium transition-all hover:underline"
+                  href={`/sapopedia/order/${orden.id_taxon || ""}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {orden.taxon}
+                </Link>
+                <span className="text-foreground text-sm" style={{fontWeight: "300"}}>
+                  |
+                </span>
+              </>
+            ) : null;
+          })()}
 
           {/* Familia - PEQUEÑO con link (rank_id = 5) */}
           {(() => {

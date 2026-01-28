@@ -283,53 +283,107 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       // Agregar fotografía de la especie si existe
       if (fichaEspecie.fotografia_ficha) {
         try {
-          const speciesImg = new Image();
-          speciesImg.crossOrigin = "anonymous";
-          speciesImg.src = fichaEspecie.fotografia_ficha;
-          
-          await new Promise((resolve) => {
-            speciesImg.onload = () => {
-              try {
-                // Calcular proporciones para mantener el aspecto original
-                const originalWidth = speciesImg.naturalWidth;
-                const originalHeight = speciesImg.naturalHeight;
-                const aspectRatio = originalWidth / originalHeight;
-                
-                // Definir ancho máximo y calcular altura proporcional
-                const maxImgWidth = 80; // mm
-                const maxImgHeight = 60; // mm
-                
-                let imgWidth = maxImgWidth;
-                let imgHeight = imgWidth / aspectRatio;
-                
-                // Si la altura excede el máximo, ajustar
-                if (imgHeight > maxImgHeight) {
-                  imgHeight = maxImgHeight;
-                  imgWidth = imgHeight * aspectRatio;
-                }
-                
-                // Alinear la imagen a la izquierda
-                const imgX = margin;
-                
-                // Verificar si hay espacio en la página actual
-                if (yPosition + imgHeight > pageHeight - margin - 15) {
-                  pdf.addPage();
-                  yPosition = margin;
-                }
-                
-                pdf.addImage(speciesImg, "JPEG", imgX, yPosition, imgWidth, imgHeight);
-                yPosition += imgHeight + 5;
-              } catch (err) {
-                console.warn("Error al agregar fotografía:", err);
+          // Función para obtener imagen como base64 usando proxy del servidor
+          const getImageAsBase64 = async (url: string): Promise<string | null> => {
+            try {
+              // Usar el proxy del servidor para evitar problemas de CORS
+              const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`;
+              const response = await fetch(proxyUrl);
+              
+              if (!response.ok) {
+                console.warn("Proxy response not ok:", response.status);
+                throw new Error('Proxy fetch failed');
               }
-              resolve(null);
-            };
-            speciesImg.onerror = () => {
-              console.warn("Error al cargar fotografía de la especie");
-              resolve(null);
-            };
-            setTimeout(() => resolve(null), 5000); // Timeout más largo para imágenes grandes
-          });
+              
+              const data = await response.json();
+              if (data.dataUrl) {
+                return data.dataUrl;
+              }
+              throw new Error('No dataUrl in response');
+            } catch (proxyError) {
+              console.warn("Error con proxy, intentando método directo:", proxyError);
+              
+              // Fallback: intentar con Image y canvas (puede fallar por CORS)
+              return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                  try {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                      ctx.drawImage(img, 0, 0);
+                      resolve(canvas.toDataURL("image/jpeg", 0.9));
+                    } else {
+                      resolve(null);
+                    }
+                  } catch (canvasError) {
+                    console.warn("Error con canvas:", canvasError);
+                    resolve(null);
+                  }
+                };
+                img.onerror = (e) => {
+                  console.warn("Error cargando imagen:", e);
+                  resolve(null);
+                };
+                img.src = url;
+                setTimeout(() => resolve(null), 5000);
+              });
+            }
+          };
+
+          console.log("Cargando imagen:", fichaEspecie.fotografia_ficha);
+          const imageBase64 = await getImageAsBase64(fichaEspecie.fotografia_ficha);
+          console.log("Imagen cargada:", imageBase64 ? "Sí" : "No");
+          
+          if (imageBase64) {
+            // Crear imagen temporal para obtener dimensiones
+            const tempImg = new Image();
+            await new Promise<void>((resolve) => {
+              tempImg.onload = () => resolve();
+              tempImg.onerror = () => resolve();
+              tempImg.src = imageBase64;
+            });
+
+            if (tempImg.naturalWidth > 0 && tempImg.naturalHeight > 0) {
+              // Calcular proporciones para mantener el aspecto original
+              const originalWidth = tempImg.naturalWidth;
+              const originalHeight = tempImg.naturalHeight;
+              const aspectRatio = originalWidth / originalHeight;
+              
+              // Definir ancho máximo y calcular altura proporcional
+              const maxImgWidth = 80; // mm
+              const maxImgHeight = 60; // mm
+              
+              let imgWidth = maxImgWidth;
+              let imgHeight = imgWidth / aspectRatio;
+              
+              // Si la altura excede el máximo, ajustar
+              if (imgHeight > maxImgHeight) {
+                imgHeight = maxImgHeight;
+                imgWidth = imgHeight * aspectRatio;
+              }
+              
+              // Alinear la imagen a la izquierda
+              const imgX = margin;
+              
+              // Verificar si hay espacio en la página actual
+              if (yPosition + imgHeight > pageHeight - margin - 15) {
+                pdf.addPage();
+                yPosition = margin;
+              }
+              
+              pdf.addImage(imageBase64, "JPEG", imgX, yPosition, imgWidth, imgHeight);
+              yPosition += imgHeight + 15;
+              console.log("Imagen agregada al PDF");
+            } else {
+              console.warn("Dimensiones de imagen inválidas");
+            }
+          } else {
+            console.warn("No se pudo cargar la fotografía de la especie");
+          }
         } catch (err) {
           console.warn("Error al procesar fotografía:", err);
         }
