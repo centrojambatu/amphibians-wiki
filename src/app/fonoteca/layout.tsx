@@ -1,7 +1,7 @@
 import {Metadata} from "next";
 
 export const metadata: Metadata = {
-  title: "Fonoteca - SapoPedia",
+  title: "Fonoteca - Sapopedia",
   description: "Audios destacados sobre anfibios de Ecuador y del mundo",
 };
 

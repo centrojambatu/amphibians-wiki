@@ -7,7 +7,7 @@ import {Button} from "@/components/ui/button";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Anfibios de Ecuador - SapoPedia",
+  title: "Anfibios de Ecuador - Sapopedia",
   description:
     "Enciclopedia electrónica de anfibios de Ecuador. Explora la increíble diversidad de ranas, sapos, salamandras y cecilias.",
 };
@@ -32,7 +32,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
               <nav className="flex items-center gap-4">
                 <Link href="/sapopedia">
                   <Button className="cursor-pointer" variant="ghost">
-                    SapoPedia
+                    Sapopedia
                   </Button>
                 </Link>
                 <Link href="/sapopedia/lista-roja">

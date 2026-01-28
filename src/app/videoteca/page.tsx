@@ -196,7 +196,7 @@ export default function VideotecaPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Anfibios Ecuador</h2>
               <p className="mt-1 text-sm text-gray-600">
-                Videos destacados de SapoPediaEcuador (Enciclopedia Electrónica de los Anfibios de
+                Videos destacados de Sapopedia Ecuador (Enciclopedia Electrónica de los Anfibios de
                 Ecuador)
               </p>
             </div>

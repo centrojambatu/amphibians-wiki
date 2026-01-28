@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 
 export const metadata: Metadata = {
-  title: "Fototeca - SapoPedia",
+  title: "Fototeca - Sapopedia",
   description: "Galería de fotografías de anfibios de Ecuador y del mundo",
 };
 

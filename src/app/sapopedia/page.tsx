@@ -15,50 +15,8 @@ export default async function SapopediaPage() {
       {/* Header */}
       <div className="mb-6 text-center sm:mb-8">
         <h1 className="text-primary mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl lg:text-4xl">
-          SapoPedia Ecuador
+          Sapopedia Ecuador
         </h1>
-        {/* Imágenes de los órdenes */}
-        <div className="mx-auto flex max-w-7xl flex-nowrap justify-center gap-4 px-2 sm:gap-6">
-          <div className="flex flex-col items-center">
-            <div className="mb-2 overflow-hidden rounded-lg">
-              <Image
-                priority
-                alt="Anura"
-                className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
-                height={216}
-                src="/assets/references/anura.jpg"
-                width={384}
-              />
-            </div>
-            <h3 className="text-base font-semibold text-gray-800 sm:text-lg">Anura</h3>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="mb-2 overflow-hidden rounded-lg">
-              <Image
-                priority
-                alt="Caudata"
-                className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
-                height={216}
-                src="/assets/references/caudata.jpg"
-                width={384}
-              />
-            </div>
-            <h3 className="text-base font-semibold text-gray-800 sm:text-lg">Caudata</h3>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="mb-2 overflow-hidden rounded-lg">
-              <Image
-                priority
-                alt="Gymnophiona"
-                className="h-auto w-96 rounded-lg object-cover sm:w-[28rem]"
-                height={216}
-                src="/assets/references/gymnophiona.jpg"
-                width={384}
-              />
-            </div>
-            <h3 className="text-base font-semibold text-gray-800 sm:text-lg">Gymnophiona</h3>
-          </div>
-        </div>
       </div>
 
       {/* Estadísticas */}
