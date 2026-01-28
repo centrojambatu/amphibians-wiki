@@ -198,7 +198,7 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
       {/* Contenido principal */}
       <div className="order-1 min-w-0 flex-1 lg:order-2">
         <Tabs className="w-full" value={selectedTab} onValueChange={handleTabChange}>
-          <TabsList className="mb-4 inline-flex h-10 w-full gap-1 rounded-lg bg-gray-100 p-1 sm:mb-6 sm:h-12 sm:w-auto">
+          {/* <TabsList className="mb-4 inline-flex h-10 w-full gap-1 rounded-lg bg-gray-100 p-1 sm:mb-6 sm:h-12 sm:w-auto">
             <TabsTrigger
               className="flex-1 rounded-md px-3 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md sm:flex-initial sm:px-6 sm:text-sm"
               value="accordion"
@@ -211,7 +211,7 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
             >
               Árbol Filogenético
             </TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <TabsContent className="mt-4 sm:mt-0" value="accordion">
             {/* Contador de resultados */}

@@ -95,9 +95,27 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       {/* Endémica */}
       <div className="w-12 text-center">
         {species.endemica ? (
-          <span className="text-sm font-semibold text-gray-800">E</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-sm font-semibold text-gray-800 cursor-help">E</span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-white [&>*:last-child]:hidden">
+                <p className="text-black">Endémica</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ) : (
-          <span className="text-sm font-semibold text-gray-500">NE</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-sm font-semibold text-gray-500 cursor-help">NE</span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-white [&>*:last-child]:hidden">
+                <p className="text-black">No endémica</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
 
@@ -124,8 +142,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                       PE
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="font-semibold">Posiblemente Extinta</p>
+                  <TooltipContent className="bg-white [&>*:last-child]:hidden">
+                    <p className="text-black">Posiblemente extinta</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -181,8 +199,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                           ?
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="font-semibold">Valor de Lista Roja no válido</p>
+                      <TooltipContent className="bg-white [&>*:last-child]:hidden">
+                        <p className="text-black">Valor de lista roja no válido</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -261,17 +279,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       {isOpen(`genus-${genus.id}`) && (
         <div className="bg-muted mt-3 rounded-lg p-4">
           {/* Header de la tabla */}
-          <div className="mb-3 px-4 py-2">
-            <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-            <div className="text-muted-foreground flex items-center gap-4 text-xs">
-              <div className="flex-1">Nombre</div>
-              <div className="w-12 text-center">En</div>
-              <div className="w-16 text-center">LR</div>
-              <div className="w-80 text-center">Distribución</div>
-            </div>
-          </div>
+
           {/* Lista de especies */}
-          <div className="space-y-2">{genus.species.map((species) => renderSpecies(species))}</div>
+          <div className="space-y-2 pl-6">{genus.species.map((species) => renderSpecies(species))}</div>
         </div>
       )}
     </div>
@@ -310,12 +320,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
 
       {isOpen(`family-${family.id}`) && (
         <div className="bg-muted mt-3 rounded-lg p-4">
-          {/* Header de géneros */}
-          <div className="mb-3 px-4 py-2">
-            <div className="text-muted-foreground text-xs">Géneros</div>
-          </div>
           {/* Lista de géneros */}
-          <div className="space-y-2">{family.genera.map((genus) => renderGenus(genus))}</div>
+          <div className="space-y-2 pl-6">{family.genera.map((genus) => renderGenus(genus))}</div>
         </div>
       )}
     </div>
@@ -351,12 +357,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
 
       {isOpen(`order-${order.id}`) && (
         <div className="bg-muted mt-3 rounded-lg p-4">
-          {/* Header de familias */}
-          <div className="mb-3 px-4 py-2">
-            <div className="text-xs text-gray-400">Familias</div>
-          </div>
           {/* Lista de familias */}
-          <div className="space-y-3">{order.families.map((family) => renderFamily(family))}</div>
+          <div className="space-y-3 pl-6">{order.families.map((family) => renderFamily(family))}</div>
         </div>
       )}
     </div>
@@ -365,9 +367,6 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   return (
     <div className="relative w-full">
       {/* Header de órdenes */}
-      <div className="mb-4 px-4 py-2">
-        <div className="text-muted-foreground text-xs">Órdenes</div>
-      </div>
 
       <div className="space-y-4">{orders.map((order) => renderOrder(order))}</div>
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -322,9 +323,10 @@ export default function FiltersPanel({
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 shrink-0 text-muted-foreground pointer-events-none" />
               <Input
-                className="w-full"
-                placeholder="Buscar especies, géneros, familias..."
+                className="w-full pl-10"
+                placeholder="Nombre científico o común"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -384,9 +386,10 @@ export default function FiltersPanel({
       </div>
 
       {/* Título y botón de limpiar */}
-      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800">Filtros</h3>
+      <div className="flex-shrink-0 border-b border-gray-200 py-4 sm:py-5">
+        <div className="flex items-center justify-between px-4 sm:px-6">
+
+
           <Button size="sm" variant="outline" onClick={resetFilters} className="text-xs sm:text-sm">
             Limpiar
           </Button>
@@ -395,34 +398,12 @@ export default function FiltersPanel({
 
       <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 max-h-[60vh] lg:max-h-none">
         <Accordion className="w-full" type="multiple">
-          {/* Provincias - desde Supabase */}
-          {catalogs.provincias.length > 0 && (
-            <AccordionItem value="provincia">
-              <AccordionTrigger className="!items-start">
-                <div className="flex flex-col items-start">
-                  <span className="font-semibold">Provincia</span>
-                  {filters.provincia.length > 0 && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.provincias,
-                        "provincia",
-                      ).join(", ")}
-                    </span>
-                  )}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {renderCatalogOptions(catalogs.provincias, "provincia")}
-              </AccordionContent>
-            </AccordionItem>
-          )}
-
           {/* Lista Roja UICN - desde Supabase */}
           {catalogs.listaRoja.length > 0 && (
             <AccordionItem value="listaRoja">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Lista Roja UICN</span>
+                  <span className="font-semibold">Lista Roja</span>
                   {filters.listaRoja.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
@@ -485,6 +466,28 @@ export default function FiltersPanel({
               </div>
             </AccordionContent>
           </AccordionItem>
+
+          {/* Provincias - desde Supabase */}
+          {catalogs.provincias.length > 0 && (
+            <AccordionItem value="provincia">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Provincia</span>
+                  {filters.provincia.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(
+                        catalogs.provincias,
+                        "provincia",
+                      ).join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                {renderCatalogOptions(catalogs.provincias, "provincia")}
+              </AccordionContent>
+            </AccordionItem>
+          )}
 
           {/* Pisos Altitudinales con gráfico */}
           <AccordionItem value="pisosAltitudinales">
@@ -575,7 +578,7 @@ export default function FiltersPanel({
           <AccordionItem value="areaDistribucion">
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Área de distribución</span>
+                <span className="font-semibold">Área distribución <span className="ml-1 font-normal text-gray-500">km²</span></span>
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
@@ -659,7 +662,7 @@ export default function FiltersPanel({
             <AccordionItem value="reservasBiosfera">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Reservas de la biosfera</span>
+                  <span className="font-semibold">Reservas biosfera</span>
                   {filters.reservasBiosfera.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
@@ -679,38 +682,13 @@ export default function FiltersPanel({
             </AccordionItem>
           )}
 
-          {/* Bosques Protegidos - desde Supabase */}
-          {catalogs.bosquesProtegidos.length > 0 && (
-            <AccordionItem value="bosquesProtegidos">
-              <AccordionTrigger className="!items-start">
-                <div className="flex flex-col items-start">
-                  <span className="font-semibold">Bosques protegidos</span>
-                  {filters.bosquesProtegidos.length > 0 && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.bosquesProtegidos,
-                        "bosquesProtegidos",
-                      ).join(", ")}
-                    </span>
-                  )}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.bosquesProtegidos,
-                  "bosquesProtegidos",
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          )}
-
           {/* Áreas Protegidas del Estado - desde Supabase */}
           {catalogs.areasProtegidasEstado.length > 0 && (
             <AccordionItem value="areasProtegidasEstado">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
                   <span className="font-semibold">
-                    Áreas protegidas del Estado
+                    Áreas protegidas Estado
                   </span>
                   {filters.areasProtegidasEstado.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
@@ -758,11 +736,36 @@ export default function FiltersPanel({
             </AccordionItem>
           )}
 
-          {/* Pluviocidad */}
+          {/* Bosques Protegidos - desde Supabase */}
+          {catalogs.bosquesProtegidos.length > 0 && (
+            <AccordionItem value="bosquesProtegidos">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Bosques protegidos</span>
+                  {filters.bosquesProtegidos.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {getActiveFilterNames(
+                        catalogs.bosquesProtegidos,
+                        "bosquesProtegidos",
+                      ).join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                {renderCatalogOptions(
+                  catalogs.bosquesProtegidos,
+                  "bosquesProtegidos",
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* Precipitación */}
           <AccordionItem value="pluviocidad">
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Pluviocidad</span>
+                <span className="font-semibold">Precipitación</span>
                 {(filters.pluviocidad.min !== 640 ||
                   filters.pluviocidad.max !== 4000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">

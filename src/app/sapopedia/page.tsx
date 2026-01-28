@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {SapopediaContent} from "@/components/sapopedia-content";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SapopediaContent } from "@/components/sapopedia-content";
 
 import getAllEspecies from "./get-all-especies";
 import getFilterCatalogs from "./get-filter-catalogs";
@@ -64,70 +64,56 @@ export default async function SapopediaPage() {
       {/* Estadísticas */}
       <div className="mb-6 grid grid-cols-1 gap-3 sm:mb-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
         <Card>
-          <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Total de Especies</CardTitle>
-          </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">{especies.length}</p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Especies registradas</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Especies</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Familias</CardTitle>
-          </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {new Set(especies.map((e) => e.familia).filter(Boolean)).size}
             </p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Familias taxonómicas</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Familias</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Géneros</CardTitle>
-          </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {new Set(especies.map((e) => e.genero).filter(Boolean)).size}
             </p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Géneros taxonómicos</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Géneros</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Endémicas</CardTitle>
-          </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {especies.filter((e) => e.endemica).length}
             </p>
             <p className="text-muted-foreground text-xs sm:text-sm">
+              Endémicas
+            </p>
+            <p className="text-muted-foreground text-xs sm:text-sm">
               {((especies.filter((e) => e.endemica).length / especies.length) * 100).toFixed(1)}%
-              del total
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Peligro Crítico</CardTitle>
-          </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {especies.filter((e) => e.lista_roja_iucn === "CR").length}
             </p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Especies en peligro crítico</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">En peligro crítico</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Contenido con tabs */}
       <div className="mb-6 sm:mb-8">
-        <h2 className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl">Explorar Especies</h2>
         <SapopediaContent especies={especies} filterCatalogs={filterCatalogs} />
       </div>
     </main>
