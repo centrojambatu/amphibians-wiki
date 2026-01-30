@@ -2,13 +2,14 @@
 
 import {useState, useEffect, useRef} from "react";
 import Link from "next/link";
-import {Menu, Search, X} from "lucide-react";
+import {Menu, Search, X, ExternalLink} from "lucide-react";
 
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
 import {processHTMLLinks} from "@/lib/process-html-links";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
+import {Card, CardContent} from "@/components/ui/card";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -475,46 +476,95 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
   }
 
   return (
-    <div className="space-y-3">
-      {/* Filtro de búsqueda */}
-      <div className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Buscar por nombre común o científico..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Panel izquierdo - Filtro y enlaces */}
+      <div className="w-full lg:w-80 lg:flex-shrink-0">
+        <div className="lg:sticky lg:top-4">
+          <Card>
+            <CardContent className="pt-4 space-y-6">
+              {/* Filtro de búsqueda */}
+              <div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Nombre científico o común"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-10"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {searchQuery && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    Filtrando: &quot;{searchQuery}&quot;
+                  </p>
+                )}
+              </div>
+
+              {/* Separador */}
+              <div className="border-t" />
+
+              {/* Enlaces directos */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-gray-700">Enlaces de interés</h3>
+                <div className="space-y-2">
+                  <a
+                    href="https://www.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Lista Roja IUCN
+                  </a>
+                  <a
+                    href="https://www.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Libro Rojo Ecuador
+                  </a>
+                  <a
+                    href="https://www.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    AmphibiaWeb
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        {searchQuery && (
-          <p className="mt-2 text-sm text-gray-500">
-            Filtrando por: &quot;{searchQuery}&quot;
-          </p>
-        )}
       </div>
 
-      {/* Categorías individuales */}
-      {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
+      {/* Panel derecho - Acordeones */}
+      <div className="flex-1 space-y-3">
+        {/* Categorías individuales */}
+        {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
 
-      {/* Grupos especiales (al final, con separación) - Sin filtro */}
-      {(especiesAmenazadas.length > 0 || especiesNoAmenazadas.length > 0) && (
-        <div className="mt-8 space-y-3 pt-6">
-          {especiesAmenazadas.length > 0 && renderGrupoEspecial("amenazadas", "Especies Amenazadas", especiesAmenazadas)}
-          {especiesNoAmenazadas.length > 0 && renderGrupoEspecial("no-amenazadas", "Especies No Amenazadas", especiesNoAmenazadas)}
-        </div>
-      )}
+        {/* Grupos especiales (al final, con separación) - Sin filtro */}
+        {(especiesAmenazadas.length > 0 || especiesNoAmenazadas.length > 0) && (
+          <div className="mt-8 space-y-3 pt-6">
+            {especiesAmenazadas.length > 0 && renderGrupoEspecial("amenazadas", "Especies Amenazadas", especiesAmenazadas)}
+            {especiesNoAmenazadas.length > 0 && renderGrupoEspecial("no-amenazadas", "Especies No Amenazadas", especiesNoAmenazadas)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
