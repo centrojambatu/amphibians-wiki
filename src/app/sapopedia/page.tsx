@@ -49,13 +49,13 @@ export default async function SapopediaPage() {
         <Card>
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
-              {especies.filter((e) => e.endemica).length}
+              {especies.filter((e) => e.endemica).length}{" "}
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {((especies.filter((e) => e.endemica).length / especies.length) * 100).toFixed(1)}%
+              </span>
             </p>
             <p className="text-muted-foreground text-xs sm:text-sm">
               Endémicas
-            </p>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {((especies.filter((e) => e.endemica).length / especies.length) * 100).toFixed(1)}%
             </p>
           </CardContent>
         </Card>

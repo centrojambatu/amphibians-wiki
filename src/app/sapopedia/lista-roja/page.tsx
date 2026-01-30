@@ -13,11 +13,7 @@ export default async function ListaRojaPage() {
     <main className="container mx-auto px-4 py-2">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Lista Roja UICN</h1>
-        <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
-          Especies de anfibios de Ecuador clasificadas según las categorías de la Lista Roja de la
-          UICN.
-        </p>
+        <h1 className="text-primary mb-4 text-4xl font-bold">Lista Roja</h1>
       </div>
 
       {/* Cards de resumen */}

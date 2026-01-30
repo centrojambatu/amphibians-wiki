@@ -293,13 +293,13 @@ export default function FiltersPanel({
           );
           const displayLabel =
             useSigla && item.sigla
-              ? `${item.nombre} (${item.sigla})`
+              ? `${item.nombre} | ${item.sigla}`
               : item.nombre;
 
           return (
             <Button
               key={item.id}
-              className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-xs break-words whitespace-normal"
+              className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm break-words whitespace-normal"
               size="sm"
               style={{
                 borderColor: isSelected ? undefined : "#e8e8e8",
@@ -448,7 +448,7 @@ export default function FiltersPanel({
                   return (
                     <Button
                       key={option.value}
-                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-xs"
+                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                       size="sm"
                       style={{
                         borderColor: isSelected ? undefined : "#e8e8e8",
@@ -497,11 +497,11 @@ export default function FiltersPanel({
                 <div className="mt-1 flex flex-wrap gap-2">
                   {(filters.rangoAltitudinal.min !== 0 ||
                     filters.rangoAltitudinal.max !== 4800) && (
-                    <span className="text-xs font-normal text-gray-500">
-                      {filters.rangoAltitudinal.min}m -{" "}
-                      {filters.rangoAltitudinal.max}m
-                    </span>
-                  )}
+                      <span className="text-xs font-normal text-gray-500">
+                        {filters.rangoAltitudinal.min}m -{" "}
+                        {filters.rangoAltitudinal.max}m
+                      </span>
+                    )}
                   {filters.distribucion.length > 0 && (
                     <span className="text-xs font-normal text-gray-500">
                       {filters.distribucion.join(", ")}
@@ -512,39 +512,8 @@ export default function FiltersPanel({
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
-                {/* Gráfico de pisos climáticos */}
-                <ClimaticFloorChartFilter
-                  altitudinalRange={{
-                    min: filters.rangoAltitudinal.min,
-                    max: filters.rangoAltitudinal.max,
-                  }}
-                />
-
-                {/* Slider de rango altitudinal */}
+                {/* Checkboxes de distribución - encima del gráfico */}
                 <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-gray-600">
-                    <span>{filters.rangoAltitudinal.min}m</span>
-                    <span>{filters.rangoAltitudinal.max}m</span>
-                  </div>
-                  <Slider
-                    max={4800}
-                    min={0}
-                    step={100}
-                    value={[
-                      filters.rangoAltitudinal.min,
-                      filters.rangoAltitudinal.max,
-                    ]}
-                    onValueChange={(values) =>
-                      handleSliderChange("rangoAltitudinal", values)
-                    }
-                  />
-                </div>
-
-                {/* Checkboxes de distribución */}
-                <div className="space-y-2 border-t border-gray-200 pt-4">
-                  <label className="text-sm font-medium text-gray-700">
-                    Distribución
-                  </label>
                   <div className="flex flex-col gap-2">
                     <label className="flex cursor-pointer items-center gap-2">
                       <input
@@ -570,6 +539,35 @@ export default function FiltersPanel({
                     </label>
                   </div>
                 </div>
+                {/* Slider de rango altitudinal */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>{filters.rangoAltitudinal.min}m</span>
+                    <span>{filters.rangoAltitudinal.max}m</span>
+                  </div>
+                  <Slider
+                    max={4800}
+                    min={0}
+                    step={100}
+                    value={[
+                      filters.rangoAltitudinal.min,
+                      filters.rangoAltitudinal.max,
+                    ]}
+                    onValueChange={(values) =>
+                      handleSliderChange("rangoAltitudinal", values)
+                    }
+                  />
+                </div>
+
+                {/* Gráfico de pisos climáticos */}
+                <ClimaticFloorChartFilter
+                  altitudinalRange={{
+                    min: filters.rangoAltitudinal.min,
+                    max: filters.rangoAltitudinal.max,
+                  }}
+                />
+
+
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -581,11 +579,11 @@ export default function FiltersPanel({
                 <span className="font-semibold">Área distribución <span className="ml-1 font-normal text-gray-500">km²</span></span>
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
-                  <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.areaDistribucion.min} km² -{" "}
-                    {filters.areaDistribucion.max} km²
-                  </span>
-                )}
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.areaDistribucion.min} km² -{" "}
+                      {filters.areaDistribucion.max} km²
+                    </span>
+                  )}
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -765,13 +763,13 @@ export default function FiltersPanel({
           <AccordionItem value="pluviocidad">
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Precipitación</span>
+                <span className="font-semibold">Precipitación <span className="ml-1 font-normal text-gray-500">media anual</span></span>
                 {(filters.pluviocidad.min !== 640 ||
                   filters.pluviocidad.max !== 4000) && (
-                  <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
-                  </span>
-                )}
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
+                    </span>
+                  )}
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -800,10 +798,10 @@ export default function FiltersPanel({
                 <span className="font-semibold">Temperatura</span>
                 {(filters.temperatura.min !== 5 ||
                   filters.temperatura.max !== 25) && (
-                  <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.temperatura.min} - {filters.temperatura.max} °C
-                  </span>
-                )}
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.temperatura.min} - {filters.temperatura.max} °C
+                    </span>
+                  )}
               </div>
             </AccordionTrigger>
             <AccordionContent>
