@@ -30,7 +30,7 @@ export default function RedListContent({especies, categorias}: RedListContentPro
       <RedListSummaryCards especies={especies} onCategoryClick={handleCategoryClick} />
 
       {/* Selector de gráficos */}
-      <RedListChartSelector categorias={categorias} especies={especies} />
+      <RedListChartSelector categorias={categorias} especies={especies} onCategoryClick={handleCategoryClick} />
 
       {/* Acordeón de categorías */}
       <div className="mt-8 mb-8">

@@ -13,11 +13,13 @@ import RedListStatus from "./RedListStatus";
 interface RedListBarChartProps {
   readonly especies: SpeciesListItem[];
   readonly categorias: CatalogOption[];
+  readonly onCategoryClick?: (categoria: string) => void;
 }
 
 export default function RedListBarChart({
   especies,
   categorias,
+  onCategoryClick,
 }: RedListBarChartProps) {
   // Debug: Verificar datos recibidos
   console.log("🔍 RedListBarChart - Total especies recibidas:", especies.length);
@@ -146,13 +148,10 @@ export default function RedListBarChart({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Distribución por Categorías
-        </h3>
-        <p className="text-muted-foreground text-sm">
-          Total: {totalEspecies} especies
+    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col ">
+      <div className="mb-4 pl-6">
+        <p className="text-lg font-semibold text-gray-800">
+          {totalEspecies} <span className="text-gray-500">especies</span>
         </p>
       </div>
 
@@ -163,18 +162,25 @@ export default function RedListBarChart({
           return (
             <div key={dato.categoria.id} className="flex items-center gap-4">
               {/* Badge de categoría */}
-              <div className="flex w-20 items-center justify-center">
+              <div 
+                className="flex w-20 items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                onClick={() => {
+                  const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
+                  if (sigla) onCategoryClick?.(sigla);
+                }}
+              >
                 {dato.categoria.sigla && (
                   <>
                     {isPE(dato.categoria.sigla) ? (
                       <div
-                        className="inline-flex items-center justify-center font-semibold text-[10px] px-2 py-1"
+                        className="inline-flex items-center justify-center font-semibold text-[11px]"
                         style={{
                           backgroundColor: getColor(dato.categoria.sigla),
                           color: "#ffffff",
                           borderRadius: "100% 0% 100% 100%",
-                          minWidth: "32px",
-                          minHeight: "32px",
+                          width: "36px",
+                          height: "36px",
+                          padding: "4px 9px",
                           boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
                         }}
                       >
@@ -201,7 +207,13 @@ export default function RedListBarChart({
               </div>
 
               {/* Nombre de categoría */}
-              <div className="w-48 flex-shrink-0">
+              <div 
+                className="w-48 flex-shrink-0 cursor-pointer hover:text-gray-600 transition-colors"
+                onClick={() => {
+                  const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
+                  if (sigla) onCategoryClick?.(sigla);
+                }}
+              >
                 <p className="text-sm font-medium text-gray-800">
                   {dato.categoria.nombre}
                 </p>
@@ -215,7 +227,13 @@ export default function RedListBarChart({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="relative h-8 w-full rounded-md bg-gray-100 cursor-pointer">
+                      <div 
+                        className="relative h-8 w-full rounded-md bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => {
+                          const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
+                          if (sigla) onCategoryClick?.(sigla);
+                        }}
+                      >
                         <div
                           className="h-full rounded-md transition-all"
                           style={{

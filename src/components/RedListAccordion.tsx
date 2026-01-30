@@ -2,11 +2,13 @@
 
 import {useState, useEffect, useRef} from "react";
 import Link from "next/link";
-import {Menu} from "lucide-react";
+import {Menu, Search, X} from "lucide-react";
 
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
 import {processHTMLLinks} from "@/lib/process-html-links";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -19,7 +21,28 @@ interface RedListAccordionProps {
 
 export default function RedListAccordion({especies, categorias, activeCategory}: RedListAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const categoryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Función para normalizar texto (quitar acentos y convertir a minúsculas)
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
+  // Filtrar especies por nombre común o científico
+  const filterSpecies = (speciesList: SpeciesListItem[]) => {
+    if (!searchQuery.trim()) return speciesList;
+
+    const normalizedQuery = normalizeText(searchQuery);
+    return speciesList.filter((species) => {
+      const nombreCientifico = normalizeText(species.nombre_cientifico || "");
+      const nombreComun = normalizeText(species.nombre_comun || "");
+      return nombreCientifico.includes(normalizedQuery) || nombreComun.includes(normalizedQuery);
+    });
+  };
 
   // Cargar el estado del acordeón desde localStorage al montar
   useEffect(() => {
@@ -117,17 +140,20 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
     return categoriasNoAmenazadas.includes(sigla);
   });
 
-  // Agrupar especies por categoría de lista roja
+  // Agrupar especies por categoría de lista roja (con filtro aplicado)
   const especiesPorCategoria = categorias
     .map((categoria) => {
       const especiesEnCategoria = especies.filter((e) => e.lista_roja_iucn === categoria.sigla);
+      // Aplicar filtro de búsqueda
+      const especiesFiltradas = filterSpecies(especiesEnCategoria);
 
       return {
         categoria,
-        especies: especiesEnCategoria,
+        especies: especiesFiltradas,
+        totalSinFiltro: especiesEnCategoria.length,
       };
     })
-    .filter((grupo) => grupo.especies.length > 0)
+    .filter((grupo) => grupo.especies.length > 0 || (searchQuery && grupo.totalSinFiltro > 0))
     .sort((a, b) => {
       // Ordenar por orden de importancia de las categorías
       // PE (Posiblemente extinta) debe ser la primera, siempre
@@ -291,9 +317,10 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
     </div>
   );
 
-  const renderCategoria = (grupo: {categoria: CatalogOption; especies: SpeciesListItem[]}) => {
+  const renderCategoria = (grupo: {categoria: CatalogOption; especies: SpeciesListItem[]; totalSinFiltro?: number}) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
+    const hayFiltroActivo = searchQuery.trim().length > 0;
 
     return (
       <div
@@ -320,6 +347,11 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
               <span className="text-foreground text-sm font-semibold">
                 {grupo.categoria.nombre}
               </span>
+              {hayFiltroActivo && grupo.totalSinFiltro && grupo.totalSinFiltro !== grupo.especies.length && (
+                <span className="text-xs text-gray-400">
+                  ({grupo.especies.length} de {grupo.totalSinFiltro})
+                </span>
+              )}
             </div>
             <p className="text-muted-foreground text-xs">
               {grupo.especies.length} especie
@@ -336,20 +368,28 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
 
         {isOpen(categoriaId) && (
           <div className="bg-muted mt-3 rounded-lg p-4">
-            {/* Header de la tabla */}
-            <div className="mb-3 px-4 py-2">
-              <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-              <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                <div className="flex-1">Nombre</div>
-                <div className="w-12 text-center">En</div>
-                <div className="w-16 text-center">LR</div>
-                <div className="w-80 text-center">Distribución</div>
-              </div>
-            </div>
-            {/* Lista de especies */}
-            <div className="space-y-2">
-              {grupo.especies.map((species) => renderSpecies(species))}
-            </div>
+            {grupo.especies.length > 0 ? (
+              <>
+                {/* Header de la tabla */}
+                <div className="mb-3 px-4 py-2">
+                  <div className="text-muted-foreground mb-2 text-xs">Especies</div>
+                  <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                    <div className="flex-1">Nombre</div>
+                    <div className="w-12 text-center">En</div>
+                    <div className="w-16 text-center">LR</div>
+                    <div className="w-80 text-center">Distribución</div>
+                  </div>
+                </div>
+                {/* Lista de especies */}
+                <div className="space-y-2">
+                  {grupo.especies.map((species) => renderSpecies(species))}
+                </div>
+              </>
+            ) : (
+              <p className="text-center text-sm text-gray-500 py-4">
+                No se encontraron especies con el filtro actual
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -436,12 +476,41 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
 
   return (
     <div className="space-y-3">
+      {/* Filtro de búsqueda */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Buscar por nombre común o científico..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="mt-2 text-sm text-gray-500">
+            Filtrando por: &quot;{searchQuery}&quot;
+          </p>
+        )}
+      </div>
+
       {/* Categorías individuales */}
       {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
 
-      {/* Grupos especiales (al final, con separación) */}
+      {/* Grupos especiales (al final, con separación) - Sin filtro */}
       {(especiesAmenazadas.length > 0 || especiesNoAmenazadas.length > 0) && (
-        <div className="mt-8 space-y-3 pt-8">
+        <div className="mt-8 space-y-3 pt-6">
           {especiesAmenazadas.length > 0 && renderGrupoEspecial("amenazadas", "Especies Amenazadas", especiesAmenazadas)}
           {especiesNoAmenazadas.length > 0 && renderGrupoEspecial("no-amenazadas", "Especies No Amenazadas", especiesNoAmenazadas)}
         </div>
