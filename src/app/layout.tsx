@@ -1,9 +1,6 @@
 import type {Metadata} from "next";
 
-import Image from "next/image";
-import Link from "next/link";
-
-import {Button} from "@/components/ui/button";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,74 +13,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
   return (
     <html lang="es" suppressHydrationWarning>
       <body className="bg-background min-h-screen font-sans antialiased" suppressHydrationWarning>
-        <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <Link className="flex items-center" href="/sapopedia">
-                <Image
-                  priority
-                  alt="Anfibios de Ecuador"
-                  className="h-auto w-auto"
-                  height={45}
-                  src="/assets/references/logo.png"
-                  width={150}
-                />
-              </Link>
-              <nav className="flex items-center gap-4">
-                <Link href="/sapopedia">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Sapopedia
-                  </Button>
-                </Link>
-                <Link href="/sapopedia/lista-roja">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Lista Roja
-                  </Button>
-                </Link>
-                <Link href="/sapopedia/nombres">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Nombres
-                  </Button>
-                </Link>
-                <Link href="/sapoteca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Biblioteca
-                  </Button>
-                </Link>
-                <Link href="/mapoteca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Mapoteca
-                  </Button>
-                </Link>
-                <Link href="/videoteca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Videoteca
-                  </Button>
-                </Link>
-                <Link href="/fonoteca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Fonoteca
-                  </Button>
-                </Link>
-                <Link href="/fototeca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Fototeca
-                  </Button>
-                </Link>
-                <Link href="/moleculoteca">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Moleculoteca
-                  </Button>
-                </Link>
-                <Link href="/sapopedia/editor-citas">
-                  <Button className="cursor-pointer" variant="ghost">
-                    Editor Ficha Especie
-                  </Button>
-                </Link>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Navbar />
 
         <main className="flex-1">{children}</main>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import Link from "next/link";
 import {Menu} from "lucide-react";
 
@@ -14,10 +14,12 @@ import RedListStatus from "./RedListStatus";
 interface RedListAccordionProps {
   readonly especies: SpeciesListItem[];
   readonly categorias: CatalogOption[];
+  readonly activeCategory?: string | null;
 }
 
-export default function RedListAccordion({especies, categorias}: RedListAccordionProps) {
+export default function RedListAccordion({especies, categorias, activeCategory}: RedListAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+  const categoryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Cargar el estado del acordeón desde localStorage al montar
   useEffect(() => {
@@ -43,6 +45,39 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     }
   }, [openItems]);
 
+  // Abrir y hacer scroll cuando cambia activeCategory
+  useEffect(() => {
+    if (activeCategory) {
+      let categoryId: string;
+
+      // Manejar grupos especiales
+      if (activeCategory === "AMENAZADAS") {
+        categoryId = "categoria-amenazadas";
+      } else if (activeCategory === "NO_AMENAZADAS") {
+        categoryId = "categoria-no-amenazadas";
+      } else if (activeCategory === "PE") {
+        // Buscar la categoría que contenga PE
+        const peCategoria = categorias.find((c) =>
+          c.sigla?.includes("PE") || c.nombre?.toLowerCase().includes("extinta")
+        );
+        categoryId = `categoria-${peCategoria?.sigla || "CR (PE)"}`;
+      } else {
+        categoryId = `categoria-${activeCategory}`;
+      }
+
+      // Abrir solo este acordeón (cerrar los demás)
+      setOpenItems(new Set([categoryId]));
+
+      // Hacer scroll al elemento
+      setTimeout(() => {
+        const element = categoryRefs.current.get(categoryId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  }, [activeCategory, categorias]);
+
   const toggleItem = (itemId: string) => {
     const newOpenItems = new Set(openItems);
 
@@ -62,6 +97,25 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
 
     return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
   };
+
+  // Categorías amenazadas y no amenazadas
+  const categoriasAmenazadas = ["PE", "CR", "EN", "VU"];
+  const categoriasNoAmenazadas = ["NT", "LC"];
+
+  // Especies amenazadas (PE, CR, EN, VU)
+  const especiesAmenazadas = especies.filter((e) => {
+    const sigla = e.lista_roja_iucn;
+    if (!sigla) return false;
+    if (isPE(sigla)) return true;
+    return categoriasAmenazadas.includes(sigla);
+  });
+
+  // Especies no amenazadas (NT, LC)
+  const especiesNoAmenazadas = especies.filter((e) => {
+    const sigla = e.lista_roja_iucn;
+    if (!sigla) return false;
+    return categoriasNoAmenazadas.includes(sigla);
+  });
 
   // Agrupar especies por categoría de lista roja
   const especiesPorCategoria = categorias
@@ -242,7 +296,13 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
 
     return (
-      <div key={categoriaId} className="relative">
+      <div
+        key={categoriaId}
+        ref={(el) => {
+          if (el) categoryRefs.current.set(categoriaId, el);
+        }}
+        className="relative"
+      >
         <div
           className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
           role="button"
@@ -296,6 +356,76 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
     );
   };
 
+  // Renderizar grupo especial (amenazadas/no amenazadas)
+  const renderGrupoEspecial = (
+    id: string,
+    nombre: string,
+    especiesGrupo: SpeciesListItem[]
+  ) => {
+    const categoriaId = `categoria-${id}`;
+    const especiesEndemicas = especiesGrupo.filter((e) => e.endemica).length;
+
+    return (
+      <div
+        key={categoriaId}
+        ref={(el) => {
+          if (el) categoryRefs.current.set(categoriaId, el);
+        }}
+        className="relative"
+      >
+        <div
+          className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
+          role="button"
+          tabIndex={0}
+          onClick={() => toggleItem(categoriaId)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleItem(categoriaId);
+            }
+          }}
+        >
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-foreground text-sm font-semibold">
+                {nombre}
+              </span>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {especiesGrupo.length} especie
+              {especiesGrupo.length !== 1 ? "s" : ""} ({especiesEndemicas} endémica
+              {especiesEndemicas !== 1 ? "s" : ""})
+            </p>
+          </div>
+
+          {/* Icono de barras */}
+          <div className="ml-3 flex-shrink-0 text-gray-300">
+            <Menu className="h-4 w-4" />
+          </div>
+        </div>
+
+        {isOpen(categoriaId) && (
+          <div className="bg-muted mt-3 rounded-lg p-4">
+            {/* Header de la tabla */}
+            <div className="mb-3 px-4 py-2">
+              <div className="text-muted-foreground mb-2 text-xs">Especies</div>
+              <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                <div className="flex-1">Nombre</div>
+                <div className="w-12 text-center">En</div>
+                <div className="w-16 text-center">LR</div>
+                <div className="w-80 text-center">Distribución</div>
+              </div>
+            </div>
+            {/* Lista de especies */}
+            <div className="space-y-2">
+              {especiesGrupo.map((species) => renderSpecies(species))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (especiesPorCategoria.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
@@ -305,6 +435,17 @@ export default function RedListAccordion({especies, categorias}: RedListAccordio
   }
 
   return (
-    <div className="space-y-3">{especiesPorCategoria.map((grupo) => renderCategoria(grupo))}</div>
+    <div className="space-y-3">
+      {/* Categorías individuales */}
+      {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
+
+      {/* Grupos especiales (al final, con separación) */}
+      {(especiesAmenazadas.length > 0 || especiesNoAmenazadas.length > 0) && (
+        <div className="mt-8 space-y-3 pt-8">
+          {especiesAmenazadas.length > 0 && renderGrupoEspecial("amenazadas", "Especies Amenazadas", especiesAmenazadas)}
+          {especiesNoAmenazadas.length > 0 && renderGrupoEspecial("no-amenazadas", "Especies No Amenazadas", especiesNoAmenazadas)}
+        </div>
+      )}
+    </div>
   );
 }

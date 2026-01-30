@@ -6,9 +6,10 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 
 interface RedListSummaryCardsProps {
   readonly especies: SpeciesListItem[];
+  readonly onCategoryClick?: (categoria: string) => void;
 }
 
-export default function RedListSummaryCards({especies}: RedListSummaryCardsProps) {
+export default function RedListSummaryCards({especies, onCategoryClick}: RedListSummaryCardsProps) {
   // Función helper para detectar si es PE
   const isPE = (sigla: string | null): boolean => {
     if (!sigla) return false;
@@ -107,7 +108,7 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
   // 7 categorías para las cards superiores: PE, CR, EN, VU, NT, LC, DD
   const categoriasListaRoja: { sigla: string; etiqueta: string }[] = [
     { sigla: "PE", etiqueta: "Posiblemente extintas" },
-    { sigla: "CR", etiqueta: "Críticamente amenazadas" },
+    { sigla: "CR", etiqueta: "Peligro Crítico" },
     { sigla: "EN", etiqueta: "En peligro" },
     { sigla: "VU", etiqueta: "Vulnerables" },
     { sigla: "NT", etiqueta: "Casi amenazadas" },
@@ -131,7 +132,11 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
           const pct =
             especiesConCategoria > 0 ? ((count / especiesConCategoria) * 100).toFixed(1) : "0";
           return (
-            <Card key={sigla} className="min-w-0 overflow-visible">
+            <Card
+              key={sigla}
+              className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md"
+              onClick={() => onCategoryClick?.(sigla)}
+            >
               <CardContent className="pt-4">
                 <p className="text-3xl font-bold sm:text-4xl">
                   {count}{" "}
@@ -149,18 +154,27 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
       {/* Card de especies amenazadas + no amenazadas */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       {/* Card de especies amenazadas */}
-      <Card>
+      <Card 
+        className="cursor-pointer transition-shadow hover:shadow-md"
+        onClick={() => onCategoryClick?.("AMENAZADAS")}
+      >
         <CardContent>
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            {["CR", "EN", "VU"].map((sigla) => (
-              <TooltipProvider key={sigla}>
+          <div className="flex flex-wrap items-start gap-2 sm:flex-nowrap sm:items-center">
+            <span className="inline-flex items-baseline gap-2">
+              <span className="text-3xl font-bold sm:text-4xl">{totalAmenazadas}</span>
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {porcentajeAmenazadas}%
+              </span>
+            </span>
+            <span className="w-full sm:w-auto sm:ml-3 inline-flex flex-wrap items-center justify-start gap-1.5 sm:-translate-y-1">
+              <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div
                       className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
                       style={{
-                        backgroundColor: getColor(sigla),
-                        color: getTextColor(sigla),
+                        backgroundColor: getColor("CR (PE)"),
+                        color: getTextColor("CR (PE)"),
                         borderRadius: "100% 0% 100% 100%",
                         width: "36px",
                         height: "36px",
@@ -168,78 +182,87 @@ export default function RedListSummaryCards({especies}: RedListSummaryCardsProps
                         boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
                       }}
                     >
-                      {sigla}
+                      PE
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="font-semibold">{getFullName(sigla)}</p>
+                    <p className="font-semibold">{getFullName("CR (PE)")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            ))}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: getColor("CR (PE)"),
-                      color: getTextColor("CR (PE)"),
-                      borderRadius: "100% 0% 100% 100%",
-                      width: "36px",
-                      height: "36px",
-                      padding: "4px 9px",
-                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    PE
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="font-semibold">{getFullName("CR (PE)")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+              {["CR", "EN", "VU"].map((sigla) => (
+                <TooltipProvider key={sigla}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
+                        style={{
+                          backgroundColor: getColor(sigla),
+                          color: getTextColor(sigla),
+                          borderRadius: "100% 0% 100% 100%",
+                          width: "36px",
+                          height: "36px",
+                          padding: "4px 9px",
+                          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                        }}
+                      >
+                        {sigla}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-semibold">{getFullName(sigla)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </span>
           </div>
-          <p className="text-3xl font-bold sm:text-4xl">{totalAmenazadas}</p>
-          <p className="text-muted-foreground text-xs sm:text-sm">Especies amenazadas</p>
-          <p className="mt-1 text-muted-foreground text-xs sm:text-sm">{porcentajeAmenazadas}% del total</p>
+          <p className="mt-1 text-muted-foreground text-xs sm:text-sm">Especies amenazadas</p>
         </CardContent>
       </Card>
 
       {/* Card de especies no amenazadas */}
-      <Card>
+      <Card 
+        className="cursor-pointer transition-shadow hover:shadow-md"
+        onClick={() => onCategoryClick?.("NO_AMENAZADAS")}
+      >
         <CardContent>
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            {["NT", "LC"].map((sigla) => (
-              <TooltipProvider key={sigla}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
-                      style={{
-                        backgroundColor: getColor(sigla),
-                        color: getTextColor(sigla),
-                        borderRadius: "100% 0% 100% 100%",
-                        width: "36px",
-                        height: "36px",
-                        padding: "4px 9px",
-                        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-                      {sigla}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="font-semibold">{getFullName(sigla)}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ))}
+          <div className="flex flex-wrap items-start gap-2 sm:flex-nowrap sm:items-center">
+            <span className="inline-flex items-baseline gap-2">
+              <span className="text-3xl font-bold sm:text-4xl">{totalNoAmenazadas}</span>
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {porcentajeNoAmenazadas}%
+              </span>
+            </span>
+            <span className="w-full sm:w-auto sm:ml-3 inline-flex flex-wrap items-center justify-start gap-1.5 sm:-translate-y-1">
+              {["NT", "LC"].map((sigla) => (
+                <TooltipProvider key={sigla}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
+                        style={{
+                          backgroundColor: getColor(sigla),
+                          color: getTextColor(sigla),
+                          borderRadius: "100% 0% 100% 100%",
+                          width: "36px",
+                          height: "36px",
+                          padding: "4px 9px",
+                          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                        }}
+                      >
+                        {sigla}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-semibold">{getFullName(sigla)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </span>
           </div>
-          <p className="text-3xl font-bold sm:text-4xl">{totalNoAmenazadas}</p>
-          <p className="text-muted-foreground text-xs sm:text-sm">Especies no amenazadas</p>
-          <p className="mt-1 text-muted-foreground text-xs sm:text-sm">{porcentajeNoAmenazadas}% del total</p>
+          <p className="mt-1 text-muted-foreground text-xs sm:text-sm">Especies no amenazadas</p>
         </CardContent>
       </Card>
       </div>
