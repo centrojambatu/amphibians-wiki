@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,10 +46,37 @@ export interface FiltersState {
   distribucion: string[]; // "oriental" | "occidental"
 }
 
+export type ExcludeFilterOption = "pluviocidad" | "temperatura" | "listaRoja";
+
+export const DEFAULT_FILTERS_STATE: FiltersState = {
+  provincia: [],
+  listaRoja: [],
+  endemismo: [],
+  rangoAltitudinal: { min: 0, max: 4800 },
+  areaDistribucion: { min: 1, max: 100000 },
+  ecosistemas: [],
+  regionesBiogeograficas: [],
+  reservasBiosfera: [],
+  bosquesProtegidos: [],
+  areasProtegidasEstado: [],
+  areasProtegidasPrivadas: [],
+  pluviocidad: { min: 640, max: 4000 },
+  temperatura: { min: 5, max: 25 },
+  distribucion: [],
+};
+
 interface FiltersPanelProps {
   readonly especies: SpeciesListItem[];
   readonly catalogs: FilterCatalogs;
   readonly onFiltersChange: (filters: FiltersState) => void;
+  /** Ocultar secciones de filtro (ej. en Lista Roja no se usan precipitación ni temperatura) */
+  readonly excludeFilters?: ExcludeFilterOption[];
+  /** Modo controlado: filtros desde el padre */
+  readonly filters?: FiltersState;
+  /** Solo accordion de filtros (para incrustar en Card de Lista Roja). Sin buscador ni wrapper. */
+  readonly embedded?: boolean;
+  /** Notificar cambio de búsqueda para filtrar el acordeón de especies (Sapopedia) */
+  readonly onSearchQueryChange?: (query: string) => void;
 }
 
 interface SearchResult {
@@ -64,27 +91,21 @@ export default function FiltersPanel({
   especies,
   catalogs,
   onFiltersChange,
+  excludeFilters = [],
+  filters: controlledFilters,
+  embedded = false,
+  onSearchQueryChange,
 }: FiltersPanelProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const [filters, setFilters] = useState<FiltersState>({
-    provincia: [],
-    listaRoja: [],
-    endemismo: [],
-    rangoAltitudinal: { min: 0, max: 4800 },
-    areaDistribucion: { min: 1, max: 100000 },
-    ecosistemas: [],
-    regionesBiogeograficas: [],
-    reservasBiosfera: [],
-    bosquesProtegidos: [],
-    areasProtegidasEstado: [],
-    areasProtegidasPrivadas: [],
-    pluviocidad: { min: 640, max: 4000 },
-    temperatura: { min: 5, max: 25 },
-    distribucion: [],
-  });
+  const [internalFilters, setInternalFilters] = useState<FiltersState>(DEFAULT_FILTERS_STATE);
+  const filters = controlledFilters ?? internalFilters;
+  const updateFilters = (newFilters: FiltersState) => {
+    onFiltersChange(newFilters);
+    if (controlledFilters === undefined) setInternalFilters(newFilters);
+  };
 
   // Función para buscar en los datos de especies
   const searchData = (query: string): SearchResult[] => {
@@ -195,42 +216,18 @@ export default function FiltersPanel({
       newValues = [...currentValues, value];
     }
 
-    const newFilters = { ...filters, [key]: newValues };
-
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
+    updateFilters({ ...filters, [key]: newValues });
   };
 
   const handleSliderChange = (key: keyof FiltersState, values: number[]) => {
-    const newFilters = {
+    updateFilters({
       ...filters,
       [key]: { min: values[0], max: values[1] },
-    };
-
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
+    });
   };
 
   const resetFilters = () => {
-    const resetFiltersState: FiltersState = {
-      provincia: [],
-      listaRoja: [],
-      endemismo: [],
-      rangoAltitudinal: { min: 0, max: 4800 },
-      areaDistribucion: { min: 1, max: 100000 },
-      ecosistemas: [],
-      regionesBiogeograficas: [],
-      reservasBiosfera: [],
-      bosquesProtegidos: [],
-      areasProtegidasEstado: [],
-      areasProtegidasPrivadas: [],
-      pluviocidad: { min: 640, max: 4000 },
-      temperatura: { min: 5, max: 25 },
-      distribucion: [],
-    };
-
-    setFilters(resetFiltersState);
-    onFiltersChange(resetFiltersState);
+    updateFilters(DEFAULT_FILTERS_STATE);
   };
 
   const getTypeLabel = (type: string) => {
@@ -251,6 +248,7 @@ export default function FiltersPanel({
   const handleSelectResult = (path: string) => {
     setOpen(false);
     setSearchQuery("");
+    onSearchQueryChange?.("");
     router.push(path);
   };
 
@@ -316,10 +314,278 @@ export default function FiltersPanel({
     );
   };
 
+  if (embedded) {
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="flex-shrink-0 py-2 flex justify-end">
+          <Button size="sm" variant="outline" onClick={resetFilters} className="gap-1 text-xs text-gray-600">
+            <RotateCcw className="h-3.5 w-3.5 text-black" />
+            Limpiar
+          </Button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto -mx-2 px-2 max-h-[50vh]">
+          <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:-mx-2 [&>[data-slot=accordion-item]]:px-2" type="multiple">
+            {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
+              <AccordionItem value="listaRoja">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Lista Roja</span>
+                    {filters.listaRoja.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.listaRoja, "listaRoja", true).join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>{renderCatalogOptions(catalogs.listaRoja, "listaRoja", true)}</AccordionContent>
+              </AccordionItem>
+            )}
+            <AccordionItem value="endemismo">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Endemismo</span>
+                  {filters.endemismo.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.endemismo.map((val) => (val === "endemic" ? "Endémicas" : "No endémicas")).join(", ")}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { value: "endemic", label: "Endémicas" },
+                    { value: "non-endemic", label: "No endémicas" },
+                  ].map((option) => {
+                    const isSelected = filters.endemismo.includes(option.value);
+                    return (
+                      <Button
+                        key={option.value}
+                        className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                        size="sm"
+                        style={{ borderColor: isSelected ? undefined : "#e8e8e8", color: isSelected ? undefined : "#454545" }}
+                        variant={isSelected ? "default" : "outline"}
+                        onClick={() => handleCategoricalChange("endemismo", option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            {catalogs.provincias.length > 0 && (
+              <AccordionItem value="provincia">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Provincia</span>
+                    {filters.provincia.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.provincias, "provincia").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>{renderCatalogOptions(catalogs.provincias, "provincia")}</AccordionContent>
+              </AccordionItem>
+            )}
+            {/* Rango altitudinal, distribución, área, ecosistemas, etc. - reutilizar el mismo markup que el panel completo */}
+            <AccordionItem value="rangoAltitudinal">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Rango altitudinal</span>
+                  {(filters.rangoAltitudinal.min !== 0 || filters.rangoAltitudinal.max !== 4800) && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{filters.rangoAltitudinal.min}m</span>
+                    <span>{filters.rangoAltitudinal.max}m</span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={4800}
+                    step={100}
+                    value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
+                    onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="distribucion">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Distribución</span>
+                  {filters.distribucion.length > 0 && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">{filters.distribucion.join(", ")}</span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.distribucion.includes("occidental")}
+                      onChange={() => handleCategoricalChange("distribucion", "occidental")}
+                      className="rounded"
+                    />
+                    <span className="text-sm">Occidental</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.distribucion.includes("oriental")}
+                      onChange={() => handleCategoricalChange("distribucion", "oriental")}
+                      className="rounded"
+                    />
+                    <span className="text-sm">Oriental</span>
+                  </label>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="areaDistribucion">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">Área de distribución</span>
+                  {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{filters.areaDistribucion.min} km²</span>
+                    <span>{filters.areaDistribucion.max} km²</span>
+                  </div>
+                  <Slider
+                    min={1}
+                    max={100000}
+                    step={100}
+                    value={[filters.areaDistribucion.min, filters.areaDistribucion.max]}
+                    onValueChange={(values) => handleSliderChange("areaDistribucion", values)}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            {catalogs.ecosistemas.length > 0 && (
+              <AccordionItem value="ecosistemas">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Ecosistemas</span>
+                    {filters.ecosistemas.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.ecosistemas, "ecosistemas").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>{renderCatalogOptions(catalogs.ecosistemas, "ecosistemas")}</AccordionContent>
+              </AccordionItem>
+            )}
+            {catalogs.regionesBiogeograficas.length > 0 && (
+              <AccordionItem value="regionesBiogeograficas">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Regiones biogeográficas</span>
+                    {filters.regionesBiogeograficas.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.regionesBiogeograficas, "regionesBiogeograficas").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.regionesBiogeograficas, "regionesBiogeograficas")}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+            {catalogs.reservasBiosfera.length > 0 && (
+              <AccordionItem value="reservasBiosfera">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Reservas de la biosfera</span>
+                    {filters.reservasBiosfera.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.reservasBiosfera, "reservasBiosfera")}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+            {catalogs.bosquesProtegidos.length > 0 && (
+              <AccordionItem value="bosquesProtegidos">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Bosques protegidos</span>
+                    {filters.bosquesProtegidos.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.bosquesProtegidos, "bosquesProtegidos")}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+            {catalogs.areasProtegidasEstado.length > 0 && (
+              <AccordionItem value="areasProtegidasEstado">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Áreas protegidas (Estado)</span>
+                    {filters.areasProtegidasEstado.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.areasProtegidasEstado, "areasProtegidasEstado").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.areasProtegidasEstado, "areasProtegidasEstado")}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+            {catalogs.areasProtegidasPrivadas.length > 0 && (
+              <AccordionItem value="areasProtegidasPrivadas">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Áreas protegidas (Privadas)</span>
+                    {filters.areasProtegidasPrivadas.length > 0 && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {getActiveFilterNames(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas").join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas")}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          </Accordion>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sticky top-0 flex h-auto lg:h-screen lg:max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
-      {/* Buscador */}
-      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+      {/* Buscador y Limpiar */}
+      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 space-y-3">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <div className="relative">
@@ -329,8 +595,10 @@ export default function FiltersPanel({
                 placeholder="Nombre científico o común"
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setOpen(e.target.value.length >= 2);
+                  const value = e.target.value;
+                  setSearchQuery(value);
+                  setOpen(value.length >= 2);
+                  onSearchQueryChange?.(value);
                 }}
                 onFocus={() => {
                   if (searchQuery.length >= 2) {
@@ -383,23 +651,21 @@ export default function FiltersPanel({
             </Command>
           </PopoverContent>
         </Popover>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={resetFilters}
+          className="w-full gap-1 text-xs text-gray-600"
+        >
+          <RotateCcw className="h-3.5 w-3.5 text-black" />
+          Limpiar
+        </Button>
       </div>
 
-      {/* Título y botón de limpiar */}
-      <div className="flex-shrink-0 border-b border-gray-200 py-4 sm:py-5">
-        <div className="flex items-center justify-between px-4 sm:px-6">
-
-
-          <Button size="sm" variant="outline" onClick={resetFilters} className="text-xs sm:text-sm">
-            Limpiar
-          </Button>
-        </div>
-      </div>
-
-      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 max-h-[60vh] lg:max-h-none">
-        <Accordion className="w-full" type="multiple">
+      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 pt-0 pb-3 sm:pb-4 max-h-[60vh] lg:max-h-none">
+        <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:-mx-4 [&>[data-slot=accordion-item]]:px-4 sm:[&>[data-slot=accordion-item]]:-mx-6 sm:[&>[data-slot=accordion-item]]:px-6" type="multiple">
           {/* Lista Roja UICN - desde Supabase */}
-          {catalogs.listaRoja.length > 0 && (
+          {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
             <AccordionItem value="listaRoja">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
@@ -759,70 +1025,132 @@ export default function FiltersPanel({
             </AccordionItem>
           )}
 
-          {/* Precipitación */}
-          <AccordionItem value="pluviocidad">
-            <AccordionTrigger className="!items-start">
-              <div className="flex flex-col items-start">
-                <span className="font-semibold">Precipitación <span className="ml-1 font-normal text-gray-500">media anual</span></span>
-                {(filters.pluviocidad.min !== 640 ||
-                  filters.pluviocidad.max !== 4000) && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
-                    </span>
-                  )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{filters.pluviocidad.min} mm/año</span>
-                  <span>{filters.pluviocidad.max} mm/año</span>
-                </div>
-                <Slider
-                  max={4000}
-                  min={640}
-                  step={50}
-                  value={[filters.pluviocidad.min, filters.pluviocidad.max]}
-                  onValueChange={(values) =>
-                    handleSliderChange("pluviocidad", values)
-                  }
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+          {!excludeFilters.includes("pluviocidad") && (
+            <>
+              {/* Precipitación */}
+              <AccordionItem value="pluviocidad">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Precipitación <span className="ml-1 font-normal text-gray-500">media anual</span></span>
+                    {(filters.pluviocidad.min !== 640 ||
+                      filters.pluviocidad.max !== 4000) && (
+                        <span className="mt-1 text-xs font-normal text-gray-500">
+                          {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
+                        </span>
+                      )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>{filters.pluviocidad.min} mm/año</span>
+                      <span>{filters.pluviocidad.max} mm/año</span>
+                    </div>
+                    <Slider
+                      max={4000}
+                      min={640}
+                      step={50}
+                      value={[filters.pluviocidad.min, filters.pluviocidad.max]}
+                      onValueChange={(values) =>
+                        handleSliderChange("pluviocidad", values)
+                      }
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </>
+          )}
 
-          {/* Temperatura */}
-          <AccordionItem value="temperatura">
-            <AccordionTrigger className="!items-start">
-              <div className="flex flex-col items-start">
-                <span className="font-semibold">Temperatura</span>
-                {(filters.temperatura.min !== 5 ||
-                  filters.temperatura.max !== 25) && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.temperatura.min} - {filters.temperatura.max} °C
-                    </span>
-                  )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{filters.temperatura.min} °C</span>
-                  <span>{filters.temperatura.max} °C</span>
-                </div>
-                <Slider
-                  max={25}
-                  min={5}
-                  step={1}
-                  value={[filters.temperatura.min, filters.temperatura.max]}
-                  onValueChange={(values) =>
-                    handleSliderChange("temperatura", values)
-                  }
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+          {!excludeFilters.includes("temperatura") && (
+            <>
+              {/* Temperatura */}
+              <AccordionItem value="temperatura">
+                <AccordionTrigger className="!items-start">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Temperatura<span className="ml-1 font-normal text-gray-500">media anual</span></span>
+                    {(filters.temperatura.min !== 5 ||
+                      filters.temperatura.max !== 25) && (
+                        <span className="mt-1 text-xs font-normal text-gray-500">
+                          {filters.temperatura.min} - {filters.temperatura.max} °C
+                        </span>
+                      )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>{filters.temperatura.min} °C</span>
+                      <span>{filters.temperatura.max} °C</span>
+                    </div>
+                    <Slider
+                      max={25}
+                      min={5}
+                      step={1}
+                      value={[filters.temperatura.min, filters.temperatura.max]}
+                      onValueChange={(values) =>
+                        handleSliderChange("temperatura", values)
+                      }
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </>
+          )}
         </Accordion>
+
+        {/* Enlaces externos */}
+        <div className="-mx-4 sm:-mx-6 mt-1"></div>
+        <div className="pt-4 space-y-2">
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Historia
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Diversidad
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Conservación
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/extincion"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Extinción
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Arqueología
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            Etnobatracología
+          </a>
+        </div>
+
       </div>
     </div>
   );

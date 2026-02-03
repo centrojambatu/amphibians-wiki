@@ -1,15 +1,17 @@
 "use client";
 
-import {useState, useEffect, useRef} from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import {Menu, Search, X, ExternalLink} from "lucide-react";
+import { Menu, Search, X, ExternalLink } from "lucide-react";
 
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
-import {processHTMLLinks} from "@/lib/process-html-links";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent} from "@/components/ui/card";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import { CatalogOption, FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
+import type { FiltersState } from "./FiltersPanel";
+import FiltersPanel from "./FiltersPanel";
+import { processHTMLLinks } from "@/lib/process-html-links";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -18,12 +20,36 @@ interface RedListAccordionProps {
   readonly especies: SpeciesListItem[];
   readonly categorias: CatalogOption[];
   readonly activeCategory?: string | null;
+  readonly speciesSearchQuery?: string;
+  readonly onSpeciesSearchChange?: (query: string) => void;
+  readonly filters?: FiltersState;
+  readonly onFiltersChange?: (filters: FiltersState) => void;
+  readonly filterCatalogs?: FilterCatalogs;
+  readonly especiesFull?: SpeciesListItem[];
 }
 
-export default function RedListAccordion({especies, categorias, activeCategory}: RedListAccordionProps) {
+export default function RedListAccordion({
+  especies,
+  categorias,
+  activeCategory,
+  speciesSearchQuery: controlledSearchQuery,
+  onSpeciesSearchChange,
+  filters,
+  onFiltersChange,
+  filterCatalogs,
+  especiesFull,
+}: RedListAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
   const categoryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const searchQuery =
+    onSpeciesSearchChange != null && controlledSearchQuery !== undefined
+      ? controlledSearchQuery
+      : internalSearchQuery;
+  const setSearchQuery =
+    onSpeciesSearchChange != null ? onSpeciesSearchChange : setInternalSearchQuery;
+  const hasSearchFromParent = onSpeciesSearchChange != null;
 
   // Función para normalizar texto (quitar acentos y convertir a minúsculas)
   const normalizeText = (text: string) => {
@@ -69,36 +95,52 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
     }
   }, [openItems]);
 
+  // Categorías amenazadas y no amenazadas (para mapear click de cards a primera categoría del grupo)
+  const categoriasAmenazadasIds = ["PE", "CR", "EN", "VU"];
+  const categoriasNoAmenazadasIds = ["NT", "LC"];
+
   // Abrir y hacer scroll cuando cambia activeCategory
   useEffect(() => {
     if (activeCategory) {
-      let categoryId: string;
+      let idsToOpen: Set<string>;
 
-      // Manejar grupos especiales
+      // Cards Amenazadas: abrir todos los acordeones del grupo (PE, CR, EN, VU)
       if (activeCategory === "AMENAZADAS") {
-        categoryId = "categoria-amenazadas";
+        const ids = categorias
+          .filter(
+            (c) =>
+              categoriasAmenazadasIds.includes(c.sigla ?? "") || isPE(c.sigla ?? ""),
+          )
+          .map((c) => `categoria-${c.sigla}`);
+        idsToOpen = new Set(ids);
       } else if (activeCategory === "NO_AMENAZADAS") {
-        categoryId = "categoria-no-amenazadas";
+        // Card No amenazadas: abrir todos los acordeones del grupo (NT, LC)
+        const ids = categorias
+          .filter((c) => categoriasNoAmenazadasIds.includes(c.sigla ?? ""))
+          .map((c) => `categoria-${c.sigla}`);
+        idsToOpen = new Set(ids);
       } else if (activeCategory === "PE") {
-        // Buscar la categoría que contenga PE
-        const peCategoria = categorias.find((c) =>
-          c.sigla?.includes("PE") || c.nombre?.toLowerCase().includes("extinta")
+        const peCategoria = categorias.find(
+          (c) =>
+            c.sigla?.includes("PE") || c.nombre?.toLowerCase().includes("extinta"),
         );
-        categoryId = `categoria-${peCategoria?.sigla || "CR (PE)"}`;
+        idsToOpen = new Set([`categoria-${peCategoria?.sigla || "CR (PE)"}`]);
       } else {
-        categoryId = `categoria-${activeCategory}`;
+        idsToOpen = new Set([`categoria-${activeCategory}`]);
       }
 
-      // Abrir solo este acordeón (cerrar los demás)
-      setOpenItems(new Set([categoryId]));
+      setOpenItems(idsToOpen);
 
-      // Hacer scroll al elemento
-      setTimeout(() => {
-        const element = categoryRefs.current.get(categoryId);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
+      // Scroll al primer acordeón abierto del grupo
+      const firstId = idsToOpen.values().next().value as string | undefined;
+      if (firstId) {
+        setTimeout(() => {
+          const element = categoryRefs.current.get(firstId);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 100);
+      }
     }
   }, [activeCategory, categorias]);
 
@@ -299,15 +341,15 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
               max: species.rango_altitudinal_max,
               occidente: species.has_distribucion_occidental
                 ? {
-                    min: species.rango_altitudinal_min,
-                    max: species.rango_altitudinal_max,
-                  }
+                  min: species.rango_altitudinal_min,
+                  max: species.rango_altitudinal_max,
+                }
                 : undefined,
               oriente: species.has_distribucion_oriental
                 ? {
-                    min: species.rango_altitudinal_min,
-                    max: species.rango_altitudinal_max,
-                  }
+                  min: species.rango_altitudinal_min,
+                  max: species.rango_altitudinal_max,
+                }
                 : undefined,
             }}
           />
@@ -318,7 +360,7 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
     </div>
   );
 
-  const renderCategoria = (grupo: {categoria: CatalogOption; especies: SpeciesListItem[]; totalSinFiltro?: number}) => {
+  const renderCategoria = (grupo: { categoria: CatalogOption; especies: SpeciesListItem[]; totalSinFiltro?: number }) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
     const hayFiltroActivo = searchQuery.trim().length > 0;
@@ -477,93 +519,111 @@ export default function RedListAccordion({especies, categorias, activeCategory}:
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
-      {/* Panel izquierdo - Filtro y enlaces */}
-      <div className="w-full lg:w-80 lg:flex-shrink-0">
-        <div className="lg:sticky lg:top-4">
-          <Card>
-            <CardContent className="pt-4 space-y-6">
-              {/* Filtro de búsqueda */}
-              <div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Nombre científico o común"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10"
-                  />
+      {/* Panel izquierdo al lado del acordeón: búsqueda por especie + enlaces (Lista Roja) o solo búsqueda (sin filterCatalogs) */}
+      {hasSearchFromParent ? (
+        <div className="w-full lg:w-80 lg:flex-shrink-0">
+          <div className="lg:sticky lg:top-4">
+            <Card>
+              <CardContent className="pt-4 space-y-6">
+                <div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Nombre científico o común"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-10"
+                    />
+                    {searchQuery && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                        onClick={() => setSearchQuery("")}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                   {searchQuery && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
-                      onClick={() => setSearchQuery("")}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Filtrando: &quot;{searchQuery}&quot;
+                    </p>
                   )}
                 </div>
-                {searchQuery && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    Filtrando: &quot;{searchQuery}&quot;
-                  </p>
+                <div className="border-t" />
+                {filterCatalogs && filters != null && onFiltersChange && (
+                  <div className="min-h-0">
+                    <FiltersPanel
+                      especies={especiesFull ?? especies}
+                      catalogs={filterCatalogs}
+                      onFiltersChange={onFiltersChange}
+                      excludeFilters={["pluviocidad", "temperatura", "listaRoja"]}
+                      filters={filters}
+                      embedded
+                    />
+                  </div>
                 )}
-              </div>
+                <div className="border-t" />
+                <div>
+                  <div className="space-y-2">
+                    <a
+                      href="https://www.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                    >
+                      Lista Roja Ecuador
+                    </a>
 
-              {/* Separador */}
-              <div className="border-t" />
-
-              {/* Enlaces directos */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-700">Enlaces de interés</h3>
-                <div className="space-y-2">
-                  <a
-                    href="https://www.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Lista Roja IUCN
-                  </a>
-                  <a
-                    href="https://www.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Libro Rojo Ecuador
-                  </a>
-                  <a
-                    href="https://www.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    AmphibiaWeb
-                  </a>
+                    <a
+                      href="https://www.iucnredlist.org"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                    >
+                      Lista Roja IUCN
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Panel derecho - Acordeones */}
-      <div className="flex-1 space-y-3">
-        {/* Categorías individuales */}
-        {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
-
-        {/* Grupos especiales (al final, con separación) - Sin filtro */}
-        {(especiesAmenazadas.length > 0 || especiesNoAmenazadas.length > 0) && (
-          <div className="mt-8 space-y-3 pt-6">
-            {especiesAmenazadas.length > 0 && renderGrupoEspecial("amenazadas", "Especies Amenazadas", especiesAmenazadas)}
-            {especiesNoAmenazadas.length > 0 && renderGrupoEspecial("no-amenazadas", "Especies No Amenazadas", especiesNoAmenazadas)}
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </div>
+      ) : (
+        <div className="flex-shrink-0 lg:hidden">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Nombre científico o común"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-xs text-gray-500">
+              Filtrando: &quot;{searchQuery}&quot;
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Acordeones */}
+      <div className="flex-1 space-y-3 min-w-0">
+        {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
       </div>
     </div>
   );

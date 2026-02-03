@@ -70,6 +70,30 @@ async function getCatalogByType(
   }));
 }
 
+/** Lista Roja UICN ordenada por columna `orden` de la base (NE, DD, LC, NT, VU, EN, CR, CR (PE)). */
+async function getListaRojaOrdenada(
+  supabaseClient: ReturnType<typeof createServiceClient>,
+): Promise<CatalogOption[]> {
+  const { data, error } = await supabaseClient
+    .from("catalogo_awe")
+    .select("id_catalogo_awe, nombre, sigla, orden")
+    .eq("tipo_catalogo_awe_id", CATALOG_TYPE_IDS.LISTA_ROJA_UICN)
+    .order("orden", { ascending: true });
+
+  if (error) {
+    console.error("Error al obtener Lista Roja:", error);
+
+    return [];
+  }
+
+  return (data || []).map((item) => ({
+    id: item.id_catalogo_awe,
+    nombre: item.nombre,
+    sigla: item.sigla,
+    value: item.sigla ?? toSlug(item.nombre),
+  }));
+}
+
 async function getProvincias(
   supabaseClient: ReturnType<typeof createServiceClient>,
 ): Promise<CatalogOption[]> {
@@ -99,7 +123,7 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
   // Ejecutar todas las consultas en paralelo
   const [
     provincias,
-    listaRoja,
+    listaRojaRaw,
     ecosistemas,
     regionesBiogeograficas,
     reservasBiosfera,
@@ -108,7 +132,7 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
     areasProtegidasPrivadas,
   ] = await Promise.all([
     getProvincias(supabaseClient), // Obtener desde geopolitica
-    getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.LISTA_ROJA_UICN, true), // Usar sigla como value
+    getListaRojaOrdenada(supabaseClient),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.ECOSISTEMAS),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.REGIONES_BIOGEOGRAFICAS),
     getCatalogByType(supabaseClient, CATALOG_TYPE_IDS.RESERVAS_BIOSFERA),
@@ -122,7 +146,7 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
 
   return {
     provincias,
-    listaRoja,
+    listaRoja: listaRojaRaw,
     ecosistemas,
     regionesBiogeograficas,
     reservasBiosfera,

@@ -3,43 +3,74 @@
 import {useState} from "react";
 
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {CatalogOption} from "@/app/sapopedia/get-filter-catalogs";
-
-import RedListSummaryCards from "./RedListSummaryCards";
-import RedListChartSelector from "./RedListChartSelector";
+import {CatalogOption, FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
+import {filterEspecies} from "@/lib/filter-especies";
+import FiltersPanel, {DEFAULT_FILTERS_STATE, FiltersState} from "./FiltersPanel";
 import RedListAccordion from "./RedListAccordion";
+import RedListChartSelector from "./RedListChartSelector";
+import RedListSummaryCards from "./RedListSummaryCards";
 
 interface RedListContentProps {
   readonly especies: SpeciesListItem[];
   readonly categorias: CatalogOption[];
+  /** Catálogos para el panel de filtros; si se pasa, se muestran filtros (sin precipitación ni temperatura) */
+  readonly filterCatalogs?: FilterCatalogs;
 }
 
-export default function RedListContent({especies, categorias}: RedListContentProps) {
+export default function RedListContent({
+  especies,
+  categorias,
+  filterCatalogs,
+}: RedListContentProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FiltersState>(DEFAULT_FILTERS_STATE);
+  const [speciesSearchQuery, setSpeciesSearchQuery] = useState("");
+
+  const especiesFiltradas = filterEspecies(especies, filters);
 
   const handleCategoryClick = (categoria: string) => {
-    // Cambiar la categoría activa (esto disparará el efecto en RedListAccordion)
     setActiveCategory(categoria);
-    // Reset después de un tiempo para permitir clicks repetidos en la misma categoría
     setTimeout(() => setActiveCategory(null), 500);
   };
 
-  return (
+  const handleFiltersChange = (newFilters: FiltersState) => {
+    setFilters(newFilters);
+  };
+
+  const content = (
     <>
-      {/* Cards de resumen */}
-      <RedListSummaryCards especies={especies} onCategoryClick={handleCategoryClick} />
-
-      {/* Selector de gráficos */}
-      <RedListChartSelector categorias={categorias} especies={especies} onCategoryClick={handleCategoryClick} />
-
-      {/* Acordeón de categorías */}
+      <RedListSummaryCards especies={especiesFiltradas} onCategoryClick={handleCategoryClick} />
+      <RedListChartSelector
+        categorias={categorias}
+        especies={especiesFiltradas}
+        onCategoryClick={handleCategoryClick}
+      />
       <div className="mt-8 mb-8">
         <RedListAccordion
           categorias={categorias}
-          especies={especies}
+          especies={especiesFiltradas}
           activeCategory={activeCategory}
+          speciesSearchQuery={speciesSearchQuery}
+          onSpeciesSearchChange={setSpeciesSearchQuery}
+          filters={filterCatalogs ? filters : undefined}
+          onFiltersChange={filterCatalogs ? handleFiltersChange : undefined}
+          filterCatalogs={filterCatalogs}
+          especiesFull={filterCatalogs ? especies : undefined}
         />
       </div>
     </>
   );
+
+  if (filterCatalogs) {
+    return (
+      <div className="min-w-0 flex-1">
+        <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
+          Mostrando {especiesFiltradas.length} de {especies.length} especies
+        </p>
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 }

@@ -14,8 +14,12 @@ export default async function ListaRojaPage() {
         <h1 className="text-primary mb-4 text-4xl font-bold">Lista Roja</h1>
       </div>
 
-      {/* Contenido interactivo */}
-      <RedListContent especies={especies} categorias={filterCatalogs.listaRoja} />
+      {/* Contenido interactivo (con panel de filtros, sin precipitación ni temperatura) */}
+      <RedListContent
+        especies={especies}
+        categorias={filterCatalogs.listaRoja}
+        filterCatalogs={filterCatalogs}
+      />
     </main>
   );
 }
