@@ -162,7 +162,7 @@ export default function RedListBarChart({
           return (
             <div key={dato.categoria.id} className="flex items-center gap-4">
               {/* Badge de categoría */}
-              <div 
+              <div
                 className="flex w-20 items-center justify-center cursor-pointer hover:scale-110 transition-transform"
                 onClick={() => {
                   const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
@@ -207,7 +207,7 @@ export default function RedListBarChart({
               </div>
 
               {/* Nombre de categoría */}
-              <div 
+              <div
                 className="w-48 flex-shrink-0 cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={() => {
                   const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
@@ -227,7 +227,7 @@ export default function RedListBarChart({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div 
+                      <div
                         className="relative h-8 w-full rounded-md bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => {
                           const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
@@ -249,9 +249,9 @@ export default function RedListBarChart({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <div className="space-y-1">
-                        <p className="font-semibold">{dato.categoria.nombre}</p>
-                        <div className="text-xs space-y-0.5">
+                      <div className="space-y-1 text-white">
+                        <p className="font-normal">{dato.categoria.nombre}</p>
+                        <div className="space-y-0.5 text-xs font-normal">
                           <p>Familias: {dato.familias}</p>
                           <p>Géneros: {dato.generos}</p>
                           <p>Especies: {dato.especies}</p>

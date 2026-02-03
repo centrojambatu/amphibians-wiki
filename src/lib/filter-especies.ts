@@ -11,11 +11,18 @@ export function filterEspecies(
 ): SpeciesListItem[] {
   if (!filters) return especiesList;
 
+  const isPosiblementeExtinta = (sigla: string | null) =>
+    !!sigla && (sigla === "PE" || sigla.includes("PE"));
+
   return especiesList.filter((especie) => {
     if (filters.listaRoja.length > 0) {
-      if (!especie.lista_roja_iucn || !filters.listaRoja.includes(especie.lista_roja_iucn)) {
-        return false;
-      }
+      const matchListaRoja = filters.listaRoja.some((val) => {
+        if (val === "PE" || val === "CR (PE)") {
+          return especie.lista_roja_iucn != null && isPosiblementeExtinta(especie.lista_roja_iucn);
+        }
+        return especie.lista_roja_iucn === val;
+      });
+      if (!matchListaRoja) return false;
     }
 
     if (filters.endemismo.length > 0) {

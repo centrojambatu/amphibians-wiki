@@ -148,8 +148,8 @@ export default function ClimaticFloorChartFilter({
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-xs">
-                      <p className="font-semibold">{floor.name}</p>
+                    <div className="text-xs text-white font-normal">
+                      <p className="font-normal">{floor.name}</p>
                       <p>
                         {intersectionStart}-{intersectionEnd}m
                       </p>

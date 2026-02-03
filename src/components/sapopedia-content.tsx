@@ -5,7 +5,8 @@ import {useState, useEffect} from "react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
 import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
-import FiltersPanel, {FiltersState} from "@/components/FiltersPanel";
+import FiltersPanel, {DEFAULT_FILTERS_STATE, FiltersState} from "@/components/FiltersPanel";
+import {Card, CardContent} from "@/components/ui/card";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
 import {filterEspecies} from "@/lib/filter-especies";
@@ -18,6 +19,11 @@ interface SapopediaContentProps {
 }
 
 const TAB_STORAGE_KEY = "sapopedia-selected-tab";
+
+function isPosiblementeExtinta(sigla: string | null): boolean {
+  if (!sigla) return false;
+  return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
+}
 
 function filterBySearchQuery(list: SpeciesListItem[], query: string): SpeciesListItem[] {
   const q = query.trim();
@@ -34,7 +40,7 @@ function filterBySearchQuery(list: SpeciesListItem[], query: string): SpeciesLis
 }
 
 export function SapopediaContent({especies, filterCatalogs}: SapopediaContentProps) {
-  const [filters, setFilters] = useState<FiltersState | null>(null);
+  const [filters, setFilters] = useState<FiltersState>(DEFAULT_FILTERS_STATE);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Cargar pestaña seleccionada desde localStorage
@@ -82,13 +88,112 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
     setFilters(newFilters);
   };
 
+  type QuickFilter = "endemicas" | "amenazadas" | "posiblemente-extintas";
+  const applyQuickFilter = (type: QuickFilter) => {
+    switch (type) {
+      case "endemicas":
+        setFilters({ ...DEFAULT_FILTERS_STATE, endemismo: ["endemic"] });
+        break;
+      case "amenazadas":
+        setFilters({ ...DEFAULT_FILTERS_STATE, listaRoja: ["CR"] });
+        break;
+      case "posiblemente-extintas": {
+        // Usar el valor del catálogo (ej. "CR (PE)") para que el panel muestre la opción activa
+        const peOption = filterCatalogs.listaRoja.find(
+          (o) =>
+            o.sigla === "PE" ||
+            (o.sigla && o.sigla.includes("PE")) ||
+            (o.nombre && o.nombre.toLowerCase().includes("posiblemente"))
+        );
+        setFilters({
+          ...DEFAULT_FILTERS_STATE,
+          listaRoja: peOption ? [peOption.value] : ["PE"],
+        });
+        break;
+      }
+    }
+  };
+
+  const totalEspecies = especies.length;
+  const totalGeneros = new Set(especies.map((e) => e.genero).filter(Boolean)).size;
+  const totalFamilias = new Set(especies.map((e) => e.familia).filter(Boolean)).size;
+  const endemicasCount = especies.filter((e) => e.endemica).length;
+  const amenazadasCount = especies.filter((e) => e.lista_roja_iucn === "CR").length;
+  const posiblementeExtintaCount = especies.filter((e) => isPosiblementeExtinta(e.lista_roja_iucn)).length;
+
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+    <div className="flex flex-col gap-4">
+      {/* Estadísticas */}
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:mb-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        <Card>
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">{totalEspecies}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Especies</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">{totalGeneros}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Géneros</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">{totalFamilias}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Familias</p>
+          </CardContent>
+        </Card>
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => applyQuickFilter("endemicas")}
+        >
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">
+              {endemicasCount}{" "}
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {totalEspecies > 0 ? ((endemicasCount / totalEspecies) * 100).toFixed(1) : "0"}%
+              </span>
+            </p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Endémicas</p>
+          </CardContent>
+        </Card>
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => applyQuickFilter("amenazadas")}
+        >
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">
+              {amenazadasCount}{" "}
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {totalEspecies > 0 ? ((amenazadasCount / totalEspecies) * 100).toFixed(1) : "0"}%
+              </span>
+            </p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Amenazadas</p>
+          </CardContent>
+        </Card>
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => applyQuickFilter("posiblemente-extintas")}
+        >
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">
+              {posiblementeExtintaCount}{" "}
+              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                {totalEspecies > 0 ? ((posiblementeExtintaCount / totalEspecies) * 100).toFixed(1) : "0"}%
+              </span>
+            </p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Posiblemente extintas</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
       {/* Panel de filtros - lado izquierdo */}
       <div className="order-2 w-full flex-shrink-0 lg:order-1 lg:w-80">
         <FiltersPanel
           catalogs={filterCatalogs}
           especies={especies}
+          filters={filters}
           onFiltersChange={handleFiltersChange}
           onSearchQueryChange={setSearchQuery}
         />
@@ -114,7 +219,7 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
 
           <TabsContent className="mt-4 sm:mt-0" value="accordion">
             {/* Contador de resultados */}
-            {(filters || searchQuery) && (
+            {(especiesPorBusqueda.length < especies.length || searchQuery) && (
               <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
                 Mostrando {especiesPorBusqueda.length} de {especies.length} especies
               </p>
@@ -128,6 +233,7 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
             <PhylogeneticTreeReal orders={ordenesOrganizados} />
           </TabsContent>
         </Tabs>
+      </div>
       </div>
     </div>
   );

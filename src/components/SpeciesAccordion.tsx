@@ -67,10 +67,10 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:border-border hover:bg-muted/50 relative flex items-center gap-4 rounded-md border px-4 py-3 transition-all"
+      className="border-border bg-card hover:border-border hover:bg-muted/50 relative grid grid-cols-[minmax(0,1fr)_3rem_4rem_20rem] items-center gap-4 rounded-md border px-4 py-3 transition-all"
     >
       {/* Nombre científico */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link
             className="text-foreground text-sm font-medium italic hover:underline"
@@ -93,15 +93,15 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {/* Endémica */}
-      <div className="w-12 text-center">
+      <div className="flex justify-center">
         {species.endemica ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="text-sm font-semibold text-gray-800 cursor-help">E</span>
               </TooltipTrigger>
-              <TooltipContent className="bg-white [&>*:last-child]:hidden">
-                <p className="text-black">Endémica</p>
+              <TooltipContent className="[&>*:last-child]:hidden">
+                <p className="text-white font-normal">Endémica</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -111,8 +111,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
               <TooltipTrigger asChild>
                 <span className="text-sm font-semibold text-gray-500 cursor-help">NE</span>
               </TooltipTrigger>
-              <TooltipContent className="bg-white [&>*:last-child]:hidden">
-                <p className="text-black">No endémica</p>
+              <TooltipContent className="[&>*:last-child]:hidden">
+                <p className="text-white font-normal">No endémica</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -120,7 +120,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {/* Lista Roja */}
-      <div className="w-16 text-center">
+      <div className="flex justify-center">
         {species.lista_roja_iucn ? (
           <>
             {isPE(species.lista_roja_iucn) ? (
@@ -142,8 +142,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                       PE
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-white [&>*:last-child]:hidden">
-                    <p className="text-black">Posiblemente extinta</p>
+                  <TooltipContent className="[&>*:last-child]:hidden">
+                    <p className="text-white font-normal">Posiblemente extinta</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -199,8 +199,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
                           ?
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-white [&>*:last-child]:hidden">
-                        <p className="text-black">Valor de lista roja no válido</p>
+                      <TooltipContent className="[&>*:last-child]:hidden">
+                        <p className="text-white font-normal">Valor de lista roja no válido</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -213,8 +213,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         )}
       </div>
 
-      {/* Pisos Climáticos */}
-      <div className="flex w-80 items-center justify-center">
+      {/* Pisos Climáticos — alineado a la derecha para unificar borde con el resto de cards */}
+      <div className="flex items-center justify-end min-w-0">
         {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
@@ -277,10 +277,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {isOpen(`genus-${genus.id}`) && (
-        <div className="bg-muted mt-3 rounded-lg p-4">
-          {/* Header de la tabla */}
-
-          {/* Lista de especies */}
+        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+          {/* Lista de especies — pr-0 para alinear borde derecho con el resto de cards */}
           <div className="space-y-2 pl-6">{genus.species.map((species) => renderSpecies(species))}</div>
         </div>
       )}
@@ -306,7 +304,7 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             <span className="text-sm text-gray-600">{family.name}</span>
           </div>
           <p className="text-xs text-gray-400">
-            {family.summary.totalSpecies} especies, {family.summary.totalGenera} géneros (
+            {family.summary.totalSpecies} especies | {family.summary.totalGenera} géneros (
             {family.summary.endemicSpecies} endémicas, {family.summary.redListSpecies} en Lista
             Roja)
           </p>
@@ -319,8 +317,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {isOpen(`family-${family.id}`) && (
-        <div className="bg-muted mt-3 rounded-lg p-4">
-          {/* Lista de géneros */}
+        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+          {/* Lista de géneros — pr-0 para alinear borde derecho con el resto de cards */}
           <div className="space-y-2 pl-6">{family.genera.map((genus) => renderGenus(genus))}</div>
         </div>
       )}
@@ -356,8 +354,8 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       </div>
 
       {isOpen(`order-${order.id}`) && (
-        <div className="bg-muted mt-3 rounded-lg p-4">
-          {/* Lista de familias */}
+        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+          {/* Lista de familias — pr-0 para que el borde derecho de las cards coincida con el de orden */}
           <div className="space-y-3 pl-6">{order.families.map((family) => renderFamily(family))}</div>
         </div>
       )}

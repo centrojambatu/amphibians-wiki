@@ -110,7 +110,7 @@ export default function RedListStatus({
       <Tooltip>
         <TooltipTrigger asChild>{badge}</TooltipTrigger>
         <TooltipContent>
-          <p className="font-semibold">{statusInfo.fullName}</p>
+          <p className="text-white font-normal">{statusInfo.fullName}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -414,7 +414,7 @@ function MapotecaContent() {
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent>
-                                        <p className="font-semibold">Posiblemente Extinta</p>
+                                        <p className="text-white font-normal">Posiblemente Extinta</p>
                                       </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>

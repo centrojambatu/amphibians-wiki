@@ -176,9 +176,9 @@ export default function RedListPieChart({especies, categorias}: RedListPieChartP
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="space-y-1">
-                      <p className="font-semibold">{slice.dato.categoria.nombre}</p>
-                      <div className="space-y-0.5 text-xs">
+                    <div className="space-y-1 text-white">
+                      <p className="font-normal">{slice.dato.categoria.nombre}</p>
+                      <div className="space-y-0.5 text-xs font-normal">
                         <p>Familias: {slice.dato.familias}</p>
                         <p>Géneros: {slice.dato.generos}</p>
                         <p>Especies: {slice.dato.especies}</p>
