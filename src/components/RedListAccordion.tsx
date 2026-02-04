@@ -613,7 +613,7 @@ export default function RedListAccordion({
                 <div>
                   <div className="space-y-2">
                     <a
-                      href="https://www.google.com"
+                      href="https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"

@@ -21,7 +21,7 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   {
-    href: "/sapopedia", 
+    href: "/sapopedia",
     label: "Anfibios Ecuador",
     submenu: [
       { href: "/sapopedia", label: "Sumarios" },
@@ -33,7 +33,15 @@ const navLinks: NavLink[] = [
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia", label: "Etnobatracología", external: true },
     ],
   },
-  {href: "/sapopedia/lista-roja", label: "Lista Roja"},
+  {
+    href: "#",
+    label: "Lista Roja",
+    submenu: [
+      { href: "/sapopedia/lista-roja", label: "Cifras" },
+      { href: "https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja", label: "Lista Roja Ecuador", external: true },
+      { href: "https://www.iucnredlist.org/", label: "Lista Roja IUCN", external: true },
+    ],
+  },
   {href: "/sapopedia/nombres", label: "Nombres"},
   {href: "/sapoteca", label: "Biblioteca"},
   {href: "/mapoteca", label: "Mapoteca"},
@@ -85,8 +93,8 @@ export default function Navbar() {
           <nav className="hidden items-center gap-2 lg:flex xl:gap-4">
             {navLinks.map((link) => (
               link.submenu ? (
-                <div 
-                  key={link.href} 
+                <div
+                  key={link.href}
                   className="relative"
                   onMouseEnter={() => setOpenSubmenu(link.label)}
                   onMouseLeave={() => setOpenSubmenu(null)}
@@ -99,14 +107,14 @@ export default function Navbar() {
                     <div className="absolute left-0 top-full z-50 min-w-[180px] rounded-md border bg-background p-1 shadow-lg">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
-                          <a 
-                            key={sublink.href} 
+                          <a
+                            key={sublink.href}
                             href={sublink.href}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <Button 
-                              className="w-full cursor-pointer justify-start text-sm" 
+                            <Button
+                              className="w-full cursor-pointer justify-start text-sm"
                               variant="ghost"
                               onClick={() => setOpenSubmenu(null)}
                             >
@@ -115,8 +123,8 @@ export default function Navbar() {
                           </a>
                         ) : (
                           <Link key={sublink.href} href={sublink.href}>
-                            <Button 
-                              className="w-full cursor-pointer justify-start text-sm" 
+                            <Button
+                              className="w-full cursor-pointer justify-start text-sm"
                               variant="ghost"
                               onClick={() => setOpenSubmenu(null)}
                             >
@@ -156,8 +164,8 @@ export default function Navbar() {
             {navLinks.map((link) => (
               link.submenu ? (
                 <div key={link.href}>
-                  <Button 
-                    className="w-full cursor-pointer justify-between" 
+                  <Button
+                    className="w-full cursor-pointer justify-between"
                     variant="ghost"
                     onClick={() => toggleMobileSubmenu(link.label)}
                   >
@@ -168,8 +176,8 @@ export default function Navbar() {
                     <div className="ml-4 flex flex-col gap-1 border-l pl-2">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
-                          <a 
-                            key={sublink.href} 
+                          <a
+                            key={sublink.href}
                             href={sublink.href}
                             target="_blank"
                             rel="noopener noreferrer"
