@@ -133,7 +133,7 @@ const CAMPOS_FICHA = [
   // Campo numérico simple
   {
     key: "area_distribucion" as const,
-    label: "Área de Distribución",
+    label: "Área de distribución",
     tipo: "numero" as const,
   },
   // Campos de catálogo AWE

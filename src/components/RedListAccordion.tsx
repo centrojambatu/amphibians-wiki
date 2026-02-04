@@ -223,7 +223,7 @@ export default function RedListAccordion({
   const renderSpecies = (species: SpeciesListItem, showUltimoAvistamiento = false) => (
     <div
       key={species.id_taxon}
-      className={`border-border bg-card hover:border-border hover:bg-muted/50 relative grid w-full min-w-0 items-center gap-4 rounded-md border pl-4 pr-0 py-3 transition-all ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_3rem_4rem_20rem]"}`}
+      className={`border-border bg-card hover:border-border hover:bg-muted/50 relative grid w-full min-w-0 items-center gap-4 rounded-md border pl-4 pr-0 py-3 transition-all ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
     >
       {/* Nombre científico */}
       <div className="min-w-0">
@@ -264,11 +264,25 @@ export default function RedListAccordion({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-white font-normal">Último registro</p>
+              <p className="text-white font-normal">Último avistamiento</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
+
+      {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+              240000 km²
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Área de distribución</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Endémica */}
       <div className="w-12 text-center">
@@ -519,8 +533,9 @@ export default function RedListAccordion({
             {/* Header de la tabla */}
             <div className="mb-3 py-2">
               <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-              <div className="text-muted-foreground grid grid-cols-[minmax(0,1fr)_3rem_4rem_20rem] items-center gap-4 text-xs">
+              <div className="text-muted-foreground grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 text-xs">
                 <div>Nombre</div>
+                <div />
                 <div className="text-center">En</div>
                 <div className="text-center">LR</div>
                 <div className="text-center">Distribución</div>
@@ -594,7 +609,7 @@ export default function RedListAccordion({
                     )}
                   </div>
                 )}
-                <div className="border-t" />
+                <div />
                 <div>
                   <div className="space-y-2">
                     <a

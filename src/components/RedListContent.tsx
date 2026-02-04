@@ -64,9 +64,6 @@ export default function RedListContent({
   if (filterCatalogs) {
     return (
       <div className="min-w-0 flex-1">
-        <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
-          Mostrando {especiesFiltradas.length} de {especies.length} especies
-        </p>
         {content}
       </div>
     );

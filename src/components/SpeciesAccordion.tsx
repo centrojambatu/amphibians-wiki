@@ -93,7 +93,7 @@ export default function SpeciesAccordion({
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:border-border hover:bg-muted/50 relative grid grid-cols-[minmax(0,1fr)_3rem_4rem_20rem] items-center gap-4 rounded-md border px-4 py-3 transition-all"
+      className="border-border bg-card hover:border-border hover:bg-muted/50 relative grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 rounded-md border px-4 py-3 transition-all"
     >
       {/* Nombre científico */}
       <div className="min-w-0">
@@ -123,6 +123,20 @@ export default function SpeciesAccordion({
           </div>
         )}
       </div>
+
+      {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+              240000 km²
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Área de distribución</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Endémica */}
       <div className="flex justify-center">

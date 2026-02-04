@@ -365,7 +365,7 @@ export default function FiltersPanel({
             Limpiar
           </Button>
         </div>
-        <div className="min-h-0 w-full flex-1 overflow-y-auto max-h-[50vh] border-t mt-2 px-6">
+        <div className="min-h-0 w-full flex-1 overflow-y-auto max-h-[75vh] border-t mt-2 px-6">
           <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b" type="multiple">
             {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
               <AccordionItem value="listaRoja">
@@ -439,10 +439,10 @@ export default function FiltersPanel({
                   <div className="mt-1 flex flex-wrap gap-2">
                     {(filters.rangoAltitudinal.min !== 0 ||
                       filters.rangoAltitudinal.max !== 4800) && (
-                      <span className="text-xs font-normal text-gray-500">
-                        {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
-                      </span>
-                    )}
+                        <span className="text-xs font-normal text-gray-500">
+                          {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                        </span>
+                      )}
                     {filters.distribucion.length > 0 && (
                       <span className="text-xs font-normal text-gray-500">
                         {filters.distribucion.join(", ")}
@@ -500,7 +500,7 @@ export default function FiltersPanel({
             <AccordionItem value="areaDistribucion">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Área distribución <span className="ml-1 font-normal text-gray-500">km²</span></span>
+                  <span className="font-semibold">Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span> EOO <span className="ml-1 font-normal text-gray-500">km²</span></span>
                   {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
@@ -888,11 +888,11 @@ export default function FiltersPanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* Área de Distribución */}
+          {/* Área de distribución */}
           <AccordionItem value="areaDistribucion">
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Área distribución <span className="ml-1 font-normal text-gray-500">km²</span></span>
+                <span className="font-semibold">Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span> EOO <span className="ml-1 font-normal text-gray-500">km²</span></span>
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
