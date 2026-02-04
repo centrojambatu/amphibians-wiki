@@ -1,4 +1,5 @@
 import {createServiceClient} from "@/utils/supabase/server";
+import {extraerNombreBaseNormalizado} from "@/lib/extraer-nombre-base";
 
 export interface TaxonNombre {
   id_taxon: number;
@@ -28,96 +29,6 @@ function normalizarTildes(texto: string): string {
     .normalize("NFD") // Descompone caracteres con tildes (á -> a + ´)
     .replace(/[\u0300-\u036f]/g, "") // Remueve los diacríticos
     .toLowerCase(); // Convierte a minúsculas para comparación
-}
-
-/**
- * Función principal de extracción de nombre base (nueva versión para normalización)
- */
-function extraerNombreBaseNormalizado(nombreCompleto: string | null): string {
-  if (!nombreCompleto) return "";
-
-  let nombre = nombreCompleto.trim();
-
-  // Regla 1a: "de [sustantivo] [adjetivo] con/sin [algo]" -> mantener "de [sustantivo]"
-  const sustantivoAdjetivoConSin =
-    /(de\s+(?:bosque|pies|vientre|cabeza|dorso|disco|ojos|muslos|patas|dedos|flancos|ingle|ingles|líneas|manchas|puntos|rayas|saco|párpado|color|garganta|hocico|rostro|brazo|membrana|bigote|membranas|cara|gula|trasero|rorso|anteojos|labio|labios))\s+[\wáéíóúñü]+\s+(?:con|sin)\s+[\wáéíóúñü\s]+$/iu;
-  const match1a = sustantivoAdjetivoConSin.exec(nombre);
-
-  if (match1a) return nombre.substring(0, match1a.index) + match1a[1];
-
-  // Regla 1b: "de [sustantivo] [adjetivo]" -> mantener "de [sustantivo]"
-  const sustantivosComunes =
-    /(de\s+(?:bosque|pies|vientre|cabeza|dorso|disco|ojos|muslos|patas|dedos|flancos|ingle|ingles|líneas|manchas|puntos|rayas|saco|párpado|color|garganta|hocico|rostro|brazo|membrana|bigote|membranas|cara|gula|trasero|plano|rorso|anteojos|hocico|labio|labios))\s+[\wáéíóúñü]+$/iu;
-  const match1b = sustantivosComunes.exec(nombre);
-
-  if (match1b) return nombre.substring(0, match1b.index) + match1b[1];
-
-  // Regla 2: "[sustantivo descriptivo compuesto] de [algo]"
-  const descriptivosCompuestos =
-    /((?:Rana)\s+de\s+(?:cristal|casco|dedos\s+delgados|espuma))\s+de\s+.+$/iu;
-
-  nombre = nombre.replace(descriptivosCompuestos, "$1");
-
-  // Regla 2b: "[sustantivo descriptivo simple] de [Nombre Propio]"
-  const descriptivosSimples =
-    /(hojarasquero|arlequín|espinosa|torrentícola|venenosa|arbórea|cohete|gladiadora|gomosa|verde|ágil|amazónica|nodriza|dedilarga|bullanguero|listada|marsupial|hoja)\s+de\s+[A-ZÁÉÍÓÚÑÜ].+$/iu;
-
-  nombre = nombre.replace(descriptivosSimples, "$1");
-
-  // Regla 2c: Limpiar "[sustantivo descriptivo] de"
-  nombre = nombre.replace(
-    /(hojarasquero|arlequín|espinosa|torrentícola|venenosa|arbórea|cohete|gladiadora|gomosa|verde|ágil|nodriza|dedilarga|bullanguero|listada|marsupial|hoja)\s+de$/iu,
-    "$1",
-  );
-
-  // Regla 3: "[sustantivo descriptivo o base] [cualquier palabra]"
-  const descriptivoConSufijo =
-    /^(.*\s+)(hojarasquero|arlequín|espinosa|torrentícola|venenosa|arbórea|cohete|gladiadora|gomosa|verde|ágil|amazónica|nodriza|dedilarga|bullanguero|listada|marsupial|hoja|hocicuda|de\s+charco|Ilulo|Sapo|Sapito|Cutín|Cutin|Rana|Ranita|Salamandra|Kayla|Pipa|Smilisca)\s+[\wáéíóúñü]+$/iu;
-  const match3 = descriptivoConSufijo.exec(nombre);
-
-  if (match3) nombre = match3[1].trim() + " " + match3[2];
-
-  // Regla 4: "con [algo]"
-  nombre = nombre.replace(/\s+con\s+[\wáéíóúñü\s]+$/iu, "");
-
-  // Regla 5: "de [Nombre Propio]"
-  nombre = nombre.replace(/\s+de\s+[A-ZÁÉÍÓÚÑÜ].+$/iu, "");
-
-  // Regla 6: "del [sustantivo] [adjetivo]"
-  const delSustantivo =
-    /(del\s+(?:bosque|Norte|Chocó|Cóndor|Gualaceño|Alto\s+Amazonas))\s+[\wáéíóúñü]+$/iu;
-  const match6 = delSustantivo.exec(nombre);
-
-  if (match6) return nombre.substring(0, match6.index) + match6[1];
-
-  // Regla 7: "del [Lugar]"
-  const delExcepciones = /\s+del\s+(Cóndor|Norte|Padre|Alto\s+Amazonas|Gualaceño|Chocó|bosque)/iu;
-
-  if (!delExcepciones.test(nombre)) nombre = nombre.replace(/\s+del\s+[A-ZÁÉÍÓÚÑÜ].+$/iu, "");
-
-  // Regla 8: "amante de [algo]" y "en forma de [algo]"
-  nombre = nombre.replace(/(\s+amante)\s+de\s+.+$/iu, "$1");
-  nombre = nombre.replace(/(\s+en\s+forma)\s+de\s+.+$/iu, "$1");
-
-  // Regla 9: Frases compuestas
-  nombre = nombre.replace(
-    /\s+(amazónico\s+variable|cabeza\s+grande|calcar\s+pequeño|diablo\s+andino|gigante\s+andino|línea\s+amarilla|más\s+hermoso|muslo\s+negro|negro\s+y\s+gris|no\s+saltarín|previo\s+a\s+la\s+muerte|rojo\s+sangre|salpicado\s+pálido|tuberculoso\s+pequeño|verde\s+rojizo|gigante\s+moteado|mágica\s+y\s+maravillosa|mapa\s+apendiculado|anteojos\s+bifurcado|de\s+la\s+costa|juiciu\s+jambatu|gran\s+hermano|de\s+cinco\s+líneas|de\s+ojos\s+rojos|punteada\s+naranja|punteada\s+rosada)$/iu,
-    "",
-  );
-
-  // Regla 10: Adjetivos simples
-  nombre = nombre.replace(
-    /\s+(adornado|afortunado|afro|ágata|amazónico|anaranjado|andino|atenuado|alado|amistoso|balador|bello|bonito|bromelícola|café|cañari|ceniciento|ceñudo|charlatán|conífero|coronado|cornudo|desnudo|diferente|diminuto|ecuatoriano|elfo|enano|enguatado|escondedor|espadachín|espejo|espinoso|exiliado|frío|gigante|glandular|grande|grueso|gualita|guardián|labioso|llorón|luchador|magnífico|manchado|marino|mezclado|minúsculo|minuto|modesto|montañero|morlaco|moteado|mutable|narizón|negro|negra|obscuro|ocelado|ocultador|pequeño|peruano|pinchaque|pseudoacuminado|raro|resplandeciente|rugoso|sacharuna|saltarín|salpicado|sanguinolento|sencillo|silencioso|solitario|sonrosado|sordo|sucio|tiktik|tímido|truncado|tubercular|variable|variado|verde|vertebralis|viudo|marrones|anómala|salpicada|ecuatoriana|minúscula|punteada|naranja|rosada|amarilla|azul|blanca)$/iu,
-    "",
-  );
-
-  // Regla 11: Nombres propios
-  nombre = nombre.replace(
-    /\s+(Cuico|Kichwa|Quechua|Waorani|Yumbo|Tesoro|Tsáchila|Siona|Puro\s+Coffee|Príncipe\s+Carlos|Jambato|Zápara)$/iu,
-    "",
-  );
-
-  return nombre.trim();
 }
 
 /**

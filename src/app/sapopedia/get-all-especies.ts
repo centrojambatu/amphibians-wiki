@@ -5,6 +5,8 @@ export interface SpeciesListItem {
   id_ficha_especie: number | null;
   nombre_cientifico: string;
   nombre_comun: string | null;
+  /** Nombre común en inglés (desde vw_nombres_comunes, igual que en la página de nombres) */
+  nombre_comun_ingles: string | null;
   descubridor: string | null;
   orden: string | null;
   familia: string | null;
@@ -259,6 +261,23 @@ export default async function getAllEspecies(
     }
   }
 
+  // Nombre común en inglés desde vw_nombres_comunes (misma fuente que la página de nombres)
+  const nombreComunInglesMap = new Map<number, string | null>();
+  if (taxonIds.length > 0) {
+    const { data: nombresData, error: errorNombres } = await (supabaseClient as any)
+      .from("vw_nombres_comunes")
+      .select("id_taxon, nombre_comun_ingles")
+      .in("id_taxon", taxonIds);
+
+    if (!errorNombres && nombresData) {
+      for (const row of nombresData as { id_taxon: number; nombre_comun_ingles: string | null }[]) {
+        if (row.id_taxon != null && row.nombre_comun_ingles != null && row.nombre_comun_ingles.trim() !== "") {
+          nombreComunInglesMap.set(row.id_taxon, row.nombre_comun_ingles.trim());
+        }
+      }
+    }
+  }
+
   // Mapear los datos de la vista a nuestro tipo SpeciesListItem
   const especiesFormateadas: SpeciesListItem[] = especies.map(
     (especie: any) => {
@@ -296,6 +315,7 @@ export default async function getAllEspecies(
         id_ficha_especie: fichaEspecieId,
         nombre_cientifico: especie.nombre_cientifico,
         nombre_comun: especie.nombre_comun,
+        nombre_comun_ingles: nombreComunInglesMap.get(taxonId) ?? null,
         descubridor: fichaEspecieId
           ? descubridorMap.get(fichaEspecieId) ?? null
           : null,

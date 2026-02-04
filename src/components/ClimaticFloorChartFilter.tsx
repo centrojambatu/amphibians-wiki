@@ -148,7 +148,7 @@ export default function ClimaticFloorChartFilter({
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-xs text-white font-normal">
+                    <div className="text-sm text-white font-normal">
                       <p className="font-normal">{floor.name}</p>
                       <p>
                         {intersectionStart}-{intersectionEnd}m
@@ -173,7 +173,7 @@ export default function ClimaticFloorChartFilter({
           return (
             <div
               key={`label-${floor.name}`}
-              className="overflow-hidden text-center text-[8px] text-gray-500"
+              className="overflow-hidden text-center text-xs text-gray-500"
               style={{ width: `${widthPercentage}%` }}
             >
               {floor.name}

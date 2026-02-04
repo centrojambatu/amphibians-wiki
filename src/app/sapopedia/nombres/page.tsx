@@ -34,16 +34,6 @@ export default async function NombresPage() {
   const nombresPorFamilia = await getNombresCompartidosPorFamilia();
   const nombresPorGenero = await getNombresCompartidosPorGenero();
 
-  // Calcular estadísticas adicionales
-  const totalNombresCompartidosFamilia = nombresPorFamilia.reduce(
-    (sum, familia) => sum + familia.nombres.length,
-    0,
-  );
-  const totalNombresCompartidosGenero = nombresPorGenero.reduce(
-    (sum, genero) => sum + genero.nombres.length,
-    0,
-  );
-
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -94,6 +84,15 @@ export default async function NombresPage() {
       <div className="mb-8">
         <h2 className="mb-6 text-2xl font-bold">Nombres por Categoría Taxonómica</h2>
         <NombresAccordion ordenes={ordenes} />
+      </div>
+
+      {/* Nombres compartidos (por familia y por género) */}
+      <div className="mb-8">
+        <h2 className="mb-6 text-2xl font-bold">Nombres Compartidos</h2>
+        <NombresCompartidos
+          nombresPorFamilia={nombresPorFamilia}
+          nombresPorGenero={nombresPorGenero}
+        />
       </div>
     </main>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, RotateCcw } from "lucide-react";
+import { Search, RotateCcw, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -73,9 +73,11 @@ interface FiltersPanelProps {
   readonly excludeFilters?: ExcludeFilterOption[];
   /** Modo controlado: filtros desde el padre */
   readonly filters?: FiltersState;
-  /** Solo accordion de filtros (para incrustar en Card de Lista Roja). Sin buscador ni wrapper. */
+  /** Solo accordion de filtros (para incrustar en Card de Lista Roja). Si se pasa onSearchQueryChange, incluye buscador. */
   readonly embedded?: boolean;
-  /** Notificar cambio de búsqueda para filtrar el acordeón de especies (Sapopedia) */
+  /** Búsqueda controlada (ej. Lista Roja). Si se pasa con onSearchQueryChange, el buscador queda en el panel. */
+  readonly searchQuery?: string;
+  /** Notificar cambio de búsqueda para filtrar el acordeón de especies (Sapopedia / Lista Roja) */
   readonly onSearchQueryChange?: (query: string) => void;
 }
 
@@ -94,10 +96,16 @@ export default function FiltersPanel({
   excludeFilters = [],
   filters: controlledFilters,
   embedded = false,
+  searchQuery: controlledSearchQuery,
   onSearchQueryChange,
 }: FiltersPanelProps) {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = (value: string) => {
+    if (controlledSearchQuery === undefined) setInternalSearchQuery(value);
+    onSearchQueryChange?.(value);
+  };
   const [open, setOpen] = useState(false);
 
   const [internalFilters, setInternalFilters] = useState<FiltersState>(DEFAULT_FILTERS_STATE);
@@ -248,7 +256,6 @@ export default function FiltersPanel({
   const handleSelectResult = (path: string) => {
     setOpen(false);
     setSearchQuery("");
-    onSearchQueryChange?.("");
     router.push(path);
   };
 
@@ -289,10 +296,6 @@ export default function FiltersPanel({
           const isSelected = (filters[filterKey] as string[]).includes(
             item.value,
           );
-          const displayLabel =
-            useSigla && item.sigla
-              ? `${item.nombre} | ${item.sigla}`
-              : item.nombre;
 
           return (
             <Button
@@ -301,12 +304,22 @@ export default function FiltersPanel({
               size="sm"
               style={{
                 borderColor: isSelected ? undefined : "#e8e8e8",
-                color: isSelected ? undefined : "#454545",
+                color: isSelected ? undefined : "#2d2d2d",
               }}
               variant={isSelected ? "default" : "outline"}
               onClick={() => handleCategoricalChange(filterKey, item.value)}
             >
-              {displayLabel}
+              {useSigla && item.sigla ? (
+                <>
+                  {item.nombre}
+                  <span className="mx-1 font-semibold text-gray-400">
+                    |
+                  </span>
+                  {item.sigla}
+                </>
+              ) : (
+                item.nombre
+              )}
             </Button>
           );
         })}
@@ -316,15 +329,44 @@ export default function FiltersPanel({
 
   if (embedded) {
     return (
-      <div className="flex flex-col h-full min-h-0">
-        <div className="flex-shrink-0 py-2 flex justify-end">
+      <div className="flex flex-col h-full min-h-0 w-full">
+        {onSearchQueryChange != null && (
+          <div className="flex-shrink-0 px-6 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Nombre científico o común"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="mt-2 text-xs text-gray-500">
+                Filtrando: &quot;{searchQuery}&quot;
+              </p>
+            )}
+          </div>
+        )}
+        <div className="flex-shrink-0 py-2 flex justify-end px-6">
           <Button size="sm" variant="outline" onClick={resetFilters} className="gap-1 text-xs text-gray-600">
             <RotateCcw className="h-3.5 w-3.5 text-black" />
             Limpiar
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto -mx-2 px-2 max-h-[50vh]">
-          <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:-mx-2 [&>[data-slot=accordion-item]]:px-2" type="multiple">
+        <div className="min-h-0 w-full flex-1 overflow-y-auto max-h-[50vh] border-t mt-2 px-6">
+          <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b" type="multiple">
             {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
               <AccordionItem value="listaRoja">
                 <AccordionTrigger className="!items-start">
@@ -363,7 +405,7 @@ export default function FiltersPanel({
                         key={option.value}
                         className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                         size="sm"
-                        style={{ borderColor: isSelected ? undefined : "#e8e8e8", color: isSelected ? undefined : "#454545" }}
+                        style={{ borderColor: isSelected ? undefined : "#e8e8e8", color: isSelected ? undefined : "#2d2d2d" }}
                         variant={isSelected ? "default" : "outline"}
                         onClick={() => handleCategoricalChange("endemismo", option.value)}
                       >
@@ -389,70 +431,76 @@ export default function FiltersPanel({
                 <AccordionContent>{renderCatalogOptions(catalogs.provincias, "provincia")}</AccordionContent>
               </AccordionItem>
             )}
-            {/* Rango altitudinal, distribución, área, ecosistemas, etc. - reutilizar el mismo markup que el panel completo */}
-            <AccordionItem value="rangoAltitudinal">
+            {/* Pisos altitudinales (gráfico + slider + distribución) */}
+            <AccordionItem value="pisosAltitudinales">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Rango altitudinal</span>
-                  {(filters.rangoAltitudinal.min !== 0 || filters.rangoAltitudinal.max !== 4800) && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
-                    </span>
-                  )}
+                  <span className="font-semibold">Pisos altitudinales</span>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {(filters.rangoAltitudinal.min !== 0 ||
+                      filters.rangoAltitudinal.max !== 4800) && (
+                      <span className="text-xs font-normal text-gray-500">
+                        {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                      </span>
+                    )}
+                    {filters.distribucion.length > 0 && (
+                      <span className="text-xs font-normal text-gray-500">
+                        {filters.distribucion.join(", ")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{filters.rangoAltitudinal.min}m</span>
-                    <span>{filters.rangoAltitudinal.max}m</span>
+                  <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={filters.distribucion.includes("occidental")}
+                          onChange={() => handleCategoricalChange("distribucion", "occidental")}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Occidental</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={filters.distribucion.includes("oriental")}
+                          onChange={() => handleCategoricalChange("distribucion", "oriental")}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Oriental</span>
+                      </label>
+                    </div>
                   </div>
-                  <Slider
-                    min={0}
-                    max={4800}
-                    step={100}
-                    value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
-                    onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>{filters.rangoAltitudinal.min}m</span>
+                      <span>{filters.rangoAltitudinal.max}m</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={4800}
+                      step={100}
+                      value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
+                      onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
+                    />
+                  </div>
+                  <ClimaticFloorChartFilter
+                    altitudinalRange={{
+                      min: filters.rangoAltitudinal.min,
+                      max: filters.rangoAltitudinal.max,
+                    }}
                   />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="distribucion">
-              <AccordionTrigger className="!items-start">
-                <div className="flex flex-col items-start">
-                  <span className="font-semibold">Distribución</span>
-                  {filters.distribucion.length > 0 && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">{filters.distribucion.join(", ")}</span>
-                  )}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filters.distribucion.includes("occidental")}
-                      onChange={() => handleCategoricalChange("distribucion", "occidental")}
-                      className="rounded"
-                    />
-                    <span className="text-sm">Occidental</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filters.distribucion.includes("oriental")}
-                      onChange={() => handleCategoricalChange("distribucion", "oriental")}
-                      className="rounded"
-                    />
-                    <span className="text-sm">Oriental</span>
-                  </label>
                 </div>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="areaDistribucion">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Área de distribución</span>
+                  <span className="font-semibold">Área distribución <span className="ml-1 font-normal text-gray-500">km²</span></span>
                   {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
@@ -546,7 +594,7 @@ export default function FiltersPanel({
               <AccordionItem value="areasProtegidasEstado">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Áreas protegidas (Estado)</span>
+                    <span className="font-semibold">Áreas protegidas Estado <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP</span>
                     {filters.areasProtegidasEstado.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
                         {getActiveFilterNames(catalogs.areasProtegidasEstado, "areasProtegidasEstado").join(", ")}
@@ -563,7 +611,7 @@ export default function FiltersPanel({
               <AccordionItem value="areasProtegidasPrivadas">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Áreas protegidas (Privadas)</span>
+                    <span className="font-semibold">Áreas protegidas privadas </span>
                     {filters.areasProtegidasPrivadas.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
                         {getActiveFilterNames(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas").join(", ")}
@@ -651,15 +699,17 @@ export default function FiltersPanel({
             </Command>
           </PopoverContent>
         </Popover>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={resetFilters}
-          className="w-full gap-1 text-xs text-gray-600"
-        >
-          <RotateCcw className="h-3.5 w-3.5 text-black" />
-          Limpiar
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={resetFilters}
+            className="gap-1 text-xs text-gray-600 w-auto"
+          >
+            <RotateCcw className="h-3.5 w-3.5 text-black" />
+            Limpiar
+          </Button>
+        </div>
       </div>
 
       <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 pt-0 pb-3 sm:pb-4 max-h-[60vh] lg:max-h-none">
@@ -718,7 +768,7 @@ export default function FiltersPanel({
                       size="sm"
                       style={{
                         borderColor: isSelected ? undefined : "#e8e8e8",
-                        color: isSelected ? undefined : "#454545",
+                        color: isSelected ? undefined : "#2d2d2d",
                       }}
                       variant={isSelected ? "default" : "outline"}
                       onClick={() =>
@@ -952,7 +1002,7 @@ export default function FiltersPanel({
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
                   <span className="font-semibold">
-                    Áreas protegidas Estado
+                    Áreas protegidas Estado <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP
                   </span>
                   {filters.areasProtegidasEstado.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">

@@ -14,21 +14,37 @@ import InterpretationGuide from "./InterpretationGuide";
 
 interface SpeciesAccordionProps {
   readonly orders: OrderGroup[];
+  /** Si se setea, se abre el acordeón de ese orden (ej. "anura", "caudata", "gymnophiona") */
+  readonly activeOrderId?: string | null;
+  /** Se llama después de abrir el orden para limpiar el estado en el padre */
+  readonly onActiveOrderIdConsumed?: () => void;
 }
 
-export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
+export default function SpeciesAccordion({
+  orders,
+  activeOrderId = null,
+  onActiveOrderIdConsumed,
+}: SpeciesAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const [showGuide, setShowGuide] = useState(false);
 
-  // Cargar el estado del acordeón desde localStorage al montar
+  // Abrir el acordeón del orden cuando se hace clic en una card de orden (Anura, Caudata, Gymnophiona)
+  useEffect(() => {
+    if (activeOrderId) {
+      const orderKey = `order-${activeOrderId}`;
+      setOpenItems(new Set([orderKey]));
+      onActiveOrderIdConsumed?.();
+    }
+  }, [activeOrderId, onActiveOrderIdConsumed]);
+
+  // Cargar el estado del acordeón desde localStorage al montar (órdenes: solo uno abierto; familias y géneros: varios)
   useEffect(() => {
     const savedState = localStorage.getItem("accordionOpenItems");
 
     if (savedState) {
       try {
         const parsedState = JSON.parse(savedState) as string[];
-
-        setOpenItems(new Set(parsedState));
+        if (parsedState.length > 0) setOpenItems(new Set(parsedState));
       } catch (error) {
         console.error("Error al cargar el estado del acordeón:", error);
       }
@@ -45,14 +61,24 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
   }, [openItems]);
 
   const toggleItem = (itemId: string) => {
-    const newOpenItems = new Set(openItems);
-
-    if (newOpenItems.has(itemId)) {
-      newOpenItems.delete(itemId);
+    const isOrder = itemId.startsWith("order-");
+    if (openItems.has(itemId)) {
+      if (isOrder) {
+        setOpenItems(new Set());
+      } else {
+        setOpenItems((prev) => {
+          const next = new Set(prev);
+          next.delete(itemId);
+          return next;
+        });
+      }
     } else {
-      newOpenItems.add(itemId);
+      if (isOrder) {
+        setOpenItems(new Set([itemId]));
+      } else {
+        setOpenItems((prev) => new Set(prev).add(itemId));
+      }
     }
-    setOpenItems(newOpenItems);
   };
 
   const isOpen = (itemId: string) => openItems.has(itemId);
@@ -87,8 +113,14 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
             />
           )}
         </div>
-        {species.nombre_comun && (
-          <div className="text-muted-foreground mt-1 text-xs">{species.nombre_comun}</div>
+        {(species.nombre_comun || species.nombre_comun_ingles) && (
+          <div className="text-muted-foreground mt-1 text-xs">
+            {species.nombre_comun}
+            {species.nombre_comun && species.nombre_comun_ingles && (
+              <span className="text-[#f07304]"> | </span>
+            )}
+            {species.nombre_comun_ingles}
+          </div>
         )}
       </div>
 
@@ -262,11 +294,9 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
               <span className="text-muted-foreground text-xs">{genus.nombre_comun}</span>
             )}
           </div>
-          <p className="text-xs text-gray-400">
-            {genus.summary.totalSpecies} especie
-            {genus.summary.totalSpecies !== 1 ? "s" : ""} ({genus.summary.endemicSpecies} endémica
-            {genus.summary.endemicSpecies !== 1 ? "s" : ""}, {genus.summary.redListSpecies} en Lista
-            Roja)
+          <p className="text-xs text-gray-500">
+            {genus.summary.totalSpecies}{" "}
+            {genus.summary.totalSpecies === 1 ? "especie" : "especies"}
           </p>
         </div>
 
@@ -302,11 +332,16 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{family.name}</span>
+            {family.nombre_comun && (
+              <span className="text-muted-foreground text-xs">{family.nombre_comun}</span>
+            )}
           </div>
-          <p className="text-xs text-gray-400">
-            {family.summary.totalSpecies} especies | {family.summary.totalGenera} géneros (
-            {family.summary.endemicSpecies} endémicas, {family.summary.redListSpecies} en Lista
-            Roja)
+          <p className="text-xs text-gray-500">
+            {family.summary.totalSpecies}{" "}
+            {family.summary.totalSpecies === 1 ? "especie" : "especies"}{" "}
+            <span className="text-[#f07304]">|</span>{" "}
+            {family.summary.totalGenera}{" "}
+            {family.summary.totalGenera === 1 ? "género" : "géneros"}
           </p>
         </div>
 
@@ -341,9 +376,12 @@ export default function SpeciesAccordion({orders}: SpeciesAccordionProps) {
       >
         <div className="flex-1">
           <span className="inline-block text-sm text-gray-600">{order.name}</span>
-          <p className="text-xs text-gray-400">
-            {order.summary.totalSpecies} especies, {order.summary.totalFamilies} familias (
-            {order.summary.endemicSpecies} endémicas, {order.summary.redListSpecies} en Lista Roja)
+          <p className="text-xs text-gray-500">
+            {order.summary.totalSpecies}{" "}
+            {order.summary.totalSpecies === 1 ? "especie" : "especies"}{" "}
+            <span className="text-[#f07304]">|</span>{" "}
+            {order.summary.totalFamilies}{" "}
+            {order.summary.totalFamilies === 1 ? "familia" : "familias"}
           </p>
         </div>
 

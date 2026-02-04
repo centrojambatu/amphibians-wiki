@@ -12,6 +12,7 @@ import { processHTMLLinks } from "@/lib/process-html-links";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
@@ -219,13 +220,13 @@ export default function RedListAccordion({
       return indexA - indexB;
     });
 
-  const renderSpecies = (species: SpeciesListItem) => (
+  const renderSpecies = (species: SpeciesListItem, showUltimoAvistamiento = false) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:border-border hover:bg-muted/50 relative flex items-center gap-4 rounded-md border px-4 py-3 transition-all"
+      className={`border-border bg-card hover:border-border hover:bg-muted/50 relative grid w-full min-w-0 items-center gap-4 rounded-md border pl-4 pr-0 py-3 transition-all ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_3rem_4rem_20rem]"}`}
     >
       {/* Nombre científico */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link
             className="text-foreground text-sm font-medium italic hover:underline"
@@ -242,18 +243,49 @@ export default function RedListAccordion({
             />
           )}
         </div>
-        {species.nombre_comun && (
-          <div className="text-muted-foreground mt-1 text-xs">{species.nombre_comun}</div>
+        {(species.nombre_comun || species.nombre_comun_ingles) && (
+          <div className="text-muted-foreground mt-1 text-xs">
+            {species.nombre_comun}
+            {species.nombre_comun && species.nombre_comun_ingles && (
+              <span className="text-[#f07304]"> | </span>
+            )}
+            {species.nombre_comun_ingles}
+          </div>
         )}
       </div>
 
+      {/* Último avistamiento (solo categoría Posiblemente extinta) */}
+      {showUltimoAvistamiento && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+                15 marzo 2020
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-white font-normal">Último registro</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
       {/* Endémica */}
       <div className="w-12 text-center">
-        {species.endemica ? (
-          <span className="text-sm font-semibold text-gray-800">E</span>
-        ) : (
-          <span className="text-sm font-semibold text-gray-500">NE</span>
-        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className={`cursor-help text-sm font-semibold ${species.endemica ? "text-gray-800" : "text-gray-500"}`}
+              >
+                {species.endemica ? "E" : "NE"}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{species.endemica ? "Endémica" : "No endémica"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Lista Roja */}
@@ -333,7 +365,7 @@ export default function RedListAccordion({
       </div>
 
       {/* Pisos Climáticos */}
-      <div className="flex w-80 items-center justify-center">
+      <div className="flex min-w-0 items-center justify-end">
         {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{
@@ -371,7 +403,7 @@ export default function RedListAccordion({
         ref={(el) => {
           if (el) categoryRefs.current.set(categoriaId, el);
         }}
-        className="relative"
+        className="relative w-full"
       >
         <div
           className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
@@ -398,8 +430,9 @@ export default function RedListAccordion({
             </div>
             <p className="text-muted-foreground text-xs">
               {grupo.especies.length} especie
-              {grupo.especies.length !== 1 ? "s" : ""} ({especiesEndemicas} endémica
-              {especiesEndemicas !== 1 ? "s" : ""})
+              {grupo.especies.length !== 1 ? "s" : ""}{" "}
+              <span className="text-[#f07304]">|</span> {especiesEndemicas} endémica
+              {especiesEndemicas !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -410,22 +443,15 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="bg-muted mt-3 rounded-lg p-4">
+          <div className="mt-3 w-full rounded-lg pt-4 pb-4 pl-4 pr-0">
+            {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {grupo.especies.length > 0 ? (
               <>
-                {/* Header de la tabla */}
-                <div className="mb-3 px-4 py-2">
-                  <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-                  <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                    <div className="flex-1">Nombre</div>
-                    <div className="w-12 text-center">En</div>
-                    <div className="w-16 text-center">LR</div>
-                    <div className="w-80 text-center">Distribución</div>
-                  </div>
-                </div>
                 {/* Lista de especies */}
-                <div className="space-y-2">
-                  {grupo.especies.map((species) => renderSpecies(species))}
+                <div className="w-full space-y-2">
+                  {grupo.especies.map((species) =>
+                    renderSpecies(species, isPE(grupo.categoria.sigla ?? null))
+                  )}
                 </div>
               </>
             ) : (
@@ -454,7 +480,7 @@ export default function RedListAccordion({
         ref={(el) => {
           if (el) categoryRefs.current.set(categoriaId, el);
         }}
-        className="relative"
+        className="relative w-full"
       >
         <div
           className="border-border bg-card relative flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3"
@@ -468,7 +494,7 @@ export default function RedListAccordion({
             }
           }}
         >
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-foreground text-sm font-semibold">
                 {nombre}
@@ -488,19 +514,20 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="bg-muted mt-3 rounded-lg p-4">
+          <div className="bg-muted mt-3 w-full rounded-lg pt-4 pb-4 pl-4 pr-0">
+            {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {/* Header de la tabla */}
-            <div className="mb-3 px-4 py-2">
+            <div className="mb-3 py-2">
               <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-              <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                <div className="flex-1">Nombre</div>
-                <div className="w-12 text-center">En</div>
-                <div className="w-16 text-center">LR</div>
-                <div className="w-80 text-center">Distribución</div>
+              <div className="text-muted-foreground grid grid-cols-[minmax(0,1fr)_3rem_4rem_20rem] items-center gap-4 text-xs">
+                <div>Nombre</div>
+                <div className="text-center">En</div>
+                <div className="text-center">LR</div>
+                <div className="text-center">Distribución</div>
               </div>
             </div>
             {/* Lista de especies */}
-            <div className="space-y-2">
+            <div className="w-full space-y-2">
               {especiesGrupo.map((species) => renderSpecies(species))}
             </div>
           </div>
@@ -523,38 +550,10 @@ export default function RedListAccordion({
       {hasSearchFromParent ? (
         <div className="w-full lg:w-80 lg:flex-shrink-0">
           <div className="lg:sticky lg:top-4">
-            <Card>
-              <CardContent className="pt-4 space-y-6">
-                <div>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      type="text"
-                      placeholder="Nombre científico o común"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-10"
-                    />
-                    {searchQuery && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
-                        onClick={() => setSearchQuery("")}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  {searchQuery && (
-                    <p className="mt-2 text-xs text-gray-500">
-                      Filtrando: &quot;{searchQuery}&quot;
-                    </p>
-                  )}
-                </div>
-                <div className="border-t" />
-                {filterCatalogs && filters != null && onFiltersChange && (
-                  <div className="min-h-0">
+            <Card className="overflow-x-hidden">
+              <CardContent className="pt-2 space-y-6">
+                {filterCatalogs && filters != null && onFiltersChange ? (
+                  <div className="min-h-0 -mx-6 w-[calc(100%+3rem)]">
                     <FiltersPanel
                       especies={especiesFull ?? especies}
                       catalogs={filterCatalogs}
@@ -562,7 +561,37 @@ export default function RedListAccordion({
                       excludeFilters={["pluviocidad", "temperatura", "listaRoja"]}
                       filters={filters}
                       embedded
+                      searchQuery={searchQuery}
+                      onSearchQueryChange={setSearchQuery}
                     />
+                  </div>
+                ) : (
+                  <div>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Nombre científico o común"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 pr-10"
+                      />
+                      {searchQuery && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                          onClick={() => setSearchQuery("")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {searchQuery && (
+                      <p className="mt-2 text-xs text-gray-500">
+                        Filtrando: &quot;{searchQuery}&quot;
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="border-t" />
@@ -622,7 +651,7 @@ export default function RedListAccordion({
       )}
 
       {/* Acordeones */}
-      <div className="flex-1 space-y-3 min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col space-y-3">
         {especiesPorCategoria.map((grupo) => renderCategoria(grupo))}
       </div>
     </div>

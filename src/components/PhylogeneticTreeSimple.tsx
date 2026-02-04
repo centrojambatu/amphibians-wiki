@@ -196,8 +196,9 @@ export default function PhylogeneticTreeSimple({
               {order.name}
             </Link>
             <p className="mt-1 text-xs text-gray-600">
-              {order.families.length} familias | {order.summary.totalSpecies}{" "}
-              especies | {order.summary.endemicSpecies} endémicas
+              {order.families.length} familias{" "}
+              <span className="text-[#f07304]">|</span> {order.summary.totalSpecies}{" "}
+              especies <span className="text-[#f07304]">|</span> {order.summary.endemicSpecies} endémicas
             </p>
           </div>
         </div>

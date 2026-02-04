@@ -10,12 +10,17 @@ import {Card, CardContent} from "@/components/ui/card";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
 import {filterEspecies} from "@/lib/filter-especies";
-import {organizeTaxonomyData} from "@/lib/organize-taxonomy";
+import {
+  organizeTaxonomyData,
+  type OrdenesNombresLookup,
+} from "@/lib/organize-taxonomy";
 import {SpeciesData} from "@/types/taxonomy";
 
 interface SapopediaContentProps {
   readonly especies: SpeciesListItem[];
   readonly filterCatalogs: FilterCatalogs;
+  /** Misma fuente que el acordeón de nombres comunes; se usan estos nombre_comun para familia y género */
+  readonly ordenesNombres?: OrdenesNombresLookup[] | null;
 }
 
 const TAB_STORAGE_KEY = "sapopedia-selected-tab";
@@ -39,9 +44,14 @@ function filterBySearchQuery(list: SpeciesListItem[], query: string): SpeciesLis
   });
 }
 
-export function SapopediaContent({especies, filterCatalogs}: SapopediaContentProps) {
+export function SapopediaContent({
+  especies,
+  filterCatalogs,
+  ordenesNombres = null,
+}: SapopediaContentProps) {
   const [filters, setFilters] = useState<FiltersState>(DEFAULT_FILTERS_STATE);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   // Cargar pestaña seleccionada desde localStorage
   const [selectedTab, setSelectedTab] = useState<string>(() => {
@@ -82,7 +92,10 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
     has_distribucion_oriental: e.has_distribucion_oriental || false,
   }));
 
-  const ordenesOrganizados = organizeTaxonomyData(especiesParaAccordion);
+  const ordenesOrganizados = organizeTaxonomyData(
+    especiesParaAccordion,
+    ordenesNombres,
+  );
 
   const handleFiltersChange = (newFilters: FiltersState) => {
     setFilters(newFilters);
@@ -121,6 +134,10 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
   const amenazadasCount = especies.filter((e) => e.lista_roja_iucn === "CR").length;
   const posiblementeExtintaCount = especies.filter((e) => isPosiblementeExtinta(e.lista_roja_iucn)).length;
 
+  const anuraCount = especies.filter((e) => e.orden?.toLowerCase() === "anura").length;
+  const caudataCount = especies.filter((e) => e.orden?.toLowerCase() === "caudata").length;
+  const gymnophionaCount = especies.filter((e) => e.orden?.toLowerCase() === "gymnophiona").length;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Estadísticas */}
@@ -131,18 +148,37 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
             <p className="text-muted-foreground text-xs sm:text-sm">Especies</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => setActiveOrderId("anura")}
+        >
           <CardContent>
-            <p className="text-3xl font-bold sm:text-4xl">{totalGeneros}</p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Géneros</p>
+            <p className="text-3xl font-bold sm:text-4xl">{anuraCount}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Anura</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => setActiveOrderId("caudata")}
+        >
           <CardContent>
-            <p className="text-3xl font-bold sm:text-4xl">{totalFamilias}</p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Familias</p>
+            <p className="text-3xl font-bold sm:text-4xl">{caudataCount}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Caudata</p>
           </CardContent>
         </Card>
+
+        <Card
+          className="cursor-pointer transition-shadow hover:shadow-md"
+          onClick={() => setActiveOrderId("gymnophiona")}
+        >
+          <CardContent>
+            <p className="text-3xl font-bold sm:text-4xl">{gymnophionaCount}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">Gymnophiona</p>
+          </CardContent>
+        </Card>
+
         <Card
           className="cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => applyQuickFilter("endemicas")}
@@ -157,20 +193,7 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
             <p className="text-muted-foreground text-xs sm:text-sm">Endémicas</p>
           </CardContent>
         </Card>
-        <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
-          onClick={() => applyQuickFilter("amenazadas")}
-        >
-          <CardContent>
-            <p className="text-3xl font-bold sm:text-4xl">
-              {amenazadasCount}{" "}
-              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
-                {totalEspecies > 0 ? ((amenazadasCount / totalEspecies) * 100).toFixed(1) : "0"}%
-              </span>
-            </p>
-            <p className="text-muted-foreground text-xs sm:text-sm">Amenazadas</p>
-          </CardContent>
-        </Card>
+
         <Card
           className="cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => applyQuickFilter("posiblemente-extintas")}
@@ -225,7 +248,11 @@ export function SapopediaContent({especies, filterCatalogs}: SapopediaContentPro
               </p>
             )}
             {/* Vista de accordion */}
-            <SpeciesAccordion orders={ordenesOrganizados} />
+            <SpeciesAccordion
+              orders={ordenesOrganizados}
+              activeOrderId={activeOrderId}
+              onActiveOrderIdConsumed={() => setActiveOrderId(null)}
+            />
           </TabsContent>
 
           <TabsContent className="mt-4 sm:mt-0" value="tree">

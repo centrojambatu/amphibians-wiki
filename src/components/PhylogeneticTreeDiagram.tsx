@@ -201,8 +201,9 @@ export default function PhylogeneticTreeDiagram({
                 </span>
               )}
               <div className="text-xs text-gray-600">
-                {order.families.length} familias | {order.summary.totalSpecies}{" "}
-                especies | {order.summary.endemicSpecies} endémicas
+                {order.families.length} familias{" "}
+                <span className="text-[#f07304]">|</span> {order.summary.totalSpecies}{" "}
+                especies <span className="text-[#f07304]">|</span> {order.summary.endemicSpecies} endémicas
               </div>
             </div>
           </div>
