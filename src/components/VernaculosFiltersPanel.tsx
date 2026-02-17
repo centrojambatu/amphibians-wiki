@@ -87,18 +87,14 @@ export default function VernaculosFiltersPanel({
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-2">
-                <Button
-                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                  size="sm"
-                  style={{
-                    borderColor: idiomaActual === null ? undefined : "#e8e8e8",
-                    color: idiomaActual === null ? undefined : "#2d2d2d",
-                  }}
-                  variant={idiomaActual === null ? "default" : "outline"}
-                  onClick={() => onIdiomaChange(null)}
-                >
+                {/* Mostrar "Todos los idiomas" como texto informativo (no clickeable) - siempre visible por defecto */}
+                <div className={`h-auto min-h-[32px] w-full rounded-md px-2 py-1.5 text-sm ${
+                  idiomaActual === null
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-gray-500"
+                }`}>
                   Todos los idiomas
-                </Button>
+                </div>
                 {idiomas.map((idioma) => {
                   const isSelected = idioma.id === idiomaActual;
                   return (
@@ -111,7 +107,14 @@ export default function VernaculosFiltersPanel({
                         color: isSelected ? undefined : "#2d2d2d",
                       }}
                       variant={isSelected ? "default" : "outline"}
-                      onClick={() => onIdiomaChange(idioma.id)}
+                      onClick={() => {
+                        // Si el idioma ya está seleccionado, deseleccionarlo y volver a "Todos los idiomas"
+                        if (isSelected) {
+                          onIdiomaChange(null);
+                        } else {
+                          onIdiomaChange(idioma.id);
+                        }
+                      }}
                     >
                       {idioma.nombre}
                     </Button>

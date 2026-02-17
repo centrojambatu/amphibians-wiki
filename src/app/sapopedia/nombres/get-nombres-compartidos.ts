@@ -1,5 +1,6 @@
-import { createServiceClient } from "@/utils/supabase/server";
-import { TaxonNombre } from "./get-taxon-nombres";
+import {createServiceClient} from "@/utils/supabase/server";
+
+import {TaxonNombre} from "./get-taxon-nombres";
 
 export interface NombreCompartido {
   nombre: string;
@@ -31,6 +32,17 @@ interface VwNombresComunes {
   nombre_cientifico: string | null;
   nombre_comun_espanol: string | null;
   nombre_comun_ingles: string | null;
+  nombre_comun_aleman: string | null;
+  nombre_comun_frances: string | null;
+  nombre_comun_portugues: string | null;
+  nombre_comun_chino: string | null;
+  nombre_comun_italiano: string | null;
+  nombre_comun_hindu: string | null;
+  nombre_comun_arabe: string | null;
+  nombre_comun_ruso: string | null;
+  nombre_comun_japones: string | null;
+  nombre_comun_holandes: string | null;
+  nombres_comunes_json: Record<string, string> | null;
 }
 
 interface TaxonInfo {
@@ -51,12 +63,15 @@ async function getTaxonInfo(
 
   // Obtener información taxonómica en lotes
   const batchSize = 100;
+
   for (let i = 0; i < taxonIds.length; i += batchSize) {
     const batch = taxonIds.slice(i, i + batchSize);
 
-    const { data: taxones, error } = await supabaseClient
+    const {data: taxones, error} = await supabaseClient
       .from("taxon")
-      .select("id_taxon, taxon_id, genero:taxon_id(taxon, taxon_id, familia:taxon_id(taxon, taxon_id, orden:taxon_id(taxon)))")
+      .select(
+        "id_taxon, taxon_id, genero:taxon_id(taxon, taxon_id, familia:taxon_id(taxon, taxon_id, orden:taxon_id(taxon)))",
+      )
       .in("id_taxon", batch);
 
     if (error) {
@@ -71,8 +86,10 @@ async function getTaxonInfo(
         const orden = familia?.orden;
 
         if (orden?.taxon && familia?.taxon && genero?.taxon) {
-          taxonInfoMap.set(t.id_taxon, {
-            id_taxon: t.id_taxon,
+          const idTaxon = t.id_taxon as number;
+
+          taxonInfoMap.set(idTaxon, {
+            id_taxon: idTaxon,
             orden: orden.taxon,
             familia: familia.taxon,
             genero: genero.taxon,
@@ -86,37 +103,79 @@ async function getTaxonInfo(
 }
 
 /**
+ * Obtiene el nombre común según el idioma especificado
+ */
+function obtenerNombreComunPorIdioma(taxon: VwNombresComunes, idiomaId: number): string | null {
+  // Mapeo de ID de idioma a nombre de columna
+  const columnasPorIdioma: Record<number, keyof VwNombresComunes> = {
+    1: "nombre_comun_espanol",
+    8: "nombre_comun_ingles",
+    9: "nombre_comun_aleman",
+    10: "nombre_comun_frances",
+    11: "nombre_comun_portugues",
+    545: "nombre_comun_chino",
+    546: "nombre_comun_italiano",
+    547: "nombre_comun_hindu",
+    548: "nombre_comun_arabe",
+    549: "nombre_comun_ruso",
+    550: "nombre_comun_japones",
+    551: "nombre_comun_holandes",
+  };
+
+  // Intentar obtener de la columna específica
+  const columna = columnasPorIdioma[idiomaId];
+
+  if (columna && taxon[columna]) {
+    return taxon[columna] as string | null;
+  }
+
+  // Si no está en la columna específica, intentar obtener del JSONB
+  return taxon.nombres_comunes_json?.[String(idiomaId)] || null;
+}
+
+/**
  * Encuentra nombres comunes compartidos por múltiples especies dentro de la misma familia
  * Lee directamente de la vista vw_nombres_comunes
+ * @param idiomaId - ID del idioma (1=Español, 8=Inglés, etc.). Por defecto 1 (Español)
  */
-export async function getNombresCompartidosPorFamilia(): Promise<
-  NombresCompartidosPorFamilia[]
-> {
+export async function getNombresCompartidosPorFamilia(
+  idiomaId: number = 1,
+): Promise<NombresCompartidosPorFamilia[]> {
   const supabaseClient = createServiceClient();
 
-  // Obtener todos los taxones con nombres comunes desde la vista
-  const { data: vwData, error: errorVw } = await supabaseClient
+  // Seleccionar todas las columnas disponibles de la vista
+  const {data: vwData, error: errorVw} = await supabaseClient
     .from("vw_nombres_comunes")
-    .select("id_taxon, id_ficha_especie, especie, nombre_cientifico, nombre_comun_espanol, nombre_comun_ingles")
-    .not("nombre_comun_espanol", "is", null);
+    .select(
+      "id_taxon, id_ficha_especie, especie, nombre_cientifico, nombre_comun_espanol, nombre_comun_ingles, nombre_comun_aleman, nombre_comun_frances, nombre_comun_portugues, nombre_comun_chino, nombre_comun_italiano, nombre_comun_hindu, nombre_comun_arabe, nombre_comun_ruso, nombre_comun_japones, nombre_comun_holandes, nombres_comunes_json",
+    );
 
-  if (errorVw) {
+  if (errorVw || !vwData) {
     console.error("Error al obtener nombres comunes:", errorVw);
+
     return [];
   }
 
-  if (!vwData || vwData.length === 0) {
+  // Filtrar por idioma usando el JSONB o la columna específica
+  const vwDataFiltrados = (vwData as unknown as VwNombresComunes[]).filter((taxon) => {
+    const nombreComun = obtenerNombreComunPorIdioma(taxon, idiomaId);
+
+    return nombreComun !== null && nombreComun.trim() !== "";
+  });
+
+  if (!vwDataFiltrados || vwDataFiltrados.length === 0) {
     return [];
   }
 
   // Obtener información taxonómica
-  const taxonIds = [...new Set(vwData.map((t: any) => t.id_taxon))];
+  const taxonIds = [...new Set(vwDataFiltrados.map((t: VwNombresComunes) => t.id_taxon))];
   const taxonInfoMap = await getTaxonInfo(supabaseClient, taxonIds);
 
   // Combinar datos
-  const taxonesValidos: (VwNombresComunes & TaxonInfo)[] = vwData
-    .map((t: any) => {
+  const taxonesValidos: (VwNombresComunes & TaxonInfo)[] = vwDataFiltrados
+    .map((t: VwNombresComunes) => {
       const taxonInfo = taxonInfoMap.get(t.id_taxon);
+
       if (!taxonInfo) {
         return null;
       }
@@ -144,7 +203,7 @@ export async function getNombresCompartidosPorFamilia(): Promise<
 
     if (!familiasMap.has(familiaKey)) {
       familiasMap.set(familiaKey, {
-        nombre_comun: null, // No hay nombre común de familia en la nueva estructura
+        nombre_comun: null,
         orden: taxon.orden,
         familia: taxon.familia,
         nombresCompartidos: new Map(),
@@ -153,9 +212,11 @@ export async function getNombresCompartidosPorFamilia(): Promise<
 
     const familiaData = familiasMap.get(familiaKey)!;
 
-    // Agregar el nombre común de la especie (usar español como principal)
-    if (taxon.nombre_comun_espanol) {
-      const nombreKey = taxon.nombre_comun_espanol.toLowerCase().trim();
+    // Obtener el nombre común según el idioma especificado
+    const nombreComun = obtenerNombreComunPorIdioma(taxon, idiomaId);
+
+    if (nombreComun) {
+      const nombreKey = nombreComun.toLowerCase().trim();
 
       if (!familiaData.nombresCompartidos.has(nombreKey)) {
         familiaData.nombresCompartidos.set(nombreKey, []);
@@ -164,8 +225,8 @@ export async function getNombresCompartidosPorFamilia(): Promise<
       familiaData.nombresCompartidos.get(nombreKey)!.push({
         id_taxon: taxon.id_taxon,
         taxon: taxon.especie || "",
-        nombre_comun: taxon.nombre_comun_espanol,
-        nombre_cientifico: taxon.nombre_cientifico || null,
+        nombre_comun: nombreComun,
+        nombre_cientifico: taxon.nombre_cientifico || undefined,
         orden: taxon.orden,
         familia: taxon.familia,
         genero: taxon.genero,
@@ -192,9 +253,8 @@ export async function getNombresCompartidosPorFamilia(): Promise<
     });
 
     if (nombresCompartidos.length > 0) {
-      const sortedNombres = nombresCompartidos.toSorted((a, b) =>
-        a.nombre.localeCompare(b.nombre),
-      );
+      const sortedNombres = nombresCompartidos.toSorted((a, b) => a.nombre.localeCompare(b.nombre));
+
       resultados.push({
         familia: familiaData.familia,
         nombre_comun_familia: familiaData.nombre_comun,
@@ -208,6 +268,7 @@ export async function getNombresCompartidosPorFamilia(): Promise<
     if (a.orden !== b.orden) {
       return a.orden.localeCompare(b.orden);
     }
+
     return a.familia.localeCompare(b.familia);
   });
 }
@@ -215,35 +276,46 @@ export async function getNombresCompartidosPorFamilia(): Promise<
 /**
  * Encuentra nombres comunes compartidos por múltiples especies dentro del mismo género
  * Lee directamente de la vista vw_nombres_comunes
+ * @param idiomaId - ID del idioma (1=Español, 8=Inglés, etc.). Por defecto 1 (Español)
  */
-export async function getNombresCompartidosPorGenero(): Promise<
-  NombresCompartidosPorGenero[]
-> {
+export async function getNombresCompartidosPorGenero(
+  idiomaId: number = 1,
+): Promise<NombresCompartidosPorGenero[]> {
   const supabaseClient = createServiceClient();
 
-  // Obtener todos los taxones con nombres comunes desde la vista
-  const { data: vwData, error: errorVw } = await supabaseClient
+  // Seleccionar todas las columnas disponibles de la vista
+  const {data: vwData, error: errorVw} = await supabaseClient
     .from("vw_nombres_comunes")
-    .select("id_taxon, id_ficha_especie, especie, nombre_cientifico, nombre_comun_espanol, nombre_comun_ingles")
-    .not("nombre_comun_espanol", "is", null);
+    .select(
+      "id_taxon, id_ficha_especie, especie, nombre_cientifico, nombre_comun_espanol, nombre_comun_ingles, nombre_comun_aleman, nombre_comun_frances, nombre_comun_portugues, nombre_comun_chino, nombre_comun_italiano, nombre_comun_hindu, nombre_comun_arabe, nombre_comun_ruso, nombre_comun_japones, nombre_comun_holandes, nombres_comunes_json",
+    );
 
-  if (errorVw) {
+  if (errorVw || !vwData) {
     console.error("Error al obtener nombres comunes:", errorVw);
+
     return [];
   }
 
-  if (!vwData || vwData.length === 0) {
+  // Filtrar por idioma usando el JSONB o la columna específica
+  const vwDataFiltrados = (vwData as unknown as VwNombresComunes[]).filter((taxon) => {
+    const nombreComun = obtenerNombreComunPorIdioma(taxon, idiomaId);
+
+    return nombreComun !== null && nombreComun.trim() !== "";
+  });
+
+  if (!vwDataFiltrados || vwDataFiltrados.length === 0) {
     return [];
   }
 
   // Obtener información taxonómica
-  const taxonIds = [...new Set(vwData.map((t: any) => t.id_taxon))];
+  const taxonIds = [...new Set(vwDataFiltrados.map((t: VwNombresComunes) => t.id_taxon))];
   const taxonInfoMap = await getTaxonInfo(supabaseClient, taxonIds);
 
   // Combinar datos
-  const taxonesValidos: (VwNombresComunes & TaxonInfo)[] = vwData
-    .map((t: any) => {
+  const taxonesValidos: (VwNombresComunes & TaxonInfo)[] = vwDataFiltrados
+    .map((t: VwNombresComunes) => {
       const taxonInfo = taxonInfoMap.get(t.id_taxon);
+
       if (!taxonInfo) {
         return null;
       }
@@ -272,7 +344,7 @@ export async function getNombresCompartidosPorGenero(): Promise<
 
     if (!generosMap.has(generoKey)) {
       generosMap.set(generoKey, {
-        nombre_comun: null, // No hay nombre común de género en la nueva estructura
+        nombre_comun: null,
         familia: taxon.familia,
         orden: taxon.orden,
         genero: taxon.genero,
@@ -282,9 +354,11 @@ export async function getNombresCompartidosPorGenero(): Promise<
 
     const generoData = generosMap.get(generoKey)!;
 
-    // Agregar el nombre común de la especie (usar español como principal)
-    if (taxon.nombre_comun_espanol) {
-      const nombreKey = taxon.nombre_comun_espanol.toLowerCase().trim();
+    // Obtener el nombre común según el idioma especificado
+    const nombreComun = obtenerNombreComunPorIdioma(taxon, idiomaId);
+
+    if (nombreComun) {
+      const nombreKey = nombreComun.toLowerCase().trim();
 
       if (!generoData.nombresCompartidos.has(nombreKey)) {
         generoData.nombresCompartidos.set(nombreKey, []);
@@ -293,8 +367,8 @@ export async function getNombresCompartidosPorGenero(): Promise<
       generoData.nombresCompartidos.get(nombreKey)!.push({
         id_taxon: taxon.id_taxon,
         taxon: taxon.especie || "",
-        nombre_comun: taxon.nombre_comun_espanol,
-        nombre_cientifico: taxon.nombre_cientifico || null,
+        nombre_comun: nombreComun,
+        nombre_cientifico: taxon.nombre_cientifico || undefined,
         orden: taxon.orden,
         familia: taxon.familia,
         genero: taxon.genero,
@@ -322,9 +396,8 @@ export async function getNombresCompartidosPorGenero(): Promise<
     });
 
     if (nombresCompartidos.length > 0) {
-      const sortedNombres = nombresCompartidos.toSorted((a, b) =>
-        a.nombre.localeCompare(b.nombre),
-      );
+      const sortedNombres = nombresCompartidos.toSorted((a, b) => a.nombre.localeCompare(b.nombre));
+
       resultados.push({
         genero: generoData.genero,
         nombre_comun_genero: generoData.nombre_comun,
@@ -342,6 +415,7 @@ export async function getNombresCompartidosPorGenero(): Promise<
     if (a.familia !== b.familia) {
       return a.familia.localeCompare(b.familia);
     }
+
     return a.genero.localeCompare(b.genero);
   });
 }

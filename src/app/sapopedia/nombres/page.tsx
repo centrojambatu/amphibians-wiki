@@ -67,9 +67,9 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
     0,
   );
 
-  // Obtener nombres compartidos directamente de la vista
-  const nombresPorFamilia = await getNombresCompartidosPorFamilia();
-  const nombresPorGenero = await getNombresCompartidosPorGenero();
+  // Obtener nombres compartidos directamente de la vista (filtrar por idioma seleccionado)
+  const nombresPorFamilia = await getNombresCompartidosPorFamilia(idiomaIdFinal);
+  const nombresPorGenero = await getNombresCompartidosPorGenero(idiomaIdFinal);
 
   return (
     <main className="container mx-auto px-4 py-8">

@@ -21,6 +21,7 @@ export default async function NombresVernaculosPage({searchParams}: NombresVerna
   const params = await searchParams;
 
   // Obtener idioma vernáculo de los parámetros
+  // Por defecto siempre es null (Todos los idiomas)
   const idiomaVernaculoId = params.idiomaVernaculo
     ? Number.parseInt(params.idiomaVernaculo, 10)
     : undefined;
@@ -28,7 +29,8 @@ export default async function NombresVernaculosPage({searchParams}: NombresVerna
   // Obtener TODOS los nombres vernáculos (sin filtrar por idioma) para filtrar en el cliente
   // Esto es más rápido que hacer consultas separadas por cada cambio de idioma
   const todosLosNombresVernaculos = await getNombresVernaculos();
-  const idiomaVernaculoInicial = idiomaVernaculoId || null;
+  // Por defecto siempre mostrar todos los idiomas (null)
+  const idiomaVernaculoInicial = idiomaVernaculoId ?? null;
 
   return (
     <main className="container mx-auto px-4 py-8">

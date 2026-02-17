@@ -34,8 +34,9 @@ function normalizarTildes(texto: string): string {
 
 /**
  * Extracción genérica de nombre base para idiomas distintos al español.
- * Remueve nombres propios, especificadores comunes y frases descriptivas.
- * Adapta patrones comunes en múltiples idiomas (inglés, francés, alemán, etc.)
+ * En otros idiomas, el nombre base es el sustantivo principal (frog, toad, salamander, etc.)
+ * Remueve adjetivos, nombres propios y especificadores, dejando solo el sustantivo.
+ * MÁS ESTRICTA: Solo devuelve sustantivos principales conocidos, nunca adjetivos.
  */
 function extraerNombreBaseGenerico(nombreComun: string | null): string {
   if (!nombreComun) return "";
@@ -45,62 +46,202 @@ function extraerNombreBaseGenerico(nombreComun: string | null): string {
   // Remover apóstrofes y posesivos comunes (ej: "Göldi's", "Simpson's")
   nombre = nombre.replace(/['']s\s+/gi, " ");
   
-  // Remover nombres propios al final (palabras que empiezan con mayúscula, excepto si es la primera palabra)
-  const palabras = nombre.split(/\s+/);
-  if (palabras.length > 1) {
-    const ultimaPalabra = palabras[palabras.length - 1];
-    // Si la última palabra empieza con mayúscula y no es la primera palabra, es probablemente un nombre propio
-    if (/^[A-ZÁÉÍÓÚÑÜ]/.test(ultimaPalabra) && palabras.length > 1) {
-      nombre = palabras.slice(0, -1).join(" ");
-    }
-  }
-  
-  // Remover frases comunes con "de"/"del"/"of"/"von"/"di" seguido de nombre propio
-  nombre = nombre.replace(/\s+(de|del|of|von|di|du|des|der|die|das)\s+[A-ZÁÉÍÓÚÑÜ][^\s]+(?:\s+[A-ZÁÉÍÓÚÑÜ][^\s]+)*$/i, "");
-  
-  // Remover especificadores comunes al final (adjetivos descriptivos en múltiples idiomas)
-  // Patrones comunes: inglés, alemán, francés, portugués, italiano, etc.
-  const especificadores = [
-    // Inglés
-    "confused", "dark", "spotted", "smooth", "gliding", "exasperating", "thigh", "senior", "brother", 
-    "nurse", "leaf", "frog", "toad", "salamander", "caecilian", "thin", "toed", "hammer",
-    // Alemán
-    "verwechselt", "dunkel", "gefleckt", "glatt", "schenkel", "blatt", "frosch", "kröte",
-    // Francés
-    "confondu", "sombre", "taches", "lisse", "cuisse", "feuille", "grenouille", "crapaud",
-    // Portugués
-    "confuso", "escuro", "manchas", "liso", "coxa", "folha", "rã", "sapo",
+  // Diccionario de sustantivos principales por idioma (el nombre base que queremos extraer)
+  // Estos son los ÚNICOS valores válidos como nombre base
+  // Ordenados por prioridad (más específicos primero para evitar falsos positivos)
+  const sustantivosPrincipales = [
+    // Inglés (compuestos primero, luego simples)
+    "treefrog", "glassfrog", "rainfrog", "swampfrog", "froglet", "toadlet",
+    "frog", "toad", "salamander", "caecilian", "newt",
+    // Alemán (compuestos primero)
+    "laubfrosch", "regenfrosch", "glasfrosch", "hammerfrosch", "pfeilgiftfrosch",
+    "raketenfrosch", "sumpffrosch", "fröschlein", "riesenkröte", "zwergkröte",
+    "frosch", "kröte", "salamander", "molch", "blindwühle", "wurmsalamander",
+    // Francés (compuestos primero)
+    "grenouille-feuille", "grenouille-marteau", "grenouille-fusée",
+    "grenouille", "crapaud", "salamandre", "triton", "rainette", "cécilie",
+    // Portugués (compuestos primero)
+    "perereca-de-dorso-espinhoso", "perereca-de-riacho", "rã-da-chuva",
+    "rã-da-chuva-da-floresta", "rã-de-capacete", "rã-de-dedos-finos",
+    "rã-de-focinho", "rã-de-riacho", "rã-de-vidro", "rã-do-brejo",
+    "rã-enfermeira", "rã-foguete", "rã-folha", "rã-gladiadora",
+    "rã-marsupial", "rã-martelo", "rã-pac-man", "rã-pegajosa",
+    "rã-venenosa", "rã-verde", "rã-ágil", "rãzinha",
+    "salamandra-sem-pulmão", "salamandra-verme", "sapo-arlequim",
+    "sapo-de-espuma", "sapo-gigante",
+    "rã", "sapo", "salamandra", "cobrinha", "perereca", "sapinho", "cecília",
     // Italiano
-    "confuso", "scuro", "macchie", "liscio", "coscia", "foglia", "rana", "rospo",
+    "ranina", "rospetto",
+    "rana", "rospo", "salamandra", "tritone", "cecilia",
+    // Chino
+    "蛙", "蟾蜍", "蝾螈",
+    // Hindi
+    "मेंढक", "टोड", "सीसीलियन", "सैलामैंडर",
+    // Árabe
+    "ضفدع", "علجوم",
+    // Ruso
+    "лягушка", "жаба", "саламандра", "жабка", "лягушонок", "червяга",
+    // Japonés
+    "カエル", "ガマ", "イモリ", "アマガエル", "アメガエル", "コガエル", "コガマ",
+    // Holandés (compuestos primero)
+    "boomkikker", "regenkikker", "glaskikker", "hamerkikker", "raketkikker",
+    "sumpfkikker", "buidelkikker", "kikkertje", "reuzenpad", "dwergpad",
+    "kikker", "pad", "salamander", "wormsalamander",
   ];
   
-  const patronEspecificadores = new RegExp(`\\s+(${especificadores.join("|")})$`, "i");
-  nombre = nombre.replace(patronEspecificadores, "");
+  // Diccionario de adjetivos comunes que NO deben ser nombre base
+  const adjetivosComunes = [
+    // Inglés
+    "confused", "dark", "spotted", "smooth", "gliding", "exasperating", "thin", "toed", "hammer",
+    "amazonian", "senior", "brother", "nurse", "leaf",
+    // Alemán
+    "verwechselt", "dunkel", "gefleckt", "glatt", "schenkel", "blatt", "amazonisch", "amazonian",
+    // Francés
+    "confondu", "sombre", "taches", "lisse", "cuisse", "feuille", "amazonien",
+    // Portugués
+    "confuso", "escuro", "manchas", "liso", "coxa", "folha", "amazônico",
+    // Italiano
+    "confuso", "scuro", "macchie", "liscio", "coscia", "foglia", "amazzonico",
+  ];
   
-  // Remover última palabra si hay más de 2 palabras y parece ser un especificador
-  const palabrasRestantes = nombre.split(/\s+/);
-  if (palabrasRestantes.length > 2) {
-    const ultima = palabrasRestantes[palabrasRestantes.length - 1].toLowerCase();
-    // Si la última palabra es muy corta o parece un especificador, removerla
-    if (ultima.length <= 4 || especificadores.some(e => ultima.includes(e.toLowerCase()))) {
-      nombre = palabrasRestantes.slice(0, -1).join(" ");
+  // Primero buscar en el nombre completo (más confiable para nombres compuestos)
+  const nombreLower = nombre.toLowerCase();
+  for (const sustantivo of sustantivosPrincipales) {
+    // Buscar el sustantivo en el nombre completo (puede tener variaciones)
+    // Priorizar coincidencias exactas de palabras completas
+    const regexExacto = new RegExp(`\\b${sustantivo}\\b`, "i");
+    if (regexExacto.test(nombreLower)) {
+      return sustantivo;
+    }
+    // Si no hay coincidencia exacta, buscar como substring
+    if (nombreLower.includes(sustantivo)) {
+      return sustantivo;
     }
   }
   
-  return nombre.trim() || nombreComun.trim();
+  // Si no se encuentra en el nombre completo, buscar palabra por palabra
+  const palabras = nombre.split(/[\s-]+/); // Dividir por espacios y guiones
+  
+  // Buscar el sustantivo principal (generalmente está al final o cerca del final)
+  // Buscar desde el final hacia el inicio para encontrar el sustantivo principal
+  for (let i = palabras.length - 1; i >= 0; i--) {
+    const palabraLimpia = palabras[i].toLowerCase().replace(/[.,;:!?]/g, ""); // Remover puntuación
+    
+    // Verificar si es un sustantivo principal (coincidencia exacta primero)
+    for (const sustantivo of sustantivosPrincipales) {
+      if (palabraLimpia === sustantivo) {
+        // Coincidencia exacta - devolver el sustantivo principal canónico
+        return sustantivo;
+      }
+      // También verificar si contiene o está contenido en el sustantivo
+      if (palabraLimpia.includes(sustantivo) || sustantivo.includes(palabraLimpia)) {
+        // Devolver el sustantivo principal canónico (no la variación)
+        return sustantivo;
+      }
+    }
+  }
+  
+  // Si aún no se encuentra, intentar buscar variaciones con sufijos comunes y compuestos
+  // Primero buscar compuestos que contengan sustantivos base
+  const compuestosConBase = [
+    // Inglés: extraer base de compuestos
+    {patron: /treefrog|tree-frog/i, base: "frog"},
+    {patron: /glassfrog|glass-frog/i, base: "frog"},
+    {patron: /rainfrog|rain-frog/i, base: "frog"},
+    {patron: /swampfrog|swamp-frog/i, base: "frog"},
+    {patron: /froglet/i, base: "frog"},
+    {patron: /toadlet/i, base: "toad"},
+    // Alemán: extraer base de compuestos
+    {patron: /laubfrosch|laub-frosch/i, base: "frosch"},
+    {patron: /regenfrosch|regen-frosch/i, base: "frosch"},
+    {patron: /glasfrosch|glas-frosch/i, base: "frosch"},
+    {patron: /hammerfrosch|hammer-frosch/i, base: "frosch"},
+    {patron: /raketenfrosch|raketen-frosch/i, base: "frosch"},
+    {patron: /sumpffrosch|sumpf-frosch/i, base: "frosch"},
+    {patron: /fröschlein/i, base: "frosch"},
+    {patron: /riesenkröte|riesen-kröte/i, base: "kröte"},
+    {patron: /zwergkröte|zwerg-kröte/i, base: "kröte"},
+    // Francés: extraer base de compuestos
+    {patron: /grenouille-feuille|grenouille feuille/i, base: "grenouille"},
+    {patron: /grenouille-marteau|grenouille marteau/i, base: "grenouille"},
+    {patron: /grenouille-fusée|grenouille fusée/i, base: "grenouille"},
+    // Portugués: extraer base de compuestos con "rã-"
+    {patron: /rã-[a-z-]+|rã [a-z ]+/i, base: "rã"},
+    {patron: /perereca-[a-z-]+|perereca [a-z ]+/i, base: "perereca"},
+    {patron: /sapinho/i, base: "sapinho"},
+    {patron: /sapo-[a-z-]+|sapo [a-z ]+/i, base: "sapo"},
+    // Holandés: extraer base de compuestos
+    {patron: /boomkikker|boom-kikker/i, base: "kikker"},
+    {patron: /regenkikker|regen-kikker/i, base: "kikker"},
+    {patron: /glaskikker|glas-kikker/i, base: "kikker"},
+    {patron: /hamerkikker|hamer-kikker/i, base: "kikker"},
+    {patron: /raketkikker|raket-kikker/i, base: "kikker"},
+    {patron: /sumpfkikker|sumpf-kikker/i, base: "kikker"},
+    {patron: /kikkertje/i, base: "kikker"},
+    {patron: /reuzenpad|reuzen-pad/i, base: "pad"},
+    {patron: /dwergpad|dwerg-pad/i, base: "pad"},
+  ];
+  
+  for (const compuesto of compuestosConBase) {
+    if (compuesto.patron.test(nombreLower)) {
+      return compuesto.base;
+    }
+  }
+  
+  // Buscar variaciones con sufijos comunes (plurales, diminutivos, etc.)
+  const variacionesSustantivos = [
+    {base: "frosch", variaciones: ["frösche", "frosches", "frosch", "fröschlein"]},
+    {base: "kröte", variaciones: ["kröten", "kröte", "riesenkröte", "zwergkröte"]},
+    {base: "frog", variaciones: ["frogs", "frog", "froglet", "treefrog", "glassfrog", "rainfrog", "swampfrog"]},
+    {base: "toad", variaciones: ["toads", "toad", "toadlet"]},
+    {base: "grenouille", variaciones: ["grenouilles", "grenouille", "grenouille-feuille", "grenouille-marteau", "grenouille-fusée"]},
+    {base: "crapaud", variaciones: ["crapauds", "crapaud"]},
+    {base: "rainette", variaciones: ["rainettes", "rainette"]},
+    {base: "rana", variaciones: ["rane", "rana", "ranina"]},
+    {base: "rospo", variaciones: ["rospi", "rospo", "rospetto"]},
+    {base: "rã", variaciones: ["rãs", "rã", "rãzinha"]},
+    {base: "sapo", variaciones: ["sapos", "sapo"]},
+    {base: "perereca", variaciones: ["pererecas", "perereca"]},
+    {base: "sapinho", variaciones: ["sapinhos", "sapinho"]},
+    {base: "salamander", variaciones: ["salamanders", "salamander", "wurmsalamander"]},
+    {base: "salamandre", variaciones: ["salamandres", "salamandre"]},
+    {base: "kikker", variaciones: ["kikkers", "kikker", "kikkertje", "boomkikker", "regenkikker", "glaskikker", "hamerkikker", "raketkikker", "sumpfkikker"]},
+    {base: "pad", variaciones: ["padden", "pad", "reuzenpad", "dwergpad"]},
+    {base: "лягушка", variaciones: ["лягушка", "лягушонок", "жабка"]},
+    {base: "жаба", variaciones: ["жаба", "жабка"]},
+  ];
+  
+  for (const variacion of variacionesSustantivos) {
+    for (const variacionForma of variacion.variaciones) {
+      // Buscar con límites de palabra para evitar falsos positivos
+      const regexVariacion = new RegExp(`\\b${variacionForma.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+      if (regexVariacion.test(nombreLower)) {
+        return variacion.base;
+      }
+      // También buscar como substring si no hay límites de palabra
+      if (nombreLower.includes(variacionForma.toLowerCase())) {
+        return variacion.base;
+      }
+    }
+  }
+  
+  // Si NO se encuentra ningún sustantivo principal conocido, NO devolver adjetivos
+  // En su lugar, devolver el nombre completo original (mejor que un adjetivo incorrecto)
+  // Esto fuerza a que se use el nombre completo si no hay sustantivo identificable
+  return nombreComun.trim();
 }
 
 /**
  * Función de normalización con dos pasadas y agrupación sin tildes
  * Funciona con cualquier idioma, pero las reglas están optimizadas para español.
- * Para otros idiomas, usa una extracción más genérica.
+ * Para otros idiomas, usa una extracción más genérica y estricta (solo sustantivo principal).
  */
 function normalizarNombres(
   listaEspecies: TaxonNombre[],
   idiomaId?: number,
 ): (TaxonNombre & {nombreBase: string; nombreBaseNormalizado: string})[] {
   // Para español (idiomaId = 1), usar la función específica
-  // Para otros idiomas, usar una extracción más genérica
+  // Para otros idiomas, usar una extracción más genérica y estricta
   const esEspanol = idiomaId === 1 || idiomaId === undefined;
   
   // PASADA 1: Extraer nombre base
@@ -111,7 +252,7 @@ function normalizarNombres(
       // Usar la función específica para español
       nombreBase = extraerNombreBaseNormalizado(especie.nombre_comun);
     } else {
-      // Para otros idiomas, extracción genérica: remover nombres propios y especificadores comunes
+      // Para otros idiomas, extracción genérica ESTRICTA: solo sustantivo principal
       nombreBase = extraerNombreBaseGenerico(especie.nombre_comun);
     }
     
@@ -121,6 +262,36 @@ function normalizarNombres(
       nombreBaseNormalizado: normalizarTildes(nombreBase),
     };
   });
+  
+  // Para otros idiomas, NO hacer optimizaciones - devolver directamente el sustantivo extraído
+  if (!esEspanol) {
+    // Contar por nombre normalizado para elegir versión canónica
+    const versionesPreferidas: Record<string, Record<string, number>> = {};
+    
+    especiesConBase.forEach((item) => {
+      if (!versionesPreferidas[item.nombreBaseNormalizado]) {
+        versionesPreferidas[item.nombreBaseNormalizado] = {};
+      }
+      const version = item.nombreBase;
+      versionesPreferidas[item.nombreBaseNormalizado][version] =
+        (versionesPreferidas[item.nombreBaseNormalizado][version] || 0) + 1;
+    });
+    
+    // Elegir la versión más común para cada nombre normalizado
+    const nombreBaseCanonicos: Record<string, string> = {};
+    
+    Object.keys(versionesPreferidas).forEach((normalizado) => {
+      const versiones = versionesPreferidas[normalizado];
+      const versionMasComun = Object.entries(versiones).sort((a, b) => b[1] - a[1])[0][0];
+      nombreBaseCanonicos[normalizado] = versionMasComun;
+    });
+    
+    // Aplicar nombres canónicos (solo para unificar variaciones del mismo sustantivo)
+    return especiesConBase.map((item) => ({
+      ...item,
+      nombreBase: nombreBaseCanonicos[item.nombreBaseNormalizado] || item.nombreBase,
+    }));
+  }
 
   // Contar por nombre normalizado (sin tildes)
   const conteoBaseNormalizado: Record<string, number> = {};
