@@ -105,7 +105,7 @@ export default function Navbar() {
             {navLinks.map((link) => (
               link.submenu ? (
                 <div
-                  key={link.href}
+                  key={link.label}
                   className="relative"
                   onMouseEnter={() => setOpenSubmenu(link.label)}
                   onMouseLeave={() => setOpenSubmenu(null)}
@@ -148,7 +148,7 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <Link key={link.href} href={link.href}>
+                <Link key={link.label} href={link.href}>
                   <Button className="cursor-pointer text-sm" variant="ghost">
                     {link.label}
                   </Button>
@@ -174,7 +174,7 @@ export default function Navbar() {
           <nav className="mt-4 flex flex-col gap-2 border-t pt-4 lg:hidden">
             {navLinks.map((link) => (
               link.submenu ? (
-                <div key={link.href}>
+                <div key={link.label}>
                   <Button
                     className="w-full cursor-pointer justify-between"
                     variant="ghost"
@@ -210,7 +210,7 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <Link key={link.href} href={link.href} onClick={closeMenu}>
+                <Link key={link.label} href={link.href} onClick={closeMenu}>
                   <Button className="w-full cursor-pointer justify-start" variant="ghost">
                     {link.label}
                   </Button>
