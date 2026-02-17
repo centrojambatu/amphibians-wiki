@@ -11,6 +11,7 @@ export interface TaxonNombre {
   orden?: string;
   familia?: string;
   genero?: string;
+  catalogo_awe_idioma_id?: number; // Para filtrar por idioma en nombres vernáculos
 }
 
 export interface NombreGroup {
@@ -32,19 +33,94 @@ function normalizarTildes(texto: string): string {
 }
 
 /**
+ * Extracción genérica de nombre base para idiomas distintos al español.
+ * Remueve nombres propios, especificadores comunes y frases descriptivas.
+ * Adapta patrones comunes en múltiples idiomas (inglés, francés, alemán, etc.)
+ */
+function extraerNombreBaseGenerico(nombreComun: string | null): string {
+  if (!nombreComun) return "";
+  
+  let nombre = nombreComun.trim();
+  
+  // Remover apóstrofes y posesivos comunes (ej: "Göldi's", "Simpson's")
+  nombre = nombre.replace(/['']s\s+/gi, " ");
+  
+  // Remover nombres propios al final (palabras que empiezan con mayúscula, excepto si es la primera palabra)
+  const palabras = nombre.split(/\s+/);
+  if (palabras.length > 1) {
+    const ultimaPalabra = palabras[palabras.length - 1];
+    // Si la última palabra empieza con mayúscula y no es la primera palabra, es probablemente un nombre propio
+    if (/^[A-ZÁÉÍÓÚÑÜ]/.test(ultimaPalabra) && palabras.length > 1) {
+      nombre = palabras.slice(0, -1).join(" ");
+    }
+  }
+  
+  // Remover frases comunes con "de"/"del"/"of"/"von"/"di" seguido de nombre propio
+  nombre = nombre.replace(/\s+(de|del|of|von|di|du|des|der|die|das)\s+[A-ZÁÉÍÓÚÑÜ][^\s]+(?:\s+[A-ZÁÉÍÓÚÑÜ][^\s]+)*$/i, "");
+  
+  // Remover especificadores comunes al final (adjetivos descriptivos en múltiples idiomas)
+  // Patrones comunes: inglés, alemán, francés, portugués, italiano, etc.
+  const especificadores = [
+    // Inglés
+    "confused", "dark", "spotted", "smooth", "gliding", "exasperating", "thigh", "senior", "brother", 
+    "nurse", "leaf", "frog", "toad", "salamander", "caecilian", "thin", "toed", "hammer",
+    // Alemán
+    "verwechselt", "dunkel", "gefleckt", "glatt", "schenkel", "blatt", "frosch", "kröte",
+    // Francés
+    "confondu", "sombre", "taches", "lisse", "cuisse", "feuille", "grenouille", "crapaud",
+    // Portugués
+    "confuso", "escuro", "manchas", "liso", "coxa", "folha", "rã", "sapo",
+    // Italiano
+    "confuso", "scuro", "macchie", "liscio", "coscia", "foglia", "rana", "rospo",
+  ];
+  
+  const patronEspecificadores = new RegExp(`\\s+(${especificadores.join("|")})$`, "i");
+  nombre = nombre.replace(patronEspecificadores, "");
+  
+  // Remover última palabra si hay más de 2 palabras y parece ser un especificador
+  const palabrasRestantes = nombre.split(/\s+/);
+  if (palabrasRestantes.length > 2) {
+    const ultima = palabrasRestantes[palabrasRestantes.length - 1].toLowerCase();
+    // Si la última palabra es muy corta o parece un especificador, removerla
+    if (ultima.length <= 4 || especificadores.some(e => ultima.includes(e.toLowerCase()))) {
+      nombre = palabrasRestantes.slice(0, -1).join(" ");
+    }
+  }
+  
+  return nombre.trim() || nombreComun.trim();
+}
+
+/**
  * Función de normalización con dos pasadas y agrupación sin tildes
+ * Funciona con cualquier idioma, pero las reglas están optimizadas para español.
+ * Para otros idiomas, usa una extracción más genérica.
  */
 function normalizarNombres(
   listaEspecies: TaxonNombre[],
+  idiomaId?: number,
 ): (TaxonNombre & {nombreBase: string; nombreBaseNormalizado: string})[] {
+  // Para español (idiomaId = 1), usar la función específica
+  // Para otros idiomas, usar una extracción más genérica
+  const esEspanol = idiomaId === 1 || idiomaId === undefined;
+  
   // PASADA 1: Extraer nombre base
-  const especiesConBase = listaEspecies.map((especie) => ({
-    ...especie,
-    nombreBase: extraerNombreBaseNormalizado(especie.nombre_comun),
-    nombreBaseNormalizado: normalizarTildes(
-      extraerNombreBaseNormalizado(especie.nombre_comun || ""),
-    ),
-  }));
+  const especiesConBase = listaEspecies.map((especie) => {
+    let nombreBase: string;
+    
+    if (esEspanol) {
+      // Usar la función específica para español
+      nombreBase = extraerNombreBaseNormalizado(especie.nombre_comun);
+    } else {
+      // Para otros idiomas, extracción genérica: remover nombres propios y especificadores comunes
+      nombreBase = extraerNombreBaseGenerico(especie.nombre_comun);
+    }
+    
+    return {
+      ...especie,
+      nombreBase,
+      nombreBaseNormalizado: normalizarTildes(nombreBase),
+    };
+  });
 
   // Contar por nombre normalizado (sin tildes)
   const conteoBaseNormalizado: Record<string, number> = {};
@@ -660,97 +736,221 @@ async function getTaxonInfo(
 ): Promise<Map<number, TaxonInfo>> {
   const taxonInfoMap = new Map<number, TaxonInfo>();
 
+  if (taxonIds.length === 0) {
+    return taxonInfoMap;
+  }
+
   // Obtener información taxonómica en lotes
   const batchSize = 100;
 
   for (let i = 0; i < taxonIds.length; i += batchSize) {
     const batch = taxonIds.slice(i, i + batchSize);
 
-    const {data: taxones, error} = await supabaseClient
+    // Obtener especies con su taxon_id (género)
+    const {data: especies, error: errorEspecies} = await supabaseClient
       .from("taxon")
-      .select(
-        "id_taxon, taxon_id, genero:taxon_id(taxon, taxon_id, familia:taxon_id(taxon, taxon_id, orden:taxon_id(taxon)))",
-      )
-      .in("id_taxon", batch);
+      .select("id_taxon, taxon_id")
+      .in("id_taxon", batch)
+      .eq("rank_id", 7);
 
-    if (error) {
-      console.error("Error al obtener información taxonómica:", error);
+    if (errorEspecies) {
+      console.error("Error al obtener especies:", errorEspecies);
       continue;
     }
 
-    if (taxones) {
-      taxones.forEach((t: any) => {
-        const genero = t.genero;
-        const familia = genero?.familia;
-        const orden = familia?.orden;
-
-        if (orden?.taxon && familia?.taxon && genero?.taxon) {
-          taxonInfoMap.set(t.id_taxon, {
-            id_taxon: t.id_taxon,
-            orden: orden.taxon,
-            familia: familia.taxon,
-            genero: genero.taxon,
-          });
-        }
-      });
+    if (!especies || especies.length === 0) {
+      continue;
     }
+
+    // Obtener géneros
+    const generoIds = [...new Set(especies.map((e: any) => e.taxon_id).filter((id: any) => id !== null))];
+    
+    if (generoIds.length === 0) {
+      continue;
+    }
+
+    const {data: generos, error: errorGeneros} = await supabaseClient
+      .from("taxon")
+      .select("id_taxon, taxon, taxon_id")
+      .in("id_taxon", generoIds)
+      .eq("rank_id", 6);
+
+    if (errorGeneros) {
+      console.error("Error al obtener géneros:", errorGeneros);
+      continue;
+    }
+
+    // Obtener familias
+    const familiaIds = [...new Set(generos?.map((g: any) => g.taxon_id).filter((id: any) => id !== null) || [])];
+    
+    if (familiaIds.length === 0) {
+      continue;
+    }
+
+    const {data: familias, error: errorFamilias} = await supabaseClient
+      .from("taxon")
+      .select("id_taxon, taxon, taxon_id")
+      .in("id_taxon", familiaIds);
+
+    if (errorFamilias) {
+      console.error("Error al obtener familias:", errorFamilias);
+      continue;
+    }
+
+    // Obtener órdenes
+    const ordenIds = [...new Set(familias?.map((f: any) => f.taxon_id).filter((id: any) => id !== null) || [])];
+    
+    if (ordenIds.length === 0) {
+      continue;
+    }
+
+    const {data: ordenes, error: errorOrdenes} = await supabaseClient
+      .from("taxon")
+      .select("id_taxon, taxon")
+      .in("id_taxon", ordenIds);
+
+    if (errorOrdenes) {
+      console.error("Error al obtener órdenes:", errorOrdenes);
+      continue;
+    }
+
+    // Crear mapas para búsqueda rápida
+    const generoMap = new Map<number, {taxon: string; taxon_id: number}>();
+    generos?.forEach((g: any) => {
+      generoMap.set(g.id_taxon, {taxon: g.taxon, taxon_id: g.taxon_id});
+    });
+
+    const familiaMap = new Map<number, {taxon: string; taxon_id: number}>();
+    familias?.forEach((f: any) => {
+      familiaMap.set(f.id_taxon, {taxon: f.taxon, taxon_id: f.taxon_id});
+    });
+
+    const ordenMap = new Map<number, string>();
+    ordenes?.forEach((o: any) => {
+      ordenMap.set(o.id_taxon, o.taxon);
+    });
+
+    // Construir el mapa final
+    especies.forEach((especie: any) => {
+      const genero = generoMap.get(especie.taxon_id);
+      if (!genero) return;
+
+      const familia = familiaMap.get(genero.taxon_id);
+      if (!familia) return;
+
+      const orden = ordenMap.get(familia.taxon_id);
+      if (!orden) return;
+
+      taxonInfoMap.set(especie.id_taxon, {
+        id_taxon: especie.id_taxon,
+        orden,
+        familia: familia.taxon,
+        genero: genero.taxon,
+      });
+    });
   }
 
+  console.log(`✅ Información taxonómica obtenida para ${taxonInfoMap.size} taxones de ${taxonIds.length} solicitados`);
   return taxonInfoMap;
 }
 
 // Función para obtener todos los taxones con nombres comunes, organizados jerárquicamente
 // Agrupa por orden > familia > género > nombre_base > especies
-export default async function getTaxonNombres(): Promise<NombreGroup[]> {
+// idiomaId: ID del idioma en catalogo_awe (1=Español, 8=Inglés, etc.). Por defecto 1 (Español)
+export default async function getTaxonNombres(idiomaId: number = 1): Promise<NombreGroup[]> {
   const supabaseClient = createServiceClient();
 
-  // Obtener todos los taxones con nombres comunes desde la vista
-  const {data: vwData, error: errorVw} = await supabaseClient
-    .from("vw_nombres_comunes")
-    .select(
-      "id_taxon, id_ficha_especie, especie, nombre_cientifico, nombre_comun_espanol, nombre_comun_ingles",
-    )
-    .not("nombre_comun_espanol", "is", null)
-    .order("especie", {ascending: true});
+  // Obtener nombres comunes directamente de nombre_comun donde principal = true
+  const {data: nombresData, error: errorNombres} = await supabaseClient
+    .from("nombre_comun")
+    .select("id_nombre_comun, nombre, taxon_id, catalogo_awe_idioma_id")
+    .eq("principal", true)
+    .eq("catalogo_awe_idioma_id", idiomaId)
+    .not("taxon_id", "is", null);
 
-  if (errorVw) {
-    console.error("Error al obtener nombres comunes:", errorVw);
-
+  if (errorNombres) {
+    console.error("Error al obtener nombres comunes:", errorNombres);
     return [];
   }
 
-  if (!vwData || vwData.length === 0) {
+  if (!nombresData || nombresData.length === 0) {
+    console.warn(`No se encontraron nombres comunes para idioma ${idiomaId}`);
     return [];
+  }
+
+  console.log(`✅ Encontrados ${nombresData.length} nombres comunes para idioma ${idiomaId}`);
+
+  // Obtener información de taxones y nombres científicos
+  const taxonIds = [...new Set(nombresData.map((n: any) => n.taxon_id))];
+  
+  // Obtener taxones (pueden ser especies o géneros)
+  const {data: taxonesData, error: errorTaxones} = await supabaseClient
+    .from("taxon")
+    .select("id_taxon, taxon, taxon_id, rank_id")
+    .in("id_taxon", taxonIds);
+
+  if (errorTaxones) {
+    console.error("Error al obtener taxones:", errorTaxones);
+    return [];
+  }
+
+  // Crear mapa de taxon_id -> nombre científico
+  const taxonIdToNombreCientifico = new Map<number, string>();
+  const taxonIdToEspecie = new Map<number, string>();
+  
+  taxonesData?.forEach((t: any) => {
+    // Usar el campo taxon (no el alias especie)
+    taxonIdToEspecie.set(t.id_taxon, t.taxon);
+  });
+
+  // Obtener nombres científicos completos desde vw_lista_especies
+  const {data: vwData, error: errorVw} = await supabaseClient
+    .from("vw_lista_especies")
+    .select("id_taxon, nombre_cientifico")
+    .in("id_taxon", taxonIds);
+
+  if (errorVw) {
+    console.error("Error al obtener nombres científicos:", errorVw);
+  } else if (vwData) {
+    vwData.forEach((t: any) => {
+      if (t.nombre_cientifico) {
+        taxonIdToNombreCientifico.set(t.id_taxon, t.nombre_cientifico);
+      }
+    });
   }
 
   // Obtener información taxonómica
-  const taxonIds = [...new Set(vwData.map((t: any) => t.id_taxon))];
   const taxonInfoMap = await getTaxonInfo(supabaseClient, taxonIds);
 
-  // Combinar datos - usar nombres comunes originales sin normalización
-  const taxonesValidos: TaxonNombre[] = vwData
-    .map((t: any) => {
-      const taxonInfo = taxonInfoMap.get(t.id_taxon);
+  // Combinar datos de nombre_comun con información taxonómica
+  const taxonesValidos: TaxonNombre[] = nombresData
+    .map((n: any) => {
+      const taxonInfo = taxonInfoMap.get(n.taxon_id);
 
-      if (!taxonInfo || !t.nombre_comun_espanol) {
+      if (!taxonInfo) {
+        console.warn(`No se encontró información taxonómica para taxon_id ${n.taxon_id}`);
         return null;
       }
 
-      const nombreComun = t.nombre_comun_espanol;
+      const nombreComun = n.nombre;
+      const especie = taxonIdToEspecie.get(n.taxon_id) || "";
+      const nombreCientifico = taxonIdToNombreCientifico.get(n.taxon_id);
 
       return {
-        id_taxon: t.id_taxon,
-        taxon: t.especie || "",
-        nombre_comun: nombreComun, // Usar nombre común original
-        nombre_comun_completo: nombreComun, // Mismo valor
-        nombre_comun_ingles: t.nombre_comun_ingles ?? undefined,
-        nombre_cientifico: t.nombre_cientifico ?? undefined,
+        id_taxon: n.taxon_id,
+        taxon: especie,
+        nombre_comun: nombreComun,
+        nombre_comun_completo: nombreComun,
+        nombre_comun_ingles: idiomaId === 8 ? nombreComun : undefined, // Si es inglés, también ponerlo aquí
+        nombre_cientifico: nombreCientifico,
         orden: taxonInfo.orden,
         familia: taxonInfo.familia,
         genero: taxonInfo.genero,
       } as TaxonNombre;
     })
     .filter((t): t is TaxonNombre => t !== null);
+
+  console.log(`✅ Taxones válidos después de filtrar: ${taxonesValidos.length}`);
 
   // Agrupar por orden > familia > género > nombre_comun (original)
   const ordenesMap = new Map<
@@ -821,8 +1021,8 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
           todasLasEspecies.push(...especies);
         });
 
-        // Normalizar nombres para agrupamiento
-        const especiesNormalizadas = normalizarNombres(todasLasEspecies);
+        // Normalizar nombres para agrupamiento (pasar idiomaId)
+        const especiesNormalizadas = normalizarNombres(todasLasEspecies, idiomaId);
 
         // Extraer nombres base únicos normalizados para el género
         const nombresBaseGeneroMap = new Map<string, string>(); // normalizado -> canónico
@@ -890,5 +1090,8 @@ export default async function getTaxonNombres(): Promise<NombreGroup[]> {
     });
   });
 
-  return ordenes.toSorted((a, b) => a.name.localeCompare(b.name));
+  const ordenesOrdenados = ordenes.toSorted((a, b) => a.name.localeCompare(b.name));
+  console.log(`✅ Total de órdenes generados: ${ordenesOrdenados.length}`);
+  
+  return ordenesOrdenados;
 }

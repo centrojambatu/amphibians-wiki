@@ -17,6 +17,8 @@ export interface SpeciesListItem {
   rango_altitudinal_min: number | null;
   rango_altitudinal_max: number | null;
   lista_roja_iucn: string | null;
+  /** Fecha último avistamiento (ISO date, ej. para posiblemente extintas) */
+  ultimo_avistamiento: string | null;
   has_distribucion_occidental: boolean;
   has_distribucion_oriental: boolean;
   // Catálogos para filtrado (slugs)
@@ -328,6 +330,7 @@ export default async function getAllEspecies(
         rango_altitudinal_min: especie.rango_altitudinal_min,
         rango_altitudinal_max: especie.rango_altitudinal_max,
         lista_roja_iucn: listaRojaMap.get(taxonId) || null,
+        ultimo_avistamiento: especie.ultimo_avistamiento ?? null,
         has_distribucion_occidental: hasOccidental,
         has_distribucion_oriental: hasOriental,
         catalogos: {

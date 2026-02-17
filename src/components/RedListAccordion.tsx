@@ -17,6 +17,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
 
+const MESES_ES: string[] = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+function formatUltimoAvistamiento(isoDate: string): string {
+  const m = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return isoDate;
+  const [, year, month, day] = m;
+  const monthIdx = parseInt(month, 10) - 1;
+  const dayNum = parseInt(day, 10);
+  return `${dayNum} ${MESES_ES[monthIdx] ?? month} ${year}`;
+}
+
 interface RedListAccordionProps {
   readonly especies: SpeciesListItem[];
   readonly categorias: CatalogOption[];
@@ -260,7 +274,9 @@ export default function RedListAccordion({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
-                15 marzo 2020
+                {species.ultimo_avistamiento
+                  ? formatUltimoAvistamiento(species.ultimo_avistamiento)
+                  : "—"}
               </div>
             </TooltipTrigger>
             <TooltipContent>

@@ -745,6 +745,7 @@ export type Database = {
           temperatura_min: number | null;
           traducciones: Json | null;
           uicn: string | null;
+          ultimo_avistamiento: string | null;
           usos: string | null;
           wikipedia: string | null;
         };
@@ -805,6 +806,7 @@ export type Database = {
           temperatura_min?: number | null;
           traducciones?: Json | null;
           uicn?: string | null;
+          ultimo_avistamiento?: string | null;
           usos?: string | null;
           wikipedia?: string | null;
         };
@@ -865,6 +867,7 @@ export type Database = {
           temperatura_min?: number | null;
           traducciones?: Json | null;
           uicn?: string | null;
+          ultimo_avistamiento?: string | null;
           usos?: string | null;
           wikipedia?: string | null;
         };
@@ -4643,6 +4646,7 @@ export type Database = {
           temperatura: number | null;
           ubicaciones_geopoliticas: string | null;
           ubicaciones_principales: string | null;
+          ultimo_avistamiento: string | null;
         };
         Relationships: [
           {

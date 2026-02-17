@@ -1,14 +1,69 @@
-import NombresAccordion from "@/components/NombresAccordion";
-import NombresCompartidos from "@/components/NombresCompartidos";
-
+import NombresContent from "./NombresContent";
+import VernaculosSection from "./VernaculosSection";
 import getTaxonNombres from "./get-taxon-nombres";
+import getNombresVernaculos from "./get-nombres-vernaculos";
 import {
   getNombresCompartidosPorFamilia,
   getNombresCompartidosPorGenero,
 } from "./get-nombres-compartidos";
 
-export default async function NombresPage() {
-  const ordenes = await getTaxonNombres();
+// Mapa de idiomas disponibles para nombres comunes
+const IDIOMAS = [
+  {id: 1, nombre: "Español", codigo: "ES"},
+  {id: 8, nombre: "Inglés", codigo: "EN"},
+  {id: 9, nombre: "Alemán", codigo: "DE"},
+  {id: 10, nombre: "Francés", codigo: "FR"},
+  {id: 11, nombre: "Portugués", codigo: "PT"},
+  {id: 545, nombre: "Chino Mandarín", codigo: "ZH"},
+  {id: 546, nombre: "Italiano", codigo: "IT"},
+  {id: 547, nombre: "Hindú", codigo: "HI"},
+  {id: 548, nombre: "Árabe", codigo: "AR"},
+  {id: 549, nombre: "Ruso", codigo: "RU"},
+  {id: 550, nombre: "Japonés", codigo: "JA"},
+  {id: 551, nombre: "Holandés", codigo: "NL"},
+] as const;
+
+// Mapa de idiomas disponibles para nombres vernáculos
+const IDIOMAS_VERNACULOS = [
+  {id: 2, nombre: "Kichwa", codigo: "QU"},
+  {id: 3, nombre: "Quechua", codigo: "QU"},
+  {id: 5, nombre: "Shuar", codigo: "SH"},
+  {id: 13, nombre: "Desconocido", codigo: "UN"},
+  {id: 542, nombre: "Swiwiar chicham", codigo: "SW"},
+  {id: 543, nombre: "Tsáfiqui", codigo: "TS"},
+  {id: 544, nombre: "Wao Terero", codigo: "WA"},
+] as const;
+
+interface NombresPageProps {
+  searchParams: Promise<{idioma?: string; idiomaVernaculo?: string}>;
+}
+
+export default async function NombresPage({searchParams}: NombresPageProps) {
+  // Esperar searchParams antes de usarlo (requerido en Next.js 15)
+  const params = await searchParams;
+
+  // Obtener idioma de los parámetros de búsqueda, por defecto español (1)
+  const idiomaId = params.idioma
+    ? parseInt(params.idioma, 10)
+    : 1;
+
+  // Validar que el idioma existe
+  const idiomaValido = IDIOMAS.find((i) => i.id === idiomaId) || IDIOMAS[0];
+  const idiomaIdFinal = idiomaValido.id;
+
+  const ordenes = await getTaxonNombres(idiomaIdFinal);
+
+  // Obtener idioma vernáculo de los parámetros
+  const idiomaVernaculoId = params.idiomaVernaculo
+    ? parseInt(params.idiomaVernaculo, 10)
+    : undefined;
+
+  // Debug: verificar que hay datos
+  if (ordenes.length === 0) {
+    console.warn(`⚠️ No se encontraron órdenes para idioma ${idiomaIdFinal}`);
+  } else {
+    console.log(`✅ Se encontraron ${ordenes.length} órdenes`);
+  }
 
   // Calcular estadísticas
   const totalNombres = ordenes.reduce(
@@ -34,23 +89,16 @@ export default async function NombresPage() {
   const nombresPorFamilia = await getNombresCompartidosPorFamilia();
   const nombresPorGenero = await getNombresCompartidosPorGenero();
 
+  // Obtener TODOS los nombres vernáculos (sin filtrar por idioma) para filtrar en el cliente
+  // Esto es más rápido que hacer consultas separadas por cada cambio de idioma
+  const todosLosNombresVernaculos = await getNombresVernaculos();
+  const idiomaVernaculoInicial = idiomaVernaculoId || null;
+
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
         <h1 className="text-primary mb-4 text-4xl font-bold">Nombres Comunes</h1>
-        <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
-          Nombres comunes de anfibios de Ecuador organizados por orden, familia y género.
-        </p>
-      </div>
-
-      <div className="mb-8 flex justify-center">
-        <img
-          alt="Mapa nombres comunes"
-          className="mx-auto max-w-full rounded-md shadow grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
-          src="/assets/references/mapa_nombre_comun.jpg"
-          style={{width: "100%", maxWidth: "700px", height: "auto"}}
-        />
       </div>
 
       {/* Estadísticas */}
@@ -80,20 +128,24 @@ export default async function NombresPage() {
         </div>
       </div>
 
-      {/* Acordeón de nombres */}
+      {/* Contenido con filtros y acordeón */}
       <div className="mb-8">
-        <h2 className="mb-6 text-2xl font-bold">Nombres por Categoría Taxonómica</h2>
-        <NombresAccordion ordenes={ordenes} />
-      </div>
-
-      {/* Nombres compartidos (por familia y por género) */}
-      <div className="mb-8">
-        <h2 className="mb-6 text-2xl font-bold">Nombres Compartidos</h2>
-        <NombresCompartidos
+        <h2 className="mb-6 text-2xl font-bold">Nombres estándar</h2>
+        <NombresContent
+          ordenes={ordenes}
+          idiomas={IDIOMAS}
+          idiomaActual={idiomaIdFinal}
           nombresPorFamilia={nombresPorFamilia}
           nombresPorGenero={nombresPorGenero}
         />
       </div>
+
+      {/* Nombres Vernáculos */}
+      <VernaculosSection
+        idiomas={IDIOMAS_VERNACULOS}
+        nombresIniciales={todosLosNombresVernaculos}
+        idiomaInicial={idiomaVernaculoInicial}
+      />
     </main>
   );
 }

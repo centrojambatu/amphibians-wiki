@@ -5,7 +5,6 @@ import {Menu} from "lucide-react";
 import Link from "next/link";
 
 import {NombreGroup, TaxonNombre} from "@/app/sapopedia/nombres/get-taxon-nombres";
-import {Badge} from "@/components/ui/badge";
 
 interface NombresAccordionProps {
   readonly ordenes: NombreGroup[];
@@ -69,17 +68,6 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
           >
             {taxon.nombre_comun_completo || taxon.nombre_comun}
           </Link>
-          {taxon.nombre_comun_ingles && (
-            <div className="mt-1 flex items-center gap-1.5">
-              <Badge
-                className="px-1.5 py-0 text-[10px] leading-tight font-medium"
-                variant="outline"
-              >
-                EN
-              </Badge>
-              <span className="text-xs text-gray-500">{taxon.nombre_comun_ingles}</span>
-            </div>
-          )}
           {taxon.nombre_cientifico && (
             <div className="mt-1 text-xs text-muted-foreground italic">{taxon.nombre_cientifico}</div>
           )}
