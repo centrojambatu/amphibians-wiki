@@ -1,7 +1,7 @@
 "use client";
 
-import {useState, useTransition} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useState, useMemo, useEffect} from "react";
+import {useSearchParams} from "next/navigation";
 import VernaculosContent from "./VernaculosContent";
 import {TaxonNombre} from "./get-taxon-nombres";
 
@@ -12,9 +12,9 @@ interface Idioma {
 }
 
 interface VernaculosSectionProps {
-  idiomas: readonly Idioma[];
-  nombresIniciales: TaxonNombre[];
-  idiomaInicial: number | null;
+  readonly idiomas: readonly Idioma[];
+  readonly nombresIniciales: TaxonNombre[];
+  readonly idiomaInicial: number | null;
 }
 
 export default function VernaculosSection({
@@ -22,48 +22,47 @@ export default function VernaculosSection({
   nombresIniciales,
   idiomaInicial,
 }: VernaculosSectionProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
   const [idiomaActual, setIdiomaActual] = useState<number | null>(idiomaInicial);
 
-  // Filtrar nombres por idioma en el cliente (mucho más rápido)
-  const nombres = nombresIniciales.filter((nombre) => {
-    // Si no hay idioma seleccionado, mostrar todos
-    if (idiomaActual === null) return true;
-    // Filtrar por idioma usando catalogo_awe_idioma_id
-    return nombre.catalogo_awe_idioma_id === idiomaActual;
-  });
+  // Filtrar nombres por idioma en el cliente con useMemo para mejor rendimiento
+  const nombres = useMemo(() => {
+    if (idiomaActual === null) return nombresIniciales;
+    return nombresIniciales.filter(
+      (nombre) => nombre.catalogo_awe_idioma_id === idiomaActual
+    );
+  }, [nombresIniciales, idiomaActual]);
 
-  const handleIdiomaChange = (nuevoIdiomaId: number | null) => {
-    setIdiomaActual(nuevoIdiomaId);
+  // Actualizar URL de forma asíncrona sin recargar la página
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentIdiomaVernaculo = params.get("idiomaVernaculo");
+    const expectedIdiomaVernaculo = idiomaActual?.toString() || null;
 
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (nuevoIdiomaId === null) {
+    // Solo actualizar la URL si es diferente a la actual
+    if (currentIdiomaVernaculo !== expectedIdiomaVernaculo) {
+      if (expectedIdiomaVernaculo === null) {
         params.delete("idiomaVernaculo");
       } else {
-        params.set("idiomaVernaculo", nuevoIdiomaId.toString());
+        params.set("idiomaVernaculo", expectedIdiomaVernaculo);
       }
-      router.push(`/sapopedia/nombres?${params.toString()}`);
-    });
+      // Usar globalThis.history.replaceState para actualizar la URL sin recargar
+      const newUrl = `/sapopedia/nombres-vernaculos?${params.toString()}`;
+      globalThis.history.replaceState({...globalThis.history.state, as: newUrl, url: newUrl}, "", newUrl);
+    }
+  }, [idiomaActual, searchParams]);
+
+  const handleIdiomaChange = (nuevoIdiomaId: number | null) => {
+    // Actualizar estado inmediatamente sin esperar la navegación
+    setIdiomaActual(nuevoIdiomaId);
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="mb-6 text-2xl font-bold">Nombres Vernáculos</h2>
-      {isPending ? (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500">Actualizando...</p>
-        </div>
-      ) : (
-        <VernaculosContent
-          nombres={nombres}
-          idiomas={idiomas}
-          idiomaActual={idiomaActual}
-          onIdiomaChange={handleIdiomaChange}
-        />
-      )}
-    </div>
+    <VernaculosContent
+      nombres={nombres}
+      idiomas={idiomas}
+      idiomaActual={idiomaActual}
+      onIdiomaChange={handleIdiomaChange}
+    />
   );
 }

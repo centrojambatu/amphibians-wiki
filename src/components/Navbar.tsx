@@ -47,6 +47,7 @@ const navLinks: NavLink[] = [
     label: "Nombres",
     submenu: [
       { href: "/sapopedia/nombres", label: "Nombres comunes" },
+      { href: "/sapopedia/nombres-vernaculos", label: "Nombres vernáculos" },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/jambatu/", label: "Jambatu", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/", label: "Rana o Sapo", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/", label: "Renacuajos", external: true },

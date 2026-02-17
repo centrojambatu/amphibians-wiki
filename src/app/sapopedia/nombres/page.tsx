@@ -1,7 +1,5 @@
 import NombresContent from "./NombresContent";
-import VernaculosSection from "./VernaculosSection";
 import getTaxonNombres from "./get-taxon-nombres";
-import getNombresVernaculos from "./get-nombres-vernaculos";
 import {
   getNombresCompartidosPorFamilia,
   getNombresCompartidosPorGenero,
@@ -23,19 +21,8 @@ const IDIOMAS = [
   {id: 551, nombre: "Holandés", codigo: "NL"},
 ] as const;
 
-// Mapa de idiomas disponibles para nombres vernáculos
-const IDIOMAS_VERNACULOS = [
-  {id: 2, nombre: "Kichwa", codigo: "QU"},
-  {id: 3, nombre: "Quechua", codigo: "QU"},
-  {id: 5, nombre: "Shuar", codigo: "SH"},
-  {id: 13, nombre: "Desconocido", codigo: "UN"},
-  {id: 542, nombre: "Swiwiar chicham", codigo: "SW"},
-  {id: 543, nombre: "Tsáfiqui", codigo: "TS"},
-  {id: 544, nombre: "Wao Terero", codigo: "WA"},
-] as const;
-
 interface NombresPageProps {
-  searchParams: Promise<{idioma?: string; idiomaVernaculo?: string}>;
+  readonly searchParams: Promise<{idioma?: string}>;
 }
 
 export default async function NombresPage({searchParams}: NombresPageProps) {
@@ -43,9 +30,7 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
   const params = await searchParams;
 
   // Obtener idioma de los parámetros de búsqueda, por defecto español (1)
-  const idiomaId = params.idioma
-    ? parseInt(params.idioma, 10)
-    : 1;
+  const idiomaId = params.idioma ? Number.parseInt(params.idioma, 10) : 1;
 
   // Validar que el idioma existe
   const idiomaValido = IDIOMAS.find((i) => i.id === idiomaId) || IDIOMAS[0];
@@ -53,16 +38,13 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
 
   const ordenes = await getTaxonNombres(idiomaIdFinal);
 
-  // Obtener idioma vernáculo de los parámetros
-  const idiomaVernaculoId = params.idiomaVernaculo
-    ? parseInt(params.idiomaVernaculo, 10)
-    : undefined;
-
   // Debug: verificar que hay datos
   if (ordenes.length === 0) {
-    console.warn(`⚠️ No se encontraron órdenes para idioma ${idiomaIdFinal}`);
+    // eslint-disable-next-line no-console
+    console.warn(`⚠️ No se encontraron órdenes para idioma ${String(idiomaIdFinal)}`);
   } else {
-    console.log(`✅ Se encontraron ${ordenes.length} órdenes`);
+    // eslint-disable-next-line no-console
+    console.log(`✅ Se encontraron ${String(ordenes.length)} órdenes`);
   }
 
   // Calcular estadísticas
@@ -88,11 +70,6 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
   // Obtener nombres compartidos directamente de la vista
   const nombresPorFamilia = await getNombresCompartidosPorFamilia();
   const nombresPorGenero = await getNombresCompartidosPorGenero();
-
-  // Obtener TODOS los nombres vernáculos (sin filtrar por idioma) para filtrar en el cliente
-  // Esto es más rápido que hacer consultas separadas por cada cambio de idioma
-  const todosLosNombresVernaculos = await getNombresVernaculos();
-  const idiomaVernaculoInicial = idiomaVernaculoId || null;
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -139,13 +116,6 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
           nombresPorGenero={nombresPorGenero}
         />
       </div>
-
-      {/* Nombres Vernáculos */}
-      <VernaculosSection
-        idiomas={IDIOMAS_VERNACULOS}
-        nombresIniciales={todosLosNombresVernaculos}
-        idiomaInicial={idiomaVernaculoInicial}
-      />
     </main>
   );
 }
