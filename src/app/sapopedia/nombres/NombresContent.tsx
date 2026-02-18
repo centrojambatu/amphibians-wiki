@@ -115,15 +115,6 @@ export default function NombresContent({
         <div className="mb-8">
           <NombresAccordion ordenes={ordenesFiltrados} />
         </div>
-
-        {/* Nombres compartidos (por familia y por género) */}
-        <div className="mb-8">
-          <h2 className="mb-6 text-2xl font-bold">Nombres Compartidos</h2>
-          <NombresCompartidos
-            nombresPorFamilia={nombresPorFamilia}
-            nombresPorGenero={nombresPorGenero}
-          />
-        </div>
       </div>
     </div>
   );

@@ -46,8 +46,9 @@ const navLinks: NavLink[] = [
     href: "#",
     label: "Nombres",
     submenu: [
-      { href: "/sapopedia/nombres", label: "Nombres comunes" },
+      { href: "/sapopedia/nombres", label: "Nombres estándar" },
       { href: "/sapopedia/nombres-vernaculos", label: "Nombres vernáculos" },
+      { href: "/sapopedia/nombres-renacuajos", label: "Nombres de renacuajos" },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/jambatu/", label: "Jambatu", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/", label: "Rana o Sapo", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/", label: "Renacuajos", external: true },
@@ -80,7 +81,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
+    <header className="sticky top-0 z-[100] bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -116,7 +117,7 @@ export default function Navbar() {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                   {openSubmenu === link.label && (
-                    <div className="absolute left-0 top-full z-50 min-w-[180px] rounded-md border bg-background p-1 shadow-lg">
+                    <div className="absolute left-0 top-full z-[110] min-w-[180px] rounded-md border bg-background p-1 shadow-lg">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
                           <a

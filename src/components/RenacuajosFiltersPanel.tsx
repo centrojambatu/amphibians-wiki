@@ -18,7 +18,7 @@ interface Idioma {
   codigo: string;
 }
 
-interface VernaculosFiltersPanelProps {
+interface RenacuajosFiltersPanelProps {
   idiomas: readonly Idioma[];
   idiomaActual: number | null;
   searchQuery: string;
@@ -26,13 +26,13 @@ interface VernaculosFiltersPanelProps {
   onIdiomaChange: (idiomaId: number | null) => void;
 }
 
-export default function VernaculosFiltersPanel({
+export default function RenacuajosFiltersPanel({
   idiomas,
   idiomaActual,
   searchQuery,
   onSearchQueryChange,
   onIdiomaChange,
-}: VernaculosFiltersPanelProps) {
+}: RenacuajosFiltersPanelProps) {
   const idiomaActualObj = idiomaActual
     ? idiomas.find((i) => i.id === idiomaActual)
     : null;
@@ -45,7 +45,7 @@ export default function VernaculosFiltersPanel({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             type="text"
-            placeholder="Nombre vernáculo o científico"
+            placeholder="Nombre de renacuajo"
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             className="pl-10 pr-10"
@@ -124,12 +124,12 @@ export default function VernaculosFiltersPanel({
                 {/* Enlace externo */}
                 <div className="mt-4 pt-2 border-t">
                   <Link
-                    href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-indigenas-vernaculos/"
+                    href="https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-sm text-primary hover:underline px-2 py-1.5"
                   >
-                    <span>Nombres indígenas y vernáculos</span>
+                    <span>Renacuajos</span>
                   </Link>
                 </div>
               </div>

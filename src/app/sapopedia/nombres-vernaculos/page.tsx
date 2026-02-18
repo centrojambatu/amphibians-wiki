@@ -36,10 +36,7 @@ export default async function NombresVernaculosPage({searchParams}: NombresVerna
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres Vernáculos</h1>
-        <p className="text-muted-foreground text-lg">
-          Nombres indígenas y vernáculos de los anfibios de Ecuador
-        </p>
+        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres vernáculos</h1>
       </div>
 
       {/* Contenido */}
