@@ -20,8 +20,6 @@ interface NombresContentProps {
   ordenes: NombreGroup[];
   idiomas: readonly Idioma[];
   idiomaActual: number;
-  nombresPorFamilia: NombresCompartidosPorFamilia;
-  nombresPorGenero: NombresCompartidosPorGenero;
 }
 
 function filterBySearchQuery(ordenes: NombreGroup[], query: string): NombreGroup[] {
@@ -87,8 +85,6 @@ export default function NombresContent({
   ordenes,
   idiomas,
   idiomaActual,
-  nombresPorFamilia,
-  nombresPorGenero,
 }: NombresContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
 

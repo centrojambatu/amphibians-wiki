@@ -6,10 +6,10 @@ const IDIOMAS_VERNACULOS = [
   {id: 2, nombre: "Kichwa", codigo: "QU"},
   {id: 3, nombre: "Quechua", codigo: "QU"},
   {id: 5, nombre: "Shuar", codigo: "SH"},
-  {id: 13, nombre: "Desconocido", codigo: "UN"},
   {id: 542, nombre: "Swiwiar chicham", codigo: "SW"},
   {id: 543, nombre: "Tsáfiqui", codigo: "TS"},
   {id: 544, nombre: "Wao Terero", codigo: "WA"},
+  {id: 13, nombre: "Desconocido", codigo: "UN"},
 ] as const;
 
 interface NombresVernaculosPageProps {
@@ -36,7 +36,7 @@ export default async function NombresVernaculosPage({searchParams}: NombresVerna
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres vernáculos</h1>
+        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres indígenas y vernáculos</h1>
       </div>
 
       {/* Contenido */}

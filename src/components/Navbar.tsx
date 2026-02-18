@@ -47,13 +47,15 @@ const navLinks: NavLink[] = [
     label: "Nombres",
     submenu: [
       { href: "/sapopedia/nombres", label: "Nombres estándar" },
-      { href: "/sapopedia/nombres-vernaculos", label: "Nombres vernáculos" },
-      { href: "/sapopedia/nombres-renacuajos", label: "Nombres de renacuajos" },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/jambatu/", label: "Jambatu", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/", label: "Rana o Sapo", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/", label: "Renacuajos", external: true },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/", label: "Nombres estandarizados", external: true },
+      { href: "/sapopedia/nombres-vernaculos", label: "Nombres vernáculos" },
       { href: "https://deepskyblue-beaver-511675.hostingersite.com/nombres-indigenas-vernaculos/", label: "Nombres indígenas", external: true },
+      { href: "/sapopedia/nombres-renacuajos", label: "Nombres de renacuajos" },
+
+      { href: "https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/", label: "Renacuajos", external: true },
+
     ],
   },
   {href: "/sapoteca", label: "Biblioteca"},
@@ -117,7 +119,7 @@ export default function Navbar() {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                   {openSubmenu === link.label && (
-                    <div className="absolute left-0 top-full z-[110] min-w-[180px] rounded-md border bg-background p-1 shadow-lg">
+                    <div className="absolute left-0 top-full z-[110] min-w-[180px] rounded-md border bg-background py-0 px-0.5 shadow-lg">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
                           <a
@@ -125,9 +127,10 @@ export default function Navbar() {
                             href={sublink.href}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="block -mb-1 last:mb-0"
                           >
                             <Button
-                              className="w-full cursor-pointer justify-start text-sm"
+                              className="w-full cursor-pointer justify-start text-sm !text-[#f07304] hover:!text-[#f07304] !h-7 !py-0.5"
                               variant="ghost"
                               onClick={() => setOpenSubmenu(null)}
                             >
@@ -135,9 +138,9 @@ export default function Navbar() {
                             </Button>
                           </a>
                         ) : (
-                          <Link key={sublink.href} href={sublink.href}>
+                          <Link key={sublink.href} href={sublink.href} className="block mt-2 first:mt-0">
                             <Button
-                              className="w-full cursor-pointer justify-start text-sm"
+                              className="w-full cursor-pointer justify-start text-sm !h-7 !py-0.5"
                               variant="ghost"
                               onClick={() => setOpenSubmenu(null)}
                             >
@@ -186,7 +189,7 @@ export default function Navbar() {
                     <ChevronDown className={`h-4 w-4 transition-transform ${mobileSubmenuOpen === link.label ? "rotate-180" : ""}`} />
                   </Button>
                   {mobileSubmenuOpen === link.label && (
-                    <div className="ml-4 flex flex-col gap-1 border-l pl-2">
+                    <div className="ml-4 flex flex-col gap-0 border-l pl-2">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
                           <a
@@ -195,14 +198,18 @@ export default function Navbar() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={closeMenu}
+                            className="block -mb-1 last:mb-0"
                           >
-                            <Button className="w-full cursor-pointer justify-start text-sm" variant="ghost">
+                            <Button
+                              className="w-full cursor-pointer justify-start text-sm !text-[#f07304] hover:!text-[#f07304] !h-7 !py-0.5"
+                              variant="ghost"
+                            >
                               {sublink.label}
                             </Button>
                           </a>
                         ) : (
-                          <Link key={sublink.href} href={sublink.href} onClick={closeMenu}>
-                            <Button className="w-full cursor-pointer justify-start text-sm" variant="ghost">
+                          <Link key={sublink.href} href={sublink.href} onClick={closeMenu} className="block mt-2 first:mt-0">
+                            <Button className="w-full cursor-pointer justify-start text-sm !h-7 !py-0.5" variant="ghost">
                               {sublink.label}
                             </Button>
                           </Link>

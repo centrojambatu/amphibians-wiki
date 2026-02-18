@@ -75,7 +75,9 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres comunes estándar</h1>
+        <h1 className="text-primary mb-4 text-4xl font-bold">
+          Nombres estándar <span style={{ color: "#f07304", fontWeight: 400, letterSpacing: "-0.1em" }}>|</span> <span className="text-2xl" style={{ color: "#a3ac9e" }}>12 idiomas</span>
+        </h1>
       </div>
 
       {/* Estadísticas */}
@@ -107,13 +109,10 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
 
       {/* Contenido con filtros y acordeón */}
       <div className="mb-8">
-        <h2 className="mb-6 text-2xl font-bold">Nombres estándar</h2>
         <NombresContent
           ordenes={ordenes}
           idiomas={IDIOMAS}
           idiomaActual={idiomaIdFinal}
-          nombresPorFamilia={nombresPorFamilia}
-          nombresPorGenero={nombresPorGenero}
         />
       </div>
     </main>
