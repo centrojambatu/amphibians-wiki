@@ -626,27 +626,6 @@ export default function RedListAccordion({
                   </div>
                 )}
                 <div />
-                <div>
-                  <div className="space-y-2">
-                    <a
-                      href="https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-                    >
-                      Lista Roja Ecuador
-                    </a>
-
-                    <a
-                      href="https://www.iucnredlist.org"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-                    >
-                      Lista Roja IUCN
-                    </a>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>

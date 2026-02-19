@@ -140,9 +140,71 @@ export function SapopediaContent({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Estadísticas */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:mb-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
-        <Card>
+      {/* Estadísticas - una sola fila horizontal */}
+      <div className="mb-6 flex flex-nowrap gap-2 overflow-x-auto sm:mb-8 sm:gap-4">
+        <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
+          <CardContent>
+            <div className="mt-2 flex flex-col gap-1.5">
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Historia
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Etnobatracología
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Arqueología
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
+          <CardContent>
+            <div className="mt-2 flex flex-col gap-1.5">
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Diversidad
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Conservación
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/extincion"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Extinción
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="min-w-0 flex-1 flex-shrink-0">
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">{totalEspecies}</p>
             <p className="text-muted-foreground text-xs sm:text-sm">Especies</p>
@@ -150,7 +212,7 @@ export function SapopediaContent({
         </Card>
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
+          className="min-w-0 flex-1 flex-shrink-0 cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => setActiveOrderId("anura")}
         >
           <CardContent>
@@ -160,7 +222,7 @@ export function SapopediaContent({
         </Card>
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
+          className="min-w-0 flex-1 flex-shrink-0 cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => setActiveOrderId("caudata")}
         >
           <CardContent>
@@ -170,7 +232,7 @@ export function SapopediaContent({
         </Card>
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
+          className="min-w-0 flex-1 flex-shrink-0 cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => setActiveOrderId("gymnophiona")}
         >
           <CardContent>
@@ -180,7 +242,7 @@ export function SapopediaContent({
         </Card>
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
+          className="min-w-0 flex-1 flex-shrink-0 cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => applyQuickFilter("endemicas")}
         >
           <CardContent>
@@ -195,13 +257,13 @@ export function SapopediaContent({
         </Card>
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md"
+          className="min-w-0 flex-1 flex-shrink-0 cursor-pointer transition-shadow hover:shadow-md"
           onClick={() => applyQuickFilter("posiblemente-extintas")}
         >
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {posiblementeExtintaCount}{" "}
-              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+              <span className="text-muted-foreground text-1xl font-normal sm:text-2xl">
                 {totalEspecies > 0 ? ((posiblementeExtintaCount / totalEspecies) * 100).toFixed(1) : "0"}%
               </span>
             </p>
