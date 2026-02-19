@@ -248,7 +248,7 @@ export function SapopediaContent({
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {endemicasCount}{" "}
-              <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+              <span className="text-muted-foreground text-lg font-normal sm:text-xl">
                 {totalEspecies > 0 ? ((endemicasCount / totalEspecies) * 100).toFixed(1) : "0"}%
               </span>
             </p>
@@ -263,7 +263,7 @@ export function SapopediaContent({
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {posiblementeExtintaCount}{" "}
-              <span className="text-muted-foreground text-1xl font-normal sm:text-2xl">
+              <span className="text-muted-foreground text-lg font-normal sm:text-xl">
                 {totalEspecies > 0 ? ((posiblementeExtintaCount / totalEspecies) * 100).toFixed(1) : "0"}%
               </span>
             </p>
