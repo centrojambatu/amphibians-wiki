@@ -23,24 +23,10 @@ const navLinks: NavLink[] = [
   {
     href: "/sapopedia",
     label: "Anfibios Ecuador",
-    submenu: [
-      { href: "/sapopedia", label: "Sumarios" },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/historia", label: "Historia", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/diversidad", label: "Diversidad", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/conservacion", label: "Conservación", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/extincion", label: "Extinción", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/arqueologia", label: "Arqueología", external: true },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia", label: "Etnobatracología", external: true },
-    ],
   },
   {
     href: "#",
     label: "Lista Roja",
-    submenu: [
-      { href: "/sapopedia/lista-roja", label: "Cifras" },
-      { href: "https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja", label: "Lista Roja Ecuador", external: true },
-      { href: "https://www.iucnredlist.org/", label: "Lista Roja IUCN", external: true },
-    ],
   },
   {
     href: "#",

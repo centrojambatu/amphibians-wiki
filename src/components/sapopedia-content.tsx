@@ -1,20 +1,20 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SpeciesAccordion from "@/components/SpeciesAccordion";
 import PhylogeneticTreeReal from "@/components/PhylogeneticTreeReal";
-import FiltersPanel, {DEFAULT_FILTERS_STATE, FiltersState} from "@/components/FiltersPanel";
-import {Card, CardContent} from "@/components/ui/card";
-import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
-import {filterEspecies} from "@/lib/filter-especies";
+import FiltersPanel, { DEFAULT_FILTERS_STATE, FiltersState } from "@/components/FiltersPanel";
+import { Card, CardContent } from "@/components/ui/card";
+import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
+import { FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
+import { filterEspecies } from "@/lib/filter-especies";
 import {
   organizeTaxonomyData,
   type OrdenesNombresLookup,
 } from "@/lib/organize-taxonomy";
-import {SpeciesData} from "@/types/taxonomy";
+import { SpeciesData } from "@/types/taxonomy";
 
 interface SapopediaContentProps {
   readonly especies: SpeciesListItem[];
@@ -144,7 +144,7 @@ export function SapopediaContent({
       <div className="mb-6 flex flex-nowrap gap-2 overflow-x-auto sm:mb-8 sm:gap-4">
         <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
           <CardContent>
-            <div className="mt-2 flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
                 target="_blank"
@@ -154,14 +154,6 @@ export function SapopediaContent({
                 Historia
               </a>
               <a
-                href="https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                Etnobatracología
-              </a>
-              <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -169,13 +161,29 @@ export function SapopediaContent({
               >
                 Arqueología
               </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/cultura"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Cultura
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/biocomercio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Biocomercio
+              </a>
             </div>
           </CardContent>
         </Card>
 
         <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
           <CardContent>
-            <div className="mt-2 flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
                 target="_blank"
@@ -185,12 +193,12 @@ export function SapopediaContent({
                 Diversidad
               </a>
               <a
-                href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
+                href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-primary hover:underline"
               >
-                Conservación
+                Distribución
               </a>
               <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/extincion"
@@ -199,6 +207,14 @@ export function SapopediaContent({
                 className="text-sm font-medium text-primary hover:underline"
               >
                 Extinción
+              </a>
+              <a
+                href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Conservación
               </a>
             </div>
           </CardContent>
@@ -248,7 +264,7 @@ export function SapopediaContent({
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {endemicasCount}{" "}
-              <span className="text-muted-foreground text-lg font-normal sm:text-xl">
+              <span className="text-muted-foreground text-lg font-normal">
                 {totalEspecies > 0 ? ((endemicasCount / totalEspecies) * 100).toFixed(1) : "0"}%
               </span>
             </p>
@@ -263,7 +279,7 @@ export function SapopediaContent({
           <CardContent>
             <p className="text-3xl font-bold sm:text-4xl">
               {posiblementeExtintaCount}{" "}
-              <span className="text-muted-foreground text-lg font-normal sm:text-xl">
+              <span className="text-muted-foreground text-lg font-normal">
                 {totalEspecies > 0 ? ((posiblementeExtintaCount / totalEspecies) * 100).toFixed(1) : "0"}%
               </span>
             </p>
@@ -273,21 +289,21 @@ export function SapopediaContent({
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-      {/* Panel de filtros - lado izquierdo */}
-      <div className="order-2 w-full flex-shrink-0 lg:order-1 lg:w-80">
-        <FiltersPanel
-          catalogs={filterCatalogs}
-          especies={especies}
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onSearchQueryChange={setSearchQuery}
-        />
-      </div>
+        {/* Panel de filtros - lado izquierdo */}
+        <div className="order-2 w-full flex-shrink-0 lg:order-1 lg:w-80">
+          <FiltersPanel
+            catalogs={filterCatalogs}
+            especies={especies}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onSearchQueryChange={setSearchQuery}
+          />
+        </div>
 
-      {/* Contenido principal */}
-      <div className="order-1 min-w-0 flex-1 lg:order-2">
-        <Tabs className="w-full" value={selectedTab} onValueChange={handleTabChange}>
-          {/* <TabsList className="mb-4 inline-flex h-10 w-full gap-1 rounded-lg bg-gray-100 p-1 sm:mb-6 sm:h-12 sm:w-auto">
+        {/* Contenido principal */}
+        <div className="order-1 min-w-0 flex-1 lg:order-2">
+          <Tabs className="w-full" value={selectedTab} onValueChange={handleTabChange}>
+            {/* <TabsList className="mb-4 inline-flex h-10 w-full gap-1 rounded-lg bg-gray-100 p-1 sm:mb-6 sm:h-12 sm:w-auto">
             <TabsTrigger
               className="flex-1 rounded-md px-3 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-md sm:flex-initial sm:px-6 sm:text-sm"
               value="accordion"
@@ -302,27 +318,27 @@ export function SapopediaContent({
             </TabsTrigger>
           </TabsList> */}
 
-          <TabsContent className="mt-4 sm:mt-0" value="accordion">
-            {/* Contador de resultados */}
-            {(especiesPorBusqueda.length < especies.length || searchQuery) && (
-              <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
-                Mostrando {especiesPorBusqueda.length} de {especies.length} especies
-              </p>
-            )}
-            {/* Vista de accordion */}
-            <SpeciesAccordion
-              orders={ordenesOrganizados}
-              activeOrderId={activeOrderId}
-              onActiveOrderIdConsumed={() => setActiveOrderId(null)}
-            />
-          </TabsContent>
+            <TabsContent className="mt-4 sm:mt-0" value="accordion">
+              {/* Contador de resultados */}
+              {(especiesPorBusqueda.length < especies.length || searchQuery) && (
+                <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
+                  Mostrando {especiesPorBusqueda.length} de {especies.length} especies
+                </p>
+              )}
+              {/* Vista de accordion */}
+              <SpeciesAccordion
+                orders={ordenesOrganizados}
+                activeOrderId={activeOrderId}
+                onActiveOrderIdConsumed={() => setActiveOrderId(null)}
+              />
+            </TabsContent>
 
-          <TabsContent className="mt-4 sm:mt-0" value="tree">
-            {/* Vista de árbol filogenético */}
-            <PhylogeneticTreeReal orders={ordenesOrganizados} />
-          </TabsContent>
-        </Tabs>
-      </div>
+            <TabsContent className="mt-4 sm:mt-0" value="tree">
+              {/* Vista de árbol filogenético */}
+              <PhylogeneticTreeReal orders={ordenesOrganizados} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
