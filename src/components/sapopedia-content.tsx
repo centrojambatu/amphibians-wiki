@@ -142,9 +142,9 @@ export function SapopediaContent({
     <div className="flex flex-col gap-4">
       {/* Estadísticas - una sola fila horizontal */}
       <div className="mb-6 flex flex-nowrap gap-2 overflow-x-auto sm:mb-8 sm:gap-4">
-        <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
-          <CardContent>
-            <div className="flex flex-col gap-1.5">
+        <Card className="min-w-0 flex-1 flex-shrink-0 !gap-0 !py-1 transition-shadow">
+          <CardContent className="!py-0">
+            <div className="mt-3 flex flex-col gap-1.5 items-start">
               <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
                 target="_blank"
@@ -181,9 +181,9 @@ export function SapopediaContent({
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow">
-          <CardContent>
-            <div className="flex flex-col gap-1.5">
+        <Card className="min-w-0 flex-1 flex-shrink-0 !gap-0 !py-1 transition-shadow">
+          <CardContent className="!py-0">
+            <div className="mt-3 flex flex-col gap-1.5 items-start">
               <a
                 href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
                 target="_blank"
