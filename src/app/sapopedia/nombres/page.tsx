@@ -83,9 +83,33 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
       {/* Estadísticas */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-800">Total de Nombres</h3>
-          <p className="text-4xl font-bold">{totalNombres}</p>
-          <p className="text-muted-foreground text-sm">Nombres estándar</p>
+
+          <div className="flex flex-col gap-2  border-gray-100">
+            <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              Jambatu
+            </a>
+            <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              Rana o sapo
+            </a>
+            <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              Nombres estandarizados
+            </a>
+          </div>
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-6">

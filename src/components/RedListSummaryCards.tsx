@@ -125,34 +125,32 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* 7 cards por categoría de lista roja */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7 sm:gap-4">
-        {categoriasListaRoja.map(({ sigla, etiqueta }) => {
-          const count = contarPorCategoria(sigla);
-          const pct =
-            especiesConCategoria > 0 ? ((count / especiesConCategoria) * 100).toFixed(1) : "0";
-          return (
-            <Card
-              key={sigla}
-              className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md"
-              onClick={() => onCategoryClick?.(sigla)}
+      {/* Card de especies amenazadas + no amenazadas + enlaces */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      {/* Card de enlaces externos Lista Roja */}
+      <Card className="transition-shadow">
+        <CardContent>
+          <div className="mt-2 flex flex-col gap-2">
+            <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline"
             >
-              <CardContent className="pt-4">
-                <p className="text-3xl font-bold sm:text-4xl">
-                  {count}{" "}
-                  <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
-                    {pct}%
-                  </span>
-                </p>
-                <p className="break-words text-muted-foreground text-xs sm:text-sm">{etiqueta}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              Lista Roja Ecuador
+            </a>
+            <a
+              href="https://www.iucnredlist.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Lista Roja IUCN
+            </a>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Card de especies amenazadas + no amenazadas */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       {/* Card de especies amenazadas */}
       <Card className="transition-shadow">
         <CardContent>
@@ -246,6 +244,32 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
           </div>
         </CardContent>
       </Card>
+      </div>
+
+      {/* 7 cards por categoría de lista roja */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7 sm:gap-4">
+        {categoriasListaRoja.map(({ sigla, etiqueta }) => {
+          const count = contarPorCategoria(sigla);
+          const pct =
+            especiesConCategoria > 0 ? ((count / especiesConCategoria) * 100).toFixed(1) : "0";
+          return (
+            <Card
+              key={sigla}
+              className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md"
+              onClick={() => onCategoryClick?.(sigla)}
+            >
+              <CardContent className="pt-4">
+                <p className="text-3xl font-bold sm:text-4xl">
+                  {count}{" "}
+                  <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
+                    {pct}%
+                  </span>
+                </p>
+                <p className="break-words text-muted-foreground text-xs sm:text-sm">{etiqueta}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

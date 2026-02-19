@@ -108,33 +108,6 @@ export default function NombresFiltersPanel({
                     </Button>
                   );
                 })}
-                {/* Enlaces externos */}
-                <div className="mt-6 pt-3 border-t flex flex-col">
-                  <Link
-                    href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline px-2 py-1.5"
-                  >
-                    Jambatu
-                  </Link>
-                  <Link
-                    href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline px-2 py-1.5"
-                  >
-                    Rana o sapo
-                  </Link>
-                  <Link
-                    href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline px-2 py-1.5"
-                  >
-                    Nombres estánda
-                  </Link>
-                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
