@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -155,7 +156,7 @@ export default function SapotecaFiltersPanel({
 
   const handleRangoAñosChange = (nuevoRango: number[]) => {
     setRangoAños(nuevoRango);
-    
+
     // Generar array de años en el rango seleccionado
     const [min, max] = nuevoRango;
     const añosEnRango: number[] = [];
@@ -245,8 +246,9 @@ export default function SapotecaFiltersPanel({
                 <Popover open={tituloOpen} onOpenChange={setTituloOpen}>
                   <PopoverTrigger asChild>
                     <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Buscar por título..."
+                        placeholder="Título"
                         value={tituloQuery || filtros.titulo || ""}
                         onChange={(e) => handleTituloChange(e.target.value)}
                         onFocus={() => {
@@ -254,6 +256,7 @@ export default function SapotecaFiltersPanel({
                             setTituloOpen(true);
                           }
                         }}
+                        className="pl-10"
                       />
                     </div>
                   </PopoverTrigger>
@@ -338,8 +341,9 @@ export default function SapotecaFiltersPanel({
                 <Popover open={autorOpen} onOpenChange={setAutorOpen}>
                   <PopoverTrigger asChild>
                     <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Buscar por autor..."
+                        placeholder="Autor"
                         value={autorQuery || filtros.autor || ""}
                         onChange={(e) => handleAutorChange(e.target.value)}
                         onFocus={() => {
@@ -347,6 +351,7 @@ export default function SapotecaFiltersPanel({
                             setAutorOpen(true);
                           }
                         }}
+                        className="pl-10"
                       />
                     </div>
                   </PopoverTrigger>
