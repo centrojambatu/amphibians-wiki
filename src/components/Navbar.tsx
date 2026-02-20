@@ -25,7 +25,7 @@ const navLinks: NavLink[] = [
     label: "Anfibios Ecuador",
   },
   {
-    href: "#",
+    href: "/sapopedia/lista-roja",
     label: "Lista Roja",
   },
   {
@@ -33,7 +33,7 @@ const navLinks: NavLink[] = [
     label: "Nombres",
     submenu: [
       { href: "/sapopedia/nombres", label: "Nombres estándar" },
-      { href: "/sapopedia/nombres-vernaculos", label: "Nombres vernáculos" },
+      { href: "/sapopedia/nombres-vernaculos", label: "Nombres indígenas" },
       { href: "/sapopedia/nombres-renacuajos", label: "Nombres renacuajos" },
 
     ],

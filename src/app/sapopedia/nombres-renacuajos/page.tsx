@@ -1,45 +1,29 @@
 import { Card, CardContent } from "@/components/ui/card";
 import RenacuajosSection from "./RenacuajosSection";
-import getNombresRenacuajos from "./get-nombres-renacuajos";
-
-// Mapa de idiomas disponibles para nombres de renacuajos
-const IDIOMAS_RENACUAJOS = [
-  { id: 1, nombre: "Español", codigo: "ES" },
-  { id: 18, nombre: "Cofán", codigo: "CF" },
-  { id: 542, nombre: "Swiwiar chicham", codigo: "SW" },
-  { id: 543, nombre: "Tsáfiqui", codigo: "TS" },
-  { id: 552, nombre: "Kichwa Amazónico", codigo: "KA" },
-  { id: 553, nombre: "Kichwa Amazónico (Quijos)", codigo: "KQ" },
-  { id: 554, nombre: "Kichwa Sierra", codigo: "KS" },
-  { id: 555, nombre: "Palta", codigo: "PA" },
-  { id: 13, nombre: "Desconocido", codigo: "UN" },
-] as const;
+import getNombresRenacuajos, { getIdiomasRenacuajos } from "./get-nombres-renacuajos";
 
 interface RenacuajosPageProps {
   readonly searchParams: Promise<{ idioma?: string }>;
 }
 
 export default async function RenacuajosPage({ searchParams }: RenacuajosPageProps) {
-  // Esperar searchParams antes de usarlo (requerido en Next.js 15)
   const params = await searchParams;
 
-  // Obtener idioma de los parámetros de búsqueda, por defecto null (todos)
-  const idiomaId = params.idioma ? Number.parseInt(params.idioma, 10) : null;
+  // Idiomas disponibles dinámicamente desde la base de datos
+  const IDIOMAS_RENACUAJOS = await getIdiomasRenacuajos();
 
-  // Validar que el idioma existe si se proporciona
+  const idiomaId = params.idioma ? Number.parseInt(params.idioma, 10) : null;
   const idiomaValido = idiomaId
     ? IDIOMAS_RENACUAJOS.find((i) => i.id === idiomaId) || null
     : null;
-  const idiomaIdFinal = idiomaValido?.id || null;
+  const idiomaIdFinal = idiomaValido?.id ?? null;
 
-  // Obtener todos los nombres de renacuajos (sin filtrar por idioma inicialmente)
-  // para permitir filtrado en el cliente
   const todosLosNombresRenacuajos = await getNombresRenacuajos();
 
   const totalNombres = todosLosNombresRenacuajos.length;
-  const idsIdiomasConocidosSinDesconocido = IDIOMAS_RENACUAJOS.filter((i) => i.id !== 13).map(
-    (i) => i.id,
-  );
+  const idsIdiomasConocidosSinDesconocido = IDIOMAS_RENACUAJOS.filter(
+    (i) => i.nombre.toLowerCase() !== "desconocido",
+  ).map((i) => i.id);
   const totalIdiomas = new Set(
     todosLosNombresRenacuajos
       .map((n) => n.catalogo_awe_idioma_id)

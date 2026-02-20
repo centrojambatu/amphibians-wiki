@@ -8,6 +8,58 @@ export interface NombreRenacuajo {
   publicacion_id: number | null;
 }
 
+export interface IdiomaRenacuajo {
+  id: number;
+  nombre: string;
+  codigo: string;
+}
+
+/**
+ * Obtiene los idiomas disponibles dinámicamente desde la tabla nombre_renacuajos
+ * y los completa con información desde catalogo_awe. "Desconocido" (id=13) siempre al final.
+ */
+export async function getIdiomasRenacuajos(): Promise<IdiomaRenacuajo[]> {
+  const supabaseClient = createServiceClient();
+
+  const {data: nombresData, error: errorNombres} = await supabaseClient
+    .from("nombre_renacuajos")
+    .select("catalogo_awe_idioma_id")
+    .not("catalogo_awe_idioma_id", "is", null);
+
+  if (errorNombres) {
+    console.error("Error al obtener idiomas de nombres de renacuajos:", errorNombres);
+    return [];
+  }
+
+  if (!nombresData || nombresData.length === 0) {
+    return [];
+  }
+
+  const idiomaIds = [...new Set(nombresData.map((n: any) => n.catalogo_awe_idioma_id))];
+
+  const {data: idiomasData, error: errorIdiomas} = await supabaseClient
+    .from("catalogo_awe")
+    .select("id_catalogo_awe, nombre, sigla")
+    .in("id_catalogo_awe", idiomaIds)
+    .order("nombre", {ascending: true});
+
+  if (errorIdiomas) {
+    console.error("Error al obtener información de idiomas (renacuajos):", errorIdiomas);
+    return [];
+  }
+
+  const idiomas: IdiomaRenacuajo[] = (idiomasData || []).map((item) => ({
+    id: item.id_catalogo_awe,
+    nombre: item.nombre,
+    codigo: item.sigla || "UN",
+  }));
+
+  const desconocido = idiomas.find((i) => i.id === 13);
+  const otrosIdiomas = idiomas.filter((i) => i.id !== 13);
+
+  return desconocido ? [...otrosIdiomas, desconocido] : otrosIdiomas;
+}
+
 /**
  * Obtiene los nombres de renacuajos como lista plana
  */
@@ -45,7 +97,7 @@ export default async function getNombresRenacuajos(
     taxon: "",
     nombre_comun: n.nombre,
     nombre_comun_completo: n.nombre,
-    nombre_cientifico: null, // Los renacuajos no tienen nombre científico asociado directamente
+    nombre_cientifico: undefined, // Los renacuajos no tienen nombre científico asociado directamente
     orden: undefined,
     familia: undefined,
     genero: undefined,
