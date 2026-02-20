@@ -13,6 +13,64 @@ export interface NombreVernaculo {
   genero?: string;
 }
 
+export interface IdiomaVernaculo {
+  id: number;
+  nombre: string;
+  codigo: string;
+}
+
+/**
+ * Obtiene los idiomas disponibles dinámicamente desde la tabla nombre_comun_vernaculo
+ * y los completa con información desde catalogo_awe
+ */
+export async function getIdiomasVernaculos(): Promise<IdiomaVernaculo[]> {
+  const supabaseClient = createServiceClient();
+
+  // Obtener los IDs únicos de idiomas que aparecen en nombre_comun_vernaculo
+  const {data: nombresData, error: errorNombres} = await supabaseClient
+    .from("nombre_comun_vernaculo")
+    .select("catalogo_awe_idioma_id")
+    .not("catalogo_awe_idioma_id", "is", null);
+
+  if (errorNombres) {
+    console.error("Error al obtener idiomas de nombres vernáculos:", errorNombres);
+    return [];
+  }
+
+  if (!nombresData || nombresData.length === 0) {
+    return [];
+  }
+
+  // Obtener IDs únicos
+  const idiomaIds = [...new Set(nombresData.map((n: any) => n.catalogo_awe_idioma_id))];
+
+  // Obtener información de los idiomas desde catalogo_awe
+  const {data: idiomasData, error: errorIdiomas} = await supabaseClient
+    .from("catalogo_awe")
+    .select("id_catalogo_awe, nombre, sigla")
+    .in("id_catalogo_awe", idiomaIds)
+    .order("nombre", {ascending: true});
+
+  if (errorIdiomas) {
+    console.error("Error al obtener información de idiomas:", errorIdiomas);
+    return [];
+  }
+
+  // Convertir a formato IdiomaVernaculo
+  const idiomas: IdiomaVernaculo[] = (idiomasData || []).map((item) => ({
+    id: item.id_catalogo_awe,
+    nombre: item.nombre,
+    codigo: item.sigla || "UN", // Usar sigla o "UN" (Unknown) como fallback
+  }));
+
+  // Separar "Desconocido" (id=13) y ponerlo al final
+  const desconocido = idiomas.find((i) => i.id === 13);
+  const otrosIdiomas = idiomas.filter((i) => i.id !== 13);
+
+  // Retornar otros idiomas primero, luego "Desconocido" si existe
+  return desconocido ? [...otrosIdiomas, desconocido] : otrosIdiomas;
+}
+
 /**
  * Obtiene los nombres vernáculos como lista plana (sin agrupación taxonómica)
  */
@@ -43,6 +101,14 @@ export default async function getNombresVernaculos(
   }
 
   console.log(`✅ Encontrados ${nombresData.length} nombres vernáculos${idiomaId ? ` para idioma ${idiomaId}` : ""}`);
+  
+  // Debug: contar nombres por idioma
+  const nombresPorIdioma = nombresData.reduce((acc: Record<number, number>, n: any) => {
+    const idiomaId = n.catalogo_awe_idioma_id;
+    acc[idiomaId] = (acc[idiomaId] || 0) + 1;
+    return acc;
+  }, {});
+  console.log("📊 Nombres por idioma:", nombresPorIdioma);
 
   // Obtener información de taxones
   const taxonIds = [...new Set(nombresData.map((n: any) => n.taxon_id))];
@@ -51,6 +117,14 @@ export default async function getNombresVernaculos(
     .from("taxon")
     .select("id_taxon, taxon, taxon_id, rank_id")
     .in("id_taxon", taxonIds);
+
+  // Crear mapa de taxon_id -> rank_id para acceso rápido
+  const taxonIdToRankId = new Map<number, number>();
+  if (taxonesData) {
+    taxonesData.forEach((t: any) => {
+      taxonIdToRankId.set(t.id_taxon, t.rank_id);
+    });
+  }
 
   if (errorTaxones) {
     console.error("Error al obtener taxones:", errorTaxones);
@@ -79,8 +153,25 @@ export default async function getNombresVernaculos(
   const nombresVernaculos: NombreVernaculo[] = nombresData
     .map((n: any) => {
       const taxonInfo = taxonInfoMap.get(n.taxon_id);
+      
+      // Si no hay información taxonómica, usar valores por defecto en lugar de excluir
       if (!taxonInfo) {
-        return null;
+        console.warn(`⚠️ No se encontró información taxonómica para taxon_id ${n.taxon_id} (idioma: ${n.catalogo_awe_idioma_id}, nombre: ${n.nombre})`);
+        // Incluir el nombre aunque no tenga información taxonómica completa
+        const especie = taxonesData?.find((t: any) => t.id_taxon === n.taxon_id)?.taxon || "";
+        const nombreCientifico = taxonIdToNombreCientifico.get(n.taxon_id);
+
+        return {
+          id: n.id,
+          nombre: n.nombre,
+          catalogo_awe_idioma_id: n.catalogo_awe_idioma_id,
+          taxon_id: n.taxon_id,
+          publicacion_id: n.publicacion_id,
+          nombre_cientifico: nombreCientifico,
+          orden: undefined,
+          familia: undefined,
+          genero: undefined,
+        } as NombreVernaculo;
       }
 
       const especie = taxonesData?.find((t: any) => t.id_taxon === n.taxon_id)?.taxon || "";
@@ -99,12 +190,20 @@ export default async function getNombresVernaculos(
       } as NombreVernaculo;
     })
     .filter((n): n is NombreVernaculo => n !== null);
+  
+  // Debug: contar nombres finales por idioma
+  const nombresFinalesPorIdioma = nombresVernaculos.reduce((acc: Record<number, number>, n) => {
+    const idiomaId = n.catalogo_awe_idioma_id;
+    acc[idiomaId] = (acc[idiomaId] || 0) + 1;
+    return acc;
+  }, {});
+  console.log("📊 Nombres finales por idioma (después de filtrar):", nombresFinalesPorIdioma);
 
   // Retornar lista plana de nombres vernáculos (sin agrupación taxonómica)
-  // Convertir NombreVernaculo a TaxonNombre
+  // Convertir NombreVernaculo a TaxonNombre (incluir nombre del taxon para orden/familia/género)
   const nombres: TaxonNombre[] = nombresVernaculos.map((nv) => ({
     id_taxon: nv.taxon_id,
-    taxon: "",
+    taxon: taxonesData?.find((t: any) => t.id_taxon === nv.taxon_id)?.taxon ?? "",
     nombre_comun: nv.nombre,
     nombre_comun_completo: nv.nombre,
     nombre_cientifico: nv.nombre_cientifico,
@@ -112,6 +211,7 @@ export default async function getNombresVernaculos(
     familia: nv.familia,
     genero: nv.genero,
     catalogo_awe_idioma_id: nv.catalogo_awe_idioma_id, // Incluir idioma para filtrar en cliente
+    rank_id: taxonIdToRankId.get(nv.taxon_id), // Incluir rank_id para determinar tipo de taxon
   }));
 
   // Ordenar por nombre vernáculo

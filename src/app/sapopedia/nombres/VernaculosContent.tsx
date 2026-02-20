@@ -61,7 +61,7 @@ export default function VernaculosContent({
 
       {/* Contenido principal */}
       <div className="order-1 min-w-0 flex-1 lg:order-2">
-        <VernaculosList nombres={nombresFiltrados} />
+        <VernaculosList nombres={nombresFiltrados} idiomas={idiomas} />
       </div>
     </div>
   );

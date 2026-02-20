@@ -111,7 +111,7 @@ a:visited {
 
 a:hover,
 a:active {
-  color: #004d13 !important;
+  color: #f07304 !important;
   text-decoration: underline !important;
 }
 
@@ -282,7 +282,7 @@ header a button {
 }
 
 header a:hover button {
-  color: #004d13 !important;
+  color: #f07304 !important;
 }
 
 /* Estilos para links del header de especies */
@@ -299,7 +299,7 @@ header a[href*="TODO"]:hover,
 header a[href*="/family/"]:hover,
 header a[href*="/genus/"]:hover,
 header a[href*="/order/"]:hover {
-  color: #004d13 !important;
+  color: #f07304 !important;
   text-decoration: underline !important;
 }
 
@@ -323,7 +323,7 @@ span.autor-ano-links a:hover,
 span.autor-ano-links a:active,
 .autor-ano-links a:hover,
 .autor-ano-links a:active {
-  color: #004d13 !important;
+  color: #f07304 !important;
   text-decoration: underline !important;
 }
 
@@ -341,7 +341,7 @@ span[class~="autor-ano-links"] a[href] {
 span[class~="autor-ano-links"] * a[href*="wikipedia"]:hover,
 span[class~="autor-ano-links"] * a[href*="http"]:hover,
 span[class~="autor-ano-links"] a[href]:hover {
-  color: #004d13 !important;
+  color: #f07304 !important;
   text-decoration: underline !important;
 }
 
@@ -389,7 +389,7 @@ span[class~="autor-ano-links"] a[href]:hover {
 
 .processed-link:hover,
 .processed-link:active {
-  color: #004d13 !important;
+  color: #f07304 !important;
   text-decoration: underline !important;
 }
 
@@ -413,7 +413,7 @@ a.processed-link.processed-link-no-underline:active {
 .processed-link.processed-link-no-underline:active,
 a.processed-link.processed-link-no-underline:hover,
 a.processed-link.processed-link-no-underline:active {
-  color: #006d1b !important;
+  color: #f07304 !important;
 }
 
 /* Estilos para Leaflet */

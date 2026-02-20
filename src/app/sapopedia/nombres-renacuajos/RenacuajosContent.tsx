@@ -60,7 +60,7 @@ export default function RenacuajosContent({
 
       {/* Contenido principal */}
       <div className="order-1 min-w-0 flex-1 lg:order-2">
-        <RenacuajosList nombres={nombresFiltrados} />
+        <RenacuajosList nombres={nombresFiltrados} idiomas={idiomas} />
       </div>
     </div>
   );

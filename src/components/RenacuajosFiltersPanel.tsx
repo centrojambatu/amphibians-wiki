@@ -88,14 +88,6 @@ export default function RenacuajosFiltersPanel({
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-2">
-                {/* Mostrar "Todos los idiomas" como texto informativo (no clickeable) - siempre visible por defecto */}
-                <div className={`h-auto min-h-[32px] w-full rounded-md px-2 py-1.5 text-sm ${
-                  idiomaActual === null
-                    ? "bg-primary/10 font-medium text-primary"
-                    : "text-gray-500"
-                }`}>
-                  Todos los idiomas
-                </div>
                 {idiomas.map((idioma) => {
                   const isSelected = idioma.id === idiomaActual;
                   return (
@@ -121,17 +113,6 @@ export default function RenacuajosFiltersPanel({
                     </Button>
                   );
                 })}
-                {/* Enlace externo */}
-                <div className="mt-4 pt-2 border-t">
-                  <Link
-                    href="https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-primary hover:underline px-2 py-1.5"
-                  >
-                    <span>Renacuajos</span>
-                  </Link>
-                </div>
               </div>
             </AccordionContent>
           </AccordionItem>

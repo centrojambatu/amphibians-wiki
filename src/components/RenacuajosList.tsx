@@ -2,11 +2,18 @@
 
 import {TaxonNombre} from "@/app/sapopedia/nombres/get-taxon-nombres";
 
-interface RenacuajosListProps {
-  nombres: TaxonNombre[];
+interface Idioma {
+  id: number;
+  nombre: string;
+  codigo: string;
 }
 
-export default function RenacuajosList({nombres}: RenacuajosListProps) {
+interface RenacuajosListProps {
+  nombres: TaxonNombre[];
+  idiomas?: readonly Idioma[];
+}
+
+export default function RenacuajosList({nombres, idiomas = []}: RenacuajosListProps) {
   if (nombres.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-muted p-8 text-center">
@@ -31,6 +38,15 @@ export default function RenacuajosList({nombres}: RenacuajosListProps) {
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-foreground">
                 {taxon.nombre_comun_completo || taxon.nombre_comun}
+                {taxon.catalogo_awe_idioma_id && idiomas.length > 0 && (
+                  <>
+                    <span className="mx-2" style={{color: "#f07304"}}>|</span>
+                    <span className="text-xs font-normal text-gray-500">
+                      {idiomas.find((i) => i.id === taxon.catalogo_awe_idioma_id)?.nombre ||
+                        ""}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>

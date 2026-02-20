@@ -1081,7 +1081,7 @@ export default function FiltersPanel({
               <AccordionItem value="pluviocidad">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Precipitación <span className="ml-1 font-normal text-gray-500">media anual</span></span>
+                    <span className="font-semibold">Precipitación<span className="ml-1 font-normal text-gray-500">media anual</span></span>
                     {(filters.pluviocidad.min !== 640 ||
                       filters.pluviocidad.max !== 4000) && (
                         <span className="mt-1 text-xs font-normal text-gray-500">
@@ -1147,60 +1147,6 @@ export default function FiltersPanel({
             </>
           )}
         </Accordion>
-
-        {/* Enlaces externos */}
-        <div className="-mx-4 sm:-mx-6 mt-1"></div>
-        <div className="pt-4 space-y-2">
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Historia
-          </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Diversidad
-          </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Conservación
-          </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/extincion"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Extinción
-          </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Arqueología
-          </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/etnobatracologia"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            Etnobatracología
-          </a>
-        </div>
-
       </div>
     </div>
   );

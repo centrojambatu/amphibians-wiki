@@ -3,11 +3,18 @@
 import Link from "next/link";
 import {TaxonNombre} from "@/app/sapopedia/nombres/get-taxon-nombres";
 
-interface VernaculosListProps {
-  nombres: TaxonNombre[];
+interface Idioma {
+  id: number;
+  nombre: string;
+  codigo: string;
 }
 
-export default function VernaculosList({nombres}: VernaculosListProps) {
+interface VernaculosListProps {
+  nombres: TaxonNombre[];
+  idiomas?: readonly Idioma[];
+}
+
+export default function VernaculosList({nombres, idiomas = []}: VernaculosListProps) {
   if (nombres.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-muted p-8 text-center">
@@ -16,12 +23,36 @@ export default function VernaculosList({nombres}: VernaculosListProps) {
     );
   }
 
+  // Función para construir la URL según el rank taxonómico
+  const getTaxonUrl = (taxon: TaxonNombre): string => {
+    const rankId = taxon.rank_id;
+
+    // rank_id: 4=Orden, 5=Familia, 6=Género, 7=Especie
+    switch (rankId) {
+      case 4: // Orden
+        return `/sapopedia/order/${taxon.id_taxon}`;
+      case 5: // Familia
+        return `/sapopedia/family/${taxon.id_taxon}`;
+      case 6: // Género
+        return `/sapopedia/genus/${taxon.id_taxon}`;
+      case 7: // Especie
+        if (taxon.nombre_cientifico) {
+          return `/sapopedia/species/${taxon.nombre_cientifico.replace(/ /g, "-")}`;
+        }
+        return `/sapopedia/species/${taxon.id_taxon}`;
+      default:
+        // Fallback: asumir especie si no hay rank_id
+        if (taxon.nombre_cientifico) {
+          return `/sapopedia/species/${taxon.nombre_cientifico.replace(/ /g, "-")}`;
+        }
+        return `/sapopedia/species/${taxon.id_taxon}`;
+    }
+  };
+
   return (
     <div className="space-y-2">
       {nombres.map((taxon) => {
-        const href = taxon.nombre_cientifico
-          ? `/sapopedia/species/${taxon.nombre_cientifico.replace(/ /g, "-")}`
-          : `/sapopedia/species/${taxon.id_taxon}`;
+        const href = getTaxonUrl(taxon);
 
         return (
           <div
@@ -34,10 +65,20 @@ export default function VernaculosList({nombres}: VernaculosListProps) {
                 href={href}
               >
                 {taxon.nombre_comun_completo || taxon.nombre_comun}
+                {taxon.catalogo_awe_idioma_id && idiomas.length > 0 && (
+                  <>
+                    <span className="mx-2" style={{color: "#f07304"}}>|</span>
+                    <span className="text-xs font-normal text-gray-500">
+                      {idiomas.find((i) => i.id === taxon.catalogo_awe_idioma_id)?.nombre ||
+                        ""}
+                    </span>
+                  </>
+                )}
               </Link>
-              {taxon.nombre_cientifico && (
+              {/* Especie: nombre científico; Orden/Familia/Género: nombre del taxon */}
+              {(taxon.rank_id === 7 ? taxon.nombre_cientifico : taxon.taxon) && (
                 <div className="mt-1 text-xs text-muted-foreground italic">
-                  {taxon.nombre_cientifico}
+                  {taxon.rank_id === 7 ? taxon.nombre_cientifico : taxon.taxon}
                 </div>
               )}
             </div>

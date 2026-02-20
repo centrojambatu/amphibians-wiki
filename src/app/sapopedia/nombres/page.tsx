@@ -7,25 +7,25 @@ import {
 
 // Mapa de idiomas disponibles para nombres comunes
 const IDIOMAS = [
-  {id: 1, nombre: "Español", codigo: "ES"},
-  {id: 8, nombre: "Inglés", codigo: "EN"},
-  {id: 9, nombre: "Alemán", codigo: "DE"},
-  {id: 10, nombre: "Francés", codigo: "FR"},
-  {id: 11, nombre: "Portugués", codigo: "PT"},
-  {id: 545, nombre: "Chino Mandarín", codigo: "ZH"},
-  {id: 546, nombre: "Italiano", codigo: "IT"},
-  {id: 547, nombre: "Hindú", codigo: "HI"},
-  {id: 548, nombre: "Árabe", codigo: "AR"},
-  {id: 549, nombre: "Ruso", codigo: "RU"},
-  {id: 550, nombre: "Japonés", codigo: "JA"},
-  {id: 551, nombre: "Holandés", codigo: "NL"},
+  { id: 1, nombre: "Español", codigo: "ES" },
+  { id: 8, nombre: "Inglés", codigo: "EN" },
+  { id: 9, nombre: "Alemán", codigo: "DE" },
+  { id: 10, nombre: "Francés", codigo: "FR" },
+  { id: 11, nombre: "Portugués", codigo: "PT" },
+  { id: 545, nombre: "Chino Mandarín", codigo: "ZH" },
+  { id: 546, nombre: "Italiano", codigo: "IT" },
+  { id: 547, nombre: "Hindú", codigo: "HI" },
+  { id: 548, nombre: "Árabe", codigo: "AR" },
+  { id: 549, nombre: "Ruso", codigo: "RU" },
+  { id: 550, nombre: "Japonés", codigo: "JA" },
+  { id: 551, nombre: "Holandés", codigo: "NL" },
 ] as const;
 
 interface NombresPageProps {
-  readonly searchParams: Promise<{idioma?: string}>;
+  readonly searchParams: Promise<{ idioma?: string }>;
 }
 
-export default async function NombresPage({searchParams}: NombresPageProps) {
+export default async function NombresPage({ searchParams }: NombresPageProps) {
   // Esperar searchParams antes de usarlo (requerido en Next.js 15)
   const params = await searchParams;
 
@@ -86,6 +86,14 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
 
           <div className="flex flex-col gap-2  border-gray-100">
             <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              Nombres estandarizados
+            </a>
+            <a
               href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
               target="_blank"
               rel="noopener noreferrer"
@@ -100,14 +108,6 @@ export default async function NombresPage({searchParams}: NombresPageProps) {
               className="text-sm text-primary hover:underline"
             >
               Rana o sapo
-            </a>
-            <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
-            >
-              Nombres estandarizados
             </a>
           </div>
         </div>

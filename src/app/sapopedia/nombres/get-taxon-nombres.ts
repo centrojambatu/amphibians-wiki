@@ -12,6 +12,7 @@ export interface TaxonNombre {
   familia?: string;
   genero?: string;
   catalogo_awe_idioma_id?: number; // Para filtrar por idioma en nombres vernáculos
+  rank_id?: number; // Rank taxonómico: 4=Orden, 5=Familia, 6=Género, 7=Especie
 }
 
 export interface NombreGroup {
