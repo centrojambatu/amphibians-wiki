@@ -89,7 +89,6 @@ export default async function getNombresRenacuajos(
     return [];
   }
 
-  console.log(`✅ Encontrados ${nombresData.length} nombres de renacuajos${idiomaId ? ` para idioma ${idiomaId}` : ""}`);
 
   // Convertir a TaxonNombre (los renacuajos no tienen taxon_id, son nombres genéricos)
   const nombres: TaxonNombre[] = nombresData.map((n: any) => ({

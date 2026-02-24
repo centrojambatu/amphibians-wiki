@@ -33,10 +33,8 @@ export default async function RenacuajosPage({ searchParams }: RenacuajosPagePro
   // Debug: verificar que hay datos
   if (todosLosNombresRenacuajos.length === 0) {
     // eslint-disable-next-line no-console
-    console.warn("⚠️ No se encontraron nombres de renacuajos");
   } else {
     // eslint-disable-next-line no-console
-    console.log(`✅ Se encontraron ${String(todosLosNombresRenacuajos.length)} nombres de renacuajos`);
   }
 
   return (

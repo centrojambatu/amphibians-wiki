@@ -41,10 +41,8 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
   // Debug: verificar que hay datos
   if (ordenes.length === 0) {
     // eslint-disable-next-line no-console
-    console.warn(`⚠️ No se encontraron órdenes para idioma ${String(idiomaIdFinal)}`);
   } else {
     // eslint-disable-next-line no-console
-    console.log(`✅ Se encontraron ${String(ordenes.length)} órdenes`);
   }
 
   // Calcular estadísticas

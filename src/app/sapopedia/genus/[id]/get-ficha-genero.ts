@@ -3,8 +3,6 @@ import {createServiceClient} from "@/utils/supabase/server";
 export default async function getFichaGenero(idFichaGenero: string) {
   const supabaseClient = createServiceClient();
 
-  console.log("🔍 getFichaGenero llamado con:", idFichaGenero);
-
   // Buscar por taxon_id, id_ficha_genero o nombre del taxon
   const isNumber = typeof idFichaGenero === "number" || /^\d+$/.test(idFichaGenero);
 
@@ -15,7 +13,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
     const idNum = Number(idFichaGenero);
 
     // Primero intentar buscar si es un taxon_id de un género
-    console.log("🔢 Buscando por taxon_id:", idNum);
     const {data: taxonData, error: errorTaxon} = await supabaseClient
       .from("taxon")
       .select("id_taxon")
@@ -26,7 +23,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
     if (!errorTaxon && taxonData) {
       // Es un taxon_id válido de género
       taxonId = taxonData.id_taxon;
-      console.log("✅ Encontrado como taxon_id de género:", taxonId);
 
       // Buscar la ficha_genero por taxon_id
       const {data: fichaData, error: errorFicha} = await supabaseClient
@@ -43,7 +39,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
       }
     } else {
       // Intentar buscar por id_ficha_genero
-      console.log("🔢 Buscando por id_ficha_genero:", idNum);
       const {data: fichaData, error: errorFicha} = await supabaseClient
         .from("ficha_genero")
         .select("*, taxon(*)")
@@ -60,8 +55,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
     }
   } else {
     // Buscar por nombre del taxon
-    console.log("📝 Buscando por nombre del taxon:", idFichaGenero);
-
     // Normalizar el nombre: trim y normalizar espacios
     const nombreNormalizado = idFichaGenero.trim().replaceAll(/\s+/g, " ");
 
@@ -75,7 +68,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
 
     // Si no se encuentra, intentar case-insensitive
     if (errorTaxon) {
-      console.log("⚠️ Búsqueda exacta falló, intentando case-insensitive...");
       const {data: taxonDataCI, error: errorTaxonCI} = await supabaseClient
         .from("taxon")
         .select("id_taxon")
@@ -86,7 +78,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
       if (!errorTaxonCI && taxonDataCI) {
         taxonData = taxonDataCI;
         errorTaxon = null;
-        console.log("✅ Taxón encontrado con búsqueda case-insensitive");
       } else {
         console.error(
           "❌ Error al obtener taxon por nombre:",
@@ -328,14 +319,6 @@ export default async function getFichaGenero(idFichaGenero: string) {
     lineage: lineageArray,
     distributions: Array.isArray(distributions) ? distributions : [],
   };
-
-  console.log("📊 Datos retornados ficha_genero:", {
-    id_ficha_genero: result.id_ficha_genero,
-    taxon_id: result.taxon_id,
-    tiene_taxones: result.taxones.length,
-    tiene_lineage: result.lineage.length,
-    tiene_publicaciones: result.publicaciones.length,
-  });
 
   return result;
 }

@@ -117,7 +117,6 @@ export default async function getAllEspecies(
       }
     }
   }
-  console.log(`📊 Mapeo UICN creado: ${nombreASiglaMap.size} categorías`);
 
   // Obtener catálogos que faltan en la vista (sin provincias y sin Lista Roja, que viene de awe_lista_roja_uicn)
   const { data: catalogosData, error: errorCatalogos } = await supabaseClient
@@ -181,12 +180,9 @@ export default async function getAllEspecies(
       if (sigla) {
         listaRojaMap.set(taxonId, sigla);
         especiesConUICN++;
-      } else {
-        console.warn(`⚠️ No se encontró sigla para categoría UICN: "${nombreUICN}"`);
       }
     }
   }
-  console.log(`📊 Especies con categoría UICN mapeadas desde la vista: ${especiesConUICN}`);
 
   // Procesar otros catálogos desde taxon_catalogo_awe
   if (catalogosData) {
@@ -350,9 +346,6 @@ export default async function getAllEspecies(
 
   // Debug: Verificar cuántas especies tienen categoría UICN
   const especiesConUICNFinal = especiesFormateadas.filter((e) => e.lista_roja_iucn).length;
-  console.log(`📊 Total especies formateadas: ${especiesFormateadas.length}`);
-  console.log(`📊 Especies con categoría UICN final: ${especiesConUICNFinal}`);
-  console.log(`📊 Tamaño del mapa listaRojaMap: ${listaRojaMap.size}`);
 
   return especiesFormateadas;
 }

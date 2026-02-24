@@ -3,8 +3,6 @@ import {createServiceClient} from "@/utils/supabase/server";
 export default async function getFichaFamilia(idFichaFamilia: string) {
   const supabaseClient = createServiceClient();
 
-  console.log("🔍 getFichaFamilia llamado con:", idFichaFamilia);
-
   // Buscar por taxon_id, id_ficha_familia o nombre del taxon
   const isNumber = typeof idFichaFamilia === "number" || /^\d+$/.test(idFichaFamilia);
 
@@ -15,7 +13,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
     const idNum = Number(idFichaFamilia);
 
     // Primero intentar buscar si es un taxon_id de una familia
-    console.log("🔢 Buscando por taxon_id:", idNum);
     const {data: taxonData, error: errorTaxon} = await supabaseClient
       .from("taxon")
       .select("id_taxon")
@@ -26,7 +23,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
     if (!errorTaxon && taxonData) {
       // Es un taxon_id válido de familia
       taxonId = taxonData.id_taxon;
-      console.log("✅ Encontrado como taxon_id de familia:", taxonId);
 
       // Buscar la ficha_familia por taxon_id
       const {data: fichaData, error: errorFicha} = await supabaseClient
@@ -43,7 +39,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
       }
     } else {
       // Intentar buscar por id_ficha_familia
-      console.log("🔢 Buscando por id_ficha_familia:", idNum);
       const {data: fichaData, error: errorFicha} = await supabaseClient
         .from("ficha_familia")
         .select("*, taxon(*)")
@@ -60,8 +55,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
     }
   } else {
     // Buscar por nombre del taxon
-    console.log("📝 Buscando por nombre del taxon:", idFichaFamilia);
-
     // Normalizar el nombre: trim y normalizar espacios
     const nombreNormalizado = idFichaFamilia.trim().replaceAll(/\s+/g, " ");
 
@@ -75,7 +68,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
 
     // Si no se encuentra, intentar case-insensitive
     if (errorTaxon) {
-      console.log("⚠️ Búsqueda exacta falló, intentando case-insensitive...");
       const {data: taxonDataCI, error: errorTaxonCI} = await supabaseClient
         .from("taxon")
         .select("id_taxon")
@@ -86,7 +78,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
       if (!errorTaxonCI && taxonDataCI) {
         taxonData = taxonDataCI;
         errorTaxon = null;
-        console.log("✅ Taxón encontrado con búsqueda case-insensitive");
       } else {
         console.error(
           "❌ Error al obtener taxon por nombre:",
@@ -328,14 +319,6 @@ export default async function getFichaFamilia(idFichaFamilia: string) {
     lineage: lineageArray,
     distributions: Array.isArray(distributions) ? distributions : [],
   };
-
-  console.log("📊 Datos retornados ficha_familia:", {
-    id_ficha_familia: result.id_ficha_familia,
-    taxon_id: result.taxon_id,
-    tiene_taxones: result.taxones.length,
-    tiene_lineage: result.lineage.length,
-    tiene_publicaciones: result.publicaciones.length,
-  });
 
   return result;
 }

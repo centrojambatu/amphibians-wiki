@@ -80,7 +80,6 @@ export default async function getColeccionesEspecie(
     }
 
     if (totalFetched > 0) {
-      console.log(`✅ Colecciones obtenidas: ${totalFetched} registros`);
     }
 
     return allData;
@@ -137,7 +136,6 @@ export default async function getColeccionesEspecie(
     }
   }
 
-  console.log(`📊 Total de colecciones únicas encontradas: ${allData.length}`);
 
   // Ordenar por fecha_col e id_coleccion (ya vienen ordenados, pero por si acaso)
   allData.sort((a, b) => {

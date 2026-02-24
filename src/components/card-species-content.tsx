@@ -829,15 +829,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     }
   };
 
-  // Log solo en desarrollo
-  if (process.env.NODE_ENV === "development") {
-    console.log("✅ CardSpeciesContent recibió fichaEspecie:", {
-      id_ficha_especie: fichaEspecie.id_ficha_especie,
-      taxon_id: fichaEspecie.taxon_id,
-      nombre_cientifico: fichaEspecie.taxones?.[0]?.taxon,
-    });
-  }
-
   return (
     <CardContent className="flex-1 overflow-y-auto p-0">
       <div className="flex">

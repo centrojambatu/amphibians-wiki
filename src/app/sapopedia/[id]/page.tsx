@@ -52,8 +52,6 @@ export default async function Page({
     console.error(error);
   }
 
-  console.log(taxons);
-
   return (
     <main>
       {/* <h1>Sapopedia</h1> */}

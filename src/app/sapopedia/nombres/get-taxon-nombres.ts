@@ -1022,7 +1022,6 @@ async function getTaxonInfo(
     });
   }
 
-  console.log(`✅ Información taxonómica obtenida para ${taxonInfoMap.size} taxones de ${taxonIds.length} solicitados`);
   return taxonInfoMap;
 }
 
@@ -1046,11 +1045,8 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
   }
 
   if (!nombresData || nombresData.length === 0) {
-    console.warn(`No se encontraron nombres comunes para idioma ${idiomaId}`);
     return [];
   }
-
-  console.log(`✅ Encontrados ${nombresData.length} nombres comunes para idioma ${idiomaId}`);
 
   // Obtener información de taxones y nombres científicos
   const taxonIds = [...new Set(nombresData.map((n: any) => n.taxon_id))];
@@ -1100,7 +1096,6 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
       const taxonInfo = taxonInfoMap.get(n.taxon_id);
 
       if (!taxonInfo) {
-        console.warn(`No se encontró información taxonómica para taxon_id ${n.taxon_id}`);
         return null;
       }
 
@@ -1121,8 +1116,6 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
       } as TaxonNombre;
     })
     .filter((t): t is TaxonNombre => t !== null);
-
-  console.log(`✅ Taxones válidos después de filtrar: ${taxonesValidos.length}`);
 
   // Agrupar por orden > familia > género > nombre_comun (original)
   const ordenesMap = new Map<
@@ -1263,7 +1256,6 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
   });
 
   const ordenesOrdenados = ordenes.toSorted((a, b) => a.name.localeCompare(b.name));
-  console.log(`✅ Total de órdenes generados: ${ordenesOrdenados.length}`);
-  
+
   return ordenesOrdenados;
 }
