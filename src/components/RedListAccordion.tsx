@@ -243,7 +243,7 @@ export default function RedListAccordion({
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link
-            className="text-foreground text-sm font-medium italic hover:underline"
+            className="text-foreground text-sm font-medium italic hover:no-underline"
             href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
           >
             {species.nombre_cientifico}

@@ -89,7 +89,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
               href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:no-underline"
             >
               Nombres estandarizados
             </a>
@@ -97,7 +97,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
               href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:no-underline"
             >
               Jambatu
             </a>
@@ -105,7 +105,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
               href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:no-underline"
             >
               Rana o sapo
             </a>

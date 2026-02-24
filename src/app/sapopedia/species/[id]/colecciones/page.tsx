@@ -56,7 +56,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
       {/* Header */}
       <div className="mb-8">
         <Link
-          className="text-muted-foreground mb-2 inline-block text-sm hover:underline"
+          className="text-muted-foreground mb-2 inline-block text-sm hover:no-underline"
           href={`/sapopedia/species/${encodeURIComponent(id)}`}
         >
           ← Volver a la ficha de la especie

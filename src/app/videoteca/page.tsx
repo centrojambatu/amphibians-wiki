@@ -105,7 +105,7 @@ export default function VideotecaPage() {
           <p className="mt-2 text-gray-600">
             Videos destacados sobre anfibios de Ecuador y del mundo del canal{" "}
             <a
-              className="text-gray-700 transition-colors hover:text-gray-900 hover:underline"
+              className="text-gray-700 transition-colors hover:text-gray-900 hover:no-underline"
               href="https://www.youtube.com/@ArcaDeLosSapos"
               rel="noopener noreferrer"
               target="_blank"

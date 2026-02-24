@@ -149,7 +149,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/historia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Historia
               </a>
@@ -157,7 +157,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Arqueología
               </a>
@@ -165,7 +165,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/cultura"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Cultura
               </a>
@@ -173,7 +173,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/biocomercio"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Biocomercio
               </a>
@@ -188,7 +188,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Diversidad
               </a>
@@ -196,7 +196,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Distribución
               </a>
@@ -204,7 +204,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/extincion"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Extinción
               </a>
@@ -212,7 +212,7 @@ export function SapopediaContent({
                 href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-primary hover:no-underline"
               >
                 Conservación
               </a>

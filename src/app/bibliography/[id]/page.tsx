@@ -239,7 +239,7 @@ export default async function BibliographyPage({params}: PageProps) {
                   {publicacion.enlaces.map((enlace) => (
                     <a
                       key={enlace.id_publicacion_enlace}
-                      className="text-primary flex items-center gap-1.5 hover:underline text-xs"
+                      className="text-primary flex items-center gap-1.5 hover:no-underline text-xs"
                       href={enlace.enlace}
                       rel="noopener noreferrer"
                       target="_blank"

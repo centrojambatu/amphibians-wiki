@@ -95,11 +95,11 @@ export default function ColeccionDetailClient({
       {/* Header */}
       <div className="mb-8">
         <div className="mb-4 flex items-center gap-2 text-sm">
-          <Link href={especieUrl} className="text-muted-foreground hover:underline">
+          <Link href={especieUrl} className="text-muted-foreground hover:no-underline">
             ← Ficha de la especie
           </Link>
           <span className="text-muted-foreground">/</span>
-          <Link href={coleccionesUrl} className="text-muted-foreground hover:underline">
+          <Link href={coleccionesUrl} className="text-muted-foreground hover:no-underline">
             Colecciones
           </Link>
           <span className="text-muted-foreground">/</span>

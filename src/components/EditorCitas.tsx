@@ -241,7 +241,7 @@ export default function EditorCitas({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-primary underline hover:text-primary/80",
+          class: "text-primary no-underline hover:text-primary/80",
         },
       }),
     ],

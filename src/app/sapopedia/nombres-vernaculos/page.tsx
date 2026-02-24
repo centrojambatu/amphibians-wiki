@@ -51,7 +51,7 @@ export default async function NombresVernaculosPage({ searchParams }: NombresVer
                   href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-indigenas-vernaculos/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-sm font-medium text-primary hover:no-underline"
                 >
                   Nombres indígenas y vernáculos
                 </a>

@@ -351,7 +351,7 @@ function MapotecaContent() {
                     <TableRow key={especie.id_taxon}>
                       <TableCell className="font-medium">
                         <Link
-                          className="text-green-600 italic hover:text-green-700 hover:underline"
+                          className="text-green-600 italic hover:text-green-700 hover:no-underline"
                           href={`/sapopedia/species/${especie.nombre_cientifico.replaceAll(" ", "-")}`}
                           onClick={() => {
                             // Guardar estado antes de navegar

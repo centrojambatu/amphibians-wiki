@@ -82,7 +82,7 @@ export default function SpeciesTechnicalSheet({
           <div className="flex flex-wrap items-baseline justify-center gap-2">
             {/* Orden - PEQUEÑO con link */}
             <Link
-              className="text-sm font-medium transition-all hover:underline"
+              className="text-sm font-medium transition-all hover:no-underline"
               href={`/order/${orderId}`}
               style={{
                 fontFamily:
@@ -98,7 +98,7 @@ export default function SpeciesTechnicalSheet({
 
             {/* Familia - PEQUEÑO con link */}
             <Link
-              className="text-sm font-medium transition-all hover:underline"
+              className="text-sm font-medium transition-all hover:no-underline"
               href={`/family/${familyId}`}
               style={{
                 fontFamily:
@@ -114,7 +114,7 @@ export default function SpeciesTechnicalSheet({
 
             {/* Género - PEQUEÑO e itálica con link */}
             <Link
-              className="text-sm font-medium italic transition-all hover:underline"
+              className="text-sm font-medium italic transition-all hover:no-underline"
               href={`/genus/${genusId}`}
               style={{
                 fontFamily:

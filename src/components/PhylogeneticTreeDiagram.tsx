@@ -92,7 +92,7 @@ export default function PhylogeneticTreeDiagram({
             <div className="node-circle bg-blue-500"></div>
             <div className="node-label">
               <Link
-                className="font-medium italic hover:underline"
+                className="font-medium italic hover:no-underline"
                 href={`/sapopedia/genus/${genus.id}`}
               >
                 {genus.name}
@@ -139,7 +139,7 @@ export default function PhylogeneticTreeDiagram({
             <div className="node-circle bg-green-600"></div>
             <div className="node-label">
               <Link
-                className="font-semibold hover:underline"
+                className="font-semibold hover:no-underline"
                 href={`/sapopedia/family/${family.id}`}
               >
                 {family.name}
@@ -186,7 +186,7 @@ export default function PhylogeneticTreeDiagram({
             <div className="node-circle bg-red-600"></div>
             <div className="node-label">
               <Link
-                className="text-lg font-bold hover:underline"
+                className="text-lg font-bold hover:no-underline"
                 href={`/sapopedia/order/${order.id}`}
               >
                 {order.name}

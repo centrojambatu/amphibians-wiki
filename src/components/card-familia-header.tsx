@@ -22,7 +22,7 @@ export const CardFamiliaHeader = ({ fichaFamilia }: CardFamiliaHeaderProps) => {
             return orden?.taxon ? (
               <>
                 <Link
-                  className="text-sm font-medium transition-all hover:underline"
+                  className="text-sm font-medium transition-all hover:no-underline"
                   href={`/sapopedia/order/${orden.id_taxon || ""}`}
                   style={{ color: "#006d1b" }}
                 >

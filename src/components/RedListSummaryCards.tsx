@@ -135,7 +135,7 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
               href="https://deepskyblue-beaver-511675.hostingersite.com/portfolio/lista-roja"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-sm font-medium text-primary hover:no-underline"
             >
               Lista Roja Ecuador
             </a>
@@ -143,7 +143,7 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
               href="https://www.iucnredlist.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-sm font-medium text-primary hover:no-underline"
             >
               Lista Roja IUCN
             </a>

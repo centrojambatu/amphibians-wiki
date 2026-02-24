@@ -23,7 +23,7 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
             return orden?.taxon ? (
               <>
                 <Link
-                  className="text-sm font-medium transition-all hover:underline"
+                  className="text-sm font-medium transition-all hover:no-underline"
                   href={`/sapopedia/order/${orden.id_taxon || ""}`}
                   style={{color: "#006d1b"}}
                 >
@@ -43,7 +43,7 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
             return familia?.taxon ? (
               <>
                 <Link
-                  className="text-sm font-medium transition-all hover:underline"
+                  className="text-sm font-medium transition-all hover:no-underline"
                   href={`/sapopedia/family/${familia.id_taxon || ""}`}
                   style={{color: "#006d1b"}}
                 >
@@ -63,7 +63,7 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
             return genero?.taxon ? (
               <>
                 <Link
-                  className="text-sm font-medium italic transition-all hover:underline"
+                  className="text-sm font-medium italic transition-all hover:no-underline"
                   href={`/sapopedia/genus/${genero.id_taxon || ""}`}
                   style={{color: "#006d1b"}}
                 >

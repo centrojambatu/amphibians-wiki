@@ -63,7 +63,7 @@ export default function NombresAccordion({ordenes}: NombresAccordionProps) {
       >
         <div className="min-w-0 flex-1">
           <Link
-            className="cursor-pointer text-sm font-medium text-foreground hover:text-primary hover:underline"
+            className="cursor-pointer text-sm font-medium text-foreground hover:text-primary hover:no-underline"
             href={href}
           >
             {taxon.nombre_comun_completo || taxon.nombre_comun}

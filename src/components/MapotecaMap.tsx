@@ -316,7 +316,7 @@ export default function MapotecaMap({
                         {group.slice(0, 5).map((u, i) => (
                           <p
                             key={i}
-                            className="cursor-pointer text-xs italic text-green-700 hover:underline"
+                            className="cursor-pointer text-xs italic text-green-700 hover:no-underline"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSpeciesClick(u);

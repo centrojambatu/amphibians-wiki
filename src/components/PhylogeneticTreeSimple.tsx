@@ -63,7 +63,7 @@ export default function PhylogeneticTreeSimple({
       <div className="flex items-center gap-2">
         <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-400"></div>
         <Link
-          className="text-xs italic text-gray-700 hover:text-gray-900 hover:underline"
+          className="text-xs italic text-gray-700 hover:text-gray-900 hover:no-underline"
           href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
         >
           {species.nombre_cientifico}
@@ -101,7 +101,7 @@ export default function PhylogeneticTreeSimple({
               </span>
             )}
             <Link
-              className="text-sm font-medium italic text-gray-800 hover:text-gray-900 hover:underline"
+              className="text-sm font-medium italic text-gray-800 hover:text-gray-900 hover:no-underline"
               href={`/sapopedia/genus/${genus.id}`}
             >
               {genus.name}
@@ -144,7 +144,7 @@ export default function PhylogeneticTreeSimple({
               </span>
             )}
             <Link
-              className="text-sm font-semibold text-gray-800 hover:text-gray-900 hover:underline"
+              className="text-sm font-semibold text-gray-800 hover:text-gray-900 hover:no-underline"
               href={`/sapopedia/family/${family.id}`}
             >
               {family.name}
@@ -190,7 +190,7 @@ export default function PhylogeneticTreeSimple({
           )}
           <div className="flex-1">
             <Link
-              className="text-lg font-bold text-gray-900 hover:text-gray-700 hover:underline"
+              className="text-lg font-bold text-gray-900 hover:text-gray-700 hover:no-underline"
               href={`/sapopedia/order/${order.id}`}
             >
               {order.name}

@@ -112,7 +112,7 @@ a:visited {
 a:hover,
 a:active {
   color: #f07304 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 /* Excepción para botones de videoteca - mantener color gris y sin subrayado */
@@ -300,7 +300,7 @@ header a[href*="/family/"]:hover,
 header a[href*="/genus/"]:hover,
 header a[href*="/order/"]:hover {
   color: #f07304 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 /* Estilos específicos para enlaces en autor_ano */
@@ -324,7 +324,7 @@ span.autor-ano-links a:active,
 .autor-ano-links a:hover,
 .autor-ano-links a:active {
   color: #f07304 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 /* Selector super específico para enlaces inyectados via dangerouslySetInnerHTML  */
@@ -342,7 +342,7 @@ span[class~="autor-ano-links"] * a[href*="wikipedia"]:hover,
 span[class~="autor-ano-links"] * a[href*="http"]:hover,
 span[class~="autor-ano-links"] a[href]:hover {
   color: #f07304 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 /* Estilos para el panel de filtros - sin hover de subrayado */
@@ -390,7 +390,7 @@ span[class~="autor-ano-links"] a[href]:hover {
 .processed-link:hover,
 .processed-link:active {
   color: #f07304 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 /* Eliminar subrayado de enlaces con clase processed-link-no-underline */

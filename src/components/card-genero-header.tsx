@@ -40,7 +40,7 @@ export const CardGeneroHeader = ({ fichaGenero }: CardGeneroHeaderProps) => {
             return familia?.taxon ? (
               <>
                 <Link
-                  className="text-sm font-medium transition-all hover:underline"
+                  className="text-sm font-medium transition-all hover:no-underline"
                   href={`/sapopedia/family/${familia.id_taxon || ""}`}
                   style={{ color: "#006d1b" }}
                 >

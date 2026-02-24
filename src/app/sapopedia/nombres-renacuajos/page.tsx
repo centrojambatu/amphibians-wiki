@@ -52,7 +52,7 @@ export default async function RenacuajosPage({ searchParams }: RenacuajosPagePro
                   href="https://deepskyblue-beaver-511675.hostingersite.com/renacuajos/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-sm font-medium text-primary hover:no-underline"
                 >
                   Nombres de renacuajos
                 </a>
@@ -66,7 +66,7 @@ export default async function RenacuajosPage({ searchParams }: RenacuajosPagePro
                   href="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-sm font-medium text-primary hover:no-underline"
                 >
                   Mapa
                 </a>
