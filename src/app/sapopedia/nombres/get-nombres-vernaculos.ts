@@ -89,7 +89,7 @@ export default async function getNombresVernaculos(
     query = query.eq("catalogo_awe_idioma_id", idiomaId);
   }
 
-  const {data: nombresData, error: errorNombres} = await query.not("taxon_id", "is", null);
+  const {data: nombresData, error: errorNombres} = await query;
 
   if (errorNombres) {
     console.error("Error al obtener nombres vernáculos:", errorNombres);
@@ -100,13 +100,24 @@ export default async function getNombresVernaculos(
     return [];
   }
 
-  // Obtener información de taxones
-  const taxonIds = [...new Set(nombresData.map((n: any) => n.taxon_id))];
+  // Obtener información de taxones (solo IDs no nulos para las consultas)
+  const taxonIds = [
+    ...new Set(
+      nombresData.map((n: any) => n.taxon_id).filter((id): id is number => id != null),
+    ),
+  ];
 
-  const {data: taxonesData, error: errorTaxones} = await supabaseClient
-    .from("taxon")
-    .select("id_taxon, taxon, taxon_id, rank_id")
-    .in("id_taxon", taxonIds);
+  let taxonesData: any[] | null = null;
+  let errorTaxones: any = null;
+
+  if (taxonIds.length > 0) {
+    const res = await supabaseClient
+      .from("taxon")
+      .select("id_taxon, taxon, taxon_id, rank_id")
+      .in("id_taxon", taxonIds);
+    taxonesData = res.data;
+    errorTaxones = res.error;
+  }
 
   // Crear mapa de taxon_id -> rank_id para acceso rápido
   const taxonIdToRankId = new Map<number, number>();
@@ -121,19 +132,20 @@ export default async function getNombresVernaculos(
     return [];
   }
 
-  // Obtener nombres científicos desde vw_lista_especies
-  const {data: vwData, error: errorVw} = await supabaseClient
-    .from("vw_lista_especies")
-    .select("id_taxon, nombre_cientifico")
-    .in("id_taxon", taxonIds);
-
+  // Obtener nombres científicos desde vw_lista_especies (solo si hay taxones)
   const taxonIdToNombreCientifico = new Map<number, string>();
-  if (!errorVw && vwData) {
-    vwData.forEach((t: any) => {
-      if (t.nombre_cientifico) {
-        taxonIdToNombreCientifico.set(t.id_taxon, t.nombre_cientifico);
-      }
-    });
+  if (taxonIds.length > 0) {
+    const {data: vwData, error: errorVw} = await supabaseClient
+      .from("vw_lista_especies")
+      .select("id_taxon, nombre_cientifico")
+      .in("id_taxon", taxonIds);
+    if (!errorVw && vwData) {
+      vwData.forEach((t: any) => {
+        if (t.nombre_cientifico) {
+          taxonIdToNombreCientifico.set(t.id_taxon, t.nombre_cientifico);
+        }
+      });
+    }
   }
 
   // Obtener información taxonómica usando una consulta SQL optimizada con JOINs
@@ -146,15 +158,15 @@ export default async function getNombresVernaculos(
       
       // Si no hay información taxonómica, usar valores por defecto en lugar de excluir
       if (!taxonInfo) {
-        // Incluir el nombre aunque no tenga información taxonómica completa
+        // Incluir el nombre aunque no tenga información taxonómica completa (o taxon_id null)
         const especie = taxonesData?.find((t: any) => t.id_taxon === n.taxon_id)?.taxon || "";
-        const nombreCientifico = taxonIdToNombreCientifico.get(n.taxon_id);
+        const nombreCientifico = n.taxon_id != null ? taxonIdToNombreCientifico.get(n.taxon_id) : undefined;
 
         return {
           id: n.id,
           nombre: n.nombre,
           catalogo_awe_idioma_id: n.catalogo_awe_idioma_id,
-          taxon_id: n.taxon_id,
+          taxon_id: n.taxon_id ?? 0,
           publicacion_id: n.publicacion_id,
           nombre_cientifico: nombreCientifico,
           orden: undefined,
@@ -170,7 +182,7 @@ export default async function getNombresVernaculos(
         id: n.id,
         nombre: n.nombre,
         catalogo_awe_idioma_id: n.catalogo_awe_idioma_id,
-        taxon_id: n.taxon_id,
+        taxon_id: n.taxon_id ?? 0,
         publicacion_id: n.publicacion_id,
         nombre_cientifico: nombreCientifico,
         orden: taxonInfo.orden,
@@ -182,8 +194,9 @@ export default async function getNombresVernaculos(
   
   // Retornar lista plana de nombres vernáculos (sin agrupación taxonómica)
   // Convertir NombreVernaculo a TaxonNombre (incluir nombre del taxon para orden/familia/género)
+  // Para nombres sin taxón (taxon_id null) se usa id_taxon 0 como convención
   const nombres: TaxonNombre[] = nombresVernaculos.map((nv) => ({
-    id_taxon: nv.taxon_id,
+    id_taxon: nv.taxon_id ?? 0,
     taxon: taxonesData?.find((t: any) => t.id_taxon === nv.taxon_id)?.taxon ?? "",
     nombre_comun: nv.nombre,
     nombre_comun_completo: nv.nombre,
@@ -192,7 +205,7 @@ export default async function getNombresVernaculos(
     familia: nv.familia,
     genero: nv.genero,
     catalogo_awe_idioma_id: nv.catalogo_awe_idioma_id, // Incluir idioma para filtrar en cliente
-    rank_id: taxonIdToRankId.get(nv.taxon_id), // Incluir rank_id para determinar tipo de taxon
+    rank_id: nv.taxon_id != null ? taxonIdToRankId.get(nv.taxon_id) : undefined,
   }));
 
   // Ordenar por nombre vernáculo

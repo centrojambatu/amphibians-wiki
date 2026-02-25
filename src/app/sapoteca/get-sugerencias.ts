@@ -16,7 +16,7 @@ export async function getSugerenciasTitulos(query: string, limit: number = 10): 
     .ilike("titulo", `%${query}%`)
     .limit(limit);
 
-  if (error || !data) {
+  if ((error && Object.keys(error).length > 0) || !data) {
     return [];
   }
 
@@ -41,7 +41,7 @@ export async function getSugerenciasAutores(query: string, limit: number = 10): 
     .ilike("autores_nombres", `%${query}%`)
     .limit(limit * 2); // Obtener más para poder procesar
 
-  if (error || !data) {
+  if ((error && Object.keys(error).length > 0) || !data) {
     return [];
   }
 

@@ -2,17 +2,23 @@ import getPublicacionesPaginadas, {
   getAñosPublicaciones,
 } from "./get-publicaciones-paginadas";
 import getTiposPublicacion from "./get-tipos-publicacion";
+import getEstadisticasSapoteca from "./get-estadisticas-sapoteca";
+import getHistogramaPublicaciones from "./get-histograma-publicaciones";
 import ReferenciaCard from "@/components/referencia-card";
 import Pagination from "@/components/pagination";
-import SapotecaFiltersPanel from "@/components/sapoteca-filters-panel";
+import SapotecaContentLayout from "@/components/sapoteca-content-layout";
+import SapotecaHistogramaChart from "@/components/sapoteca-histograma-chart";
+import { Card, CardContent } from "@/components/ui/card";
 import type { FiltrosSapoteca } from "./get-publicaciones-paginadas";
 
 interface SearchParams {
+  [key: string]: string | undefined;
   pagina?: string;
   titulo?: string;
   años?: string;
   autor?: string;
   tipos?: string;
+  indexada?: string;
 }
 
 interface PageProps {
@@ -34,70 +40,125 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
     tiposPublicacion: params.tipos
       ? params.tipos.split(",").map(Number).filter((n) => !isNaN(n))
       : undefined,
+    indexada: params.indexada === "true" ? true : params.indexada === "false" ? false : undefined,
   };
 
   // Obtener datos en paralelo
-  const [publicacionesData, años, tiposPublicacion] = await Promise.all([
-    getPublicacionesPaginadas(pagina, itemsPorPagina, filtros),
-    getAñosPublicaciones(),
-    getTiposPublicacion(),
-  ]);
+  const [publicacionesData, años, tiposPublicacion, estadisticas, histogramaData] =
+    await Promise.all([
+      getPublicacionesPaginadas(pagina, itemsPorPagina, filtros),
+      getAñosPublicaciones(),
+      getTiposPublicacion(),
+      getEstadisticasSapoteca(),
+      getHistogramaPublicaciones(),
+    ]);
 
   const { publicaciones, total, totalPaginas } = publicacionesData;
 
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
       </div>
 
+      {/* Cards de estadísticas */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Publicaciones científicas</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalCientificas.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Publicaciones divulgación</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalDivulgacion.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Publicaciones indexadas</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalIndexadas.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Publicaciones no indexadas</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalNoIndexadas.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">
+              Promedio publicaciones (última década)
+            </p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.promedioUltimaDecada.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Publicaciones año actual</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.publicacionesAnioActual.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Histograma de publicaciones por año */}
+      <div className="mb-8">
+        <SapotecaHistogramaChart data={histogramaData} />
+      </div>
+
         {/* Layout con panel de filtros y contenido */}
-        <div className="flex gap-6">
-          {/* Panel de filtros - lado izquierdo */}
-          <div className="w-80 flex-shrink-0">
-            <SapotecaFiltersPanel tiposPublicacion={tiposPublicacion} años={años} />
+        <SapotecaContentLayout tiposPublicacion={tiposPublicacion} años={años}>
+          {/* Información de resultados */}
+          <div className="mb-6 text-sm text-muted-foreground">
+            Mostrando {publicaciones.length} de {total} referencias
+            {totalPaginas > 1 && ` (Página ${pagina} de ${totalPaginas})`}
           </div>
 
-          {/* Contenido principal */}
-          <div className="min-w-0 flex-1">
-            {/* Información de resultados */}
-            <div className="mb-6 text-sm text-muted-foreground">
-              Mostrando {publicaciones.length} de {total} referencias
-              {totalPaginas > 1 && ` (Página ${pagina} de ${totalPaginas})`}
-            </div>
-
-            {/* Lista de referencias */}
-            {publicaciones.length > 0 ? (
-              <div className="mb-8 space-y-4">
-                {publicaciones.map((publicacion) => (
-                  <ReferenciaCard
-                    key={publicacion.id_publicacion}
-                    publicacion={publicacion}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="mb-8 rounded-lg border bg-card p-8 text-center">
-                <p className="text-muted-foreground">
-                  No se encontraron referencias disponibles.
-                </p>
-              </div>
-            )}
-
-            {/* Paginación */}
-            {totalPaginas > 1 && (
-              <div className="mt-8">
-                <Pagination
-                  paginaActual={pagina}
-                  totalPaginas={totalPaginas}
-                  baseUrl="/sapoteca"
-                  searchParams={params}
+          {/* Lista de referencias */}
+          {publicaciones.length > 0 ? (
+            <div className="mb-8 space-y-4">
+              {publicaciones.map((publicacion) => (
+                <ReferenciaCard
+                  key={publicacion.id_publicacion}
+                  publicacion={publicacion}
                 />
-              </div>
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mb-8 rounded-lg border bg-card p-8 text-center">
+              <p className="text-muted-foreground">
+                No se encontraron referencias disponibles.
+              </p>
+            </div>
+          )}
+
+          {/* Paginación */}
+          {totalPaginas > 1 && (
+            <div className="mt-8">
+              <Pagination
+                paginaActual={pagina}
+                totalPaginas={totalPaginas}
+                baseUrl="/sapoteca"
+                searchParams={params}
+              />
+            </div>
+          )}
+        </SapotecaContentLayout>
     </main>
   );
 }

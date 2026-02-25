@@ -20,6 +20,7 @@ export interface FiltrosSapoteca {
   años?: number[];
   autor?: string;
   tiposPublicacion?: number[];
+  indexada?: boolean;
 }
 
 export interface PublicacionesPaginadas {
@@ -43,13 +44,14 @@ export default async function getPublicacionesPaginadas(
   // Calcular offset
   const offset = (pagina - 1) * itemsPorPagina;
 
-  // Construir query base usando la vista
-  let countQuery = supabaseClient
-    .from("vw_publicacion_completa")
-    .select("*", {count: "exact", head: true});
+  // Vista solo publicaciones de Ecuador (anfibios_ecuador = true)
+  const vista = "vw_publicacion_completa_ecuador";
 
-  let dataQuery = supabaseClient
-    .from("vw_publicacion_completa")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
+  let countQuery = supabaseClient.from(vista as any).select("*", {count: "exact", head: true});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
+  let dataQuery = supabaseClient.from(vista as any)
     .select(
       "id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha, total_enlaces",
     );
@@ -63,20 +65,25 @@ export default async function getPublicacionesPaginadas(
   }
 
   if (filtros?.años && filtros.años.length > 0) {
-    // Filtrar por la columna 'anos' que contiene años como string (puede tener múltiples años separados por comas)
-    // Si hay muchos años, usar un enfoque diferente para evitar errores
     if (filtros.años.length > 50) {
-      // Si hay más de 50 años, usar un filtro más simple basado en el rango
+      // Para rangos amplios, filtrar por publicacion_ano con rango numérico
       const añoMin = Math.min(...filtros.años);
       const añoMax = Math.max(...filtros.años);
-      // Filtrar por años que contengan cualquier año en el rango
-      const añoMinStr = añoMin.toString();
-      const añoMaxStr = añoMax.toString();
-      countQuery = countQuery.or(`anos.ilike.%${añoMinStr}%,anos.ilike.%${añoMaxStr}%`);
-      dataQuery = dataQuery.or(`anos.ilike.%${añoMinStr}%,anos.ilike.%${añoMaxStr}%`);
+
+      const {data: pubsEnRango} = await supabaseClient
+        .from("publicacion_ano")
+        .select("publicacion_id")
+        .gte("ano", añoMin)
+        .lte("ano", añoMax);
+
+      if (pubsEnRango && pubsEnRango.length > 0) {
+        const ids = [...new Set(pubsEnRango.map((r) => r.publicacion_id))];
+        countQuery = countQuery.in("id_publicacion", ids);
+        dataQuery = dataQuery.in("id_publicacion", ids);
+      } else {
+        return { publicaciones: [], total: 0, pagina: 1, totalPaginas: 0, itemsPorPagina };
+      }
     } else {
-      // Construir una condición OR para buscar cualquiera de los años seleccionados
-      // El formato debe ser: "campo.operador.valor,campo.operador.valor"
       const condicionesAño = filtros.años.map((año) => `anos.ilike.%${año}%`).join(",");
       countQuery = countQuery.or(condicionesAño);
       dataQuery = dataQuery.or(condicionesAño);
@@ -88,6 +95,11 @@ export default async function getPublicacionesPaginadas(
 
     countQuery = countQuery.ilike("autores_nombres", autorFilter);
     dataQuery = dataQuery.ilike("autores_nombres", autorFilter);
+  }
+
+  if (filtros?.indexada !== undefined) {
+    countQuery = countQuery.eq("indexada", filtros.indexada);
+    dataQuery = dataQuery.eq("indexada", filtros.indexada);
   }
 
   if (filtros?.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
@@ -215,25 +227,26 @@ export default async function getPublicacionesPaginadas(
 }
 
 /**
- * Obtiene años únicos de las publicaciones para filtros
- * Obtiene los años desde la columna 'anos' de la vista vw_publicacion_completa
+ * Obtiene años únicos de las publicaciones de Ecuador para filtros
  */
 export async function getAñosPublicaciones(): Promise<number[]> {
   const supabaseClient = createServiceClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
   const {data, error} = await supabaseClient
-    .from("vw_publicacion_completa")
+    .from("vw_publicacion_completa_ecuador" as any)
     .select("anos")
     .not("anos", "is", null)
     .neq("anos", "");
 
-  if (error || !data) {
+  if ((error && Object.keys(error).length > 0) || !data) {
     return [];
   }
 
   const años = new Set<number>();
+  const rows = data as { anos?: string | null }[];
 
-  data.forEach((pub) => {
+  rows.forEach((pub) => {
     if (pub.anos) {
       // La columna anos contiene años separados por comas (ej: "2011, 2012")
       const añosString = pub.anos.split(",").map((a) => a.trim());
