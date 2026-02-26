@@ -62,87 +62,105 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
         <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
       </div>
 
-      {/* Cards de estadísticas */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Publicaciones científicas</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+      {/* Cards de estadísticas (mismo estilo que Lista Roja: número arriba, label abajo) */}
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 sm:gap-4">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalCientificas.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Publicaciones científicas
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Publicaciones divulgación</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalDivulgacion.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Publicaciones divulgación
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Publicaciones indexadas</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalIndexadas.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Publicaciones indexadas
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Publicaciones no indexadas</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalNoIndexadas.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Publicaciones no indexadas
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">
-              Promedio publicaciones (última década)
-            </p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.promedioUltimaDecada.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Promedio publicaciones (última década)
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Publicaciones año actual</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.publicacionesAnioActual.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Publicaciones año actual
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Taxonomía</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalTaxonomia.toLocaleString()}
             </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Taxonomía
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Evolución</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalEvolucion.toLocaleString()}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Ecología</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
-              {estadisticas.totalEcologia.toLocaleString()}
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Evolución
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Conservación</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+              {estadisticas.totalEcologia.toLocaleString()}
+            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Ecología
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalConservacion.toLocaleString()}
+            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Conservación
             </p>
           </CardContent>
         </Card>
@@ -153,24 +171,28 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             rel={estadisticas.publicacionMasCitada.enlace ? "noopener noreferrer" : undefined}
             className="block"
           >
-            <Card className="transition-colors hover:bg-gray-50">
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground text-sm">Publicación más citada</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">
-                  {estadisticas.publicacionMasCitada.contadorCitas.toLocaleString()}
+            <Card className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
+              <CardContent className="pt-4">
+                <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+                  {estadisticas.publicacionMasCitada.contadorCitas.toLocaleString()} citas
                 </p>
-                <p className="mt-1 text-[10px] leading-tight text-gray-500">
+                <p className="break-words text-muted-foreground text-xs sm:text-sm">
+                  Publicación más citada
+                </p>
+                <p className="mt-1 break-words text-muted-foreground text-[10px] leading-tight sm:text-xs">
                   {estadisticas.publicacionMasCitada.titulo}
                 </p>
               </CardContent>
             </Card>
           </a>
         )}
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm">Autores en publicaciones Anfibios Ecuador</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalAutoresEcuador.toLocaleString()}
+            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              Autores en publicaciones Ecuador
             </p>
           </CardContent>
         </Card>
