@@ -114,6 +114,66 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             </p>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Taxonomía</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalTaxonomia.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Evolución</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalEvolucion.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Ecología</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalEcologia.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Conservación</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalConservacion.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        {estadisticas.publicacionMasCitada && (
+          <a
+            href={estadisticas.publicacionMasCitada.enlace ?? `/bibliography/${estadisticas.publicacionMasCitada.idPublicacion}`}
+            target={estadisticas.publicacionMasCitada.enlace ? "_blank" : undefined}
+            rel={estadisticas.publicacionMasCitada.enlace ? "noopener noreferrer" : undefined}
+            className="block"
+          >
+            <Card className="transition-colors hover:bg-gray-50">
+              <CardContent className="pt-6">
+                <p className="text-muted-foreground text-sm">Publicación más citada</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">
+                  {estadisticas.publicacionMasCitada.contadorCitas.toLocaleString()}
+                </p>
+                <p className="mt-1 text-[10px] leading-tight text-gray-500">
+                  {estadisticas.publicacionMasCitada.titulo}
+                </p>
+              </CardContent>
+            </Card>
+          </a>
+        )}
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm">Autores en publicaciones Anfibios Ecuador</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">
+              {estadisticas.totalAutoresEcuador.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Histograma de publicaciones por año */}
