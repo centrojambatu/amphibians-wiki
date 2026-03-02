@@ -222,7 +222,7 @@ export function SapopediaContent({
 
         <Card className="min-w-0 flex-1 flex-shrink-0">
           <CardContent>
-            <p className="text-3xl font-bold sm:text-4xl">{totalEspecies}</p>
+            <p className="text-4xl font-bold text-[#f07304] sm:text-5xl">{totalEspecies}</p>
             <p className="text-muted-foreground text-xs sm:text-sm">Especies</p>
           </CardContent>
         </Card>

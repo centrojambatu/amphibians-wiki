@@ -166,21 +166,24 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
         </Card>
         {estadisticas.publicacionMasCitada && (
           <a
-            href={estadisticas.publicacionMasCitada.enlace ?? `/bibliography/${estadisticas.publicacionMasCitada.idPublicacion}`}
-            target={estadisticas.publicacionMasCitada.enlace ? "_blank" : undefined}
-            rel={estadisticas.publicacionMasCitada.enlace ? "noopener noreferrer" : undefined}
+            href="https://scholar.google.com/citations?view_op=view_citation&hl=es&user=DuBUsasAAAAJ&citation_for_view=DuBUsasAAAAJ:mVmsd5A6BfQC"
+            target="_blank"
+            rel="noopener noreferrer"
             className="block"
           >
             <Card className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
               <CardContent className="pt-4">
                 <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                  {estadisticas.publicacionMasCitada.contadorCitas.toLocaleString()} citas
+                  <span>451</span>
+                  <span className="ml-1 align-baseline text-xs font-medium text-muted-foreground sm:text-sm">
+                    citas
+                  </span>
                 </p>
-                <p className="break-words text-muted-foreground text-xs sm:text-sm">
-                  Publicación más citada
-                </p>
-                <p className="mt-1 break-words text-muted-foreground text-[10px] leading-tight sm:text-xs">
-                  {estadisticas.publicacionMasCitada.titulo}
+
+                <p className="mt-1 break-words text-[10px] leading-tight text-muted-foreground sm:text-xs">
+                  Publicación más citada{" "}
+                  <span className="text-[#f07304]">|</span>{" "}
+                  Autor principal ecuatoriano
                 </p>
               </CardContent>
             </Card>
