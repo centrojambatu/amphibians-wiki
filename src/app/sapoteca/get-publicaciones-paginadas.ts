@@ -247,11 +247,16 @@ export default async function getPublicacionesPaginadas(
   return resultado;
 }
 
+/** Límite inferior razonable para años. El mínimo real es el de la publicación más antigua. */
+const AÑO_MIN_SANE = 1000;
+
 /**
- * Obtiene años únicos de las publicaciones de Ecuador para filtros
+ * Obtiene años únicos de las publicaciones de Ecuador para filtros.
+ * El año mínimo es el de la publicación más antigua (igual que el histograma).
  */
 export async function getAñosPublicaciones(): Promise<number[]> {
   const supabaseClient = createServiceClient();
+  const añoActual = new Date().getFullYear();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
   const {data, error} = await supabaseClient
@@ -267,22 +272,29 @@ export async function getAñosPublicaciones(): Promise<number[]> {
       if (pub.anos) {
         pub.anos.split(",").map((a) => a.trim()).forEach((añoStr) => {
           const año = Number.parseInt(añoStr, 10);
-          if (año && !isNaN(año) && año >= 1000 && año <= 9999) años.add(año);
+          if (
+            año &&
+            !isNaN(año) &&
+            año >= AÑO_MIN_SANE &&
+            año <= añoActual
+          ) {
+            años.add(año);
+          }
         });
       }
     });
     return Array.from(años).sort((a, b) => b - a);
   }
 
-  // Fallback: años distintos desde publicacion_ano (sin filtrar por Ecuador)
+  // Fallback: años desde publicacion_ano
   const {data: pa} = await supabaseClient
     .from("publicacion_ano")
     .select("ano")
-    .gte("ano", 1849)
-    .lte("ano", new Date().getFullYear());
+    .gte("ano", AÑO_MIN_SANE)
+    .lte("ano", añoActual);
   const añosSet = new Set<number>();
   (pa ?? []).forEach((r: { ano: number }) => {
-    if (r.ano >= 1000 && r.ano <= 9999) añosSet.add(r.ano);
+    if (r.ano >= AÑO_MIN_SANE && r.ano <= añoActual) añosSet.add(r.ano);
   });
   return Array.from(añosSet).sort((a, b) => b - a);
 }

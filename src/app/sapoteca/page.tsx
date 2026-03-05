@@ -196,16 +196,49 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             </Card>
           </a>
         )}
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalAutoresEcuador.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Autores en publicaciones Ecuador
-            </p>
-          </CardContent>
-        </Card>
+        {estadisticas.publicacionCientificaMasReciente ? (
+          <a
+            className="block h-full"
+            href={
+              estadisticas.publicacionCientificaMasReciente.enlace ||
+              `/bibliography/${String(estadisticas.publicacionCientificaMasReciente.idPublicacion)}`
+            }
+            rel={estadisticas.publicacionCientificaMasReciente.enlace ? "noopener noreferrer" : undefined}
+            target={estadisticas.publicacionCientificaMasReciente.enlace ? "_blank" : undefined}
+          >
+            <Card className="flex h-full min-h-[88px] min-w-0 flex-col transition-shadow hover:shadow-md">
+              <CardContent className="flex flex-1 flex-col justify-between pt-4">
+                <p
+                  className="line-clamp-2 break-words text-xs font-medium leading-tight"
+                  title={
+                    estadisticas.publicacionCientificaMasReciente.titulo.replace(
+                      /<[^>]*>/g,
+                      " ",
+                    ).replace(/\s+/g, " ").trim()
+                  }
+                >
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: estadisticas.publicacionCientificaMasReciente.titulo,
+                    }}
+                  />
+                </p>
+                <p className="mt-1 shrink-0 break-words text-muted-foreground text-[10px] sm:text-xs">
+                  Publicación científica más reciente
+                </p>
+              </CardContent>
+            </Card>
+          </a>
+        ) : (
+          <Card className="flex h-full min-h-[88px] min-w-0 flex-col transition-shadow hover:shadow-md">
+            <CardContent className="pt-4">
+              <p className="break-words text-muted-foreground text-xs sm:text-sm">
+                Publicación científica más reciente
+              </p>
+              <p className="text-muted-foreground text-xs">No disponible</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Histograma de publicaciones por año */}

@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { DatosHistograma } from "@/app/sapoteca/get-histograma-publicaciones";
+import type {DatosHistograma} from "@/app/sapoteca/get-histograma-publicaciones";
+
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface SapotecaHistogramaChartProps {
   data: DatosHistograma;
@@ -16,8 +12,8 @@ const ALTURA_MAX_BARRA = 220;
 const COLOR_BARRA = "#67aa4d";
 const COLOR_BARRA_CERO = "#e5e7eb";
 
-export default function SapotecaHistogramaChart({ data }: SapotecaHistogramaChartProps) {
-  const { puntos, totalPublicaciones } = data;
+export default function SapotecaHistogramaChart({data}: SapotecaHistogramaChartProps) {
+  const {puntos, totalPublicaciones} = data;
   const maxCantidad = Math.max(...puntos.map((p) => p.cantidad), 1);
 
   if (puntos.length === 0) {
@@ -35,24 +31,17 @@ export default function SapotecaHistogramaChart({ data }: SapotecaHistogramaChar
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4">
         <p className="text-lg font-semibold text-gray-800">
-          Publicaciones por año{" "}
-          <span className="text-gray-500">
-            (1849 – {new Date().getFullYear()}) · {totalPublicaciones.toLocaleString()} total
-          </span>
+          Publicaciones por año <span className="text-[#f07304]">|</span>{" "}
+          <span className="text-gray-500">total {totalPublicaciones.toLocaleString()}</span>
         </p>
       </div>
 
-      <div
-        className="flex w-full items-end gap-px"
-        style={{ height: ALTURA_MAX_BARRA + 32 }}
-      >
+      <div className="flex w-full items-end gap-px" style={{height: ALTURA_MAX_BARRA + 32}}>
         <TooltipProvider delayDuration={0}>
           {puntos.map((punto) => {
-            const altura =
-              maxCantidad > 0
-                ? (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA
-                : 0;
+            const altura = maxCantidad > 0 ? (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA : 0;
             const tieneDatos = punto.cantidad > 0;
+
             return (
               <Tooltip key={punto.año}>
                 <TooltipTrigger asChild>
@@ -64,18 +53,20 @@ export default function SapotecaHistogramaChart({ data }: SapotecaHistogramaChar
                     }}
                   />
                 </TooltipTrigger>
-                  <TooltipContent side="top" className="border border-gray-200 bg-white text-gray-900 shadow-md">
-                    <div className="space-y-0.5">
-                      <p className="font-medium">{punto.año}</p>
-                      <p className="text-xs text-gray-600">
-                        {punto.cantidad}{" "}
-                        {punto.cantidad === 1 ? "publicación" : "publicaciones"}
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
+                <TooltipContent
+                  className="border border-gray-200 bg-white text-gray-900 shadow-md"
+                  side="top"
+                >
+                  <div className="space-y-0.5">
+                    <p className="font-medium">{punto.año}</p>
+                    <p className="text-xs text-gray-600">
+                      {punto.cantidad} {punto.cantidad === 1 ? "publicación" : "publicaciones"}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </TooltipProvider>
       </div>
 
@@ -84,11 +75,9 @@ export default function SapotecaHistogramaChart({ data }: SapotecaHistogramaChar
         {puntos.map((punto, i) => {
           const step = Math.max(1, Math.floor(puntos.length / 10));
           const mostrar = i % step === 0;
+
           return (
-            <div
-              key={punto.año}
-              className="min-w-0 flex-1 text-center"
-            >
+            <div key={punto.año} className="min-w-0 flex-1 text-center">
               {mostrar ? punto.año : ""}
             </div>
           );

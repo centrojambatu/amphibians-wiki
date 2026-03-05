@@ -1,25 +1,21 @@
 "use client";
 
-import type { TiposPublicacionAgrupados } from "@/app/sapoteca/get-tipos-publicacion";
+import type {TiposPublicacionAgrupados} from "@/app/sapoteca/get-tipos-publicacion";
 
-import { useState, useEffect, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Search, Calendar, CornerDownLeft } from "lucide-react";
+import {useState, useEffect, useTransition} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {Search, Calendar, CornerDownLeft} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Slider} from "@/components/ui/slider";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -27,7 +23,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { FiltrosSapoteca } from "@/app/sapoteca/get-publicaciones-paginadas";
+import {FiltrosSapoteca} from "@/app/sapoteca/get-publicaciones-paginadas";
 
 interface SapotecaFiltersPanelProps {
   readonly tiposPublicacion: TiposPublicacionAgrupados;
@@ -76,35 +72,24 @@ export default function SapotecaFiltersPanel({
 
   const indexadaParam = searchParams.get("indexada");
   const indexadaInicial: boolean | undefined =
-    indexadaParam === "true"
-      ? true
-      : indexadaParam === "false"
-        ? false
-        : undefined;
+    indexadaParam === "true" ? true : indexadaParam === "false" ? false : undefined;
 
   const formatoImpresoParam = searchParams.get("formatoImpreso");
   const formatoImpresoInicial: boolean | undefined =
-    formatoImpresoParam === "true"
-      ? true
-      : formatoImpresoParam === "false"
-        ? false
-        : undefined;
+    formatoImpresoParam === "true" ? true : formatoImpresoParam === "false" ? false : undefined;
 
   const [filtros, setFiltros] = useState<FiltrosSapoteca>({
     titulo: tituloInicial || undefined,
     años: añosIniciales || undefined,
     autor: autorInicial || undefined,
-    tiposPublicacion:
-      searchParams.get("tipos")?.split(",").map(Number) || undefined,
+    tiposPublicacion: searchParams.get("tipos")?.split(",").map(Number) || undefined,
     indexada: indexadaInicial,
     formatoImpreso: formatoImpresoInicial,
   });
 
   useEffect(() => {
     if (tituloQuery.length >= 2) {
-      fetch(
-        `/api/sapoteca/sugerencias-titulos?q=${encodeURIComponent(tituloQuery)}`,
-      )
+      fetch(`/api/sapoteca/sugerencias-titulos?q=${encodeURIComponent(tituloQuery)}`)
         .then((res) => res.json())
         .then(setSugerenciasTitulos)
         .catch(() => setSugerenciasTitulos([]));
@@ -115,9 +100,7 @@ export default function SapotecaFiltersPanel({
 
   useEffect(() => {
     if (autorQuery.length >= 2) {
-      fetch(
-        `/api/sapoteca/sugerencias-autores?q=${encodeURIComponent(autorQuery)}`,
-      )
+      fetch(`/api/sapoteca/sugerencias-autores?q=${encodeURIComponent(autorQuery)}`)
         .then((res) => res.json())
         .then(setSugerenciasAutores)
         .catch(() => setSugerenciasAutores([]));
@@ -149,14 +132,12 @@ export default function SapotecaFiltersPanel({
     const params = new URLSearchParams();
 
     if (filtros.titulo) params.set("titulo", filtros.titulo);
-    if (filtros.años && filtros.años.length > 0)
-      params.set("años", filtros.años.join(","));
+    if (filtros.años && filtros.años.length > 0) params.set("años", filtros.años.join(","));
     if (filtros.autor) params.set("autor", filtros.autor);
     if (filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
       params.set("tipos", filtros.tiposPublicacion.join(","));
     }
-    if (filtros.indexada !== undefined)
-      params.set("indexada", String(filtros.indexada));
+    if (filtros.indexada !== undefined) params.set("indexada", String(filtros.indexada));
     if (filtros.formatoImpreso !== undefined)
       params.set("formatoImpreso", String(filtros.formatoImpreso));
 
@@ -173,13 +154,13 @@ export default function SapotecaFiltersPanel({
 
   const handleTituloChange = (value: string) => {
     setTituloQuery(value);
-    setFiltros((prev) => ({ ...prev, titulo: value || undefined }));
+    setFiltros((prev) => ({...prev, titulo: value || undefined}));
     setTituloOpen(value.length >= 2 && sugerenciasTitulos.length > 0);
   };
 
   const handleSelectTitulo = (titulo: string) => {
     setTituloQuery(titulo);
-    setFiltros((prev) => ({ ...prev, titulo }));
+    setFiltros((prev) => ({...prev, titulo}));
     setTituloOpen(false);
   };
 
@@ -204,19 +185,19 @@ export default function SapotecaFiltersPanel({
     const añoClamp = Math.min(añoMax, Math.max(añoMin, año));
 
     setRangoAños([añoClamp, añoClamp]);
-    setFiltros((prev) => ({ ...prev, años: [añoClamp] }));
+    setFiltros((prev) => ({...prev, años: [añoClamp]}));
     setAñoEspecificoInput("");
   };
 
   const handleAutorChange = (value: string) => {
     setAutorQuery(value);
-    setFiltros((prev) => ({ ...prev, autor: value || undefined }));
+    setFiltros((prev) => ({...prev, autor: value || undefined}));
     setAutorOpen(value.length >= 2 && sugerenciasAutores.length > 0);
   };
 
   const handleSelectAutor = (autor: string) => {
     setAutorQuery(autor);
-    setFiltros((prev) => ({ ...prev, autor }));
+    setFiltros((prev) => ({...prev, autor}));
     setAutorOpen(false);
   };
 
@@ -267,10 +248,7 @@ export default function SapotecaFiltersPanel({
                     value={tituloQuery || filtros.titulo || ""}
                     onChange={(e) => handleTituloChange(e.target.value)}
                     onFocus={() => {
-                      if (
-                        tituloQuery.length >= 2 &&
-                        sugerenciasTitulos.length > 0
-                      )
+                      if (tituloQuery.length >= 2 && sugerenciasTitulos.length > 0)
                         setTituloOpen(true);
                     }}
                   />
@@ -283,10 +261,9 @@ export default function SapotecaFiltersPanel({
               >
                 <Command>
                   <CommandList>
-                    {sugerenciasTitulos.length === 0 &&
-                      tituloQuery.length >= 2 && (
-                        <CommandEmpty>No se encontraron títulos</CommandEmpty>
-                      )}
+                    {sugerenciasTitulos.length === 0 && tituloQuery.length >= 2 && (
+                      <CommandEmpty>No se encontraron títulos</CommandEmpty>
+                    )}
                     {sugerenciasTitulos.length > 0 && (
                       <CommandGroup>
                         {sugerenciasTitulos.map((titulo) => (
@@ -328,10 +305,7 @@ export default function SapotecaFiltersPanel({
                     value={autorQuery || filtros.autor || ""}
                     onChange={(e) => handleAutorChange(e.target.value)}
                     onFocus={() => {
-                      if (
-                        autorQuery.length >= 2 &&
-                        sugerenciasAutores.length > 0
-                      )
+                      if (autorQuery.length >= 2 && sugerenciasAutores.length > 0)
                         setAutorOpen(true);
                     }}
                   />
@@ -344,10 +318,9 @@ export default function SapotecaFiltersPanel({
               >
                 <Command>
                   <CommandList>
-                    {sugerenciasAutores.length === 0 &&
-                      autorQuery.length >= 2 && (
-                        <CommandEmpty>No se encontraron autores</CommandEmpty>
-                      )}
+                    {sugerenciasAutores.length === 0 && autorQuery.length >= 2 && (
+                      <CommandEmpty>No se encontraron autores</CommandEmpty>
+                    )}
                     {sugerenciasAutores.length > 0 && (
                       <CommandGroup>
                         {sugerenciasAutores.map((autor) => (
@@ -400,9 +373,7 @@ export default function SapotecaFiltersPanel({
 
                     if (v) aplicarAñoEspecifico(v);
                   }}
-                  onChange={(e) =>
-                    setAñoEspecificoInput(e.target.value.replace(/\D/g, ""))
-                  }
+                  onChange={(e) => setAñoEspecificoInput(e.target.value.replace(/\D/g, ""))}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       const v = (e.target as HTMLInputElement).value.trim();
@@ -413,10 +384,7 @@ export default function SapotecaFiltersPanel({
                 />
               </div>
               <span className="shrink-0" title="Enter para aplicar">
-                <CornerDownLeft
-                  aria-hidden
-                  className="text-muted-foreground h-4 w-4"
-                />
+                <CornerDownLeft aria-hidden className="text-muted-foreground h-4 w-4" />
               </span>
             </div>
             <div className="space-y-2 pt-2">
@@ -440,21 +408,11 @@ export default function SapotecaFiltersPanel({
 
           {/* Tipo de publicación: despliegue en "Científica", con divisiones */}
           {(() => {
-            const cientifica = tiposPublicacion.secciones.find(
-              (s) => s.tipo === "CIENTIFICA",
-            );
-            const tesis = tiposPublicacion.secciones.find(
-              (s) => s.tipo === "TESIS",
-            );
-            const divulgacion = tiposPublicacion.secciones.find(
-              (s) => s.tipo === "DIVULGACIÓN",
-            );
-            const otro = tiposPublicacion.secciones.find(
-              (s) => s.tipo === "OTRO",
-            );
-            const sinAsignar = tiposPublicacion.secciones.find(
-              (s) => s.tipo === "SIN_ASIGNAR",
-            );
+            const cientifica = tiposPublicacion.secciones.find((s) => s.tipo === "CIENTIFICA");
+            const tesis = tiposPublicacion.secciones.find((s) => s.tipo === "TESIS");
+            const divulgacion = tiposPublicacion.secciones.find((s) => s.tipo === "DIVULGACIÓN");
+            const otro = tiposPublicacion.secciones.find((s) => s.tipo === "OTRO");
+            const sinAsignar = tiposPublicacion.secciones.find((s) => s.tipo === "SIN_ASIGNAR");
 
             return (
               <>
@@ -467,9 +425,9 @@ export default function SapotecaFiltersPanel({
                     <AccordionTrigger className="!items-start px-6 py-3">
                       {cientifica ? (
                         <span className="text-foreground text-sm">
-                          {cientifica.titulo}
-                          <span className="ml-1.5 font-semibold tabular-nums">
-                            ({cientifica.totalPublicaciones.toLocaleString()})
+                          {cientifica.titulo} <span className="text-[#f07304]">|</span>{" "}
+                          <span className="text-muted-foreground tabular-nums">
+                            {cientifica.totalPublicaciones.toLocaleString()}
                           </span>
                         </span>
                       ) : (
@@ -482,19 +440,11 @@ export default function SapotecaFiltersPanel({
                           className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                           size="sm"
                           style={{
-                            borderColor:
-                              filtros.indexada === true
-                                ? undefined
-                                : "#e8e8e8",
-                            color:
-                              filtros.indexada === true
-                                ? undefined
-                                : "#2d2d2d",
+                            borderColor: filtros.indexada === true ? undefined : "#e8e8e8",
+                            color: filtros.indexada === true ? undefined : "#2d2d2d",
                           }}
                           type="button"
-                          variant={
-                            filtros.indexada === true ? "default" : "outline"
-                          }
+                          variant={filtros.indexada === true ? "default" : "outline"}
                           onClick={() => handleIndexadaChange(true)}
                         >
                           Indexadas
@@ -503,102 +453,73 @@ export default function SapotecaFiltersPanel({
                           className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                           size="sm"
                           style={{
-                            borderColor:
-                              filtros.indexada === false
-                                ? undefined
-                                : "#e8e8e8",
-                            color:
-                              filtros.indexada === false
-                                ? undefined
-                                : "#2d2d2d",
+                            borderColor: filtros.indexada === false ? undefined : "#e8e8e8",
+                            color: filtros.indexada === false ? undefined : "#2d2d2d",
                           }}
                           type="button"
-                          variant={
-                            filtros.indexada === false ? "default" : "outline"
-                          }
+                          variant={filtros.indexada === false ? "default" : "outline"}
                           onClick={() => handleIndexadaChange(false)}
                         >
                           No indexadas
                         </Button>
-                        {cientifica && (() => {
-                          const articuloItem = cientifica.items.find(
-                            (i) =>
-                              i.nombre.toLowerCase() === "artículo" ||
-                              i.nombre.toLowerCase() === "articulo",
-                          );
-                          const libroCientificoItem = cientifica.items.find(
-                            (i) =>
-                              i.nombre
-                                .toLowerCase()
-                                .includes("libro científico") ||
-                              i.nombre.toLowerCase().includes("libro cientifico"),
-                          );
-                          const articuloSelected = articuloItem
-                            ? filtros.tiposPublicacion?.includes(articuloItem.id)
-                            : false;
-                          const libroCientificoSelected = libroCientificoItem
-                            ? filtros.tiposPublicacion?.includes(
-                                libroCientificoItem.id,
-                              )
-                            : false;
-                          if (!articuloItem && !libroCientificoItem) return null;
-                          return (
-                            <>
-                              {articuloItem && (
-                                <Button
-                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                  size="sm"
-                                  style={{
-                                    borderColor: articuloSelected
-                                      ? undefined
-                                      : "#e8e8e8",
-                                    color: articuloSelected
-                                      ? undefined
-                                      : "#2d2d2d",
-                                  }}
-                                  type="button"
-                                  variant={
-                                    articuloSelected
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  onClick={() =>
-                                    handleTipoSeccionChange([articuloItem.id])
-                                  }
-                                >
-                                  Artículo
-                                </Button>
-                              )}
-                              {libroCientificoItem && (
-                                <Button
-                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                  size="sm"
-                                  style={{
-                                    borderColor: libroCientificoSelected
-                                      ? undefined
-                                      : "#e8e8e8",
-                                    color: libroCientificoSelected
-                                      ? undefined
-                                      : "#2d2d2d",
-                                  }}
-                                  type="button"
-                                  variant={
-                                    libroCientificoSelected
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  onClick={() =>
-                                    handleTipoSeccionChange([
-                                      libroCientificoItem.id,
-                                    ])
-                                  }
-                                >
-                                  Libro científico
-                                </Button>
-                              )}
-                            </>
-                          );
-                        })()}
+                        {cientifica &&
+                          (() => {
+                            const articuloItem = cientifica.items.find(
+                              (i) =>
+                                i.nombre.toLowerCase() === "artículo" ||
+                                i.nombre.toLowerCase() === "articulo",
+                            );
+                            const libroCientificoItem = cientifica.items.find(
+                              (i) =>
+                                i.nombre.toLowerCase().includes("libro científico") ||
+                                i.nombre.toLowerCase().includes("libro cientifico"),
+                            );
+                            const articuloSelected = articuloItem
+                              ? filtros.tiposPublicacion?.includes(articuloItem.id)
+                              : false;
+                            const libroCientificoSelected = libroCientificoItem
+                              ? filtros.tiposPublicacion?.includes(libroCientificoItem.id)
+                              : false;
+
+                            if (!articuloItem && !libroCientificoItem) return null;
+
+                            return (
+                              <div className="mt-4 flex flex-col gap-2 pt-4">
+                                {articuloItem && (
+                                  <Button
+                                    className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                    size="sm"
+                                    style={{
+                                      borderColor: articuloSelected ? undefined : "#e8e8e8",
+                                      color: articuloSelected ? undefined : "#2d2d2d",
+                                    }}
+                                    type="button"
+                                    variant={articuloSelected ? "default" : "outline"}
+                                    onClick={() => handleTipoSeccionChange([articuloItem.id])}
+                                  >
+                                    Artículo
+                                  </Button>
+                                )}
+                                {libroCientificoItem && (
+                                  <Button
+                                    className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                    size="sm"
+                                    style={{
+                                      borderColor: libroCientificoSelected ? undefined : "#e8e8e8",
+                                      color: libroCientificoSelected ? undefined : "#2d2d2d",
+                                    }}
+                                    type="button"
+                                    variant={libroCientificoSelected ? "default" : "outline"}
+                                    onClick={() =>
+                                      handleTipoSeccionChange([libroCientificoItem.id])
+                                    }
+                                  >
+                                    Libro científico
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          })()}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -624,116 +545,77 @@ export default function SapotecaFiltersPanel({
                         <AccordionItem value="divulgacion">
                           <AccordionTrigger className="!items-start px-6 py-3">
                             <span className="text-foreground text-sm">
-                              {divulgacion.titulo}
-                              <span className="ml-1.5 font-semibold tabular-nums">
-                                ({divulgacion.totalPublicaciones.toLocaleString()})
+                              {divulgacion.titulo} <span className="text-[#f07304]">|</span>{" "}
+                              <span className="text-muted-foreground tabular-nums">
+                                {divulgacion.totalPublicaciones.toLocaleString()}
                               </span>
                             </span>
                           </AccordionTrigger>
                           <AccordionContent className="space-y-2 px-6">
-                                  <div>
-                                    <p className="text-muted-foreground mb-1.5 text-xs font-medium">
-                                      Impresas o web
-                                    </p>
-                                    <div className="flex flex-col gap-2">
-                                      <Button
-                                        className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                        size="sm"
-                                        style={{
-                                          borderColor:
-                                            filtros.formatoImpreso === true
-                                              ? undefined
-                                              : "#e8e8e8",
-                                          color:
-                                            filtros.formatoImpreso === true
-                                              ? undefined
-                                              : "#2d2d2d",
-                                        }}
-                                        type="button"
-                                        variant={
-                                          filtros.formatoImpreso === true
-                                            ? "default"
-                                            : "outline"
-                                        }
-                                        onClick={() =>
-                                          handleFormatoImpresoChange(true)
-                                        }
-                                      >
-                                        Impresa
-                                      </Button>
-                                      <Button
-                                        className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                        size="sm"
-                                        style={{
-                                          borderColor:
-                                            filtros.formatoImpreso === false
-                                              ? undefined
-                                              : "#e8e8e8",
-                                          color:
-                                            filtros.formatoImpreso === false
-                                              ? undefined
-                                              : "#2d2d2d",
-                                        }}
-                                        type="button"
-                                        variant={
-                                          filtros.formatoImpreso === false
-                                            ? "default"
-                                            : "outline"
-                                        }
-                                        onClick={() =>
-                                          handleFormatoImpresoChange(false)
-                                        }
-                                      >
-                                        Web
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  {libroItem && (
-                                    <Button
-                                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                      size="sm"
-                                      style={{
-                                        borderColor: libroSelected
-                                          ? undefined
-                                          : "#e8e8e8",
-                                        color: libroSelected
-                                          ? undefined
-                                          : "#2d2d2d",
-                                      }}
-                                      type="button"
-                                      variant={
-                                        libroSelected ? "default" : "outline"
-                                      }
-                                      onClick={() =>
-                                        handleTipoSeccionChange([libroItem.id])
-                                      }
-                                    >
-                                      Libros
-                                    </Button>
-                                  )}
-                                  {guiaItem && (
-                                    <Button
-                                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                      size="sm"
-                                      style={{
-                                        borderColor: guiaSelected
-                                          ? undefined
-                                          : "#e8e8e8",
-                                        color: guiaSelected
-                                          ? undefined
-                                          : "#2d2d2d",
-                                      }}
-                                      type="button"
-                                      variant={
-                                        guiaSelected ? "default" : "outline"
-                                      }
-                                      onClick={() =>
-                                        handleTipoSeccionChange([guiaItem.id])
-                                      }
-                                    >
-                                      Guías
-                                    </Button>
-                                  )}
+                            <div>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                  size="sm"
+                                  style={{
+                                    borderColor:
+                                      filtros.formatoImpreso === true ? undefined : "#e8e8e8",
+                                    color: filtros.formatoImpreso === true ? undefined : "#2d2d2d",
+                                  }}
+                                  type="button"
+                                  variant={filtros.formatoImpreso === true ? "default" : "outline"}
+                                  onClick={() => handleFormatoImpresoChange(true)}
+                                >
+                                  Impresa
+                                </Button>
+                                <Button
+                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                  size="sm"
+                                  style={{
+                                    borderColor:
+                                      filtros.formatoImpreso === false ? undefined : "#e8e8e8",
+                                    color: filtros.formatoImpreso === false ? undefined : "#2d2d2d",
+                                  }}
+                                  type="button"
+                                  variant={filtros.formatoImpreso === false ? "default" : "outline"}
+                                  onClick={() => handleFormatoImpresoChange(false)}
+                                >
+                                  Web
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="mt-4 flex flex-col gap-2 pt-4">
+                              {libroItem && (
+                                <Button
+                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                  size="sm"
+                                  style={{
+                                    borderColor: libroSelected ? undefined : "#e8e8e8",
+                                    color: libroSelected ? undefined : "#2d2d2d",
+                                  }}
+                                  type="button"
+                                  variant={libroSelected ? "default" : "outline"}
+                                  onClick={() => handleTipoSeccionChange([libroItem.id])}
+                                >
+                                  Libros
+                                </Button>
+                              )}
+                              {guiaItem && (
+                              <Button
+                                className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                size="sm"
+                                style={{
+                                  borderColor: guiaSelected ? undefined : "#e8e8e8",
+                                  color: guiaSelected ? undefined : "#2d2d2d",
+                                }}
+                                type="button"
+                                variant={guiaSelected ? "default" : "outline"}
+                                onClick={() => handleTipoSeccionChange([guiaItem.id])}
+                              >
+                                Guías
+                              </Button>
+                            )}
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       );
@@ -750,9 +632,9 @@ export default function SapotecaFiltersPanel({
                         <AccordionItem value="tesis">
                           <AccordionTrigger className="!items-start px-6 py-3">
                             <span className="text-foreground text-sm">
-                              {tesis.titulo}
-                              <span className="ml-1.5 font-semibold tabular-nums">
-                                ({tesis.totalPublicaciones.toLocaleString()})
+                              {tesis.titulo} <span className="text-[#f07304]">|</span>{" "}
+                              <span className="text-muted-foreground tabular-nums">
+                                {tesis.totalPublicaciones.toLocaleString()}
                               </span>
                             </span>
                           </AccordionTrigger>
@@ -761,20 +643,12 @@ export default function SapotecaFiltersPanel({
                               className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                               size="sm"
                               style={{
-                                borderColor: tesisSelected
-                                  ? undefined
-                                  : "#e8e8e8",
-                                color: tesisSelected
-                                  ? undefined
-                                  : "#2d2d2d",
+                                borderColor: tesisSelected ? undefined : "#e8e8e8",
+                                color: tesisSelected ? undefined : "#2d2d2d",
                               }}
                               type="button"
-                              variant={
-                                tesisSelected ? "default" : "outline"
-                              }
-                              onClick={() =>
-                                handleTipoSeccionChange(tesisIds)
-                              }
+                              variant={tesisSelected ? "default" : "outline"}
+                              onClick={() => handleTipoSeccionChange(tesisIds)}
                             >
                               Tesis
                             </Button>
@@ -794,9 +668,9 @@ export default function SapotecaFiltersPanel({
                         <AccordionItem value="otro">
                           <AccordionTrigger className="!items-start px-6 py-3">
                             <span className="text-foreground text-sm">
-                              {otro.titulo}
-                              <span className="ml-1.5 font-semibold tabular-nums">
-                                ({otro.totalPublicaciones.toLocaleString()})
+                              {otro.titulo} <span className="text-[#f07304]">|</span>{" "}
+                              <span className="text-muted-foreground tabular-nums">
+                                {otro.totalPublicaciones.toLocaleString()}
                               </span>
                             </span>
                           </AccordionTrigger>
@@ -805,20 +679,12 @@ export default function SapotecaFiltersPanel({
                               className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                               size="sm"
                               style={{
-                                borderColor: otroSelected
-                                  ? undefined
-                                  : "#e8e8e8",
-                                color: otroSelected
-                                  ? undefined
-                                  : "#2d2d2d",
+                                borderColor: otroSelected ? undefined : "#e8e8e8",
+                                color: otroSelected ? undefined : "#2d2d2d",
                               }}
                               type="button"
-                              variant={
-                                otroSelected ? "default" : "outline"
-                              }
-                              onClick={() =>
-                                handleTipoSeccionChange(otroIds)
-                              }
+                              variant={otroSelected ? "default" : "outline"}
+                              onClick={() => handleTipoSeccionChange(otroIds)}
                             >
                               Otros
                             </Button>
@@ -831,9 +697,9 @@ export default function SapotecaFiltersPanel({
                 {sinAsignar && (
                   <div className="border-b px-6 py-3">
                     <p className="text-foreground text-sm">
-                      {sinAsignar.titulo}
-                      <span className="ml-1.5 font-semibold tabular-nums">
-                        ({sinAsignar.totalPublicaciones.toLocaleString()})
+                      {sinAsignar.titulo} <span className="text-[#f07304]">|</span>{" "}
+                      <span className="text-muted-foreground tabular-nums">
+                        {sinAsignar.totalPublicaciones.toLocaleString()}
                       </span>
                     </p>
                   </div>

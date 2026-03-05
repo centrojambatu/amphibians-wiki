@@ -10,10 +10,11 @@ export interface DatosHistograma {
   totalPublicaciones: number;
 }
 
-const AÑO_INICIO = 1849;
+/** Límite inferior razonable para años (evita datos erróneos). El inicio real es el de la publicación más antigua. */
+const AÑO_MIN_SANE = 1000;
 
 /**
- * Obtiene el número de publicaciones por año (solo Ecuador) desde 1849 hasta el año actual.
+ * Obtiene el número de publicaciones por año (solo Ecuador) desde la publicación más antigua hasta el año actual.
  * Devuelve también el conteo de publicaciones únicas (no la suma de pares año-publicación).
  */
 export default async function getHistogramaPublicaciones(): Promise<DatosHistograma> {
@@ -26,7 +27,7 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
     .select("*", { count: "exact", head: true })
     .eq("anfibios_ecuador", true);
 
-  // Intentar primero la vista (más eficiente)
+  // Intentar primero la vista (más eficiente); la vista incluye todos los años >= 1000
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista puede no estar en tipos
   const { data: viewData, error: viewError } = await supabase
     .from("vw_publicaciones_ecuador_por_ano" as any)
@@ -36,12 +37,14 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
     const countsByYear = new Map<number, number>();
     for (const row of viewData as { ano: number; cantidad: number }[]) {
       const año = Number(row.ano);
-      if (año >= AÑO_INICIO && año <= añoActual) {
+      if (año >= AÑO_MIN_SANE && año <= añoActual) {
         countsByYear.set(año, row.cantidad ?? 0);
       }
     }
+    const añoInicio =
+      countsByYear.size > 0 ? Math.min(...countsByYear.keys()) : añoActual;
     return {
-      puntos: rellenarRango(AÑO_INICIO, añoActual, countsByYear),
+      puntos: rellenarRango(añoInicio, añoActual, countsByYear),
       totalPublicaciones: totalPublicaciones ?? 0,
     };
   }
@@ -69,7 +72,7 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
       .from("publicacion_ano")
       .select("ano")
       .in("publicacion_id", chunk)
-      .gte("ano", AÑO_INICIO)
+      .gte("ano", AÑO_MIN_SANE)
       .lte("ano", añoActual);
     const rows = anosData ?? [];
     for (const r of rows as { ano: number }[]) {
@@ -78,8 +81,10 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
     }
   }
 
+  const añoInicio =
+    countsByYear.size > 0 ? Math.min(...countsByYear.keys()) : añoActual;
   return {
-    puntos: rellenarRango(AÑO_INICIO, añoActual, countsByYear),
+    puntos: rellenarRango(añoInicio, añoActual, countsByYear),
     totalPublicaciones: totalPublicaciones ?? idsEcuador.length,
   };
 }

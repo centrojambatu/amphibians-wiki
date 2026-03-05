@@ -7,6 +7,12 @@ export interface PublicacionMasCitada {
   enlace: string | null;
 }
 
+export interface PublicacionCientificaMasReciente {
+  idPublicacion: number;
+  titulo: string;
+  enlace: string | null;
+}
+
 export interface EstadisticasSapoteca {
   totalCientificas: number;
   totalDivulgacion: number;
@@ -19,7 +25,7 @@ export interface EstadisticasSapoteca {
   totalEcologia: number;
   totalConservacion: number;
   publicacionMasCitada: PublicacionMasCitada | null;
-  totalAutoresEcuador: number;
+  publicacionCientificaMasReciente: PublicacionCientificaMasReciente | null;
 }
 
 /** Tipos de catalogo_publicaciones que cuentan como "científicas" */
@@ -82,7 +88,7 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     { count: countEcologia },
     { count: countConservacion },
     masCitadaResult,
-    totalAutoresEcuadorResult,
+    masRecienteResult,
   ] = await Promise.all([
     supabase
       .from("vw_publicacion_cientifica_ecuador" as any)
@@ -124,7 +130,12 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
       .order("contador_citas", { ascending: false })
       .limit(1)
       .single(),
-    supabase.from("vw_total_autores_ecuador_cientificas" as any).select("total").single(),
+    supabase
+      .from("vw_publicacion_cientifica_ecuador" as any)
+      .select("id_publicacion, titulo, numero_publicacion_ano, fecha")
+      .order("numero_publicacion_ano", { ascending: false, nullsFirst: false })
+      .limit(1)
+      .single(),
   ]);
 
   const totalUltimaDecada = countUltimaDecada ?? 0;
@@ -156,8 +167,30 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     };
   }
 
-  const totalAutoresEcuador =
-    (totalAutoresEcuadorResult.data as { total: number } | null)?.total ?? 0;
+  const masReciente = masRecienteResult.data as {
+    id_publicacion: number;
+    titulo: string | null;
+  } | null;
+
+  let publicacionCientificaMasReciente: PublicacionCientificaMasReciente | null = null;
+  if (masReciente?.id_publicacion && masReciente?.titulo) {
+    const { data: enlaceMasReciente } = await supabase
+      .from("publicacion_enlace")
+      .select("enlace")
+      .eq("publicacion_id", masReciente.id_publicacion)
+      .neq("enlace", "")
+      .neq("enlace", "http://")
+      .not("enlace", "is", null)
+      .order("id_publicacion_enlace", { ascending: true })
+      .limit(1)
+      .single();
+
+    publicacionCientificaMasReciente = {
+      idPublicacion: masReciente.id_publicacion,
+      titulo: masReciente.titulo,
+      enlace: enlaceMasReciente?.enlace ?? null,
+    };
+  }
 
   return {
     totalCientificas: countCientificas ?? 0,
@@ -171,6 +204,6 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     totalEcologia: countEcologia ?? 0,
     totalConservacion: countConservacion ?? 0,
     publicacionMasCitada,
-    totalAutoresEcuador,
+    publicacionCientificaMasReciente,
   };
 }
