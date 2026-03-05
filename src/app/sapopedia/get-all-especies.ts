@@ -55,6 +55,35 @@ function parseCatalogString(catalogString: string | null): string[] {
     .filter((slug) => slug.length > 0);
 }
 
+const CHUNK_SIZE = 200;
+
+/**
+ * Ejecuta una query con .in(field, ids) por chunks en paralelo y une resultados.
+ * Evita requests muy grandes y planes ineficientes (supabase-postgres-best-practices).
+ */
+async function fetchInChunks<T>(
+  ids: number[],
+  chunkSize: number,
+  run: (chunk: number[]) => Promise<{ data: T[] | null; error: unknown }>,
+): Promise<{ data: T[]; error: unknown }> {
+  if (ids.length === 0) return { data: [], error: null };
+  if (ids.length <= chunkSize) {
+    const r = await run(ids);
+    return { data: r.data ?? [], error: r.error };
+  }
+  const chunks: number[][] = [];
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    chunks.push(ids.slice(i, i + chunkSize));
+  }
+  const results = await Promise.all(chunks.map((c) => run(c)));
+  const firstError = results.find((r) => r.error)?.error ?? null;
+  if (firstError) console.error("Error en consulta por chunks:", firstError);
+  return {
+    data: results.flatMap((r) => r.data ?? []),
+    error: firstError,
+  };
+}
+
 export default async function getAllEspecies(
   familia?: string,
 ): Promise<SpeciesListItem[]> {
@@ -98,14 +127,87 @@ export default async function getAllEspecies(
   // Rank de geopolitica para provincias
   const RANK_PROVINCIAS = 3;
 
-  // Obtener el mapeo de nombre -> sigla para categorías UICN
-  const { data: categoriasUICN, error: errorCategoriasUICN } = await supabaseClient
-    .from("catalogo_awe")
-    .select("nombre, sigla")
-    .eq("tipo_catalogo_awe_id", TIPO_LISTA_ROJA);
+  const fichaEspecieIds: number[] = especies
+    .map((e: any) => e.especie_ficha_especie_id as number)
+    .filter((id: number | null | undefined): id is number => id != null);
+
+  // Consultas auxiliares en paralelo; listas grandes se fragmentan en chunks (data-n-plus-one / evitar .in() enorme)
+  const [
+    { data: categoriasUICN, error: errorCategoriasUICN },
+    catalogosResult,
+    provinciasResult,
+    fichasResult,
+    nombresResult,
+  ] = await Promise.all([
+    supabaseClient
+      .from("catalogo_awe")
+      .select("nombre, sigla")
+      .eq("tipo_catalogo_awe_id", TIPO_LISTA_ROJA),
+    fetchInChunks(
+      taxonIds,
+      CHUNK_SIZE,
+      (chunk) =>
+        Promise.resolve(
+          supabaseClient
+            .from("taxon_catalogo_awe")
+            .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
+            .in("taxon_id", chunk)
+            .in("catalogo_awe.tipo_catalogo_awe_id", [
+              TIPO_ECOSISTEMAS,
+              TIPO_RESERVAS_BIOSFERA,
+              TIPO_BOSQUES_PROTEGIDOS,
+            ]),
+        ).then((r: { data: unknown[] | null; error: unknown }) => r),
+    ),
+    fetchInChunks(
+      taxonIds,
+      CHUNK_SIZE,
+      (chunk) =>
+        Promise.resolve(
+          supabaseClient
+            .from("taxon_geopolitica")
+            .select(
+              "taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)",
+            )
+            .in("taxon_id", chunk)
+            .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS),
+        ).then((r: { data: unknown[] | null; error: unknown }) => r),
+    ),
+    fetchInChunks(fichaEspecieIds, CHUNK_SIZE, (chunk) =>
+      Promise.resolve(
+        supabaseClient
+          .from("ficha_especie")
+          .select("id_ficha_especie, descubridor")
+          .in("id_ficha_especie", chunk),
+      ).then((r: { data: unknown[] | null; error: unknown }) => r),
+    ),
+    fetchInChunks(taxonIds, CHUNK_SIZE, (chunk) =>
+      Promise.resolve(
+        (supabaseClient as any)
+          .from("vw_nombres_comunes")
+          .select("id_taxon, nombre_comun_ingles")
+          .in("id_taxon", chunk),
+      ).then((r: { data: unknown[] | null; error: unknown }) => r),
+    ),
+  ]);
+
+  const catalogosData = catalogosResult.data;
+  const provinciasData = provinciasResult.data;
+  const fichasData = fichasResult.data;
+  const nombresData = nombresResult.data;
+  const errorCatalogos = catalogosResult.error;
+  const errorProvincias = provinciasResult.error;
+  const errorFichas = fichasResult.error;
+  const errorNombres = nombresResult.error;
 
   if (errorCategoriasUICN) {
     console.error("Error al obtener categorías UICN:", errorCategoriasUICN);
+  }
+  if (errorCatalogos) {
+    console.error("Error al obtener catálogos:", errorCatalogos);
+  }
+  if (errorProvincias) {
+    console.error("Error al obtener provincias:", errorProvincias);
   }
 
   // Crear mapa de nombre -> sigla para UICN
@@ -116,34 +218,6 @@ export default async function getAllEspecies(
         nombreASiglaMap.set(cat.nombre, cat.sigla);
       }
     }
-  }
-
-  // Obtener catálogos que faltan en la vista (sin provincias y sin Lista Roja, que viene de awe_lista_roja_uicn)
-  const { data: catalogosData, error: errorCatalogos } = await supabaseClient
-    .from("taxon_catalogo_awe")
-    .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
-    .in("taxon_id", taxonIds)
-    .in("catalogo_awe.tipo_catalogo_awe_id", [
-      TIPO_ECOSISTEMAS,
-      TIPO_RESERVAS_BIOSFERA,
-      TIPO_BOSQUES_PROTEGIDOS,
-    ]);
-
-  // Obtener provincias desde taxon_geopolitica
-  const { data: provinciasData, error: errorProvincias } = await supabaseClient
-    .from("taxon_geopolitica")
-    .select(
-      "taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)",
-    )
-    .in("taxon_id", taxonIds)
-    .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
-
-  if (errorCatalogos) {
-    console.error("Error al obtener catálogos:", errorCatalogos);
-  }
-
-  if (errorProvincias) {
-    console.error("Error al obtener provincias:", errorProvincias);
   }
 
   // Crear mapas de taxon_id -> catálogos
@@ -234,44 +308,28 @@ export default async function getAllEspecies(
     }
   }
 
-  // Obtener el campo descubridor de ficha_especie
-  const fichaEspecieIds: number[] = especies
-    .map((e: any) => e.especie_ficha_especie_id as number)
-    .filter((id: number | null | undefined): id is number => id != null);
-
   const descubridorMap = new Map<number, string | null>();
-
-  if (fichaEspecieIds.length > 0) {
-    const { data: fichasData, error: errorFichas } = await supabaseClient
-      .from("ficha_especie")
-      .select("id_ficha_especie, descubridor")
-      .in("id_ficha_especie", fichaEspecieIds);
-
-    if (errorFichas) {
-      console.error("Error al obtener descubridor de ficha_especie:", errorFichas);
-    } else if (fichasData) {
-      for (const ficha of fichasData) {
-        descubridorMap.set(
-          ficha.id_ficha_especie,
-          ficha.descubridor ?? null,
-        );
-      }
+  if (errorFichas) {
+    console.error("Error al obtener descubridor de ficha_especie:", errorFichas);
+  } else if (fichasData.length > 0) {
+    const fichas = fichasData as { id_ficha_especie: number; descubridor: string | null }[];
+    for (const ficha of fichas) {
+      descubridorMap.set(ficha.id_ficha_especie, ficha.descubridor ?? null);
     }
   }
 
-  // Nombre común en inglés desde vw_nombres_comunes (misma fuente que la página de nombres)
   const nombreComunInglesMap = new Map<number, string | null>();
-  if (taxonIds.length > 0) {
-    const { data: nombresData, error: errorNombres } = await (supabaseClient as any)
-      .from("vw_nombres_comunes")
-      .select("id_taxon, nombre_comun_ingles")
-      .in("id_taxon", taxonIds);
-
-    if (!errorNombres && nombresData) {
-      for (const row of nombresData as { id_taxon: number; nombre_comun_ingles: string | null }[]) {
-        if (row.id_taxon != null && row.nombre_comun_ingles != null && row.nombre_comun_ingles.trim() !== "") {
-          nombreComunInglesMap.set(row.id_taxon, row.nombre_comun_ingles.trim());
-        }
+  if (!errorNombres && nombresData) {
+    for (const row of nombresData as {
+      id_taxon: number;
+      nombre_comun_ingles: string | null;
+    }[]) {
+      if (
+        row.id_taxon != null &&
+        row.nombre_comun_ingles != null &&
+        row.nombre_comun_ingles.trim() !== ""
+      ) {
+        nombreComunInglesMap.set(row.id_taxon, row.nombre_comun_ingles.trim());
       }
     }
   }

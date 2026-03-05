@@ -900,128 +900,47 @@ interface VwNombresComunes {
 }
 
 /**
- * Obtiene la información taxonómica (orden, familia, género) para una lista de taxones
+ * Obtiene la información taxonómica (orden, familia, género) para una lista de taxones.
+ * Usa RPC get_taxon_hierarchy (una query con JOINs) en lugar de 4 consultas por lote.
  */
 async function getTaxonInfo(
   supabaseClient: any,
   taxonIds: number[],
 ): Promise<Map<number, TaxonInfo>> {
   const taxonInfoMap = new Map<number, TaxonInfo>();
+  if (taxonIds.length === 0) return taxonInfoMap;
 
-  if (taxonIds.length === 0) {
-    return taxonInfoMap;
-  }
-
-  // Obtener información taxonómica en lotes
-  const batchSize = 100;
-
+  const batchSize = 200;
+  const batches: number[][] = [];
   for (let i = 0; i < taxonIds.length; i += batchSize) {
-    const batch = taxonIds.slice(i, i + batchSize);
-
-    // Obtener especies con su taxon_id (género)
-    const {data: especies, error: errorEspecies} = await supabaseClient
-      .from("taxon")
-      .select("id_taxon, taxon_id")
-      .in("id_taxon", batch)
-      .eq("rank_id", 7);
-
-    if (errorEspecies) {
-      console.error("Error al obtener especies:", errorEspecies);
-      continue;
-    }
-
-    if (!especies || especies.length === 0) {
-      continue;
-    }
-
-    // Obtener géneros
-    const generoIds = [...new Set(especies.map((e: any) => e.taxon_id).filter((id: any) => id !== null))];
-    
-    if (generoIds.length === 0) {
-      continue;
-    }
-
-    const {data: generos, error: errorGeneros} = await supabaseClient
-      .from("taxon")
-      .select("id_taxon, taxon, taxon_id")
-      .in("id_taxon", generoIds)
-      .eq("rank_id", 6);
-
-    if (errorGeneros) {
-      console.error("Error al obtener géneros:", errorGeneros);
-      continue;
-    }
-
-    // Obtener familias
-    const familiaIds = [...new Set(generos?.map((g: any) => g.taxon_id).filter((id: any) => id !== null) || [])];
-    
-    if (familiaIds.length === 0) {
-      continue;
-    }
-
-    const {data: familias, error: errorFamilias} = await supabaseClient
-      .from("taxon")
-      .select("id_taxon, taxon, taxon_id")
-      .in("id_taxon", familiaIds);
-
-    if (errorFamilias) {
-      console.error("Error al obtener familias:", errorFamilias);
-      continue;
-    }
-
-    // Obtener órdenes
-    const ordenIds = [...new Set(familias?.map((f: any) => f.taxon_id).filter((id: any) => id !== null) || [])];
-    
-    if (ordenIds.length === 0) {
-      continue;
-    }
-
-    const {data: ordenes, error: errorOrdenes} = await supabaseClient
-      .from("taxon")
-      .select("id_taxon, taxon")
-      .in("id_taxon", ordenIds);
-
-    if (errorOrdenes) {
-      console.error("Error al obtener órdenes:", errorOrdenes);
-      continue;
-    }
-
-    // Crear mapas para búsqueda rápida
-    const generoMap = new Map<number, {taxon: string; taxon_id: number}>();
-    generos?.forEach((g: any) => {
-      generoMap.set(g.id_taxon, {taxon: g.taxon, taxon_id: g.taxon_id});
-    });
-
-    const familiaMap = new Map<number, {taxon: string; taxon_id: number}>();
-    familias?.forEach((f: any) => {
-      familiaMap.set(f.id_taxon, {taxon: f.taxon, taxon_id: f.taxon_id});
-    });
-
-    const ordenMap = new Map<number, string>();
-    ordenes?.forEach((o: any) => {
-      ordenMap.set(o.id_taxon, o.taxon);
-    });
-
-    // Construir el mapa final
-    especies.forEach((especie: any) => {
-      const genero = generoMap.get(especie.taxon_id);
-      if (!genero) return;
-
-      const familia = familiaMap.get(genero.taxon_id);
-      if (!familia) return;
-
-      const orden = ordenMap.get(familia.taxon_id);
-      if (!orden) return;
-
-      taxonInfoMap.set(especie.id_taxon, {
-        id_taxon: especie.id_taxon,
-        orden,
-        familia: familia.taxon,
-        genero: genero.taxon,
-      });
-    });
+    batches.push(taxonIds.slice(i, i + batchSize));
   }
 
+  const results = await Promise.all(
+    batches.map((batch) =>
+      supabaseClient.rpc("get_taxon_hierarchy", {
+        taxon_ids: batch,
+      }),
+    ),
+  );
+
+  for (const {data: rows, error} of results) {
+    if (error) {
+      console.error("Error get_taxon_hierarchy:", error);
+      continue;
+    }
+    if (!rows?.length) continue;
+    for (const row of rows as {id_taxon: number; orden: string; familia: string; genero: string}[]) {
+      if (row.id_taxon != null && row.orden != null && row.familia != null && row.genero != null) {
+        taxonInfoMap.set(row.id_taxon, {
+          id_taxon: row.id_taxon,
+          orden: row.orden,
+          familia: row.familia,
+          genero: row.genero,
+        });
+      }
+    }
+  }
   return taxonInfoMap;
 }
 
