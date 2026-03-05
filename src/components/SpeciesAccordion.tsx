@@ -90,14 +90,70 @@ export default function SpeciesAccordion({
     return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
   };
 
+  const renderRedListBadge = (listaRoja: string, size: "sm" | "md" = "md") => {
+    const dim = size === "sm" ? "28px" : "36px";
+
+    if (isPE(listaRoja)) {
+      return (
+        <div
+          className="inline-flex items-center justify-center text-[11px] font-semibold"
+          style={{
+            backgroundColor: "#b71c1c",
+            color: "#ffffff",
+            borderRadius: "100% 0% 100% 100%",
+            width: dim,
+            height: dim,
+            flexShrink: 0,
+          }}
+        >
+          PE
+        </div>
+      );
+    }
+
+    const valorNormalizado = listaRoja.trim().toUpperCase();
+    const valoresValidos: readonly string[] = ["LC", "NT", "VU", "EN", "CR", "EW", "EX", "DD"];
+
+    if (valoresValidos.includes(valorNormalizado)) {
+      return (
+        <RedListStatus
+          showTooltip={size === "md"}
+          status={valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"}
+        />
+      );
+    }
+
+    console.warn(
+      `⚠️ Valor de lista roja no válido: "${listaRoja}" para especie`,
+    );
+
+    return (
+      <div
+        className="inline-flex items-center justify-center text-[11px] font-semibold"
+        style={{
+          backgroundColor: "#d1d1c6",
+          color: "#666666",
+          borderRadius: "100% 0% 100% 100%",
+          width: dim,
+          height: dim,
+          flexShrink: 0,
+        }}
+      >
+        ?
+      </div>
+    );
+  };
+
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:border-border hover:bg-muted/50 relative grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 rounded-md border px-4 py-3 transition-all"
+      className="border-border bg-card hover:bg-muted/50 relative rounded-md border px-4 py-3 transition-all
+        flex flex-col gap-1.5
+        lg:grid lg:grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] lg:items-center lg:gap-4"
     >
-      {/* Nombre científico */}
+      {/* ── Nombre científico (visible en todos los tamaños) ── */}
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           <Link
             className="text-foreground text-sm font-medium italic hover:no-underline"
             href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
@@ -122,13 +178,35 @@ export default function SpeciesAccordion({
             {species.nombre_comun_ingles}
           </div>
         )}
+
+        {/* Badges inline — solo en móvil/tablet (<lg) */}
+        <div className="mt-2 flex flex-wrap items-center gap-2 lg:hidden">
+          {/* Endémica */}
+          {species.endemica ? (
+            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800">
+              E
+            </span>
+          ) : (
+            <span className="rounded bg-gray-50 px-1.5 py-0.5 text-xs font-semibold text-gray-400">
+              NE
+            </span>
+          )}
+          {/* Lista Roja */}
+          {species.lista_roja_iucn ? (
+            renderRedListBadge(species.lista_roja_iucn, "sm")
+          ) : (
+            <span className="text-muted-foreground text-xs">-</span>
+          )}
+          {/* Distribución km² */}
+          <span className="text-muted-foreground text-xs">240000 km²</span>
+        </div>
       </div>
 
-      {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
+      {/* ── Distribución km² — solo desktop ── */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+            <div className="text-muted-foreground hidden min-w-0 cursor-help text-center text-xs lg:block">
               240000 km²
             </div>
           </TooltipTrigger>
@@ -138,16 +216,16 @@ export default function SpeciesAccordion({
         </Tooltip>
       </TooltipProvider>
 
-      {/* Endémica */}
-      <div className="flex justify-center">
+      {/* ── Endémica — solo desktop ── */}
+      <div className="hidden justify-center lg:flex">
         {species.endemica ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-sm font-semibold text-gray-800 cursor-help">E</span>
+                <span className="cursor-help text-sm font-semibold text-gray-800">E</span>
               </TooltipTrigger>
               <TooltipContent className="[&>*:last-child]:hidden">
-                <p className="text-white font-normal">Endémica</p>
+                <p className="font-normal text-white">Endémica</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -155,112 +233,38 @@ export default function SpeciesAccordion({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-sm font-semibold text-gray-500 cursor-help">NE</span>
+                <span className="cursor-help text-sm font-semibold text-gray-500">NE</span>
               </TooltipTrigger>
               <TooltipContent className="[&>*:last-child]:hidden">
-                <p className="text-white font-normal">No endémica</p>
+                <p className="font-normal text-white">No endémica</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </div>
 
-      {/* Lista Roja */}
-      <div className="flex justify-center">
+      {/* ── Lista Roja — solo desktop ── */}
+      <div className="hidden justify-center lg:flex">
         {species.lista_roja_iucn ? (
-          <>
-            {isPE(species.lista_roja_iucn) ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
-                      style={{
-                        backgroundColor: "#b71c1c",
-                        color: "#ffffff",
-                        borderRadius: "100% 0% 100% 100%",
-                        width: "36px",
-                        height: "36px",
-                        padding: "4px 9px",
-                        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                      }}
-                    >
-                      PE
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="[&>*:last-child]:hidden">
-                    <p className="text-white font-normal">Posiblemente extinta</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              (() => {
-                // Normalizar el valor: trim y uppercase
-                const valorNormalizado = species.lista_roja_iucn.trim().toUpperCase();
-                // Lista de valores válidos
-                const valoresValidos: readonly string[] = [
-                  "LC",
-                  "NT",
-                  "VU",
-                  "EN",
-                  "CR",
-                  "EW",
-                  "EX",
-                  "DD",
-                ];
-
-                // Verificar si el valor está en la lista de válidos
-                if (valoresValidos.includes(valorNormalizado)) {
-                  return (
-                    <RedListStatus
-                      showTooltip={true}
-                      status={
-                        valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
-                      }
-                    />
-                  );
-                }
-
-                // Si no es válido, mostrar warning y badge con "?"
-                console.warn(
-                  `⚠️ Valor de lista roja no válido: "${species.lista_roja_iucn}" (normalizado: "${valorNormalizado}") para especie ${species.nombre_cientifico}`,
-                );
-
-                return (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div
-                          className="inline-flex cursor-pointer items-center justify-center text-[11px] font-semibold"
-                          style={{
-                            backgroundColor: "#d1d1c6",
-                            color: "#666666",
-                            borderRadius: "100% 0% 100% 100%",
-                            width: "36px",
-                            height: "36px",
-                            padding: "4px 9px",
-                            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                          }}
-                        >
-                          ?
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="[&>*:last-child]:hidden">
-                        <p className="text-white font-normal">Valor de lista roja no válido</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              })()
-            )}
-          </>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>{renderRedListBadge(species.lista_roja_iucn, "md")}</span>
+              </TooltipTrigger>
+              {isPE(species.lista_roja_iucn) && (
+                <TooltipContent className="[&>*:last-child]:hidden">
+                  <p className="font-normal text-white">Posiblemente extinta</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         ) : (
           <span className="text-muted-foreground">-</span>
         )}
       </div>
 
-      {/* Pisos Climáticos — alineado a la derecha para unificar borde con el resto de cards */}
-      <div className="flex items-center justify-end min-w-0">
+      {/* ── Pisos Climáticos — solo desktop ── */}
+      <div className="hidden min-w-0 items-center justify-end lg:flex">
         {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
           <ClimaticFloorChart
             altitudinalRange={{

@@ -1,10 +1,10 @@
 import {notFound} from "next/navigation";
 import Link from "next/link";
-import {ArrowLeft, ExternalLink, Users} from "lucide-react";
+import {ArrowLeft, Download, FileText} from "lucide-react";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import CopyButton from "@/components/copy-button";
+import {toBibtex, toRis} from "@/lib/export-bibliography";
 
 import getPublicacionById, {getAllPublicacionIds} from "../get-publicacion-by-id";
 
@@ -29,6 +29,7 @@ export async function generateStaticParams() {
     return publicacionesLimitadas;
   } catch (error) {
     console.error("Error en generateStaticParams:", error);
+
     return [];
   }
 }
@@ -47,8 +48,23 @@ export default async function BibliographyPage({params}: PageProps) {
     notFound();
   }
 
-  // Extraer año
-  const año = publicacion.numero_publicacion_ano || new Date(publicacion.fecha).getFullYear();
+  const payloadExport = {
+    id_publicacion: publicacion.id_publicacion,
+    titulo: publicacion.titulo,
+    titulo_secundario: publicacion.titulo_secundario,
+    numero_publicacion_ano: publicacion.numero_publicacion_ano,
+    fecha: publicacion.fecha,
+    editorial: publicacion.editorial,
+    volumen: publicacion.volumen,
+    numero: publicacion.numero,
+    pagina: publicacion.pagina,
+    palabras_clave: publicacion.palabras_clave,
+    resumen: publicacion.resumen,
+    autores: publicacion.autores,
+    enlaces: publicacion.enlaces.map((e) => ({enlace: e.enlace})),
+  };
+  const bibtexPreview = toBibtex(payloadExport);
+  const risPreview = toRis(payloadExport);
 
   return (
     <div className="bg-background min-h-screen">
@@ -56,7 +72,7 @@ export default async function BibliographyPage({params}: PageProps) {
         {/* Botón de regreso */}
         <div className="mb-6">
           <Link href="/sapoteca">
-            <Button variant="ghost" className="gap-2">
+            <Button className="gap-2" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
               Volver a la Biblioteca
             </Button>
@@ -85,15 +101,62 @@ export default async function BibliographyPage({params}: PageProps) {
             )}
           </h2>
 
+          {/* Exportar BibTeX / RIS */}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground text-sm">Exportar:</span>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                className="gap-1.5"
+                download
+                href={`/api/bibliography/${id}/export?format=bibtex`}
+              >
+                <FileText className="h-4 w-4" />
+                BibTeX
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                className="gap-1.5"
+                download
+                href={`/api/bibliography/${id}/export?format=ris`}
+              >
+                <Download className="h-4 w-4" />
+                RIS
+              </a>
+            </Button>
+          </div>
+
+          {/* Previsualización BibTeX y RIS */}
+          <div className="mb-6 grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+            <div className="overflow-hidden rounded-xl border bg-muted/30">
+              <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
+                <span className="text-sm font-medium">BibTeX</span>
+                <CopyButton text={bibtexPreview} />
+              </div>
+              <pre className="max-h-[280px] overflow-auto p-3 text-left font-mono text-xs leading-relaxed">
+                <code className="whitespace-pre break-words">{bibtexPreview}</code>
+              </pre>
+            </div>
+            <div className="overflow-hidden rounded-xl border bg-muted/30">
+              <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
+                <span className="text-sm font-medium">RIS</span>
+                <CopyButton text={risPreview} />
+              </div>
+              <pre className="max-h-[280px] overflow-auto p-3 text-left font-mono text-xs leading-relaxed">
+                <code className="whitespace-pre break-words">{risPreview}</code>
+              </pre>
+            </div>
+          </div>
+
           {/* Cita completa */}
-          <div className="bg-muted mb-4 overflow-hidden rounded-xl border shadow-sm py-2 gap-2">
-            <div className="px-3 py-1 flex items-center justify-between">
+          <div className="bg-muted mb-4 gap-2 overflow-hidden rounded-xl border py-2 shadow-sm">
+            <div className="flex items-center justify-between px-3 py-1">
               <h2 className="text-base font-semibold">Cita completa</h2>
               {(publicacion.cita_larga || publicacion.cita) && (
                 <CopyButton text={publicacion.cita_larga || publicacion.cita || ""} />
               )}
             </div>
-            <div className="px-3 pb-0.5 pt-1">
+            <div className="px-3 pt-1 pb-0.5">
               {publicacion.cita_larga ? (
                 <div
                   dangerouslySetInnerHTML={{__html: publicacion.cita_larga}}
@@ -109,177 +172,6 @@ export default async function BibliographyPage({params}: PageProps) {
               )}
             </div>
           </div>
-
-          {/* Información bibliográfica */}
-          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Card className="overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-              <CardHeader className="px-3 py-1">
-                <CardTitle className="text-base font-semibold">Información bibliográfica</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 pb-0.5 pt-1">
-                <dl className="space-y-1 text-xs leading-tight">
-                  <dt className="font-medium">Cita corta:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.cita_corta || "No disponible"}
-                  </dd>
-
-                  <dt className="font-medium">Año:</dt>
-                  <dd className="text-muted-foreground">{año || "No disponible"}</dd>
-
-                  <dt className="font-medium">Editorial/Revista:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.editorial || "No disponible"}
-                  </dd>
-
-                  <dt className="font-medium">Volumen:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.volumen || "No disponible"}
-                  </dd>
-
-                  <dt className="font-medium">Número:</dt>
-                  <dd className="text-muted-foreground">{publicacion.numero || "No disponible"}</dd>
-
-                  <dt className="font-medium">Páginas:</dt>
-                  <dd className="text-muted-foreground">{publicacion.pagina || "No disponible"}</dd>
-
-                  <dt className="font-medium">Fecha:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.fecha
-                      ? new Date(publicacion.fecha).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
-                      : "No disponible"}
-                  </dd>
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card className="overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-              <CardHeader className="px-3 py-1">
-                <CardTitle className="text-base font-semibold">Detalles adicionales</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 pb-0.5 pt-1">
-                <dl className="space-y-1 text-xs leading-tight">
-                  <dt className="font-medium">Palabras clave:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.palabras_clave || "No disponible"}
-                  </dd>
-
-                  <dt className="font-medium">Publicación CJ:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.publicacion_cj ? "Sí" : "No"}
-                  </dd>
-
-                  <dt className="font-medium">Categoría:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.categoria !== null && publicacion.categoria !== undefined
-                      ? publicacion.categoria
-                        ? "Científica"
-                        : "Divulgación"
-                      : "No disponible"}
-                  </dd>
-
-                  <dt className="font-medium">Tipo:</dt>
-                  <dd className="text-muted-foreground">
-                    {publicacion.editor !== null && publicacion.editor !== undefined
-                      ? publicacion.editor
-                        ? "Editor"
-                        : "Autor"
-                      : "No disponible"}
-                  </dd>
-                </dl>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Resumen */}
-          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-            <CardHeader className="px-3 py-1">
-              <CardTitle className="text-base font-semibold">Resumen</CardTitle>
-            </CardHeader>
-            <CardContent className="px-3 pb-0.5 pt-1">
-              {publicacion.resumen ? (
-                <div
-                  dangerouslySetInnerHTML={{__html: publicacion.resumen}}
-                  className="text-xs leading-relaxed prose prose-sm max-w-none"
-                />
-              ) : (
-                <p className="text-muted-foreground text-xs">No disponible</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Observaciones */}
-          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-            <CardHeader className="px-3 py-1">
-              <CardTitle className="text-base font-semibold">Observaciones</CardTitle>
-            </CardHeader>
-            <CardContent className="px-3 pb-0.5 pt-1">
-              {publicacion.observaciones ? (
-                <div
-                  dangerouslySetInnerHTML={{__html: publicacion.observaciones}}
-                  className="text-xs leading-relaxed prose prose-sm max-w-none"
-                />
-              ) : (
-                <p className="text-muted-foreground text-xs">No disponible</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Enlaces externos */}
-          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-            <CardHeader className="px-3 py-1">
-              <CardTitle className="text-base font-semibold">Enlaces externos</CardTitle>
-            </CardHeader>
-            <CardContent className="px-3 pb-0.5 pt-1">
-              {publicacion.enlaces && publicacion.enlaces.length > 0 ? (
-                <div className="space-y-1">
-                  {publicacion.enlaces.map((enlace) => (
-                    <a
-                      key={enlace.id_publicacion_enlace}
-                      className="text-primary flex items-center gap-1.5 hover:no-underline text-xs"
-                      href={enlace.enlace}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      <span>{enlace.texto_enlace || "Enlace externo"}</span>
-                      {enlace.exclusivo_cj && (
-                        <span className="text-muted-foreground text-[10px]">(CJ)</span>
-                      )}
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-xs">No disponible</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Autores */}
-          <Card className="mb-4 overflow-hidden transition-all hover:shadow-md py-2 gap-2">
-            <CardHeader className="px-3 py-1">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                <Users className="h-4 w-4" />
-                Autores
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-3 pb-0.5 pt-1">
-              {publicacion.autores && publicacion.autores.length > 0 ? (
-                <div className="space-y-1">
-                  {publicacion.autores.map((autor) => (
-                    <div key={autor.id_autor} className="text-xs leading-tight">
-                      {autor.nombres} {autor.apellidos}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-xs">No disponible</p>
-              )}
-            </CardContent>
-          </Card>
         </article>
       </main>
     </div>

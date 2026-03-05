@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagen de Google Photos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .image-wrapper:hover img {
+            transform: scale(1.05);
+        }
+
+        .info {
+            padding: 30px;
+            background: white;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            color: #856404;
+        }
+
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-wrapper">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczPFUlg7fp3_sitsx0DsixMPU1R_CVlpAeASjvWHMb7Tb9M8KN6a5JIVeBQuedfPDgKqtNXG_nX-LeSoY-Fn1VOG9IiZfnke8bK6asX1iTuFzfmNGOHkI-8n5P7YIlAzLcJWCztt9DjoZw0ZWGLRr30=w1024-h680-s-no-gm?authuser=0"
+                 alt="Imagen de Google Photos"
+                 id="mainImage"
+                 onerror="handleImageError()">
+        </div>
+
+        <div class="info">
+            <h1>📸 Imagen desde Google Photos</h1>
+
+            <div class="details">
+                <div class="detail-item">
+                    <div class="detail-label">Resolución Original</div>
+                    <div class="detail-value">1024 × 680 px</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Fuente</div>
+                    <div class="detail-value">Google Photos</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Estado</div>
+                    <div class="detail-value" id="imageStatus">Cargando...</div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <a href="https://lh3.googleusercontent.com/pw/AP1GczPFUlg7fp3_sitsx0DsixMPU1R_CVlpAeASjvWHMb7Tb9M8KN6a5JIVeBQuedfPDgKqtNXG_nX-LeSoY-Fn1VOG9IiZfnke8bK6asX1iTuFzfmNGOHkI-8n5P7YIlAzLcJWCztt9DjoZw0ZWGLRr30=s0"
+                   class="btn btn-primary"
+                   target="_blank">
+                    Abrir Original
+                </a>
+                <button class="btn btn-secondary" onclick="copyUrl()">
+                    📋 Copiar URL
+                </button>
+                <button class="btn btn-secondary" onclick="downloadImage()">
+                    ⬇️ Descargar
+                </button>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Advertencia sobre Google Photos:</strong>
+                Esta URL puede dejar de funcionar en el futuro. Google Photos no está diseñado para hosting permanente de imágenes en sitios web. Para uso en producción, considera migrar a servicios como Cloudinary, Supabase Storage, o ImgBB.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detectar cuando la imagen se carga exitosamente
+        document.getElementById('mainImage').addEventListener('load', function() {
+            document.getElementById('imageStatus').textContent = '✅ Activa';
+            document.getElementById('imageStatus').style.color = '#28a745';
+        });
+
+        // Manejar error de carga
+        function handleImageError() {
+            document.getElementById('imageStatus').textContent = '❌ Error al cargar';
+            document.getElementById('imageStatus').style.color = '#dc3545';
+
+            const img = document.getElementById('mainImage');
+            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1024" height="680" viewBox="0 0 1024 680"%3E%3Crect fill="%23f8f9fa" width="1024" height="680"/%3E%3Ctext x="512" y="340" font-family="Arial" font-size="24" fill="%23666" text-anchor="middle"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
+
+            alert('⚠️ La imagen no se pudo cargar. Posibles razones:\n\n1. La URL ha expirado\n2. Problemas de permisos de Google Photos\n3. La imagen fue eliminada\n\nEsta es la razón por la que Google Photos NO es confiable para hosting web.');
+        }
+
+        // Copiar URL al portapapeles
+        function copyUrl() {
+            const url = document.getElementById('mainImage').src;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copiada al portapapeles');
+            }).catch(() => {
+                prompt('Copia esta URL:', url);
+            });
+        }
+
+        // Descargar imagen
+        function downloadImage() {
+            const url = document.getElementById('mainImage').src;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'imagen_google_photos.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Detectar si la imagen ya está en cache
+        if (document.getElementById('mainImage').complete) {
+            document.getElementById('imageStatus').textContent = '✅ Activa';
+            document.getElementById('imageStatus').style.color = '#28a745';
+        }
+    </script>
+</body>
+</html>

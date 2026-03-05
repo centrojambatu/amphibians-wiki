@@ -148,7 +148,7 @@ export default function RedListBarChart({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 h-full flex flex-col ">
+    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-6 h-full flex flex-col">
       <div className="mb-4 pl-6">
         <p className="text-lg font-semibold text-gray-800">
           {totalEspecies} <span className="text-gray-500">especies</span>
@@ -163,7 +163,7 @@ export default function RedListBarChart({
             <div key={dato.categoria.id} className="flex items-center gap-4">
               {/* Badge de categoría */}
               <div
-                className="flex w-20 items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                className="flex w-8 sm:w-20 flex-shrink-0 items-center justify-center cursor-pointer hover:scale-110 transition-transform"
                 onClick={() => {
                   const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
                   if (sigla) onCategoryClick?.(sigla);
@@ -208,7 +208,7 @@ export default function RedListBarChart({
 
               {/* Nombre de categoría */}
               <div
-                className="w-48 flex-shrink-0 cursor-pointer hover:text-gray-600 transition-colors"
+                className="hidden sm:block w-48 flex-shrink-0 cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={() => {
                   const sigla = isPE(dato.categoria.sigla) ? "PE" : dato.categoria.sigla;
                   if (sigla) onCategoryClick?.(sigla);
@@ -263,7 +263,7 @@ export default function RedListBarChart({
               </div>
 
               {/* Porcentaje del total */}
-              <div className="w-16 text-right">
+              <div className="w-10 sm:w-16 flex-shrink-0 text-right">
                 <p className="text-sm font-medium text-gray-600">
                   {especiesConCategoria > 0
                     ? ((dato.count / especiesConCategoria) * 100).toFixed(1)

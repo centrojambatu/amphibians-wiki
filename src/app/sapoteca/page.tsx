@@ -19,6 +19,7 @@ interface SearchParams {
   autor?: string;
   tipos?: string;
   indexada?: string;
+  formatoImpreso?: string;
 }
 
 interface PageProps {
@@ -41,6 +42,12 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
       ? params.tipos.split(",").map(Number).filter((n) => !isNaN(n))
       : undefined,
     indexada: params.indexada === "true" ? true : params.indexada === "false" ? false : undefined,
+    formatoImpreso:
+      params.formatoImpreso === "true"
+        ? true
+        : params.formatoImpreso === "false"
+          ? false
+          : undefined,
   };
 
   // Obtener datos en paralelo

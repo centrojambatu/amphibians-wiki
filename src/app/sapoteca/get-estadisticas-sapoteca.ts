@@ -22,17 +22,57 @@ export interface EstadisticasSapoteca {
   totalAutoresEcuador: number;
 }
 
+/** Tipos de catalogo_publicaciones que cuentan como "científicas" */
+const TIPOS_CIENTIFICAS = new Set(["CIENTIFICA", "TESIS"]);
+
+/** Tipo que cuenta como "divulgación" */
+const TIPO_DIVULGACION = "DIVULGACIÓN";
+
 /**
  * Obtiene las estadísticas de la biblioteca (solo publicaciones Ecuador).
+ * Científicas/divulgación se basan en catalogo_publicaciones.tipo.
  */
 export default async function getEstadisticasSapoteca(): Promise<EstadisticasSapoteca> {
   const supabase = createServiceClient();
   const añoActual = new Date().getFullYear();
   const hace10 = añoActual - 9;
 
+  // Conteos por tipo de publicación (catalogo_publicaciones.tipo). PostgREST limita ~1000 filas; paginamos para traer todas.
+  interface PcaRow {
+    publicacion_id: number;
+    catalogo_publicaciones: { tipo: string | null } | null;
+    publicacion: { anfibios_ecuador: boolean | null } | null;
+  }
+  const idsCientificas = new Set<number>();
+  const idsDivulgacion = new Set<number>();
+  const pageSize = 1000;
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: pcaPage } = await supabase
+      .from("publicacion_catalogo_awe")
+      .select("publicacion_id, catalogo_publicaciones(tipo), publicacion(anfibios_ecuador)")
+      .not("catalogo_publicaciones_id", "is", null)
+      .range(offset, offset + pageSize - 1);
+
+    const rows = (pcaPage ?? []) as unknown as PcaRow[];
+    for (const r of rows) {
+      if (r.publicacion?.anfibios_ecuador !== true) continue;
+
+      const tipo = r.catalogo_publicaciones?.tipo ?? "";
+      if (TIPOS_CIENTIFICAS.has(tipo)) idsCientificas.add(r.publicacion_id);
+      if (tipo === TIPO_DIVULGACION) idsDivulgacion.add(r.publicacion_id);
+    }
+    hasMore = rows.length === pageSize;
+    offset += pageSize;
+  }
+
+  const countCientificas = idsCientificas.size;
+  const countDivulgacion = idsDivulgacion.size;
+
+  // Estadísticas de las cards: solo publicaciones tipo CIENTÍFICA (usa vistas)
   const [
-    { count: countCientificas },
-    { count: countDivulgacion },
     { count: countIndexadas },
     { count: countNoIndexadas },
     { count: countUltimaDecada },
@@ -45,64 +85,46 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     totalAutoresEcuadorResult,
   ] = await Promise.all([
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
-      .eq("cientifica", true),
-    supabase
-      .from("publicacion")
-      .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
-      .or("cientifica.eq.false,cientifica.is.null"),
-    supabase
-      .from("publicacion")
-      .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("indexada", true),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .or("indexada.eq.false,indexada.is.null"),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .gte("numero_publicacion_ano", hace10)
       .lte("numero_publicacion_ano", añoActual),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("numero_publicacion_ano", añoActual),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("rel_taxonomia", true),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("rel_evolucion", true),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("rel_ecologia", true),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("*", { count: "exact", head: true })
-      .eq("anfibios_ecuador", true)
       .eq("rel_conservacion", true),
     supabase
-      .from("publicacion")
+      .from("vw_publicacion_cientifica_ecuador" as any)
       .select("id_publicacion, titulo, contador_citas")
       .gt("contador_citas", 0)
       .order("contador_citas", { ascending: false })
       .limit(1)
       .single(),
-    supabase.from("vw_total_autores_ecuador" as any).select("total").single(),
+    supabase.from("vw_total_autores_ecuador_cientificas" as any).select("total").single(),
   ]);
 
   const totalUltimaDecada = countUltimaDecada ?? 0;

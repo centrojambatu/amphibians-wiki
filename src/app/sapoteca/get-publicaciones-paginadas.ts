@@ -1,5 +1,158 @@
 import {createServiceClient} from "@/utils/supabase/server";
 import {generatePublicacionSlug} from "@/lib/generate-publicacion-slug";
+import type {SupabaseClient} from "@supabase/supabase-js";
+
+/** Máximo de IDs en un .in() para evitar URLs demasiado largas (fetch failed) */
+const MAX_IDS_IN_QUERY = 150;
+
+/**
+ * Fallback: obtiene publicaciones desde la tabla publicacion cuando la vista no está disponible.
+ */
+async function getPublicacionesDesdeTabla(
+  supabase: SupabaseClient,
+  offset: number,
+  itemsPorPagina: number,
+  filtros: FiltrosSapoteca | undefined,
+  idsFormato: number[] | null,
+): Promise<PublicacionesPaginadas> {
+  let idsFiltro: number[] | null = idsFormato && idsFormato.length > 0 ? [...idsFormato] : null;
+
+  if (filtros?.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
+    const {data: idsTipo} = await supabase
+      .from("publicacion_catalogo_awe")
+      .select("publicacion_id")
+      .in("catalogo_publicaciones_id", filtros.tiposPublicacion);
+    const ids = [...new Set((idsTipo ?? []).map((r) => r.publicacion_id))];
+    if (idsFiltro !== null) {
+      const setF = new Set(idsFiltro);
+      idsFiltro = ids.filter((id) => setF.has(id));
+    } else {
+      idsFiltro = ids;
+    }
+    if (idsFiltro.length === 0) {
+      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+    }
+  }
+
+  if (filtros?.años && filtros.años.length > 0) {
+    const {data: pa} = await supabase.from("publicacion_ano").select("publicacion_id").in("ano", filtros.años);
+    const idsAño = [...new Set((pa ?? []).map((r) => r.publicacion_id))];
+    if (idsFiltro !== null) {
+      const setF = new Set(idsFiltro);
+      idsFiltro = idsAño.filter((id) => setF.has(id));
+    } else {
+      idsFiltro = idsAño;
+    }
+    if (idsFiltro.length === 0) {
+      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+    }
+  }
+
+  if (filtros?.autor) {
+    const {data: autores} = await supabase.from("autor").select("id_autor").or(`nombres.ilike.%${filtros.autor}%,apellidos.ilike.%${filtros.autor}%`);
+    const idsAutor = (autores ?? []).map((a) => a.id_autor);
+    if (idsAutor.length === 0) {
+      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+    }
+    const {data: pa} = await supabase.from("publicacion_autor").select("publicacion_id").in("autor_id", idsAutor);
+    const idsPub = [...new Set((pa ?? []).map((r) => r.publicacion_id))];
+    if (idsFiltro !== null) {
+      const setF = new Set(idsFiltro);
+      idsFiltro = idsPub.filter((id) => setF.has(id));
+    } else {
+      idsFiltro = idsPub;
+    }
+    if (idsFiltro.length === 0) {
+      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+    }
+  }
+
+  let q = supabase
+    .from("publicacion")
+    .select("id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha", {
+      count: "exact",
+    })
+    .eq("anfibios_ecuador", true);
+
+  if (filtros?.titulo) {
+    q = q.ilike("titulo", `%${filtros.titulo}%`);
+  }
+  if (filtros?.indexada !== undefined) {
+    q = q.eq("indexada", filtros.indexada);
+  }
+  if (idsFiltro !== null && idsFiltro.length > 0) {
+    if (idsFiltro.length <= MAX_IDS_IN_QUERY) {
+      q = q.in("id_publicacion", idsFiltro);
+    } else {
+      const chunks: number[][] = [];
+      for (let i = 0; i < idsFiltro.length; i += MAX_IDS_IN_QUERY) {
+        chunks.push(idsFiltro.slice(i, i + MAX_IDS_IN_QUERY));
+      }
+      q = q.or(chunks.map((c) => `id_publicacion.in.(${c.join(",")})`).join(","));
+    }
+  }
+
+  const {data: rows, count, error} = await q
+    .order("numero_publicacion_ano", {ascending: false, nullsFirst: false})
+    .order("fecha", {ascending: false})
+    .range(offset, offset + itemsPorPagina - 1);
+
+  if (error || !rows) {
+    return {
+      publicaciones: [],
+      total: 0,
+      pagina: Math.floor(offset / itemsPorPagina) + 1,
+      totalPaginas: 0,
+      itemsPorPagina,
+    };
+  }
+
+  const total = count ?? 0;
+  const totalPaginas = Math.ceil(total / itemsPorPagina);
+
+  const publicacionIds = rows.map((r: { id_publicacion: number }) => r.id_publicacion);
+  const {data: enlacesData} = await supabase
+    .from("publicacion_enlace")
+    .select("publicacion_id, enlace")
+    .in("publicacion_id", publicacionIds)
+    .neq("enlace", "http://")
+    .neq("enlace", "")
+    .not("enlace", "is", null)
+    .order("id_publicacion_enlace", {ascending: true});
+
+  const enlacesMap = new Map<number, string>();
+  const totalEnlacesMap = new Map<number, number>();
+  (enlacesData ?? []).forEach((e: { publicacion_id: number; enlace: string }) => {
+    if (!enlacesMap.has(e.publicacion_id)) enlacesMap.set(e.publicacion_id, e.enlace);
+    totalEnlacesMap.set(e.publicacion_id, (totalEnlacesMap.get(e.publicacion_id) ?? 0) + 1);
+  });
+
+  const publicacionesTransformadas: PublicacionSapoteca[] = rows.map((pub: Record<string, unknown>) => {
+    const año = (pub.numero_publicacion_ano as number) || (pub.fecha ? new Date(pub.fecha as string).getFullYear() : null);
+    return {
+      id_publicacion: pub.id_publicacion as number,
+      titulo: pub.titulo as string,
+      titulo_secundario: pub.titulo_secundario as string | null,
+      cita_corta: pub.cita_corta as string | null,
+      cita: pub.cita as string | null,
+      cita_larga: pub.cita_larga as string | null,
+      numero_publicacion_ano: pub.numero_publicacion_ano as number | null,
+      fecha:
+        typeof pub.fecha === "string" ? pub.fecha : pub.fecha ? new Date(pub.fecha as string | Date).toISOString().slice(0, 10) : "",
+      slug: generatePublicacionSlug(pub.cita_corta as string | null, año, pub.titulo as string, pub.id_publicacion as number),
+      total_enlaces: totalEnlacesMap.get(Number(pub.id_publicacion)) ?? null,
+      primer_enlace: enlacesMap.get(Number(pub.id_publicacion)) ?? null,
+    };
+  });
+
+  return {
+    publicaciones: publicacionesTransformadas,
+    total,
+    pagina: Math.floor(offset / itemsPorPagina) + 1,
+    totalPaginas,
+    itemsPorPagina,
+  };
+}
 
 export interface PublicacionSapoteca {
   id_publicacion: number;
@@ -21,6 +174,8 @@ export interface FiltrosSapoteca {
   autor?: string;
   tiposPublicacion?: number[];
   indexada?: boolean;
+  /** true = impreso, false = web (campo publicacion.formato_impreso) */
+  formatoImpreso?: boolean;
 }
 
 export interface PublicacionesPaginadas {
@@ -41,82 +196,35 @@ export default async function getPublicacionesPaginadas(
 ): Promise<PublicacionesPaginadas> {
   const supabaseClient = createServiceClient();
 
-  // Calcular offset
   const offset = (pagina - 1) * itemsPorPagina;
 
-  // Vista solo publicaciones de Ecuador (anfibios_ecuador = true)
-  const vista = "vw_publicacion_completa_ecuador";
+  // Impresas/web: IDs de publicaciones divulgación con ese formato
+  let idsFormato: number[] | null = null;
+  if (filtros?.formatoImpreso !== undefined) {
+    const {data: catDivulgacion} = await supabaseClient
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- catalogo_publicaciones puede no estar en tipos generados
+      .from("catalogo_publicaciones" as any)
+      .select("id")
+      .eq("tipo", "DIVULGACIÓN");
+    const idsCatDivulgacion = (catDivulgacion ?? []).map((r: { id: number }) => r.id);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
-  let countQuery = supabaseClient.from(vista as any).select("*", {count: "exact", head: true});
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
-  let dataQuery = supabaseClient.from(vista as any)
-    .select(
-      "id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha, total_enlaces",
-    );
-
-  // Aplicar filtros
-  if (filtros?.titulo) {
-    const tituloFilter = `%${filtros.titulo}%`;
-
-    countQuery = countQuery.ilike("titulo", tituloFilter);
-    dataQuery = dataQuery.ilike("titulo", tituloFilter);
-  }
-
-  if (filtros?.años && filtros.años.length > 0) {
-    if (filtros.años.length > 50) {
-      // Para rangos amplios, filtrar por publicacion_ano con rango numérico
-      const añoMin = Math.min(...filtros.años);
-      const añoMax = Math.max(...filtros.años);
-
-      const {data: pubsEnRango} = await supabaseClient
-        .from("publicacion_ano")
-        .select("publicacion_id")
-        .gte("ano", añoMin)
-        .lte("ano", añoMax);
-
-      if (pubsEnRango && pubsEnRango.length > 0) {
-        const ids = [...new Set(pubsEnRango.map((r) => r.publicacion_id))];
-        countQuery = countQuery.in("id_publicacion", ids);
-        dataQuery = dataQuery.in("id_publicacion", ids);
-      } else {
-        return { publicaciones: [], total: 0, pagina: 1, totalPaginas: 0, itemsPorPagina };
-      }
-    } else {
-      const condicionesAño = filtros.años.map((año) => `anos.ilike.%${año}%`).join(",");
-      countQuery = countQuery.or(condicionesAño);
-      dataQuery = dataQuery.or(condicionesAño);
-    }
-  }
-
-  if (filtros?.autor) {
-    const autorFilter = `%${filtros.autor}%`;
-
-    countQuery = countQuery.ilike("autores_nombres", autorFilter);
-    dataQuery = dataQuery.ilike("autores_nombres", autorFilter);
-  }
-
-  if (filtros?.indexada !== undefined) {
-    countQuery = countQuery.eq("indexada", filtros.indexada);
-    dataQuery = dataQuery.eq("indexada", filtros.indexada);
-  }
-
-  if (filtros?.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
-    // Para tipos de publicación, necesitamos filtrar por publicacion_catalogo_awe
-    // Primero obtenemos las publicaciones que tienen esos tipos
-    const {data: publicacionesConTipo} = await supabaseClient
+    const {data: pcaDivulgacion} = await supabaseClient
       .from("publicacion_catalogo_awe")
       .select("publicacion_id")
-      .in("catalogo_awe_id", filtros.tiposPublicacion);
+      .in("catalogo_publicaciones_id", idsCatDivulgacion);
+    const setDivulgacion = new Set(
+      (pcaDivulgacion ?? []).map((r: { publicacion_id: number }) => r.publicacion_id),
+    );
 
-    if (publicacionesConTipo && publicacionesConTipo.length > 0) {
-      const publicacionIds = publicacionesConTipo.map((p) => p.publicacion_id);
+    const {data: rowsFormato} = await supabaseClient
+      .from("publicacion")
+      .select("id_publicacion")
+      .eq("anfibios_ecuador", true)
+      .eq("formato_impreso", filtros.formatoImpreso);
+    const idsConFormato = rowsFormato?.map((r) => r.id_publicacion) ?? [];
+    idsFormato = idsConFormato.filter((id) => setDivulgacion.has(id));
 
-      countQuery = countQuery.in("id_publicacion", publicacionIds);
-      dataQuery = dataQuery.in("id_publicacion", publicacionIds);
-    } else {
-      // Si no hay publicaciones con esos tipos, retornar vacío
+    if (idsFormato.length === 0) {
       return {
         publicaciones: [],
         total: 0,
@@ -127,103 +235,16 @@ export default async function getPublicacionesPaginadas(
     }
   }
 
-  // Obtener total de publicaciones
-  const {count, error: countError} = await countQuery;
-
-  if (countError) {
-    console.error("Error al contar publicaciones:", JSON.stringify(countError, null, 2));
-    console.error("Filtros aplicados:", JSON.stringify(filtros, null, 2));
-
-    return {
-      publicaciones: [],
-      total: 0,
-      pagina: 1,
-      totalPaginas: 0,
-      itemsPorPagina,
-    };
-  }
-
-  const total = count || 0;
-  const totalPaginas = Math.ceil(total / itemsPorPagina);
-
-  // Obtener publicaciones paginadas
-  const {data: publicaciones, error} = await dataQuery
-    .order("numero_publicacion_ano", {ascending: false, nullsFirst: false})
-    .order("fecha", {ascending: false})
-    .range(offset, offset + itemsPorPagina - 1);
-
-  if (error) {
-    console.error("Error al obtener publicaciones:", error);
-
-    return {
-      publicaciones: [],
-      total: 0,
-      pagina: 1,
-      totalPaginas: 0,
-      itemsPorPagina,
-    };
-  }
-
-  if (!publicaciones) {
-    return {
-      publicaciones: [],
-      total: 0,
-      pagina: 1,
-      totalPaginas: 0,
-      itemsPorPagina,
-    };
-  }
-
-  // Obtener los IDs de las publicaciones que tienen enlaces
-  const publicacionIds = publicaciones.map((p: any) => p.id_publicacion);
-  
-  // Obtener el primer enlace de cada publicación
-  const {data: enlacesData} = await supabaseClient
-    .from("publicacion_enlace")
-    .select("publicacion_id, enlace")
-    .in("publicacion_id", publicacionIds)
-    .neq("enlace", "http://")
-    .neq("enlace", "")
-    .not("enlace", "is", null)
-    .order("id_publicacion_enlace", {ascending: true});
-
-  // Crear un mapa de publicacion_id -> primer_enlace
-  const enlacesMap = new Map<number, string>();
-  if (enlacesData) {
-    enlacesData.forEach((enlace: any) => {
-      if (!enlacesMap.has(enlace.publicacion_id)) {
-        enlacesMap.set(enlace.publicacion_id, enlace.enlace);
-      }
-    });
-  }
-
-  // Transformar los datos
-  const publicacionesTransformadas: PublicacionSapoteca[] = publicaciones.map((pub: any) => {
-    const año =
-      pub.numero_publicacion_ano || (pub.fecha ? new Date(pub.fecha).getFullYear() : null);
-
-    return {
-      id_publicacion: pub.id_publicacion,
-      titulo: pub.titulo,
-      titulo_secundario: pub.titulo_secundario,
-      cita_corta: pub.cita_corta,
-      cita: pub.cita,
-      cita_larga: pub.cita_larga,
-      numero_publicacion_ano: pub.numero_publicacion_ano,
-      fecha: pub.fecha,
-      slug: generatePublicacionSlug(pub.cita_corta, año, pub.titulo, pub.id_publicacion),
-      total_enlaces: pub.total_enlaces || null,
-      primer_enlace: enlacesMap.get(pub.id_publicacion) || null,
-    };
-  });
-
-  return {
-    publicaciones: publicacionesTransformadas,
-    total,
-    pagina,
-    totalPaginas,
+  // Usar siempre la tabla publicacion (vista puede no estar disponible o devolver vacío)
+  const resultado = await getPublicacionesDesdeTabla(
+    supabaseClient,
+    offset,
     itemsPorPagina,
-  };
+    filtros,
+    idsFormato,
+  );
+
+  return resultado;
 }
 
 /**
@@ -239,27 +260,29 @@ export async function getAñosPublicaciones(): Promise<number[]> {
     .not("anos", "is", null)
     .neq("anos", "");
 
-  if ((error && Object.keys(error).length > 0) || !data) {
-    return [];
+  if (!error && data && data.length > 0) {
+    const años = new Set<number>();
+    const rows = data as { anos?: string | null }[];
+    rows.forEach((pub) => {
+      if (pub.anos) {
+        pub.anos.split(",").map((a) => a.trim()).forEach((añoStr) => {
+          const año = Number.parseInt(añoStr, 10);
+          if (año && !isNaN(año) && año >= 1000 && año <= 9999) años.add(año);
+        });
+      }
+    });
+    return Array.from(años).sort((a, b) => b - a);
   }
 
-  const años = new Set<number>();
-  const rows = data as { anos?: string | null }[];
-
-  rows.forEach((pub) => {
-    if (pub.anos) {
-      // La columna anos contiene años separados por comas (ej: "2011, 2012")
-      const añosString = pub.anos.split(",").map((a) => a.trim());
-
-      añosString.forEach((añoStr) => {
-        const año = Number.parseInt(añoStr, 10);
-
-        if (año && !isNaN(año) && año >= 1000 && año <= 9999) {
-          años.add(año);
-        }
-      });
-    }
+  // Fallback: años distintos desde publicacion_ano (sin filtrar por Ecuador)
+  const {data: pa} = await supabaseClient
+    .from("publicacion_ano")
+    .select("ano")
+    .gte("ano", 1849)
+    .lte("ano", new Date().getFullYear());
+  const añosSet = new Set<number>();
+  (pa ?? []).forEach((r: { ano: number }) => {
+    if (r.ano >= 1000 && r.ano <= 9999) añosSet.add(r.ano);
   });
-
-  return Array.from(años).sort((a, b) => b - a);
+  return Array.from(añosSet).sort((a, b) => b - a);
 }

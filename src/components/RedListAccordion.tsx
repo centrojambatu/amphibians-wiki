@@ -234,193 +234,219 @@ export default function RedListAccordion({
       return indexA - indexB;
     });
 
-  const renderSpecies = (species: SpeciesListItem, showUltimoAvistamiento = false) => (
-    <div
-      key={species.id_taxon}
-      className={`border-border bg-card hover:border-border hover:bg-muted/50 relative grid w-full min-w-0 items-center gap-4 rounded-md border pl-4 pr-0 py-3 transition-all ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
-    >
-      {/* Nombre científico */}
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <Link
-            className="text-foreground text-sm font-medium italic hover:no-underline"
-            href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
+  const renderSpecies = (species: SpeciesListItem, showUltimoAvistamiento = false) => {
+    const valorNormalizadoRL = species.lista_roja_iucn?.trim().toUpperCase();
+    const valoresValidosRL: readonly string[] = ["LC", "NT", "VU", "EN", "CR", "EW", "EX", "DD"];
+
+    const redListBadge = species.lista_roja_iucn ? (
+      <>
+        {isPE(species.lista_roja_iucn) ? (
+          <div
+            className="inline-flex items-center justify-center text-[11px] font-semibold"
+            style={{
+              backgroundColor: "#b71c1c",
+              color: "#ffffff",
+              borderRadius: "100% 0% 100% 100%",
+              width: "36px",
+              height: "36px",
+              padding: "4px 9px",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+            }}
           >
-            {species.nombre_cientifico}
-          </Link>
-          {species.descubridor && (
-            <span
-              dangerouslySetInnerHTML={{
-                __html: processHTMLLinks(species.descubridor),
-              }}
-              className="text-xs text-gray-500"
-            />
-          )}
-        </div>
-        {(species.nombre_comun || species.nombre_comun_ingles) && (
-          <div className="text-muted-foreground mt-1 text-xs">
-            {species.nombre_comun}
-            {species.nombre_comun && species.nombre_comun_ingles && (
-              <span className="text-[#f07304]"> | </span>
-            )}
-            {species.nombre_comun_ingles}
+            PE
+          </div>
+        ) : valorNormalizadoRL && valoresValidosRL.includes(valorNormalizadoRL) ? (
+          <RedListStatus
+            showTooltip={false}
+            status={valorNormalizadoRL as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"}
+          />
+        ) : (
+          <div
+            className="inline-flex items-center justify-center text-[11px] font-semibold"
+            style={{
+              backgroundColor: "#d1d1c6",
+              color: "#666666",
+              borderRadius: "100% 0% 100% 100%",
+              width: "36px",
+              height: "36px",
+              padding: "4px 9px",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+            }}
+          >
+            ?
           </div>
         )}
-      </div>
+      </>
+    ) : (
+      <span className="text-muted-foreground">-</span>
+    );
 
-      {/* Último avistamiento (solo categoría Posiblemente extinta) */}
-      {showUltimoAvistamiento && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+    return (
+      <div
+        key={species.id_taxon}
+        className="border-border bg-card hover:border-border hover:bg-muted/50 relative w-full min-w-0 rounded-md border transition-all"
+      >
+        {/* Mobile layout (< sm) */}
+        <div className="flex items-start gap-3 px-4 py-3 sm:hidden">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <Link
+                className="text-foreground text-sm font-medium italic hover:no-underline"
+                href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
+              >
+                {species.nombre_cientifico}
+              </Link>
+              {species.descubridor && (
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: processHTMLLinks(species.descubridor),
+                  }}
+                  className="text-xs text-gray-500"
+                />
+              )}
+            </div>
+            {(species.nombre_comun || species.nombre_comun_ingles) && (
+              <div className="text-muted-foreground mt-1 text-xs">
+                {species.nombre_comun}
+                {species.nombre_comun && species.nombre_comun_ingles && (
+                  <span className="text-[#f07304]"> | </span>
+                )}
+                {species.nombre_comun_ingles}
+              </div>
+            )}
+            {showUltimoAvistamiento && (
+              <div className="text-muted-foreground mt-1 text-xs">
                 {species.ultimo_avistamiento
                   ? formatUltimoAvistamiento(species.ultimo_avistamiento)
                   : "—"}
               </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-white font-normal">Último avistamiento</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-
-      {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
-              240000 km²
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Área de distribución</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      {/* Endémica */}
-      <div className="w-12 text-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className={`cursor-help text-sm font-semibold ${species.endemica ? "text-gray-800" : "text-gray-500"}`}
-              >
-                {species.endemica ? "E" : "NE"}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{species.endemica ? "Endémica" : "No endémica"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Lista Roja */}
-      <div className="w-16 text-center">
-        {species.lista_roja_iucn ? (
-          <>
-            {isPE(species.lista_roja_iucn) ? (
-              <div
-                className="inline-flex items-center justify-center text-[11px] font-semibold"
-                style={{
-                  backgroundColor: "#b71c1c",
-                  color: "#ffffff",
-                  borderRadius: "100% 0% 100% 100%",
-                  width: "36px",
-                  height: "36px",
-                  padding: "4px 9px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                }}
-              >
-                PE
-              </div>
-            ) : (
-              (() => {
-                // Normalizar el valor: trim y uppercase
-                const valorNormalizado = species.lista_roja_iucn.trim().toUpperCase();
-                // Lista de valores válidos
-                const valoresValidos: readonly string[] = [
-                  "LC",
-                  "NT",
-                  "VU",
-                  "EN",
-                  "CR",
-                  "EW",
-                  "EX",
-                  "DD",
-                ];
-
-                // Verificar si el valor está en la lista de válidos
-                if (valoresValidos.includes(valorNormalizado)) {
-                  return (
-                    <RedListStatus
-                      showTooltip={false}
-                      status={
-                        valorNormalizado as "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD"
-                      }
-                    />
-                  );
-                }
-
-                // Si no es válido, mostrar warning y badge con "?"
-                console.warn(
-                  `⚠️ Valor de lista roja no válido: "${species.lista_roja_iucn}" (normalizado: "${valorNormalizado}") para especie ${species.nombre_cientifico}`,
-                );
-
-                return (
-                  <div
-                    className="inline-flex items-center justify-center text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: "#d1d1c6",
-                      color: "#666666",
-                      borderRadius: "100% 0% 100% 100%",
-                      width: "36px",
-                      height: "36px",
-                      padding: "4px 9px",
-                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                    }}
-                  >
-                    ?
-                  </div>
-                );
-              })()
             )}
-          </>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )}
-      </div>
+          </div>
+          <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
+            <span
+              className={`text-xs font-semibold ${species.endemica ? "text-gray-700" : "text-gray-400"}`}
+            >
+              {species.endemica ? "E" : "NE"}
+            </span>
+            <div className="flex w-9 items-center justify-center">{redListBadge}</div>
+          </div>
+        </div>
 
-      {/* Pisos Climáticos */}
-      <div className="flex min-w-0 items-center justify-end">
-        {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
-          <ClimaticFloorChart
-            altitudinalRange={{
-              min: species.rango_altitudinal_min,
-              max: species.rango_altitudinal_max,
-              occidente: species.has_distribucion_occidental
-                ? {
+        {/* Desktop layout (≥ sm) */}
+        <div
+          className={`hidden sm:grid w-full min-w-0 items-center gap-4 pl-4 pr-0 py-3 ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
+        >
+          {/* Nombre científico */}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Link
+                className="text-foreground text-sm font-medium italic hover:no-underline"
+                href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
+              >
+                {species.nombre_cientifico}
+              </Link>
+              {species.descubridor && (
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: processHTMLLinks(species.descubridor),
+                  }}
+                  className="text-xs text-gray-500"
+                />
+              )}
+            </div>
+            {(species.nombre_comun || species.nombre_comun_ingles) && (
+              <div className="text-muted-foreground mt-1 text-xs">
+                {species.nombre_comun}
+                {species.nombre_comun && species.nombre_comun_ingles && (
+                  <span className="text-[#f07304]"> | </span>
+                )}
+                {species.nombre_comun_ingles}
+              </div>
+            )}
+          </div>
+
+          {/* Último avistamiento (solo categoría Posiblemente extinta) */}
+          {showUltimoAvistamiento && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+                    {species.ultimo_avistamiento
+                      ? formatUltimoAvistamiento(species.ultimo_avistamiento)
+                      : "—"}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-white font-normal">Último avistamiento</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
+                  240000 km²
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Área de distribución</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* Endémica */}
+          <div className="w-12 text-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={`cursor-help text-sm font-semibold ${species.endemica ? "text-gray-800" : "text-gray-500"}`}
+                  >
+                    {species.endemica ? "E" : "NE"}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{species.endemica ? "Endémica" : "No endémica"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* Lista Roja */}
+          <div className="w-16 text-center">{redListBadge}</div>
+
+          {/* Pisos Climáticos */}
+          <div className="flex min-w-0 items-center justify-end">
+            {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
+              <ClimaticFloorChart
+                altitudinalRange={{
                   min: species.rango_altitudinal_min,
                   max: species.rango_altitudinal_max,
-                }
-                : undefined,
-              oriente: species.has_distribucion_oriental
-                ? {
-                  min: species.rango_altitudinal_min,
-                  max: species.rango_altitudinal_max,
-                }
-                : undefined,
-            }}
-          />
-        ) : (
-          <span className="text-xs text-gray-400">Sin datos</span>
-        )}
+                  occidente: species.has_distribucion_occidental
+                    ? {
+                      min: species.rango_altitudinal_min,
+                      max: species.rango_altitudinal_max,
+                    }
+                    : undefined,
+                  oriente: species.has_distribucion_oriental
+                    ? {
+                      min: species.rango_altitudinal_min,
+                      max: species.rango_altitudinal_max,
+                    }
+                    : undefined,
+                }}
+              />
+            ) : (
+              <span className="text-xs text-gray-400">Sin datos</span>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderCategoria = (grupo: { categoria: CatalogOption; especies: SpeciesListItem[]; totalSinFiltro?: number }) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
@@ -473,7 +499,7 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="mt-3 w-full rounded-lg pt-4 pb-4 pl-4 pr-0">
+          <div className="mt-3 w-full rounded-lg pt-4 pb-4 pl-2 pr-2 sm:pl-4 sm:pr-0">
             {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {grupo.especies.length > 0 ? (
               <>
@@ -544,12 +570,12 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="bg-muted mt-3 w-full rounded-lg pt-4 pb-4 pl-4 pr-0">
+          <div className="bg-muted mt-3 w-full rounded-lg pt-4 pb-4 pl-2 pr-2 sm:pl-4 sm:pr-0">
             {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {/* Header de la tabla */}
             <div className="mb-3 py-2">
               <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-              <div className="text-muted-foreground grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 text-xs">
+              <div className="text-muted-foreground hidden sm:grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 text-xs">
                 <div>Nombre</div>
                 <div />
                 <div className="text-center">En</div>
