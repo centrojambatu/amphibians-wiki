@@ -39,7 +39,7 @@ export default function ReferenciaCard({ publicacion }: ReferenciaCardProps) {
     <div className="relative overflow-hidden rounded-xl border bg-card py-2 shadow-sm transition-all hover:shadow-md">
       <div className="px-3 py-1">
         <p
-          className="text-sm leading-tight text-gray-700"
+          className="text-sm leading-relaxed text-gray-700"
           dangerouslySetInnerHTML={{
             __html: processHTMLLinks(citaLarga),
           }}
