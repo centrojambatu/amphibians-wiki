@@ -20,7 +20,7 @@ export default function SapotecaHistogramaChart({data}: SapotecaHistogramaChartP
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         <p className="text-lg font-semibold text-gray-800">
-          Publicaciones por año (1849 – {new Date().getFullYear()})
+          Publicaciones científicas por año (1849 – {new Date().getFullYear()})
         </p>
         <p className="mt-4 text-sm text-gray-500">No hay datos disponibles.</p>
       </div>
@@ -31,7 +31,7 @@ export default function SapotecaHistogramaChart({data}: SapotecaHistogramaChartP
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4">
         <p className="text-lg font-semibold text-gray-800">
-          Publicaciones por año <span className="text-[#f07304]">|</span>{" "}
+          Publicaciones científicas por año <span className="text-[#f07304]">|</span>{" "}
           <span className="text-gray-500">total {totalPublicaciones.toLocaleString()}</span>
         </p>
       </div>
@@ -60,7 +60,7 @@ export default function SapotecaHistogramaChart({data}: SapotecaHistogramaChartP
                   <div className="space-y-0.5">
                     <p className="font-medium">{punto.año}</p>
                     <p className="text-xs text-gray-600">
-                      {punto.cantidad} {punto.cantidad === 1 ? "publicación" : "publicaciones"}
+                      {punto.cantidad} {punto.cantidad === 1 ? "publicación científica" : "publicaciones científicas"}
                     </p>
                   </div>
                 </TooltipContent>
