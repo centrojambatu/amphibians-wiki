@@ -170,7 +170,7 @@ export function SapopediaContent({
     ["Historia", "https://deepskyblue-beaver-511675.hostingersite.com/historia"],
     ["Diversidad", "https://deepskyblue-beaver-511675.hostingersite.com/diversidad"],
     ["Arqueología", "https://deepskyblue-beaver-511675.hostingersite.com/arqueologia"],
-    ["Distribución", "https://deepskyblue-beaver-511675.hostingersite.com/diversidad"],
+    ["Distribución", "https://deepskyblue-beaver-511675.hostingersite.com/distribucion"],
     ["Cultura", "https://deepskyblue-beaver-511675.hostingersite.com/cultura"],
     ["Extinción", "https://deepskyblue-beaver-511675.hostingersite.com/extincion"],
     ["Biocomercio", "https://deepskyblue-beaver-511675.hostingersite.com/biocomercio"],
@@ -233,7 +233,7 @@ export function SapopediaContent({
               </a>
               <a
                 className="text-primary text-sm font-medium hover:no-underline"
-                href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad"
+                href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion"
                 rel="noopener noreferrer"
                 target="_blank"
               >

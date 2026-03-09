@@ -256,6 +256,9 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
           const pct =
             especiesConCategoria > 0 ? ((count / especiesConCategoria) * 100).toFixed(1) : "0";
 
+          const esPE = sigla === "PE";
+          const colorPE = getColor("PE");
+
           return (
             <Card
               key={sigla}
@@ -263,8 +266,9 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
               onClick={() => onCategoryClick?.(sigla)}
             >
               <CardContent className="pt-4">
-                <p className="text-3xl font-bold sm:text-4xl">
-                  {count}{" "}
+                <p className={esPE ? "text-4xl font-bold sm:text-5xl" : "text-3xl font-bold sm:text-4xl"}>
+                  <span style={esPE ? { color: colorPE } : undefined}>{count}</span>
+                  {" "}
                   <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
                     {pct}%
                   </span>

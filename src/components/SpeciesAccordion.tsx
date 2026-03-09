@@ -32,6 +32,7 @@ export default function SpeciesAccordion({
   useEffect(() => {
     if (activeOrderId) {
       const orderKey = `order-${activeOrderId}`;
+
       setOpenItems(new Set([orderKey]));
       onActiveOrderIdConsumed?.();
     }
@@ -44,6 +45,7 @@ export default function SpeciesAccordion({
     if (savedState) {
       try {
         const parsedState = JSON.parse(savedState) as string[];
+
         if (parsedState.length > 0) setOpenItems(new Set(parsedState));
       } catch (error) {
         console.error("Error al cargar el estado del acordeón:", error);
@@ -62,13 +64,16 @@ export default function SpeciesAccordion({
 
   const toggleItem = (itemId: string) => {
     const isOrder = itemId.startsWith("order-");
+
     if (openItems.has(itemId)) {
       if (isOrder) {
         setOpenItems(new Set());
       } else {
         setOpenItems((prev) => {
           const next = new Set(prev);
+
           next.delete(itemId);
+
           return next;
         });
       }
@@ -123,9 +128,7 @@ export default function SpeciesAccordion({
       );
     }
 
-    console.warn(
-      `⚠️ Valor de lista roja no válido: "${listaRoja}" para especie`,
-    );
+    console.warn(`⚠️ Valor de lista roja no válido: "${listaRoja}" para especie`);
 
     return (
       <div
@@ -147,9 +150,7 @@ export default function SpeciesAccordion({
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:bg-muted/50 relative rounded-md border px-4 py-3 transition-all
-        flex flex-col gap-1.5
-        lg:grid lg:grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] lg:items-center lg:gap-4"
+      className="border-border bg-card hover:bg-muted/50 relative flex flex-col gap-1.5 rounded-md border px-4 py-3 transition-all lg:grid lg:grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] lg:items-center lg:gap-4"
     >
       {/* ── Nombre científico (visible en todos los tamaños) ── */}
       <div className="min-w-0">
@@ -211,7 +212,7 @@ export default function SpeciesAccordion({
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Área de distribución</p>
+            <p>Área distribución Ecuador</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -313,8 +314,7 @@ export default function SpeciesAccordion({
             )}
           </div>
           <p className="text-xs text-gray-500">
-            {genus.summary.totalSpecies}{" "}
-            {genus.summary.totalSpecies === 1 ? "especie" : "especies"}
+            {genus.summary.totalSpecies} {genus.summary.totalSpecies === 1 ? "especie" : "especies"}
           </p>
         </div>
 
@@ -325,9 +325,11 @@ export default function SpeciesAccordion({
       </div>
 
       {isOpen(`genus-${genus.id}`) && (
-        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+        <div className="mt-3 rounded-lg pt-4 pr-0 pb-4 pl-4">
           {/* Lista de especies — pr-0 para alinear borde derecho con el resto de cards */}
-          <div className="space-y-2 pl-6">{genus.species.map((species) => renderSpecies(species))}</div>
+          <div className="space-y-2 pl-6">
+            {genus.species.map((species) => renderSpecies(species))}
+          </div>
         </div>
       )}
     </div>
@@ -357,8 +359,7 @@ export default function SpeciesAccordion({
           <p className="text-xs text-gray-500">
             {family.summary.totalSpecies}{" "}
             {family.summary.totalSpecies === 1 ? "especie" : "especies"}{" "}
-            <span className="text-[#f07304]">|</span>{" "}
-            {family.summary.totalGenera}{" "}
+            <span className="text-[#f07304]">|</span> {family.summary.totalGenera}{" "}
             {family.summary.totalGenera === 1 ? "género" : "géneros"}
           </p>
         </div>
@@ -370,7 +371,7 @@ export default function SpeciesAccordion({
       </div>
 
       {isOpen(`family-${family.id}`) && (
-        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+        <div className="mt-3 rounded-lg pt-4 pr-0 pb-4 pl-4">
           {/* Lista de géneros — pr-0 para alinear borde derecho con el resto de cards */}
           <div className="space-y-2 pl-6">{family.genera.map((genus) => renderGenus(genus))}</div>
         </div>
@@ -395,10 +396,8 @@ export default function SpeciesAccordion({
         <div className="flex-1">
           <span className="inline-block text-sm text-gray-600">{order.name}</span>
           <p className="text-xs text-gray-500">
-            {order.summary.totalSpecies}{" "}
-            {order.summary.totalSpecies === 1 ? "especie" : "especies"}{" "}
-            <span className="text-[#f07304]">|</span>{" "}
-            {order.summary.totalFamilies}{" "}
+            {order.summary.totalSpecies} {order.summary.totalSpecies === 1 ? "especie" : "especies"}{" "}
+            <span className="text-[#f07304]">|</span> {order.summary.totalFamilies}{" "}
             {order.summary.totalFamilies === 1 ? "familia" : "familias"}
           </p>
         </div>
@@ -410,9 +409,11 @@ export default function SpeciesAccordion({
       </div>
 
       {isOpen(`order-${order.id}`) && (
-        <div className="mt-3 rounded-lg pt-4 pb-4 pl-4 pr-0">
+        <div className="mt-3 rounded-lg pt-4 pr-0 pb-4 pl-4">
           {/* Lista de familias — pr-0 para que el borde derecho de las cards coincida con el de orden */}
-          <div className="space-y-3 pl-6">{order.families.map((family) => renderFamily(family))}</div>
+          <div className="space-y-3 pl-6">
+            {order.families.map((family) => renderFamily(family))}
+          </div>
         </div>
       )}
     </div>

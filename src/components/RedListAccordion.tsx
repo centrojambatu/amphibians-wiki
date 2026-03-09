@@ -1,33 +1,46 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import type {FiltersState} from "./FiltersPanel";
+
+import {useState, useEffect, useRef} from "react";
 import Link from "next/link";
-import { Menu, Search, X, ExternalLink } from "lucide-react";
+import {Menu, Search, X, ExternalLink} from "lucide-react";
 
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
-import { CatalogOption, FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
-import type { FiltersState } from "./FiltersPanel";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {CatalogOption, FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
+import {processHTMLLinks} from "@/lib/process-html-links";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent} from "@/components/ui/card";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+
 import FiltersPanel from "./FiltersPanel";
-import { processHTMLLinks } from "@/lib/process-html-links";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
 
 const MESES_ES: string[] = [
-  "enero", "febrero", "marzo", "abril", "mayo", "junio",
-  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
 ];
 
 function formatUltimoAvistamiento(isoDate: string): string {
-  const m = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate);
+
   if (!m) return isoDate;
   const [, year, month, day] = m;
   const monthIdx = parseInt(month, 10) - 1;
   const dayNum = parseInt(day, 10);
+
   return `${dayNum} ${MESES_ES[monthIdx] ?? month} ${year}`;
 }
 
@@ -79,9 +92,11 @@ export default function RedListAccordion({
     if (!searchQuery.trim()) return speciesList;
 
     const normalizedQuery = normalizeText(searchQuery);
+
     return speciesList.filter((species) => {
       const nombreCientifico = normalizeText(species.nombre_cientifico || "");
       const nombreComun = normalizeText(species.nombre_comun || "");
+
       return nombreCientifico.includes(normalizedQuery) || nombreComun.includes(normalizedQuery);
     });
   };
@@ -122,23 +137,22 @@ export default function RedListAccordion({
       // Cards Amenazadas: abrir todos los acordeones del grupo (PE, CR, EN, VU)
       if (activeCategory === "AMENAZADAS") {
         const ids = categorias
-          .filter(
-            (c) =>
-              categoriasAmenazadasIds.includes(c.sigla ?? "") || isPE(c.sigla ?? ""),
-          )
+          .filter((c) => categoriasAmenazadasIds.includes(c.sigla ?? "") || isPE(c.sigla ?? ""))
           .map((c) => `categoria-${c.sigla}`);
+
         idsToOpen = new Set(ids);
       } else if (activeCategory === "NO_AMENAZADAS") {
         // Card No amenazadas: abrir todos los acordeones del grupo (NT, LC)
         const ids = categorias
           .filter((c) => categoriasNoAmenazadasIds.includes(c.sigla ?? ""))
           .map((c) => `categoria-${c.sigla}`);
+
         idsToOpen = new Set(ids);
       } else if (activeCategory === "PE") {
         const peCategoria = categorias.find(
-          (c) =>
-            c.sigla?.includes("PE") || c.nombre?.toLowerCase().includes("extinta"),
+          (c) => c.sigla?.includes("PE") || c.nombre?.toLowerCase().includes("extinta"),
         );
+
         idsToOpen = new Set([`categoria-${peCategoria?.sigla || "CR (PE)"}`]);
       } else {
         idsToOpen = new Set([`categoria-${activeCategory}`]);
@@ -147,12 +161,14 @@ export default function RedListAccordion({
       setOpenItems(idsToOpen);
 
       // Scroll al primer acordeón abierto del grupo
-      const firstId = idsToOpen.values().next().value as string | undefined;
+      const firstId = idsToOpen.values().next().value;
+
       if (firstId) {
         setTimeout(() => {
           const element = categoryRefs.current.get(firstId);
+
           if (element) {
-            element.scrollIntoView({ behavior: "smooth", block: "start" });
+            element.scrollIntoView({behavior: "smooth", block: "start"});
           }
         }, 100);
       }
@@ -186,15 +202,19 @@ export default function RedListAccordion({
   // Especies amenazadas (PE, CR, EN, VU)
   const especiesAmenazadas = especies.filter((e) => {
     const sigla = e.lista_roja_iucn;
+
     if (!sigla) return false;
     if (isPE(sigla)) return true;
+
     return categoriasAmenazadas.includes(sigla);
   });
 
   // Especies no amenazadas (NT, LC)
   const especiesNoAmenazadas = especies.filter((e) => {
     const sigla = e.lista_roja_iucn;
+
     if (!sigla) return false;
+
     return categoriasNoAmenazadas.includes(sigla);
   });
 
@@ -334,7 +354,7 @@ export default function RedListAccordion({
 
         {/* Desktop layout (≥ sm) */}
         <div
-          className={`hidden sm:grid w-full min-w-0 items-center gap-4 pl-4 pr-0 py-3 ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
+          className={`hidden w-full min-w-0 items-center gap-4 py-3 pr-0 pl-4 sm:grid ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
         >
           {/* Nombre científico */}
           <div className="min-w-0">
@@ -377,7 +397,7 @@ export default function RedListAccordion({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="text-white font-normal">Último avistamiento</p>
+                  <p className="font-normal text-white">Último avistamiento</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -392,7 +412,7 @@ export default function RedListAccordion({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Área de distribución</p>
+                <p>Área distribución Ecuador</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -427,15 +447,15 @@ export default function RedListAccordion({
                   max: species.rango_altitudinal_max,
                   occidente: species.has_distribucion_occidental
                     ? {
-                      min: species.rango_altitudinal_min,
-                      max: species.rango_altitudinal_max,
-                    }
+                        min: species.rango_altitudinal_min,
+                        max: species.rango_altitudinal_max,
+                      }
                     : undefined,
                   oriente: species.has_distribucion_oriental
                     ? {
-                      min: species.rango_altitudinal_min,
-                      max: species.rango_altitudinal_max,
-                    }
+                        min: species.rango_altitudinal_min,
+                        max: species.rango_altitudinal_max,
+                      }
                     : undefined,
                 }}
               />
@@ -448,7 +468,11 @@ export default function RedListAccordion({
     );
   };
 
-  const renderCategoria = (grupo: { categoria: CatalogOption; especies: SpeciesListItem[]; totalSinFiltro?: number }) => {
+  const renderCategoria = (grupo: {
+    categoria: CatalogOption;
+    especies: SpeciesListItem[];
+    totalSinFiltro?: number;
+  }) => {
     const categoriaId = `categoria-${grupo.categoria.sigla || grupo.categoria.id}`;
     const especiesEndemicas = grupo.especies.filter((e) => e.endemica).length;
     const hayFiltroActivo = searchQuery.trim().length > 0;
@@ -478,16 +502,18 @@ export default function RedListAccordion({
               <span className="text-foreground text-sm font-semibold">
                 {grupo.categoria.nombre}
               </span>
-              {hayFiltroActivo && grupo.totalSinFiltro && grupo.totalSinFiltro !== grupo.especies.length && (
-                <span className="text-xs text-gray-400">
-                  ({grupo.especies.length} de {grupo.totalSinFiltro})
-                </span>
-              )}
+              {hayFiltroActivo &&
+                grupo.totalSinFiltro &&
+                grupo.totalSinFiltro !== grupo.especies.length && (
+                  <span className="text-xs text-gray-400">
+                    ({grupo.especies.length} de {grupo.totalSinFiltro})
+                  </span>
+                )}
             </div>
             <p className="text-muted-foreground text-xs">
               {grupo.especies.length} especie
-              {grupo.especies.length !== 1 ? "s" : ""}{" "}
-              <span className="text-[#f07304]">|</span> {especiesEndemicas} endémica
+              {grupo.especies.length !== 1 ? "s" : ""} <span className="text-[#f07304]">|</span>{" "}
+              {especiesEndemicas} endémica
               {especiesEndemicas !== 1 ? "s" : ""}
             </p>
           </div>
@@ -499,19 +525,19 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="mt-3 w-full rounded-lg pt-4 pb-4 pl-2 pr-2 sm:pl-4 sm:pr-0">
+          <div className="mt-3 w-full rounded-lg pt-4 pr-2 pb-4 pl-2 sm:pr-0 sm:pl-4">
             {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {grupo.especies.length > 0 ? (
               <>
                 {/* Lista de especies */}
                 <div className="w-full space-y-2">
                   {grupo.especies.map((species) =>
-                    renderSpecies(species, isPE(grupo.categoria.sigla ?? null))
+                    renderSpecies(species, isPE(grupo.categoria.sigla ?? null)),
                   )}
                 </div>
               </>
             ) : (
-              <p className="text-center text-sm text-gray-500 py-4">
+              <p className="py-4 text-center text-sm text-gray-500">
                 No se encontraron especies con el filtro actual
               </p>
             )}
@@ -522,11 +548,7 @@ export default function RedListAccordion({
   };
 
   // Renderizar grupo especial (amenazadas/no amenazadas)
-  const renderGrupoEspecial = (
-    id: string,
-    nombre: string,
-    especiesGrupo: SpeciesListItem[]
-  ) => {
+  const renderGrupoEspecial = (id: string, nombre: string, especiesGrupo: SpeciesListItem[]) => {
     const categoriaId = `categoria-${id}`;
     const especiesEndemicas = especiesGrupo.filter((e) => e.endemica).length;
 
@@ -550,11 +572,9 @@ export default function RedListAccordion({
             }
           }}
         >
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-foreground text-sm font-semibold">
-                {nombre}
-              </span>
+              <span className="text-foreground text-sm font-semibold">{nombre}</span>
             </div>
             <p className="text-muted-foreground text-xs">
               {especiesGrupo.length} especie
@@ -570,12 +590,12 @@ export default function RedListAccordion({
         </div>
 
         {isOpen(categoriaId) && (
-          <div className="bg-muted mt-3 w-full rounded-lg pt-4 pb-4 pl-2 pr-2 sm:pl-4 sm:pr-0">
+          <div className="bg-muted mt-3 w-full rounded-lg pt-4 pr-2 pb-4 pl-2 sm:pr-0 sm:pl-4">
             {/* pr-0 para alinear borde derecho de las cards hijas con el card padre */}
             {/* Header de la tabla */}
             <div className="mb-3 py-2">
               <div className="text-muted-foreground mb-2 text-xs">Especies</div>
-              <div className="text-muted-foreground hidden sm:grid grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 text-xs">
+              <div className="text-muted-foreground hidden grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] items-center gap-4 text-xs sm:grid">
                 <div>Nombre</div>
                 <div />
                 <div className="text-center">En</div>
@@ -602,42 +622,42 @@ export default function RedListAccordion({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col gap-6 lg:flex-row">
       {/* Panel izquierdo al lado del acordeón: búsqueda por especie + enlaces (Lista Roja) o solo búsqueda (sin filterCatalogs) */}
       {hasSearchFromParent ? (
         <div className="w-full lg:w-80 lg:flex-shrink-0">
           <div className="lg:sticky lg:top-4">
             <Card className="overflow-x-hidden">
-              <CardContent className="pt-2 space-y-6">
+              <CardContent className="space-y-6 pt-2">
                 {filterCatalogs && filters != null && onFiltersChange ? (
-                  <div className="min-h-0 -mx-6 w-[calc(100%+3rem)]">
+                  <div className="-mx-6 min-h-0 w-[calc(100%+3rem)]">
                     <FiltersPanel
-                      especies={especiesFull ?? especies}
+                      embedded
                       catalogs={filterCatalogs}
-                      onFiltersChange={onFiltersChange}
+                      especies={especiesFull ?? especies}
                       excludeFilters={["pluviocidad", "temperatura", "listaRoja"]}
                       filters={filters}
-                      embedded
                       searchQuery={searchQuery}
+                      onFiltersChange={onFiltersChange}
                       onSearchQueryChange={setSearchQuery}
                     />
                   </div>
                 ) : (
                   <div>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                       <Input
-                        type="text"
+                        className="pr-10 pl-10"
                         placeholder="Nombre científico o común"
+                        type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 pr-10"
                       />
                       {searchQuery && (
                         <Button
-                          variant="ghost"
+                          className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
                           size="sm"
-                          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                          variant="ghost"
                           onClick={() => setSearchQuery("")}
                         >
                           <X className="h-4 w-4" />
@@ -659,19 +679,19 @@ export default function RedListAccordion({
       ) : (
         <div className="flex-shrink-0 lg:hidden">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              type="text"
+              className="pr-10 pl-10"
               placeholder="Nombre científico o común"
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10"
             />
             {searchQuery && (
               <Button
-                variant="ghost"
+                className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
                 size="sm"
-                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                variant="ghost"
                 onClick={() => setSearchQuery("")}
               >
                 <X className="h-4 w-4" />
@@ -679,9 +699,7 @@ export default function RedListAccordion({
             )}
           </div>
           {searchQuery && (
-            <p className="mt-2 text-xs text-gray-500">
-              Filtrando: &quot;{searchQuery}&quot;
-            </p>
+            <p className="mt-2 text-xs text-gray-500">Filtrando: &quot;{searchQuery}&quot;</p>
           )}
         </div>
       )}
