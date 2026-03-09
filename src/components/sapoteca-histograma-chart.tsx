@@ -10,8 +10,8 @@ interface SapotecaHistogramaChartProps {
 }
 
 const ALTURA_MAX_BARRA = 220;
-const COLOR_BARRA = "#67aa4d";
-const COLOR_BARRA_SELECCIONADA = "#4a7c39";
+const COLOR_BARRA = "#f07304";
+const COLOR_BARRA_SELECCIONADA = "#d86503";
 const COLOR_BARRA_CERO = "#e5e7eb";
 const COLOR_BARRA_CERO_SELECCIONADA = "#d1d5db";
 

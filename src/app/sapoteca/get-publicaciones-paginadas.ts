@@ -158,6 +158,19 @@ async function getPublicacionesDesdeTabla(
   const totalPaginas = Math.ceil(total / itemsPorPagina);
 
   const publicacionIds = rows.map((r: { id_publicacion: number }) => r.id_publicacion);
+  const tipoMap = new Map<number, string>();
+  if (publicacionIds.length > 0) {
+    const idsForTipo = publicacionIds.length <= MAX_IDS_IN_QUERY
+      ? publicacionIds
+      : publicacionIds.slice(0, MAX_IDS_IN_QUERY);
+    const { data: tipoData } = await supabase
+      .from("vw_publicacion_anfibios_ecuador" as any)
+      .select("id_publicacion, tipo")
+      .in("id_publicacion", idsForTipo);
+    (tipoData ?? []).forEach((r: { id_publicacion: number; tipo: string }) => {
+      tipoMap.set(r.id_publicacion, r.tipo);
+    });
+  }
   const {data: enlacesData} = await supabase
     .from("publicacion_enlace")
     .select("publicacion_id, enlace")
@@ -189,6 +202,7 @@ async function getPublicacionesDesdeTabla(
       slug: generatePublicacionSlug(pub.cita_corta as string | null, año, pub.titulo as string, pub.id_publicacion as number),
       total_enlaces: totalEnlacesMap.get(Number(pub.id_publicacion)) ?? null,
       primer_enlace: enlacesMap.get(Number(pub.id_publicacion)) ?? null,
+      tipo: tipoMap.get(Number(pub.id_publicacion)) ?? undefined,
     };
   });
 
@@ -213,6 +227,8 @@ export interface PublicacionSapoteca {
   slug: string;
   total_enlaces: number | null;
   primer_enlace: string | null;
+  /** CIENTIFICA | TESIS | DIVULGACIÓN | OTRO | SIN_ASIGNAR (para color del título en card) */
+  tipo?: string;
 }
 
 export interface FiltrosSapoteca {

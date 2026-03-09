@@ -4,7 +4,7 @@ import type {TiposPublicacionAgrupados} from "@/app/sapoteca/get-tipos-publicaci
 
 import {useState, useEffect, useTransition} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {Search, Calendar, CornerDownLeft, X} from "lucide-react";
+import {Search, Calendar, CornerDownLeft, RotateCcw} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -89,18 +89,25 @@ export default function SapotecaFiltersPanel({
 
   // Sincronizar estado del panel cuando la URL cambia (p. ej. clic en barra del histograma)
   const paramsKey = searchParams.toString();
+
   useEffect(() => {
     const titulo = searchParams.get("titulo") || "";
     const autor = searchParams.get("autor") || "";
     const añosStr = searchParams.get("años");
     const años = añosStr
-      ? añosStr.split(",").map(Number).filter((n) => !isNaN(n))
+      ? añosStr
+          .split(",")
+          .map(Number)
+          .filter((n) => !isNaN(n))
       : undefined;
     const rango =
       años && años.length > 0 ? [Math.min(...años), Math.max(...años)] : [añoMin, añoMax];
     const tiposStr = searchParams.get("tipos");
     const tipos = tiposStr
-      ? tiposStr.split(",").map(Number).filter((n) => !isNaN(n))
+      ? tiposStr
+          .split(",")
+          .map(Number)
+          .filter((n) => !isNaN(n))
       : undefined;
     const idx = searchParams.get("indexada");
     const indexada = idx === "true" ? true : idx === "false" ? false : undefined;
@@ -291,19 +298,23 @@ export default function SapotecaFiltersPanel({
 
   const nombresTipos = (() => {
     const map = new Map<number, string>();
+
     for (const s of tiposPublicacion.secciones) {
       for (const item of s.items) map.set(item.id, item.nombre);
     }
+
     return map;
   })();
 
   const idsSoloCientificas = (() => {
     const ids = new Set<number>();
+
     for (const s of tiposPublicacion.secciones) {
       if (s.tipo === "CIENTIFICA" || s.tipo === "TESIS") {
         for (const item of s.items) ids.add(item.id);
       }
     }
+
     return ids;
   })();
 
@@ -317,9 +328,22 @@ export default function SapotecaFiltersPanel({
     <div className="sticky top-0 flex h-screen max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div className="filters-panel-scroll flex-1 overflow-y-auto py-4">
         <div className="w-full space-y-6">
+          {/* Limpiar - encima de todos los filtros */}
+          <div className="flex justify-end px-6">
+            <Button
+              className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+              type="button"
+              variant="ghost"
+              onClick={handleLimpiar}
+            >
+              <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
+              Limpiar
+            </Button>
+          </div>
+
           {tieneFiltrosActivos && (
             <div className="space-y-2 px-6">
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                 Filtros activos
               </p>
               <ul className="text-foreground space-y-1 text-sm">
@@ -346,9 +370,7 @@ export default function SapotecaFiltersPanel({
                     <span className="text-muted-foreground">Tipo:</span>{" "}
                     {esFiltroSoloCientificas
                       ? "Científica"
-                      : filtros.tiposPublicacion
-                          .map((id) => nombresTipos.get(id) ?? id)
-                          .join(", ")}
+                      : filtros.tiposPublicacion.map((id) => nombresTipos.get(id) ?? id).join(", ")}
                   </li>
                 )}
                 {filtros.indexada === true && (
@@ -544,21 +566,8 @@ export default function SapotecaFiltersPanel({
             </div>
           </div>
 
-          {/* Limpiar filtros - arriba de Científica */}
-          <div className="px-6">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full gap-2"
-              onClick={handleLimpiar}
-            >
-              <X className="h-4 w-4" />
-              Limpiar filtros
-            </Button>
-          </div>
-
           {/* Tipo de publicación: despliegue en "Científica", con divisiones */}
+          <div className="mt-14">
           {(() => {
             const cientifica = tiposPublicacion.secciones.find((s) => s.tipo === "CIENTIFICA");
             const tesis = tiposPublicacion.secciones.find((s) => s.tipo === "TESIS");
@@ -753,20 +762,20 @@ export default function SapotecaFiltersPanel({
                                 </Button>
                               )}
                               {guiaItem && (
-                              <Button
-                                className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                                size="sm"
-                                style={{
-                                  borderColor: guiaSelected ? undefined : "#e8e8e8",
-                                  color: guiaSelected ? undefined : "#2d2d2d",
-                                }}
-                                type="button"
-                                variant={guiaSelected ? "default" : "outline"}
-                                onClick={() => handleTipoSeccionChange([guiaItem.id])}
-                              >
-                                Guías
-                              </Button>
-                            )}
+                                <Button
+                                  className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                                  size="sm"
+                                  style={{
+                                    borderColor: guiaSelected ? undefined : "#e8e8e8",
+                                    color: guiaSelected ? undefined : "#2d2d2d",
+                                  }}
+                                  type="button"
+                                  variant={guiaSelected ? "default" : "outline"}
+                                  onClick={() => handleTipoSeccionChange([guiaItem.id])}
+                                >
+                                  Guías
+                                </Button>
+                              )}
                             </div>
                           </AccordionContent>
                         </AccordionItem>
@@ -859,6 +868,7 @@ export default function SapotecaFiltersPanel({
               </>
             );
           })()}
+          </div>
         </div>
       </div>
     </div>

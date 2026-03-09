@@ -77,7 +77,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 sm:gap-4">
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
           <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+            <p className="text-4xl font-bold tabular-nums text-[#f07304] sm:text-5xl">
               {estadisticas.totalCientificas.toLocaleString()}
             </p>
             <p className="break-words text-muted-foreground text-xs sm:text-sm">

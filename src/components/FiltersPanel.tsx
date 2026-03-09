@@ -360,8 +360,13 @@ export default function FiltersPanel({
           </div>
         )}
         <div className="flex-shrink-0 py-2 flex justify-end px-6">
-          <Button size="sm" variant="outline" onClick={resetFilters} className="gap-1 text-xs text-gray-600">
-            <RotateCcw className="h-3.5 w-3.5 text-black" />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={resetFilters}
+            className="gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
             Limpiar
           </Button>
         </div>
@@ -701,12 +706,12 @@ export default function FiltersPanel({
         </Popover>
         <div className="flex justify-end">
           <Button
-            size="sm"
-            variant="outline"
+            type="button"
+            variant="ghost"
             onClick={resetFilters}
-            className="gap-1 text-xs text-gray-600 w-auto"
+            className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
           >
-            <RotateCcw className="h-3.5 w-3.5 text-black" />
+            <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
             Limpiar
           </Button>
         </div>
