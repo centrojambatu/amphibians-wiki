@@ -17,34 +17,77 @@ async function getPublicacionesDesdeTabla(
 ): Promise<PublicacionesPaginadas> {
   let idsFiltro: number[] | null = idsFormato && idsFormato.length > 0 ? [...idsFormato] : null;
 
+  // Resolver IDs de catálogo a valores de tipo (CIENTIFICA, TESIS, DIVULGACIÓN, OTRO) para la vista
+  let tiposValores: string[] = [];
   if (filtros?.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
-    const {data: idsTipo} = await supabase
-      .from("publicacion_catalogo_awe")
-      .select("publicacion_id")
-      .in("catalogo_publicaciones_id", filtros.tiposPublicacion);
-    const ids = [...new Set((idsTipo ?? []).map((r) => r.publicacion_id))];
+    const { data: catData } = await supabase
+      .from("catalogo_publicaciones" as any)
+      .select("tipo")
+      .in("id", filtros.tiposPublicacion);
+    tiposValores = [
+      ...new Set(
+        (catData ?? []).map((r: { tipo: string | null }) => (r.tipo ?? "OTRO").trim()),
+      ),
+    ];
+  }
+
+  // Una sola fuente: vista vw_publicacion_anfibios_ecuador (tipo + numero_publicacion_ano)
+  const tieneFiltroTipo = tiposValores.length > 0;
+  const tieneFiltroAño = filtros?.años && filtros.años.length > 0;
+  if (tieneFiltroTipo || tieneFiltroAño) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista no está en tipos generados
+    let qVista = supabase
+      .from("vw_publicacion_anfibios_ecuador" as any)
+      .select("id_publicacion");
+    if (tieneFiltroTipo) qVista = qVista.in("tipo", tiposValores);
+    if (tieneFiltroAño) qVista = qVista.in("numero_publicacion_ano", filtros.años!);
+    const { data: rowsVista } = await qVista;
+    const idsVista = (rowsVista ?? []) as { id_publicacion: number }[];
+    const idsList = idsVista.map((r) => r.id_publicacion);
     if (idsFiltro !== null) {
       const setF = new Set(idsFiltro);
-      idsFiltro = ids.filter((id) => setF.has(id));
+      idsFiltro = idsList.filter((id) => setF.has(id));
     } else {
-      idsFiltro = ids;
+      idsFiltro = idsList;
     }
     if (idsFiltro.length === 0) {
-      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+      return {
+        publicaciones: [],
+        total: 0,
+        pagina: Math.floor(offset / itemsPorPagina) + 1,
+        totalPaginas: 0,
+        itemsPorPagina,
+      };
     }
   }
 
-  if (filtros?.años && filtros.años.length > 0) {
-    const {data: pa} = await supabase.from("publicacion_ano").select("publicacion_id").in("ano", filtros.años);
-    const idsAño = [...new Set((pa ?? []).map((r) => r.publicacion_id))];
+  // Indexada / no indexada: solo publicaciones científicas (igual que las tarjetas)
+  if (filtros?.indexada !== undefined) {
+    let qCientificas = supabase
+      .from("vw_publicacion_cientifica_ecuador" as any)
+      .select("id_publicacion");
+    if (filtros.indexada) {
+      qCientificas = qCientificas.eq("indexada", true);
+    } else {
+      qCientificas = qCientificas.or("indexada.eq.false,indexada.is.null");
+    }
+    const { data: rowsCient } = await qCientificas;
+    const idsCientificas = (rowsCient ?? []) as { id_publicacion: number }[];
+    const idsListCient = idsCientificas.map((r) => r.id_publicacion);
     if (idsFiltro !== null) {
       const setF = new Set(idsFiltro);
-      idsFiltro = idsAño.filter((id) => setF.has(id));
+      idsFiltro = idsListCient.filter((id) => setF.has(id));
     } else {
-      idsFiltro = idsAño;
+      idsFiltro = idsListCient;
     }
     if (idsFiltro.length === 0) {
-      return { publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina };
+      return {
+        publicaciones: [],
+        total: 0,
+        pagina: Math.floor(offset / itemsPorPagina) + 1,
+        totalPaginas: 0,
+        itemsPorPagina,
+      };
     }
   }
 
@@ -78,7 +121,11 @@ async function getPublicacionesDesdeTabla(
     q = q.ilike("titulo", `%${filtros.titulo}%`);
   }
   if (filtros?.indexada !== undefined) {
-    q = q.eq("indexada", filtros.indexada);
+    if (filtros.indexada) {
+      q = q.eq("indexada", true);
+    } else {
+      q = q.or("indexada.eq.false,indexada.is.null");
+    }
   }
   if (idsFiltro !== null && idsFiltro.length > 0) {
     if (idsFiltro.length <= MAX_IDS_IN_QUERY) {

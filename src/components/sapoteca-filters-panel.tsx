@@ -4,7 +4,7 @@ import type {TiposPublicacionAgrupados} from "@/app/sapoteca/get-tipos-publicaci
 
 import {useState, useEffect, useTransition} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {Search, Calendar, CornerDownLeft} from "lucide-react";
+import {Search, Calendar, CornerDownLeft, X} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -86,6 +86,39 @@ export default function SapotecaFiltersPanel({
     indexada: indexadaInicial,
     formatoImpreso: formatoImpresoInicial,
   });
+
+  // Sincronizar estado del panel cuando la URL cambia (p. ej. clic en barra del histograma)
+  const paramsKey = searchParams.toString();
+  useEffect(() => {
+    const titulo = searchParams.get("titulo") || "";
+    const autor = searchParams.get("autor") || "";
+    const añosStr = searchParams.get("años");
+    const años = añosStr
+      ? añosStr.split(",").map(Number).filter((n) => !isNaN(n))
+      : undefined;
+    const rango =
+      años && años.length > 0 ? [Math.min(...años), Math.max(...años)] : [añoMin, añoMax];
+    const tiposStr = searchParams.get("tipos");
+    const tipos = tiposStr
+      ? tiposStr.split(",").map(Number).filter((n) => !isNaN(n))
+      : undefined;
+    const idx = searchParams.get("indexada");
+    const indexada = idx === "true" ? true : idx === "false" ? false : undefined;
+    const fmt = searchParams.get("formatoImpreso");
+    const formatoImpreso = fmt === "true" ? true : fmt === "false" ? false : undefined;
+
+    setTituloQuery(titulo);
+    setAutorQuery(autor);
+    setRangoAños(rango);
+    setFiltros({
+      titulo: titulo || undefined,
+      años: años?.length ? años : undefined,
+      autor: autor || undefined,
+      tiposPublicacion: tipos?.length ? tipos : undefined,
+      indexada,
+      formatoImpreso,
+    });
+  }, [paramsKey, añoMin]);
 
   useEffect(() => {
     if (tituloQuery.length >= 2) {
@@ -232,10 +265,115 @@ export default function SapotecaFiltersPanel({
     }));
   };
 
+  const handleLimpiar = () => {
+    setTituloQuery("");
+    setAutorQuery("");
+    setRangoAños([añoMin, añoMax]);
+    setAñoEspecificoInput("");
+    setFiltros({
+      titulo: undefined,
+      años: undefined,
+      autor: undefined,
+      tiposPublicacion: undefined,
+      indexada: undefined,
+      formatoImpreso: undefined,
+    });
+    // La navegación la hace el useEffect al detectar el cambio de filtros
+  };
+
+  const tieneFiltrosActivos =
+    !!filtros.titulo ||
+    (filtros.años && filtros.años.length > 0) ||
+    !!filtros.autor ||
+    (filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0) ||
+    filtros.indexada !== undefined ||
+    filtros.formatoImpreso !== undefined;
+
+  const nombresTipos = (() => {
+    const map = new Map<number, string>();
+    for (const s of tiposPublicacion.secciones) {
+      for (const item of s.items) map.set(item.id, item.nombre);
+    }
+    return map;
+  })();
+
+  const idsSoloCientificas = (() => {
+    const ids = new Set<number>();
+    for (const s of tiposPublicacion.secciones) {
+      if (s.tipo === "CIENTIFICA" || s.tipo === "TESIS") {
+        for (const item of s.items) ids.add(item.id);
+      }
+    }
+    return ids;
+  })();
+
+  const esFiltroSoloCientificas =
+    filtros.tiposPublicacion &&
+    filtros.tiposPublicacion.length > 0 &&
+    filtros.tiposPublicacion.length === idsSoloCientificas.size &&
+    filtros.tiposPublicacion.every((id) => idsSoloCientificas.has(id));
+
   return (
     <div className="sticky top-0 flex h-screen max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div className="filters-panel-scroll flex-1 overflow-y-auto py-4">
         <div className="w-full space-y-6">
+          {tieneFiltrosActivos && (
+            <div className="space-y-2 px-6">
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                Filtros activos
+              </p>
+              <ul className="text-foreground space-y-1 text-sm">
+                {filtros.titulo && (
+                  <li className="truncate" title={filtros.titulo}>
+                    <span className="text-muted-foreground">Título:</span> {filtros.titulo}
+                  </li>
+                )}
+                {filtros.años && filtros.años.length > 0 && (
+                  <li>
+                    <span className="text-muted-foreground">Año(s):</span>{" "}
+                    {filtros.años.length <= 3
+                      ? filtros.años.join(", ")
+                      : `${String(filtros.años[0])} - ${String(filtros.años[filtros.años.length - 1])}`}
+                  </li>
+                )}
+                {filtros.autor && (
+                  <li className="truncate" title={filtros.autor}>
+                    <span className="text-muted-foreground">Autor:</span> {filtros.autor}
+                  </li>
+                )}
+                {filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0 && (
+                  <li>
+                    <span className="text-muted-foreground">Tipo:</span>{" "}
+                    {esFiltroSoloCientificas
+                      ? "Científica"
+                      : filtros.tiposPublicacion
+                          .map((id) => nombresTipos.get(id) ?? id)
+                          .join(", ")}
+                  </li>
+                )}
+                {filtros.indexada === true && (
+                  <li>
+                    <span className="text-muted-foreground">Indexación:</span> Indexadas
+                  </li>
+                )}
+                {filtros.indexada === false && (
+                  <li>
+                    <span className="text-muted-foreground">Indexación:</span> No indexadas
+                  </li>
+                )}
+                {filtros.formatoImpreso === true && (
+                  <li>
+                    <span className="text-muted-foreground">Formato:</span> Impreso
+                  </li>
+                )}
+                {filtros.formatoImpreso === false && (
+                  <li>
+                    <span className="text-muted-foreground">Formato:</span> Web
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
           {/* Filtro de Título */}
           <div className="space-y-2 px-6">
             <Popover open={tituloOpen} onOpenChange={setTituloOpen}>
@@ -404,6 +542,20 @@ export default function SapotecaFiltersPanel({
                 <span>{añoMax}</span>
               </div>
             </div>
+          </div>
+
+          {/* Limpiar filtros - arriba de Científica */}
+          <div className="px-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={handleLimpiar}
+            >
+              <X className="h-4 w-4" />
+              Limpiar filtros
+            </Button>
           </div>
 
           {/* Tipo de publicación: despliegue en "Científica", con divisiones */}

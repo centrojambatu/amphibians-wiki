@@ -34,6 +34,42 @@ SELECT id_publicacion, titulo, autores_nombres
 FROM vw_publicacion_completa_ecuador;
 
 -- ============================================================================
+-- Vista Sapoteca: publicaciones anfibios Ecuador con columna tipo (filtros)
+-- Una fila por publicación; tipo = CIENTIFICA | TESIS | DIVULGACIÓN | OTRO | SIN_ASIGNAR
+-- Prioridad para asignar un solo tipo por publicación: CIENTIFICA > TESIS > DIVULGACIÓN > OTRO
+-- ============================================================================
+CREATE OR REPLACE VIEW vw_publicacion_anfibios_ecuador AS
+SELECT
+  p.id_publicacion,
+  p.titulo,
+  p.titulo_secundario,
+  p.cita_corta,
+  p.cita,
+  p.cita_larga,
+  p.numero_publicacion_ano,
+  p.fecha,
+  p.indexada,
+  COALESCE(
+    (
+      SELECT cp.tipo
+      FROM publicacion_catalogo_awe pca
+      JOIN catalogo_publicaciones cp ON cp.id = pca.catalogo_publicaciones_id
+      WHERE pca.publicacion_id = p.id_publicacion
+      ORDER BY CASE cp.tipo
+        WHEN 'CIENTIFICA' THEN 1
+        WHEN 'TESIS' THEN 2
+        WHEN 'DIVULGACIÓN' THEN 3
+        WHEN 'OTRO' THEN 4
+        ELSE 5
+      END
+      LIMIT 1
+    ),
+    'SIN_ASIGNAR'
+  )::text AS tipo
+FROM publicacion p
+WHERE p.anfibios_ecuador = true;
+
+-- ============================================================================
 -- Vistas para estadísticas Sapoteca: solo publicaciones tipo CIENTÍFICA/TESIS
 -- Usadas por las cards (indexadas, no indexadas, promedio, año actual, etc.)
 -- ============================================================================

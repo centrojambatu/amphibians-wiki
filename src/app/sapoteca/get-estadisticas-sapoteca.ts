@@ -77,7 +77,7 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
   const countCientificas = idsCientificas.size;
   const countDivulgacion = idsDivulgacion.size;
 
-  // Estadísticas de las cards: solo publicaciones tipo CIENTÍFICA (usa vistas)
+  // Estadísticas de las cards: indexadas / no indexadas solo sobre publicaciones científicas
   const [
     { count: countIndexadas },
     { count: countNoIndexadas },

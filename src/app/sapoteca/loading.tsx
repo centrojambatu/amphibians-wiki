@@ -36,15 +36,36 @@ export default function SapotecaLoading() {
           </div>
         </div>
 
-        {/* Skeleton del contenido */}
+        {/* Skeleton del listado de publicaciones (misma estructura que ReferenciaCard) */}
         <div className="min-w-0 flex-1">
-          <div className="mb-6 h-4 w-48 animate-pulse rounded bg-gray-200" />
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="rounded-lg border bg-white p-5">
-                <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-                <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-gray-100" />
-                <div className="mt-2 h-3 w-full animate-pulse rounded bg-gray-100" />
+          <div className="mb-6 h-4 w-56 animate-pulse rounded bg-muted" />
+          <div className="mb-8 space-y-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div
+                key={i}
+                className="relative overflow-hidden rounded-xl border bg-card py-2 shadow-sm"
+              >
+                <div className="px-3 py-1">
+                  <div className="space-y-2">
+                    <div
+                      className="h-4 animate-pulse rounded bg-muted"
+                      style={{ width: `${85 - i * 3}%` }}
+                    />
+                    <div
+                      className="h-4 animate-pulse rounded bg-muted"
+                      style={{ width: `${70 + (i % 3) * 10}%` }}
+                    />
+                    <div className="h-4 w-full animate-pulse rounded bg-muted" />
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {[1, 2, 3, 4].map((j) => (
+                      <div
+                        key={j}
+                        className="h-6 w-14 animate-pulse rounded border border-gray-200 bg-muted"
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

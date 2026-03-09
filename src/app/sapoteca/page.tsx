@@ -62,6 +62,10 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
 
   const { publicaciones, total, totalPaginas } = publicacionesData;
 
+  const idsTiposCientificas = tiposPublicacion.secciones
+    .filter((s) => s.tipo === "CIENTIFICA" || s.tipo === "TESIS")
+    .flatMap((s) => s.items.map((i) => i.id));
+
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -243,7 +247,10 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
 
       {/* Histograma de publicaciones por año */}
       <div className="mb-8">
-        <SapotecaHistogramaChart data={histogramaData} />
+        <SapotecaHistogramaChart
+          data={histogramaData}
+          idsTiposCientificas={idsTiposCientificas}
+        />
       </div>
 
         {/* Layout con panel de filtros y contenido */}
