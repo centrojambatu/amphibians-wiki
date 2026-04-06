@@ -33,14 +33,10 @@ export default async function ColeccionDetailPage({params}: PageProps) {
   const decodedId = decodeURIComponent(id);
   const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
 
-  // Obtener la ficha de especie para validar y obtener datos
-  const fichaEspecie = await getFichaEspecie(sanitizedId);
-
-  if (!fichaEspecie) {
-    notFound();
-  }
-
-  const taxonIdNum = fichaEspecie.taxon_id;
+  // Obtener la ficha de especie para validar y obtener datos (solo si parece ser una especie)
+  // Registros a nivel de género/familia/orden tienen ambas palabras capitalizadas (e.g. "Amphibia Anura")
+  const looksLikeSpecies = / [a-z]/.test(sanitizedId) || /^\d+$/.test(sanitizedId);
+  const fichaEspecie = looksLikeSpecies ? await getFichaEspecie(sanitizedId) : null;
 
   // Fetch colección y todos los datos relacionados en paralelo
   const [
@@ -67,28 +63,27 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     notFound();
   }
 
-  // Obtener el nombre científico completo de la especie
-  const nombreCientificoCompleto = fichaEspecie.taxones?.[0]?.taxonPadre?.taxon
-    ? `${fichaEspecie.taxones[0].taxonPadre.taxon} ${fichaEspecie.taxones[0].taxon}`
-    : fichaEspecie.taxones?.[0]?.taxon || "";
+  // Validar que la colección pertenece al taxón indicado en la URL (solo si hay ficha de especie)
+  if (fichaEspecie) {
+    const taxonIdNum = fichaEspecie.taxon_id;
+    const nombreCientificoCompleto = fichaEspecie.taxones?.[0]?.taxonPadre?.taxon
+      ? `${fichaEspecie.taxones[0].taxonPadre.taxon} ${fichaEspecie.taxones[0].taxon}`
+      : fichaEspecie.taxones?.[0]?.taxon || "";
 
-  // Validar que la colección pertenece a la especie indicada en la URL
-  // Primero verificar si taxon_id coincide
-  const taxonIdCoincide = coleccion.taxon_id === taxonIdNum;
+    const taxonIdCoincide = coleccion.taxon_id === taxonIdNum;
 
-  // Si taxon_id no coincide, validar por taxon_nombre usando comparación flexible
-  if (!taxonIdCoincide) {
-    const coleccionTaxonNombre = coleccion.taxon_nombre?.toLowerCase().trim() || "";
-    const nombreCientificoLower = nombreCientificoCompleto.toLowerCase().trim();
+    if (!taxonIdCoincide) {
+      const coleccionTaxonNombre = coleccion.taxon_nombre?.toLowerCase().trim() || "";
+      const nombreCientificoLower = nombreCientificoCompleto.toLowerCase().trim();
 
-    // Verificar coincidencia: el taxon_nombre debe contener el nombre científico o viceversa
-    const nombresCoinciden =
-      coleccionTaxonNombre &&
-      (coleccionTaxonNombre.includes(nombreCientificoLower) ||
-        nombreCientificoLower.includes(coleccionTaxonNombre));
+      const nombresCoinciden =
+        coleccionTaxonNombre &&
+        (coleccionTaxonNombre.includes(nombreCientificoLower) ||
+          nombreCientificoLower.includes(coleccionTaxonNombre));
 
-    if (!nombresCoinciden) {
-      notFound();
+      if (!nombresCoinciden) {
+        notFound();
+      }
     }
   }
 

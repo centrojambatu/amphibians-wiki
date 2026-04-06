@@ -1,27 +1,35 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
   CircleMarker,
-  Tooltip,
+  Popup,
   useMap,
 } from "react-leaflet";
+import L from "leaflet";
 import { useRouter } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 
-import type { UbicacionEspecie } from "@/app/api/mapoteca/route";
+import type { UbicacionEspecie, MapotecaResponse } from "@/app/api/mapoteca/route";
+
+// Canvas renderer para mejor rendimiento con miles de puntos
+const canvasRenderer =
+  typeof window !== "undefined" ? L.canvas({ padding: 0.5 }) : undefined;
 
 // Componente para ajustar la vista del mapa
 function MapBoundsAdjuster({
   ubicaciones,
+  skip,
 }: {
   ubicaciones: UbicacionEspecie[];
+  skip?: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
+    if (skip) return;
     if (ubicaciones.length > 0) {
       const validUbicaciones = ubicaciones.filter(
         (u) => u.latitud && u.longitud
@@ -33,45 +41,240 @@ function MapBoundsAdjuster({
         map.fitBounds(bounds, { padding: [20, 20], maxZoom: 10 });
       }
     }
-  }, [ubicaciones, map]);
+  }, [ubicaciones, map, skip]);
 
   return null;
 }
 
-// Colores por familia/género para diferenciar visualmente
-function getColorByGenus(genero: string): string {
-  const colors: Record<string, string> = {
-    Pristimantis: "#e63946",
-    Atelopus: "#f4a261",
-    Hyloxalus: "#2a9d8f",
-    Noblella: "#e9c46a",
-    Epipedobates: "#264653",
-    Gastrotheca: "#9b59b6",
-    Osteocephalus: "#3498db",
-    Rhinella: "#27ae60",
-    Dendropsophus: "#e74c3c",
-    Hyalinobatrachium: "#1abc9c",
-    Centrolene: "#00bcd4",
-    Nymphargus: "#8e44ad",
-    Agalychnis: "#2ecc71",
-    Boana: "#f39c12",
-  };
+// Componente para rastrear zoom/center del mapa
+function MapStateTracker({
+  stateRef,
+}: {
+  stateRef: React.MutableRefObject<{ center: [number, number]; zoom: number }>;
+}) {
+  const map = useMap();
 
-  return colors[genero] || "#6c757d";
+  useEffect(() => {
+    const update = () => {
+      const c = map.getCenter();
+      stateRef.current = {
+        center: [c.lat, c.lng],
+        zoom: map.getZoom(),
+      };
+    };
+    map.on("moveend", update);
+    map.on("zoomend", update);
+    return () => {
+      map.off("moveend", update);
+      map.off("zoomend", update);
+    };
+  }, [map, stateRef]);
+
+  return null;
 }
 
-// Generar color basado en elevación
-function getColorByElevation(elevacion: number | null): string {
-  if (!elevacion) return "#6c757d";
+// Componente para restaurar el estado del mapa (zoom, center, popup)
+function MapStateRestorer({
+  center,
+  zoom,
+  popupKey,
+  markerRefs,
+}: {
+  center: [number, number];
+  zoom: number;
+  popupKey: string | null;
+  markerRefs: React.MutableRefObject<Map<string, L.CircleMarker>>;
+}) {
+  const map = useMap();
+  const restored = useRef(false);
 
-  if (elevacion < 500) return "#1a9850"; // Verde - tierras bajas
-  if (elevacion < 1000) return "#91cf60"; // Verde claro
-  if (elevacion < 1500) return "#d9ef8b"; // Amarillo-verde
-  if (elevacion < 2000) return "#fee08b"; // Amarillo
-  if (elevacion < 2500) return "#fdae61"; // Naranja
-  if (elevacion < 3000) return "#f46d43"; // Naranja-rojo
-  if (elevacion < 3500) return "#d73027"; // Rojo
-  return "#a50026"; // Rojo oscuro - páramo
+  useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+
+    map.setView(center, zoom, { animate: false });
+
+    if (popupKey) {
+      // Small delay to ensure markers are rendered
+      setTimeout(() => {
+        const marker = markerRefs.current.get(popupKey);
+        if (marker) {
+          marker.openPopup();
+        }
+      }, 300);
+    }
+  }, [map, center, zoom, popupKey, markerRefs]);
+
+  return null;
+}
+
+// Link a la ocurrencia en GBIF para colecciones externas
+function GbifLink({
+  catalogoMuseo,
+  numeroMuseo,
+}: {
+  catalogoMuseo: string;
+  numeroMuseo: string;
+}) {
+  const [gbifUrl, setGbifUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGbif = async () => {
+      try {
+        // Mapeo de códigos de institución y catálogo para GBIF
+        let institutionCode = catalogoMuseo;
+        let catNumber = numeroMuseo;
+        let collectionCode: string | null = null;
+        switch (catalogoMuseo) {
+          case "KU":
+            collectionCode = "KUH";
+            break;
+          case "QCAZA":
+            institutionCode = "QCAZ";
+            catNumber = `QCAZA${numeroMuseo}`;
+            break;
+          case "QCAZ":
+            catNumber = `QCAZA${numeroMuseo}`;
+            break;
+          case "AMNH":
+            catNumber = `A-${numeroMuseo}`;
+            break;
+          case "USNM":
+            catNumber = `USNM ${numeroMuseo}`;
+            break;
+          case "DHMECN":
+            catNumber = `DHMECN ${numeroMuseo}`;
+            break;
+        }
+        const params = new URLSearchParams({
+          institutionCode,
+          catalogNumber: catNumber,
+          classKey: "131",
+          limit: "1",
+        });
+        if (collectionCode) {
+          params.set("collectionCode", collectionCode);
+        }
+        const res = await fetch(
+          `https://api.gbif.org/v1/occurrence/search?${params.toString()}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          setGbifUrl(
+            `https://www.gbif.org/occurrence/${data.results[0].key}`
+          );
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGbif();
+  }, [catalogoMuseo, numeroMuseo]);
+
+  if (loading) {
+    return (
+      <span className="text-[10px] text-gray-400">
+        Buscando en GBIF...
+      </span>
+    );
+  }
+
+  if (!gbifUrl) return null;
+
+  return (
+    <a
+      href={gbifUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[10px] font-semibold text-[#4ba24b] underline hover:text-[#397a39]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      Ver en GBIF ↗
+    </a>
+  );
+}
+
+// Contenido compacto de un registro
+function RegistroInfo({
+  u,
+  onSpeciesClick,
+  onColeccionClick,
+}: {
+  u: UbicacionEspecie;
+  onSpeciesClick?: (u: UbicacionEspecie) => void;
+  onColeccionClick?: (u: UbicacionEspecie) => void;
+}) {
+  const isExterna = u.origen === "coleccion_externa";
+  const isCJ = u.origen === "coleccion";
+  const isSpeciesLevel = u.rank_id === 7;
+  // Navegable si tiene rank_id conocido (4=orden, 5=familia, 6=género, 7=especie)
+  const canNavigate = onSpeciesClick && u.rank_id != null && u.rank_id >= 4;
+
+  // Etiqueta y nombre según el nivel taxonómico
+  const rankLabel = u.rank_id === 4 ? "Orden" : u.rank_id === 5 ? "Familia" : u.rank_id === 6 ? "Género" : "Especie";
+  // Para especie: "Género especie"; para otros niveles: solo el nombre del taxón (segunda palabra)
+  const displayName = isSpeciesLevel
+    ? u.nombre_cientifico
+    : u.nombre_cientifico.split(" ").pop() || u.nombre_cientifico;
+
+  return (
+    <div className="text-[11px]" style={{ lineHeight: "1.2" }}>
+      {(u.catalogo_museo || u.numero_museo) && (
+        <span className="font-bold text-[#2a6496]">
+          {[u.catalogo_museo, u.numero_museo].filter(Boolean).join(" ")}
+        </span>
+      )}
+      {(u.catalogo_museo || u.numero_museo) && <br />}
+      <b>{rankLabel}:</b>{" "}
+      {canNavigate ? (
+        <i
+          className="cursor-pointer text-[#4ba24b] hover:text-[#397a39]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSpeciesClick(u);
+          }}
+        >
+          {displayName}
+        </i>
+      ) : (
+        <i>{displayName}</i>
+      )}
+      {u.localidad && <><br /><b>Localidad:</b> {u.localidad}</>}
+      <br />
+      {u.provincia && <><b>Prov:</b> {u.provincia} &middot; </>}
+      <b>Pa&iacute;s:</b> Ecuador
+      {u.elevacion != null && <> &middot; <b>Elev:</b> {u.elevacion} m</>}
+      <br /><b>Lat:</b> {u.latitud}, <b>Lon:</b> {u.longitud}
+      {u.cita_corta && <><br /><b>Pub:</b> {u.cita_corta}</>}
+      {isCJ && u.id_coleccion && onColeccionClick && (
+        <>
+          <br />
+          <span
+            className="cursor-pointer text-[10px] font-semibold text-[#4ba24b] hover:underline hover:text-[#397a39]"
+            onClick={(e) => {
+              e.stopPropagation();
+              onColeccionClick(u);
+            }}
+          >
+            Ver colección →
+          </span>
+        </>
+      )}
+      {isExterna && u.catalogo_museo && u.numero_museo && (
+        <>
+          <br />
+          <GbifLink
+            catalogoMuseo={u.catalogo_museo}
+            numeroMuseo={u.numero_museo}
+          />
+        </>
+      )}
+    </div>
+  );
 }
 
 // Tipos de mapas base disponibles
@@ -112,42 +315,79 @@ type MapTileType = keyof typeof MAP_TILES;
 interface MapotecaMapProps {
   provinciaFilter?: string;
   especieFilter?: string;
-  colorMode?: "genus" | "elevation";
   mapType?: MapTileType;
-  maxPoints?: number;
-  onNavigateToSpecies?: () => void; // Callback para guardar estado antes de navegar
+  maxPuntos?: number;
+  onNavigateToSpecies?: () => void;
 }
 
 export default function MapotecaMap({
   provinciaFilter,
   especieFilter,
-  colorMode = "elevation",
   mapType = "provinces",
-  maxPoints = 11000,
+  maxPuntos = 1000,
   onNavigateToSpecies,
 }: MapotecaMapProps) {
   const [ubicaciones, setUbicaciones] = useState<UbicacionEspecie[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  // Track current filters to know when to reset
+  const filtersRef = useRef({ provinciaFilter, especieFilter });
 
-  // Fetch datos
+  // Map state tracking
+  const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
+    center: [-1.8312, -78.1834],
+    zoom: 7,
+  });
+  const markerRefs = useRef<Map<string, L.CircleMarker>>(new Map());
+
+  // Restore saved map state from sessionStorage
+  const [savedMapState] = useState<{
+    center: [number, number];
+    zoom: number;
+    popupKey: string | null;
+  } | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = sessionStorage.getItem("mapotecaMapState");
+    if (stored) {
+      sessionStorage.removeItem("mapotecaMapState");
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  // Reset y carga inicial cuando cambian los filtros
   useEffect(() => {
-    const fetchUbicaciones = async () => {
+    const filtersChanged =
+      filtersRef.current.provinciaFilter !== provinciaFilter ||
+      filtersRef.current.especieFilter !== especieFilter;
+
+    filtersRef.current = { provinciaFilter, especieFilter };
+
+    const fetchInitial = async () => {
       setLoading(true);
       setError(null);
+      setUbicaciones([]);
 
       try {
         const params = new URLSearchParams();
         if (provinciaFilter) params.set("provincia", provinciaFilter);
         if (especieFilter) params.set("especie", especieFilter);
-        params.set("limit", "15000"); // Asegurar que se envíe el límite
+        params.set("limit", String(maxPuntos));
+        params.set("offset", "0");
 
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
-        const data = await response.json();
-        setUbicaciones(data);
+        const result: MapotecaResponse = await response.json();
+        setUbicaciones(result.data);
+        setTotal(result.total);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
@@ -155,44 +395,156 @@ export default function MapotecaMap({
       }
     };
 
-    fetchUbicaciones();
+    if (filtersChanged) {
+      fetchInitial();
+    }
   }, [provinciaFilter, especieFilter]);
 
-  // Limitar ubicaciones según maxPoints
-  const limitedUbicaciones = useMemo(() => {
-    return ubicaciones.slice(0, maxPoints);
-  }, [ubicaciones, maxPoints]);
+  // Carga inicial al montar
+  useEffect(() => {
+    const fetchInitial = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const params = new URLSearchParams();
+        if (provinciaFilter) params.set("provincia", provinciaFilter);
+        if (especieFilter) params.set("especie", especieFilter);
+        params.set("limit", String(maxPuntos));
+        params.set("offset", "0");
+
+        const response = await fetch(`/api/mapoteca?${params.toString()}`);
+        if (!response.ok) throw new Error("Error al cargar datos");
+
+        const result: MapotecaResponse = await response.json();
+        setUbicaciones(result.data);
+        setTotal(result.total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitial();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cargar más datos cuando el slider sube más allá de lo que tenemos
+  useEffect(() => {
+    if (loading) return;
+    if (maxPuntos <= ubicaciones.length) return;
+    if (ubicaciones.length >= total) return;
+
+    const fetchMore = async () => {
+      setLoadingMore(true);
+      try {
+        const params = new URLSearchParams();
+        if (provinciaFilter) params.set("provincia", provinciaFilter);
+        if (especieFilter) params.set("especie", especieFilter);
+        params.set("limit", String(maxPuntos - ubicaciones.length));
+        params.set("offset", String(ubicaciones.length));
+
+        const response = await fetch(`/api/mapoteca?${params.toString()}`);
+        if (!response.ok) throw new Error("Error al cargar más datos");
+
+        const result: MapotecaResponse = await response.json();
+        setUbicaciones((prev) => [...prev, ...result.data]);
+        setTotal(result.total);
+      } catch (err) {
+        console.error("Error cargando más puntos:", err);
+      } finally {
+        setLoadingMore(false);
+      }
+    };
+
+    fetchMore();
+  }, [maxPuntos, loading, ubicaciones.length, total, provinciaFilter, especieFilter]);
+
+  // Puntos a renderizar (puede ser menos que los cargados si el slider baja)
+  const ubicacionesVisibles = useMemo(() => {
+    return ubicaciones.slice(0, maxPuntos);
+  }, [ubicaciones, maxPuntos]);
 
   // Agrupar por ubicación para evitar sobreposición
   const groupedUbicaciones = useMemo(() => {
     const groups = new Map<string, UbicacionEspecie[]>();
 
-    limitedUbicaciones.forEach((u) => {
-      // Redondear coordenadas para agrupar puntos muy cercanos
+    ubicacionesVisibles.forEach((u) => {
       const key = `${u.latitud?.toFixed(4)}_${u.longitud?.toFixed(4)}`;
       const existing = groups.get(key) || [];
       groups.set(key, [...existing, u]);
     });
 
     return groups;
-  }, [limitedUbicaciones]);
+  }, [ubicacionesVisibles]);
 
-  // Navegar a la ficha de especie
-  const handleSpeciesClick = useCallback(
+  // Guardar estado del mapa antes de navegar
+  const saveMapState = useCallback(
     (ubicacion: UbicacionEspecie) => {
-      // Llamar al callback para guardar estado antes de navegar
+      const popupKey = ubicacion.latitud && ubicacion.longitud
+        ? `${ubicacion.latitud.toFixed(4)}_${ubicacion.longitud.toFixed(4)}`
+        : null;
+      sessionStorage.setItem(
+        "mapotecaMapState",
+        JSON.stringify({
+          center: mapStateRef.current.center,
+          zoom: mapStateRef.current.zoom,
+          popupKey,
+        })
+      );
       if (onNavigateToSpecies) {
         onNavigateToSpecies();
       }
-      const speciesSlug = ubicacion.nombre_cientifico.replaceAll(" ", "-");
-      router.push(`/sapopedia/species/${speciesSlug}`);
     },
-    [router, onNavigateToSpecies]
+    [onNavigateToSpecies]
+  );
+
+  // Obtener la ruta de la ficha según el rank_id
+  // rank_id: 4=Orden, 5=Familia, 6=Género, 7=especie
+  const getTaxonRoute = useCallback((ubicacion: UbicacionEspecie): string | null => {
+    const parts = ubicacion.nombre_cientifico.split(" ");
+    // Para especie: slug es "Género-especie"
+    // Para otros: el nombre del taxon es la segunda palabra (el taxon directo)
+    switch (ubicacion.rank_id) {
+      case 7: // especie
+        return `/sapopedia/species/${ubicacion.nombre_cientifico.replaceAll(" ", "-")}`;
+      case 6: // género - segunda palabra es el género
+        return parts[1] ? `/sapopedia/genus/${parts[1]}` : null;
+      case 5: // familia - segunda palabra es la familia
+        return parts[1] ? `/sapopedia/family/${parts[1]}` : null;
+      case 4: // orden - segunda palabra es el orden
+        return parts[1] ? `/sapopedia/order/${parts[1]}` : null;
+      default:
+        return null;
+    }
+  }, []);
+
+  // Navegar a la ficha del taxón (especie, género, familia u orden)
+  const handleTaxonClick = useCallback(
+    (ubicacion: UbicacionEspecie) => {
+      const route = getTaxonRoute(ubicacion);
+      if (!route) return;
+      saveMapState(ubicacion);
+      router.push(route);
+    },
+    [router, saveMapState, getTaxonRoute]
+  );
+
+  // Navegar a la vista de colección CJ
+  const handleColeccionClick = useCallback(
+    (ubicacion: UbicacionEspecie) => {
+      if (!ubicacion.id_coleccion) return;
+      saveMapState(ubicacion);
+      const slug = ubicacion.nombre_cientifico.replaceAll(" ", "-");
+      router.push(`/sapopedia/species/${slug}/colecciones/${ubicacion.id_coleccion}`);
+    },
+    [router, saveMapState]
   );
 
   if (loading) {
     return (
-      <div className="flex h-[600px] items-center justify-center rounded-lg bg-gray-100">
+      <div className="flex h-[calc(100vh-220px)] items-center justify-center rounded-lg bg-gray-100">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
           <p className="text-muted-foreground">
@@ -205,7 +557,7 @@ export default function MapotecaMap({
 
   if (error) {
     return (
-      <div className="flex h-[600px] items-center justify-center rounded-lg bg-red-50">
+      <div className="flex h-[calc(100vh-220px)] items-center justify-center rounded-lg bg-red-50">
         <div className="text-center">
           <p className="text-red-600">Error: {error}</p>
         </div>
@@ -213,134 +565,110 @@ export default function MapotecaMap({
     );
   }
 
-  // Centro de Ecuador
-  const ecuadorCenter: [number, number] = [-1.8312, -78.1834];
+  // Centro de Ecuador (o restaurado)
+  const ecuadorCenter: [number, number] = savedMapState?.center ?? [-1.8312, -78.1834];
+  const initialZoom = savedMapState?.zoom ?? 7;
 
   return (
-    <div className="relative h-[600px] w-full overflow-hidden rounded-lg border shadow-lg">
+    <div className="relative h-[calc(100vh-220px)] w-full overflow-hidden rounded-lg border shadow-lg">
       <MapContainer
         center={ecuadorCenter}
-        zoom={7}
+        zoom={initialZoom}
         className="h-full w-full"
         scrollWheelZoom={true}
+        renderer={canvasRenderer}
+        preferCanvas={true}
       >
         <TileLayer
           attribution={MAP_TILES[mapType].attribution}
           url={MAP_TILES[mapType].url}
         />
 
-        {limitedUbicaciones.length > 0 && (
-          <MapBoundsAdjuster ubicaciones={limitedUbicaciones} />
+        <MapStateTracker stateRef={mapStateRef} />
+
+        {savedMapState && (
+          <MapStateRestorer
+            center={savedMapState.center}
+            zoom={savedMapState.zoom}
+            popupKey={savedMapState.popupKey}
+            markerRefs={markerRefs}
+          />
+        )}
+
+        {ubicacionesVisibles.length > 0 && (
+          <MapBoundsAdjuster ubicaciones={ubicacionesVisibles} skip={!!savedMapState} />
         )}
 
         {Array.from(groupedUbicaciones.entries()).map(([key, group]) => {
-          const firstUbicacion = group[0];
-          if (!firstUbicacion.latitud || !firstUbicacion.longitud) return null;
+          const first = group[0];
+          if (!first.latitud || !first.longitud) return null;
 
-          const color =
-            colorMode === "elevation"
-              ? getColorByElevation(firstUbicacion.elevacion)
-              : getColorByGenus(firstUbicacion.genero);
-
-          // Si hay múltiples especies en el mismo punto
           const isMultiple = group.length > 1;
-          const radius = isMultiple ? 8 : 6;
+          const hasCJ = group.some((u) => u.origen === "coleccion");
+
+          // CJ = naranja, Externa = verde
+          const color = hasCJ ? "#f97316" : "#22c55e";
+          const radius = isMultiple ? 7 : 5;
+
+          const popupContent = (
+            <div className="max-w-[280px] text-gray-800">
+              {isMultiple && (
+                <p className="mb-1 pb-1 border-b text-[10px] font-semibold text-gray-400">
+                  {group.length} registros
+                </p>
+              )}
+              <div
+                style={{
+                  maxHeight: isMultiple ? "220px" : "none",
+                  overflowY: isMultiple ? "auto" : "visible",
+                }}
+              >
+                {group.map((u, i) => (
+                  <div
+                    key={i}
+                    className={`py-1 ${
+                      i > 0 ? "border-t border-gray-100 mt-1 pt-1" : ""
+                    }`}
+                  >
+                    <RegistroInfo
+                      u={u}
+                      onSpeciesClick={handleTaxonClick}
+                      onColeccionClick={u.origen === "coleccion" ? handleColeccionClick : undefined}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
 
           return (
             <CircleMarker
               key={key}
-              center={[firstUbicacion.latitud, firstUbicacion.longitud]}
+              ref={(ref) => {
+                if (ref) {
+                  markerRefs.current.set(key, ref as unknown as L.CircleMarker);
+                } else {
+                  markerRefs.current.delete(key);
+                }
+              }}
+              center={[first.latitud, first.longitud]}
               radius={radius}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.8,
+                fillOpacity: 0.85,
                 color: "#fff",
-                weight: 2,
-              }}
-              eventHandlers={{
-                click: () => {
-                  if (group.length === 1) {
-                    handleSpeciesClick(firstUbicacion);
-                  }
-                },
+                weight: 1.5,
               }}
             >
-              <Tooltip
-                direction="top"
-                offset={[0, -10]}
-                opacity={1}
-                className="mapoteca-tooltip"
+              <Popup
+                offset={[0, -5]}
+                className="mapoteca-popup"
+                maxWidth={300}
+                minWidth={200}
+                autoPan={true}
               >
-                <div className="min-w-[200px] max-w-[280px]">
-                  {group.length === 1 ? (
-                    <>
-                      <p className="font-semibold italic text-green-700">
-                        {firstUbicacion.nombre_cientifico}
-                      </p>
-                      <div className="mt-1 space-y-0.5 text-xs text-gray-600">
-                        {firstUbicacion.provincia && (
-                          <p>
-                            <span className="font-medium">Provincia:</span>{" "}
-                            {firstUbicacion.provincia}
-                          </p>
-                        )}
-                        {firstUbicacion.localidad && (
-                          <p className="break-words">
-                            <span className="font-medium">Localidad:</span>{" "}
-                            <span className="break-words">{firstUbicacion.localidad}</span>
-                          </p>
-                        )}
-                        {firstUbicacion.elevacion && (
-                          <p>
-                            <span className="font-medium">Elevación:</span>{" "}
-                            {firstUbicacion.elevacion} m
-                          </p>
-                        )}
-                        {firstUbicacion.voucher && (
-                          <p className="break-words">
-                            <span className="font-medium">Voucher:</span>{" "}
-                            <span className="break-words">{firstUbicacion.voucher}</span>
-                          </p>
-                        )}
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500 italic">
-                        Presiona el punto para ver la ficha
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="mb-1 font-semibold text-gray-800">
-                        {group.length} registros en esta ubicación
-                      </p>
-                      <div className="max-h-[150px] space-y-1 overflow-y-auto">
-                        {group.slice(0, 5).map((u, i) => (
-                          <p
-                            key={i}
-                            className="cursor-pointer text-xs italic text-green-700 hover:no-underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSpeciesClick(u);
-                            }}
-                          >
-                            • {u.nombre_cientifico}
-                          </p>
-                        ))}
-                        {group.length > 5 && (
-                          <p className="text-xs text-gray-500">
-                            ... y {group.length - 5} más
-                          </p>
-                        )}
-                      </div>
-                      {firstUbicacion.elevacion && (
-                        <p className="mt-1 text-xs text-gray-600">
-                          <span className="font-medium">Elevación:</span>{" "}
-                          {firstUbicacion.elevacion} m
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-              </Tooltip>
+                {popupContent}
+              </Popup>
             </CircleMarker>
           );
         })}
@@ -348,82 +676,46 @@ export default function MapotecaMap({
 
       {/* Leyenda */}
       <div className="absolute right-3 top-3 z-[1000] rounded-lg bg-white/95 p-3 text-xs shadow-lg">
-        <p className="mb-2 font-semibold text-gray-700">
-          {colorMode === "elevation" ? "Elevación (m)" : "Por género"}
-        </p>
-        {colorMode === "elevation" ? (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block h-3 w-3 rounded-full"
-                style={{ backgroundColor: "#1a9850" }}
-              ></span>
-              <span>&lt; 500</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block h-3 w-3 rounded-full"
-                style={{ backgroundColor: "#91cf60" }}
-              ></span>
-              <span>500 - 1000</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block h-3 w-3 rounded-full"
-                style={{ backgroundColor: "#fee08b" }}
-              ></span>
-              <span>1500 - 2000</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block h-3 w-3 rounded-full"
-                style={{ backgroundColor: "#f46d43" }}
-              ></span>
-              <span>2500 - 3000</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block h-3 w-3 rounded-full"
-                style={{ backgroundColor: "#a50026" }}
-              ></span>
-              <span>&gt; 3500</span>
-            </div>
+        <p className="mb-2 font-semibold text-gray-700">Origen</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{
+                backgroundColor: "#f97316",
+                border: "1.5px solid #fff",
+                boxShadow: "0 0 0 1px #ccc",
+              }}
+            ></span>
+            <span>Fund. Jambatu - CJ</span>
           </div>
-        ) : (
-          <div className="space-y-1">
-            {[
-              { name: "Pristimantis", color: "#e63946" },
-              { name: "Atelopus", color: "#f4a261" },
-              { name: "Hyloxalus", color: "#2a9d8f" },
-              { name: "Centrolene", color: "#00bcd4" },
-              { name: "Otros", color: "#6c757d" },
-            ].map((item) => (
-              <div key={item.name} className="flex items-center gap-2">
-                <span
-                  className="inline-block h-3 w-3 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                ></span>
-                <span className="italic">{item.name}</span>
-              </div>
-            ))}
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{
+                backgroundColor: "#22c55e",
+                border: "1.5px solid #fff",
+                boxShadow: "0 0 0 1px #ccc",
+              }}
+            ></span>
+            <span>Colecciones externas</span>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Contador de registros */}
       <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg">
         <span className="font-semibold text-green-700">
-          {limitedUbicaciones.length.toLocaleString()}
+          {ubicacionesVisibles.length.toLocaleString()}
         </span>
-        {ubicaciones.length > limitedUbicaciones.length && (
-          <span className="text-gray-500">
-            {" / "}
-            {ubicaciones.length.toLocaleString()}
-          </span>
-        )}
         <span className="text-gray-600">
-          {" "}registros{ubicaciones.length > limitedUbicaciones.length ? "" : " mostrados"}
+          {total > ubicacionesVisibles.length
+            ? ` / ${total.toLocaleString()} registros`
+            : " registros"}
         </span>
+        {loadingMore && (
+          <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
+        )}
       </div>
     </div>
   );

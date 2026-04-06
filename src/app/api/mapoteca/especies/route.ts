@@ -19,60 +19,52 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   try {
-    // Obtener ubicaciones filtradas (similar a la API principal)
-    async function fetchAllUbicaciones() {
-      const pageSize = 1000;
-      let allData: any[] = [];
-      let page = 0;
-      let hasMore = true;
+    // Obtener taxon_ids únicos desde vw_colecciones
+    const pageSize = 1000;
+    let allData: any[] = [];
+    let page = 0;
+    let hasMore = true;
 
-      while (hasMore) {
-        let query = supabase
-          .from("ubicacion_especie")
-          .select("id_taxon")
-          .not("latitud", "is", null)
-          .not("longitud", "is", null)
-          .range(page * pageSize, (page + 1) * pageSize - 1);
+    while (hasMore) {
+      let query = supabase
+        .from("vw_colecciones")
+        .select("taxon_id, nombre_especie")
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
-        // Filtrar por provincia si se especifica (usando el campo provincia de ubicacion_especie)
-        if (provincia) {
-          query = query.ilike("provincia", `%${provincia}%`);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          allData = [...allData, ...data];
-          hasMore = data.length === pageSize;
-          page++;
-        } else {
-          hasMore = false;
-        }
+      if (provincia) {
+        query = query.ilike("provincia", `%${provincia}%`);
       }
 
-      return allData;
+      if (especie) {
+        query = query.ilike("nombre_especie", `%${especie}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        hasMore = data.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
     }
 
-    const ubicaciones = await fetchAllUbicaciones();
-
-    if (!ubicaciones || ubicaciones.length === 0) {
+    if (allData.length === 0) {
       return NextResponse.json([]);
     }
 
-    // Obtener taxon_ids únicos
-    const taxonIds = [...new Set(ubicaciones.map((u) => u.id_taxon).filter(Boolean))];
+    const taxonIds = [...new Set(allData.map((u) => u.taxon_id).filter(Boolean))];
 
     if (taxonIds.length === 0) {
       return NextResponse.json([]);
     }
 
     // Obtener información de especies desde la vista vw_ficha_especie_completa
-    // Usar especie_taxon_id para obtener solo una fila por especie
-    // Incluir awe_lista_roja_uicn para obtener la lista roja directamente desde la vista
     const { data: especiesData, error: especiesError } = await supabase
       .from("vw_ficha_especie_completa" as any)
       .select("especie_taxon_id, nombre_cientifico, endemica, familia, genero, awe_lista_roja_uicn")
@@ -91,7 +83,7 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    // Eliminar duplicados basándose en especie_taxon_id (mantener solo el primero)
+    // Eliminar duplicados basándose en especie_taxon_id
     const especiesUnicasMap = new Map<number, any>();
     especiesData.forEach((e: any) => {
       const taxonId = e.especie_taxon_id;
@@ -102,15 +94,7 @@ export async function GET(request: Request) {
 
     const especiesUnicasArray = Array.from(especiesUnicasMap.values());
 
-    // Filtrar por especie si se especifica
-    let especiesFiltradas = especiesUnicasArray;
-    if (especie) {
-      especiesFiltradas = especiesUnicasArray.filter((e: any) =>
-        e.nombre_cientifico?.toLowerCase().includes(especie.toLowerCase())
-      );
-    }
-
-    // Obtener el mapeo de nombre -> sigla para categorías UICN (igual que en get-all-especies.ts)
+    // Obtener el mapeo de nombre -> sigla para categorías UICN
     const { data: categoriasUICN, error: errorCategoriasUICN } = await supabase
       .from("catalogo_awe")
       .select("nombre, sigla")
@@ -120,7 +104,6 @@ export async function GET(request: Request) {
       console.error("Error al obtener categorías UICN:", errorCategoriasUICN);
     }
 
-    // Crear mapa de nombre -> sigla para UICN
     const nombreASiglaMap = new Map<string, string>();
     if (categoriasUICN) {
       for (const cat of categoriasUICN) {
@@ -130,12 +113,11 @@ export async function GET(request: Request) {
       }
     }
 
-    // Crear mapa de lista roja por taxon_id usando awe_lista_roja_uicn de la vista
-    // (igual que en get-all-especies.ts)
+    // Crear mapa de lista roja por taxon_id
     const listaRojaMap = new Map<number, string>();
-    for (const especie of especiesFiltradas) {
-      const taxonId = especie.especie_taxon_id as number;
-      const nombreUICN = especie.awe_lista_roja_uicn as string | null;
+    for (const esp of especiesUnicasArray) {
+      const taxonId = esp.especie_taxon_id as number;
+      const nombreUICN = esp.awe_lista_roja_uicn as string | null;
 
       if (taxonId && nombreUICN) {
         const sigla = nombreASiglaMap.get(nombreUICN);
@@ -145,8 +127,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // Formatear resultados - una sola especie por taxon_id
-    const resultado: EspecieMapoteca[] = especiesFiltradas.map((e: any) => ({
+    // Formatear resultados
+    const resultado: EspecieMapoteca[] = especiesUnicasArray.map((e: any) => ({
       id_taxon: e.especie_taxon_id,
       nombre_cientifico: e.nombre_cientifico || "",
       endemica: e.endemica ?? null,
@@ -155,7 +137,6 @@ export async function GET(request: Request) {
       genero: e.genero || null,
     }));
 
-    // Ordenar por nombre científico
     resultado.sort((a, b) =>
       a.nombre_cientifico.localeCompare(b.nombre_cientifico)
     );
