@@ -193,7 +193,7 @@ function GbifLink({
       className="text-[10px] font-semibold text-[#4ba24b] underline hover:text-[#397a39]"
       onClick={(e) => e.stopPropagation()}
     >
-      Ver en GBIF ↗
+      GBIF ↗
     </a>
   );
 }
@@ -229,7 +229,6 @@ function RegistroInfo({
         </span>
       )}
       {(u.catalogo_museo || u.numero_museo) && <br />}
-      <b>{rankLabel}:</b>{" "}
       {canNavigate ? (
         <i
           className="cursor-pointer text-[#4ba24b] hover:text-[#397a39]"
@@ -243,12 +242,11 @@ function RegistroInfo({
       ) : (
         <i>{displayName}</i>
       )}
-      {u.localidad && <><br /><b>Localidad:</b> {u.localidad}</>}
       <br />
-      {u.provincia && <><b>Prov:</b> {u.provincia} &middot; </>}
-      <b>Pa&iacute;s:</b> Ecuador
-      {u.elevacion != null && <> &middot; <b>Elev:</b> {u.elevacion} m</>}
-      <br /><b>Lat:</b> {u.latitud}, <b>Lon:</b> {u.longitud}
+      {[u.localidad, u.provincia].filter(Boolean).join(", ")}
+      <br />
+      {u.latitud}, {u.longitud}
+      {u.elevacion != null && <>{" "}<span className="text-[#f97315] font-bold">|</span> {u.elevacion} msnm</>}
       {u.cita_corta && <><br /><b>Pub:</b> {u.cita_corta}</>}
       {isCJ && u.id_coleccion && onColeccionClick && (
         <>
@@ -260,7 +258,7 @@ function RegistroInfo({
               onColeccionClick(u);
             }}
           >
-            Ver colección →
+            Ver más →
           </span>
         </>
       )}
