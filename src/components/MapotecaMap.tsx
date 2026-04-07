@@ -311,8 +311,12 @@ const MAP_TILES = {
 type MapTileType = keyof typeof MAP_TILES;
 
 interface MapotecaMapProps {
-  provinciaFilter?: string;
+  provinciaFilter?: string[];
   especieFilter?: string;
+  catalogoFilter?: string[];
+  localidadesFilter?: string[];
+  elevacionMin?: number;
+  elevacionMax?: number;
   mapType?: MapTileType;
   maxPuntos?: number;
   onNavigateToSpecies?: () => void;
@@ -321,6 +325,10 @@ interface MapotecaMapProps {
 export default function MapotecaMap({
   provinciaFilter,
   especieFilter,
+  catalogoFilter,
+  localidadesFilter,
+  elevacionMin,
+  elevacionMax,
   mapType = "provinces",
   maxPuntos = 1000,
   onNavigateToSpecies,
@@ -332,7 +340,21 @@ export default function MapotecaMap({
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   // Track current filters to know when to reset
-  const filtersRef = useRef({ provinciaFilter, especieFilter });
+  const filtersRef = useRef({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+
+  // Build query params from all filters
+  const buildFilterParams = useCallback((limit: number, offset: number) => {
+    const params = new URLSearchParams();
+    if (provinciaFilter && provinciaFilter.length > 0) params.set("provincias", provinciaFilter.join(","));
+    if (especieFilter) params.set("especie", especieFilter);
+    if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
+    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join(","));
+    if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
+    if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
+    params.set("limit", String(limit));
+    params.set("offset", String(offset));
+    return params;
+  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax]);
 
   // Map state tracking
   const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
@@ -360,13 +382,18 @@ export default function MapotecaMap({
     return null;
   });
 
-  // Reset y carga inicial cuando cambian los filtros
+  // Reset y carga cuando cambian los filtros
   useEffect(() => {
+    const prev = filtersRef.current;
     const filtersChanged =
-      filtersRef.current.provinciaFilter !== provinciaFilter ||
-      filtersRef.current.especieFilter !== especieFilter;
+      prev.provinciaFilter !== provinciaFilter ||
+      prev.especieFilter !== especieFilter ||
+      prev.catalogoFilter !== catalogoFilter ||
+      prev.elevacionMin !== elevacionMin ||
+      prev.elevacionMax !== elevacionMax ||
+      JSON.stringify(prev.localidadesFilter) !== JSON.stringify(localidadesFilter);
 
-    filtersRef.current = { provinciaFilter, especieFilter };
+    filtersRef.current = { provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax };
 
     const fetchInitial = async () => {
       setLoading(true);
@@ -374,12 +401,7 @@ export default function MapotecaMap({
       setUbicaciones([]);
 
       try {
-        const params = new URLSearchParams();
-        if (provinciaFilter) params.set("provincia", provinciaFilter);
-        if (especieFilter) params.set("especie", especieFilter);
-        params.set("limit", String(maxPuntos));
-        params.set("offset", "0");
-
+        const params = buildFilterParams(maxPuntos, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
@@ -396,7 +418,7 @@ export default function MapotecaMap({
     if (filtersChanged) {
       fetchInitial();
     }
-  }, [provinciaFilter, especieFilter]);
+  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams, maxPuntos]);
 
   // Carga inicial al montar
   useEffect(() => {
@@ -405,12 +427,7 @@ export default function MapotecaMap({
       setError(null);
 
       try {
-        const params = new URLSearchParams();
-        if (provinciaFilter) params.set("provincia", provinciaFilter);
-        if (especieFilter) params.set("especie", especieFilter);
-        params.set("limit", String(maxPuntos));
-        params.set("offset", "0");
-
+        const params = buildFilterParams(maxPuntos, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
@@ -437,12 +454,7 @@ export default function MapotecaMap({
     const fetchMore = async () => {
       setLoadingMore(true);
       try {
-        const params = new URLSearchParams();
-        if (provinciaFilter) params.set("provincia", provinciaFilter);
-        if (especieFilter) params.set("especie", especieFilter);
-        params.set("limit", String(maxPuntos - ubicaciones.length));
-        params.set("offset", String(ubicaciones.length));
-
+        const params = buildFilterParams(maxPuntos - ubicaciones.length, ubicaciones.length);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar más datos");
 
@@ -457,7 +469,7 @@ export default function MapotecaMap({
     };
 
     fetchMore();
-  }, [maxPuntos, loading, ubicaciones.length, total, provinciaFilter, especieFilter]);
+  }, [maxPuntos, loading, ubicaciones.length, total, buildFilterParams]);
 
   // Puntos a renderizar (puede ser menos que los cargados si el slider baja)
   const ubicacionesVisibles = useMemo(() => {

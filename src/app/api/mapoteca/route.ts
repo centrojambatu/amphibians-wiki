@@ -54,8 +54,12 @@ async function fetchByOrigen(
   origen: string,
   limit: number,
   offset: number,
-  provincia: string | null,
+  provincias: string[] | null,
   especie: string | null,
+  localidades: string[] | null,
+  catalogos: string[] | null,
+  elevacionMin: number | null,
+  elevacionMax: number | null,
 ): Promise<any[]> {
   const pageSize = 1000;
   let allData: any[] = [];
@@ -70,11 +74,32 @@ async function fetchByOrigen(
       .range(offset + fetched, offset + fetched + batchSize - 1)
       .order("taxon_id", { ascending: true });
 
-    if (provincia) {
-      query = query.ilike("provincia", `%${provincia}%`);
+    if (provincias && provincias.length > 0) {
+      query = query.in("provincia", provincias);
     }
     if (especie) {
       query = query.ilike("nombre_especie", `%${especie}%`);
+    }
+    if (localidades && localidades.length > 0) {
+      query = query.in("localidad", localidades);
+    }
+    if (catalogos && catalogos.length > 0) {
+      const orParts = catalogos.map((c) => {
+        const spaceIdx = c.indexOf(" ");
+        if (spaceIdx > 0) {
+          const cat = c.substring(0, spaceIdx);
+          const num = c.substring(spaceIdx + 1);
+          return `and(catalogo_museo.eq.${cat},numero_museo.eq.${num})`;
+        }
+        return `catalogo_museo.eq.${c}`;
+      });
+      query = query.or(orParts.join(","));
+    }
+    if (elevacionMin !== null) {
+      query = query.gte("elevacion", elevacionMin);
+    }
+    if (elevacionMax !== null) {
+      query = query.lte("elevacion", elevacionMax);
     }
 
     const { data, error } = await query;
@@ -95,8 +120,23 @@ async function fetchByOrigen(
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const provincia = searchParams.get("provincia");
+  const provinciasParam = searchParams.get("provincias");
+  const provincias = provinciasParam
+    ? provinciasParam.split(",").map((p) => p.trim()).filter(Boolean)
+    : null;
   const especie = searchParams.get("especie");
+  const localidadesParam = searchParams.get("localidades");
+  const localidades = localidadesParam
+    ? localidadesParam.split(",").map((l) => l.trim()).filter(Boolean)
+    : null;
+  const catalogosParam = searchParams.get("catalogos");
+  const catalogos = catalogosParam
+    ? catalogosParam.split("||").map((c) => c.trim()).filter(Boolean)
+    : null;
+  const elevacionMinParam = searchParams.get("elevacion_min");
+  const elevacionMin = elevacionMinParam !== null ? parseFloat(elevacionMinParam) : null;
+  const elevacionMaxParam = searchParams.get("elevacion_max");
+  const elevacionMax = elevacionMaxParam !== null ? parseFloat(elevacionMaxParam) : null;
   const limit = Math.min(parseInt(searchParams.get("limit") || "1000", 10), 5000);
   const offset = parseInt(searchParams.get("offset") || "0", 10);
 
@@ -109,8 +149,24 @@ export async function GET(request: Request) {
         .from("vw_colecciones")
         .select("taxon_id", { count: "exact", head: true });
       if (origen) q = q.eq("origen", origen);
-      if (provincia) q = q.ilike("provincia", `%${provincia}%`);
+      if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
       if (especie) q = q.ilike("nombre_especie", `%${especie}%`);
+      if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
+      if (catalogos && catalogos.length > 0) {
+        // Each catalog is "catalogo_museo numero_museo", split and match both
+        const orParts = catalogos.map((c) => {
+          const spaceIdx = c.indexOf(" ");
+          if (spaceIdx > 0) {
+            const cat = c.substring(0, spaceIdx);
+            const num = c.substring(spaceIdx + 1);
+            return `and(catalogo_museo.eq.${cat},numero_museo.eq.${num})`;
+          }
+          return `catalogo_museo.eq.${c}`;
+        });
+        q = q.or(orParts.join(","));
+      }
+      if (elevacionMin !== null) q = q.gte("elevacion", elevacionMin);
+      if (elevacionMax !== null) q = q.lte("elevacion", elevacionMax);
       return q;
     };
 
@@ -143,8 +199,8 @@ export async function GET(request: Request) {
 
     // Fetch en paralelo de ambos orígenes
     const [cjData, extData] = await Promise.all([
-      cjLimit > 0 ? fetchByOrigen(supabase, "coleccion", cjLimit, offset, provincia, especie) : [],
-      extLimit > 0 ? fetchByOrigen(supabase, "coleccion_externa", extLimit, offset, provincia, especie) : [],
+      cjLimit > 0 ? fetchByOrigen(supabase, "coleccion", cjLimit, offset, provincias, especie, localidades, catalogos, elevacionMin, elevacionMax) : [],
+      extLimit > 0 ? fetchByOrigen(supabase, "coleccion_externa", extLimit, offset, provincias, especie, localidades, catalogos, elevacionMin, elevacionMax) : [],
     ]);
 
     // Mezclar intercalando ambos orígenes
