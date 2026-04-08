@@ -17,6 +17,7 @@ export interface UbicacionEspecie {
   latitud: number | null;
   longitud: number | null;
   elevacion: number | null;
+  fecha_coleccion: string | null;
 }
 
 export interface MapotecaResponse {
@@ -25,7 +26,7 @@ export interface MapotecaResponse {
 }
 
 const SELECT_FIELDS =
-  "origen, id_coleccion, taxon_id, rank_id, nombre_especie, latitud, longitud, localidad, elevacion, catalogo_museo, numero_museo, provincia, cita_corta";
+  "origen, id_coleccion, taxon_id, rank_id, nombre_especie, latitud, longitud, localidad, elevacion, catalogo_museo, numero_museo, provincia, cita_corta, fecha_coleccion";
 
 function mapRow(row: any): UbicacionEspecie {
   const nombreEspecie = row.nombre_especie || "";
@@ -46,6 +47,7 @@ function mapRow(row: any): UbicacionEspecie {
     latitud: row.latitud,
     longitud: row.longitud,
     elevacion: row.elevacion,
+    fecha_coleccion: row.fecha_coleccion ?? null,
   };
 }
 
@@ -55,11 +57,12 @@ async function fetchByOrigen(
   limit: number,
   offset: number,
   provincias: string[] | null,
-  especie: string | null,
+  especies: string[] | null,
   localidades: string[] | null,
   catalogos: string[] | null,
   elevacionMin: number | null,
   elevacionMax: number | null,
+  fichaFilterIds: number[] | null,
 ): Promise<any[]> {
   const pageSize = 1000;
   let allData: any[] = [];
@@ -74,11 +77,14 @@ async function fetchByOrigen(
       .range(offset + fetched, offset + fetched + batchSize - 1)
       .order("taxon_id", { ascending: true });
 
+    if (fichaFilterIds && fichaFilterIds.length > 0) {
+      query = query.in("taxon_id", fichaFilterIds);
+    }
     if (provincias && provincias.length > 0) {
       query = query.in("provincia", provincias);
     }
-    if (especie) {
-      query = query.ilike("nombre_especie", `%${especie}%`);
+    if (especies && especies.length > 0) {
+      query = query.or(especies.map((e) => `nombre_especie.ilike.%${e}%`).join(","));
     }
     if (localidades && localidades.length > 0) {
       query = query.in("localidad", localidades);
@@ -124,7 +130,18 @@ export async function GET(request: Request) {
   const provincias = provinciasParam
     ? provinciasParam.split(",").map((p) => p.trim()).filter(Boolean)
     : null;
-  const especie = searchParams.get("especie");
+  const pisosParam = searchParams.get("pisos");
+  const pisos = pisosParam
+    ? pisosParam.split(",").map((p) => p.trim()).filter(Boolean)
+    : null;
+  const snapsParam = searchParams.get("snaps");
+  const snaps = snapsParam
+    ? snapsParam.split(",").map((s) => s.trim()).filter(Boolean)
+    : null;
+  const especiesParam = searchParams.get("especies");
+  const especies = especiesParam
+    ? especiesParam.split("||").map((e) => e.trim()).filter(Boolean)
+    : null;
   const localidadesParam = searchParams.get("localidades");
   const localidades = localidadesParam
     ? localidadesParam.split(",").map((l) => l.trim()).filter(Boolean)
@@ -137,23 +154,43 @@ export async function GET(request: Request) {
   const elevacionMin = elevacionMinParam !== null ? parseFloat(elevacionMinParam) : null;
   const elevacionMaxParam = searchParams.get("elevacion_max");
   const elevacionMax = elevacionMaxParam !== null ? parseFloat(elevacionMaxParam) : null;
-  const limit = Math.min(parseInt(searchParams.get("limit") || "1000", 10), 5000);
-  const offset = parseInt(searchParams.get("offset") || "0", 10);
+  const limit = Math.min(parseInt(searchParams.get("limit") || "1000", 10), 60000);
+  const cjOffset = parseInt(searchParams.get("cj_offset") || "0", 10);
+  const extOffset = parseInt(searchParams.get("ext_offset") || "0", 10);
 
   const supabase = await createClient();
 
   try {
+    // Si hay filtro de piso o SNAP, obtener taxon_ids desde vw_ficha_especie_completa via RPC
+    let fichaFilterIds: number[] | null = null;
+    if ((pisos && pisos.length > 0) || (snaps && snaps.length > 0)) {
+      const { data: fichaData } = await supabase.rpc("get_tabla_taxon_ids", {
+        p_pisos: pisos ?? null,
+        p_snaps: snaps ?? null,
+        p_provincias: null,
+        p_especies: null,
+        p_localidades: null,
+        p_catalogos: null,
+        p_elevacion_min: null,
+        p_elevacion_max: null,
+      });
+      fichaFilterIds = (fichaData ?? []).map((r: { taxon_id: number }) => Number(r.taxon_id));
+      if (fichaFilterIds.length === 0) {
+        return NextResponse.json({ data: [], total: 0 });
+      }
+    }
+
     // Conteo total y por origen en paralelo
     const buildCountQuery = (origen?: string) => {
       let q = supabase
         .from("vw_colecciones")
         .select("taxon_id", { count: "exact", head: true });
       if (origen) q = q.eq("origen", origen);
+      if (fichaFilterIds && fichaFilterIds.length > 0) q = q.in("taxon_id", fichaFilterIds);
       if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
-      if (especie) q = q.ilike("nombre_especie", `%${especie}%`);
+      if (especies && especies.length > 0) q = q.or(especies.map((e) => `nombre_especie.ilike.%${e}%`).join(","));
       if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
       if (catalogos && catalogos.length > 0) {
-        // Each catalog is "catalogo_museo numero_museo", split and match both
         const orParts = catalogos.map((c) => {
           const spaceIdx = c.indexOf(" ");
           if (spaceIdx > 0) {
@@ -182,16 +219,16 @@ export async function GET(request: Request) {
     const cjTotal = cjCountRes.count ?? 0;
     const extTotal = extCountRes.count ?? 0;
 
-    // Repartir el limit 50/50, ajustando si un origen tiene menos
+    // Repartir el limit 50/50, usando offsets independientes por origen
     const halfLimit = Math.floor(limit / 2);
-    let cjLimit = Math.min(halfLimit, cjTotal - offset);
-    let extLimit = Math.min(halfLimit, extTotal - offset);
+    let cjLimit = Math.min(halfLimit, cjTotal - cjOffset);
+    let extLimit = Math.min(halfLimit, extTotal - extOffset);
 
     // Si un origen tiene menos registros disponibles, dar el sobrante al otro
     if (cjLimit < halfLimit) {
-      extLimit = Math.min(limit - Math.max(cjLimit, 0), extTotal - offset);
+      extLimit = Math.min(limit - Math.max(cjLimit, 0), extTotal - extOffset);
     } else if (extLimit < halfLimit) {
-      cjLimit = Math.min(limit - Math.max(extLimit, 0), cjTotal - offset);
+      cjLimit = Math.min(limit - Math.max(extLimit, 0), cjTotal - cjOffset);
     }
 
     cjLimit = Math.max(cjLimit, 0);
@@ -199,8 +236,8 @@ export async function GET(request: Request) {
 
     // Fetch en paralelo de ambos orígenes
     const [cjData, extData] = await Promise.all([
-      cjLimit > 0 ? fetchByOrigen(supabase, "coleccion", cjLimit, offset, provincias, especie, localidades, catalogos, elevacionMin, elevacionMax) : [],
-      extLimit > 0 ? fetchByOrigen(supabase, "coleccion_externa", extLimit, offset, provincias, especie, localidades, catalogos, elevacionMin, elevacionMax) : [],
+      cjLimit > 0 ? fetchByOrigen(supabase, "coleccion", cjLimit, cjOffset, provincias, especies, localidades, catalogos, elevacionMin, elevacionMax, fichaFilterIds) : [],
+      extLimit > 0 ? fetchByOrigen(supabase, "coleccion_externa", extLimit, extOffset, provincias, especies, localidades, catalogos, elevacionMin, elevacionMax, fichaFilterIds) : [],
     ]);
 
     // Mezclar intercalando ambos orígenes

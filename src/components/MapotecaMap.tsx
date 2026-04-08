@@ -18,6 +18,40 @@ import type { UbicacionEspecie, MapotecaResponse } from "@/app/api/mapoteca/rout
 const canvasRenderer =
   typeof window !== "undefined" ? L.canvas({ padding: 0.5 }) : undefined;
 
+// Caché en memoria a nivel de módulo — persiste mientras el usuario navega sin recargar
+interface CacheEntry {
+  data: UbicacionEspecie[];
+  total: number;
+  timestamp: number;
+}
+const dataCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
+
+function buildCacheKey(filters: {
+  provinciaFilter?: string[];
+  especieFilter?: string[];
+  catalogoFilter?: string[];
+  localidadesFilter?: string[];
+  elevacionMin?: number;
+  elevacionMax?: number;
+}): string {
+  return JSON.stringify(filters);
+}
+
+function getCached(key: string): CacheEntry | null {
+  const entry = dataCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    dataCache.delete(key);
+    return null;
+  }
+  return entry;
+}
+
+function setCache(key: string, data: UbicacionEspecie[], total: number) {
+  dataCache.set(key, { data, total, timestamp: Date.now() });
+}
+
 // Componente para ajustar la vista del mapa
 function MapBoundsAdjuster({
   ubicaciones,
@@ -225,7 +259,7 @@ function RegistroInfo({
     <div className="text-[11px]" style={{ lineHeight: "1.2" }}>
       {(u.catalogo_museo || u.numero_museo) && (
         <span className="font-bold text-[#2a6496]">
-          {[u.catalogo_museo, u.numero_museo].filter(Boolean).join(" ")}
+          {[u.catalogo_museo, u.numero_museo].filter(Boolean).join(" ").replace(/Fundación/g, "Centro")}
         </span>
       )}
       {(u.catalogo_museo || u.numero_museo) && <br />}
@@ -247,7 +281,6 @@ function RegistroInfo({
       <br />
       {u.latitud}, {u.longitud}
       {u.elevacion != null && <>{" "}<span className="text-[#f97315] font-bold">|</span> {u.elevacion} msnm</>}
-      {u.cita_corta && <><br /><b>Pub:</b> {u.cita_corta}</>}
       {isCJ && u.id_coleccion && onColeccionClick && (
         <>
           <br />
@@ -312,25 +345,27 @@ type MapTileType = keyof typeof MAP_TILES;
 
 interface MapotecaMapProps {
   provinciaFilter?: string[];
-  especieFilter?: string;
+  pisoFilter?: string[];
+  snapFilter?: string[];
+  especieFilter?: string[];
   catalogoFilter?: string[];
   localidadesFilter?: string[];
   elevacionMin?: number;
   elevacionMax?: number;
   mapType?: MapTileType;
-  maxPuntos?: number;
   onNavigateToSpecies?: () => void;
 }
 
 export default function MapotecaMap({
   provinciaFilter,
+  pisoFilter,
+  snapFilter,
   especieFilter,
   catalogoFilter,
   localidadesFilter,
   elevacionMin,
   elevacionMax,
   mapType = "provinces",
-  maxPuntos = 1000,
   onNavigateToSpecies,
 }: MapotecaMapProps) {
   const [ubicaciones, setUbicaciones] = useState<UbicacionEspecie[]>([]);
@@ -338,23 +373,27 @@ export default function MapotecaMap({
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
   const router = useRouter();
   // Track current filters to know when to reset
-  const filtersRef = useRef({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+  const filtersRef = useRef({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
 
   // Build query params from all filters
-  const buildFilterParams = useCallback((limit: number, offset: number) => {
+  const buildFilterParams = useCallback((limit: number, cjOffset = 0, extOffset = 0) => {
     const params = new URLSearchParams();
     if (provinciaFilter && provinciaFilter.length > 0) params.set("provincias", provinciaFilter.join(","));
-    if (especieFilter) params.set("especie", especieFilter);
+    if (pisoFilter && pisoFilter.length > 0) params.set("pisos", pisoFilter.join(","));
+    if (snapFilter && snapFilter.length > 0) params.set("snaps", snapFilter.join(","));
+    if (especieFilter && especieFilter.length > 0) params.set("especies", especieFilter.join("||"));
     if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
     if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join(","));
     if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
     if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
     params.set("limit", String(limit));
-    params.set("offset", String(offset));
+    params.set("cj_offset", String(cjOffset));
+    params.set("ext_offset", String(extOffset));
     return params;
-  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax]);
+  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax]);
 
   // Map state tracking
   const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
@@ -396,12 +435,21 @@ export default function MapotecaMap({
     filtersRef.current = { provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax };
 
     const fetchInitial = async () => {
+      const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const cached = getCached(cacheKey);
+      if (cached) {
+        setUbicaciones(cached.data);
+        setTotal(cached.total);
+        return;
+      }
+
+      fetchingRef.current = true;
       setLoading(true);
       setError(null);
       setUbicaciones([]);
 
       try {
-        const params = buildFilterParams(maxPuntos, 0);
+        const params = buildFilterParams(5000, 0, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
@@ -411,6 +459,7 @@ export default function MapotecaMap({
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
+        fetchingRef.current = false;
         setLoading(false);
       }
     };
@@ -418,16 +467,25 @@ export default function MapotecaMap({
     if (filtersChanged) {
       fetchInitial();
     }
-  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams, maxPuntos]);
+  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams]);
 
   // Carga inicial al montar
   useEffect(() => {
     const fetchInitial = async () => {
+      const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const cached = getCached(cacheKey);
+      if (cached) {
+        setUbicaciones(cached.data);
+        setTotal(cached.total);
+        return;
+      }
+
+      fetchingRef.current = true;
       setLoading(true);
       setError(null);
 
       try {
-        const params = buildFilterParams(maxPuntos, 0);
+        const params = buildFilterParams(5000, 0, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
@@ -437,6 +495,7 @@ export default function MapotecaMap({
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
+        fetchingRef.current = false;
         setLoading(false);
       }
     };
@@ -445,36 +504,77 @@ export default function MapotecaMap({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cargar más datos cuando el slider sube más allá de lo que tenemos
+  // Cargar más datos en batches hasta completar los 60,000
   useEffect(() => {
-    if (loading) return;
-    if (maxPuntos <= ubicaciones.length) return;
+    if (loading || fetchingRef.current) return;
     if (ubicaciones.length >= total) return;
+    if (total === 0) return;
+
+    let cancelled = false;
 
     const fetchMore = async () => {
+      fetchingRef.current = true;
       setLoadingMore(true);
       try {
-        const params = buildFilterParams(maxPuntos - ubicaciones.length, ubicaciones.length);
+        const cjLoaded = ubicaciones.filter((u) => u.origen === "coleccion").length;
+        const extLoaded = ubicaciones.filter((u) => u.origen === "coleccion_externa").length;
+        const params = buildFilterParams(5000, cjLoaded, extLoaded);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar más datos");
 
         const result: MapotecaResponse = await response.json();
-        setUbicaciones((prev) => [...prev, ...result.data]);
-        setTotal(result.total);
+        if (!cancelled) {
+          setUbicaciones((prev) => {
+            const updated = [...prev, ...result.data];
+            if (updated.length >= result.total && result.total > 0) {
+              const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+              setCache(cacheKey, updated, result.total);
+            }
+            return updated;
+          });
+          setTotal(result.total);
+        }
       } catch (err) {
         console.error("Error cargando más puntos:", err);
       } finally {
-        setLoadingMore(false);
+        fetchingRef.current = false;
+        if (!cancelled) setLoadingMore(false);
       }
     };
 
     fetchMore();
-  }, [maxPuntos, loading, ubicaciones.length, total, buildFilterParams]);
 
-  // Puntos a renderizar (puede ser menos que los cargados si el slider baja)
-  const ubicacionesVisibles = useMemo(() => {
-    return ubicaciones.slice(0, maxPuntos);
-  }, [ubicaciones, maxPuntos]);
+    return () => { cancelled = true; fetchingRef.current = false; };
+  }, [loading, ubicaciones.length, total, buildFilterParams]);
+
+  const ubicacionesVisibles = useMemo(() => ubicaciones, [ubicaciones]);
+
+  // Rango de fechas para el gradiente
+  const { minDate, maxDate } = useMemo(() => {
+    const timestamps = ubicaciones
+      .map((u) => u.fecha_coleccion)
+      .filter(Boolean)
+      .map((d) => new Date(d!).getTime())
+      .filter((t) => !isNaN(t));
+    if (timestamps.length === 0) return { minDate: null, maxDate: null };
+    return { minDate: Math.min(...timestamps), maxDate: Math.max(...timestamps) };
+  }, [ubicaciones]);
+
+  // Púrpura oscuro (antiguo) → Naranja (reciente); gris claro si no hay fecha
+  const getColorForDate = useCallback(
+    (fecha: string | null): string => {
+      if (!fecha || minDate === null || maxDate === null) return "#d4d4d4";
+      const t = new Date(fecha).getTime();
+      if (isNaN(t)) return "#d4d4d4";
+      const ratio = maxDate === minDate ? 1 : (t - minDate) / (maxDate - minDate);
+      // Interpolación RGB: #4c1d95 → #fb923c
+      const r = Math.round(0x4c + ratio * (0xfb - 0x4c));
+      const g = Math.round(0x1d + ratio * (0x92 - 0x1d));
+      const b = Math.round(0x95 + ratio * (0x3c - 0x95));
+      return `rgb(${r}, ${g}, ${b})`;
+    },
+    [minDate, maxDate]
+  );
 
   // Agrupar por ubicación para evitar sobreposición
   const groupedUbicaciones = useMemo(() => {
@@ -581,6 +681,12 @@ export default function MapotecaMap({
 
   return (
     <div className="relative h-[calc(100vh-220px)] w-full overflow-hidden rounded-lg border shadow-lg">
+      {loadingMore && (
+        <div className="absolute bottom-14 left-1/2 z-[1000] -translate-x-1/2 flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-lg">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
+          Añadiendo puntos...
+        </div>
+      )}
       <MapContainer
         center={ecuadorCenter}
         zoom={initialZoom}
@@ -614,10 +720,9 @@ export default function MapotecaMap({
           if (!first.latitud || !first.longitud) return null;
 
           const isMultiple = group.length > 1;
-          const hasCJ = group.some((u) => u.origen === "coleccion");
-
-          // CJ = naranja, Externa = verde
-          const color = hasCJ ? "#f97316" : "#22c55e";
+          const groupDates = group.map((u) => u.fecha_coleccion).filter(Boolean).sort();
+          const representativeDate = groupDates[groupDates.length - 1] ?? null;
+          const color = getColorForDate(representativeDate);
           const radius = isMultiple ? 7 : 5;
 
           const popupContent = (
@@ -665,9 +770,9 @@ export default function MapotecaMap({
               radius={radius}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.85,
-                color: "#fff",
-                weight: 1.5,
+                fillOpacity: representativeDate ? 0.9 : 0.4,
+                color: representativeDate ? "#fff" : "#ccc",
+                weight: representativeDate ? 1 : 0.5,
               }}
             >
               <Popup
@@ -684,34 +789,25 @@ export default function MapotecaMap({
         })}
       </MapContainer>
 
-      {/* Leyenda */}
-      <div className="absolute right-3 top-3 z-[1000] rounded-lg bg-white/95 p-3 text-xs shadow-lg">
-        <p className="mb-2 font-semibold text-gray-700">Origen</p>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{
-                backgroundColor: "#f97316",
-                border: "1.5px solid #fff",
-                boxShadow: "0 0 0 1px #ccc",
-              }}
-            ></span>
-            <span>Fund. Jambatu - CJ</span>
+
+      {/* Leyenda de gradiente por fecha */}
+      {minDate !== null && maxDate !== null && (
+        <div className="absolute bottom-14 right-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 shadow-lg">
+          <p className="mb-1 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Fecha colección</p>
+          <div
+            className="h-2 w-32 rounded-full"
+            style={{ background: "linear-gradient(to right, #4c1d95, #fb923c)", border: "1px solid #e5e7eb" }}
+          />
+          <div className="mt-0.5 flex justify-between text-[9px] text-gray-400">
+            <span>{new Date(minDate).getFullYear()}</span>
+            <span>{new Date(maxDate).getFullYear()}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{
-                backgroundColor: "#22c55e",
-                border: "1.5px solid #fff",
-                boxShadow: "0 0 0 1px #ccc",
-              }}
-            ></span>
-            <span>Colecciones externas</span>
+          <div className="mt-0.5 flex items-center gap-1 text-[9px] text-gray-400">
+            <div className="h-2 w-2 rounded-full" style={{ background: "#d4d4d4", border: "1px solid #bbb" }} />
+            <span>Sin fecha</span>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Contador de registros */}
       <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg">
