@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const ColeccionMiniMap = dynamic(() => import("@/components/ColeccionMiniMap"), { ssr: false });
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -106,43 +109,31 @@ export default function ColeccionDetailClient({
           <span className="font-medium">Detalle</span>
         </div>
         <h1 className="mb-2 text-4xl font-bold">Colección</h1>
-        <p className="text-muted-foreground text-lg">
-          {coleccion.campobase_nombre && coleccion.fecha_col
-            ? `${new Date(coleccion.fecha_col).getFullYear()}: ${coleccion.campobase_nombre}`
-            : coleccion.campobase_nombre || `ID: ${coleccion.id_coleccion}`}
-          {coleccion.gui && ` - ${coleccion.gui}`}
-        </p>
+        {(coleccion.catalogo_museo || coleccion.num_museo) && (
+          <p className="text-muted-foreground text-lg">
+            {[coleccion.catalogo_museo, coleccion.num_museo].filter(Boolean).join(" ")}
+          </p>
+        )}
       </div>
 
       {/* Información básica en dos columnas */}
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-lg">Información General</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Columna izquierda */}
             <div className="space-y-4">
               {/* Serie de campo */}
               <div className="rounded-lg border bg-muted/30 p-3">
                 <h4 className="mb-2 text-sm font-semibold">Serie de Campo</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <Field label="SC" value={formatValue(coleccion.sc)} />
-                  <Field label="GUI" value={formatValue(coleccion.gui)} />
-                  <Field label="# Museo" value={formatValue(coleccion.num_museo)} />
-                </div>
-                <div className="mt-2">
-                  <Field label="# Colector" value={formatValue(coleccion.num_colector)} />
-                </div>
+                <Field label="# Museo" value={formatValue(coleccion.num_museo)} />
               </div>
 
               {/* Identificación */}
               <div className="rounded-lg border bg-muted/30 p-3">
-                <h4 className="mb-2 text-sm font-semibold">Identificación</h4>
                 <div className="space-y-1">
-                  <Field label="Especie" value={formatValue(coleccion.taxon_nombre)} />
-                  <Field label="Estatus" value={formatValue(coleccion.estatus_identificacion)} />
-                  <Field label="Posible ID" value={formatValue(coleccion.identificacion_posible)} />
+                  {coleccion.taxon_nombre && (
+                    <p className="text-sm italic">{coleccion.taxon_nombre}</p>
+                  )}
                   <Field label="Identificado por" value={formatValue(coleccion.identificado_por)} />
                   <Field label="Fecha ID" value={formatDateSimple(coleccion.fecha_identifica)} />
                 </div>
@@ -150,7 +141,6 @@ export default function ColeccionDetailClient({
 
               {/* Datos biológicos */}
               <div className="rounded-lg border bg-muted/30 p-3">
-                <h4 className="mb-2 text-sm font-semibold">Datos Biológicos</h4>
                 <div className="grid grid-cols-3 gap-2">
                   <Field label="Estadío" value={formatValue(coleccion.estadio)} />
                   <Field label="# Indiv." value={formatValue(coleccion.numero_individuos)} />
@@ -166,14 +156,7 @@ export default function ColeccionDetailClient({
               {/* Colección */}
               <div className="rounded-lg border bg-muted/30 p-3">
                 <h4 className="mb-2 text-sm font-semibold">Colección</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Field label="Fecha" value={formatDateSimple(coleccion.fecha_col)} />
-                  <Field label="Hora" value={formatValue(coleccion.hora)} />
-                </div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <Field label="Estado" value={formatValue(coleccion.estado)} />
-                  <Field label="Permiso" value={formatValue(coleccion.permiso_npicmpf)} />
-                </div>
+                <Field label="Fecha" value={formatDateSimple(coleccion.fecha_col)} />
               </div>
             </div>
 
@@ -183,7 +166,6 @@ export default function ColeccionDetailClient({
               <div className="rounded-lg border bg-muted/30 p-3">
                 <h4 className="mb-2 text-sm font-semibold">Localidad</h4>
                 <div className="space-y-1">
-                  <Field label="Campo Base" value={formatValue(coleccion.campobase_nombre)} />
                   <Field
                     label="Provincia"
                     value={formatValue(coleccion.campobase_provincia || coleccion.provincia)}
@@ -199,7 +181,7 @@ export default function ColeccionDetailClient({
 
               {/* Coordenadas */}
               <div className="rounded-lg border bg-muted/30 p-3">
-                <h4 className="mb-2 text-sm font-semibold">Coordenadas Geográficas</h4>
+                <h4 className="mb-2 text-sm font-semibold">Coordenadas</h4>
                 <div className="grid grid-cols-3 gap-2">
                   <Field label="Latitud" value={formatValue(coleccion.latitud)} />
                   <Field label="Longitud" value={formatValue(coleccion.longitud)} />
@@ -210,22 +192,17 @@ export default function ColeccionDetailClient({
                     }
                   />
                 </div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <Field label="Sist. Coord." value={formatValue(coleccion.sistema_coordenadas)} />
+                <div className="mt-2">
                   <Field label="Fuente" value={formatValue(coleccion.fuente_coord)} />
                 </div>
-                <div className="mt-2">
-                  <span className="text-muted-foreground text-xs font-semibold">GBIF:</span>{" "}
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-medium ${
-                      coleccion.gbif
-                        ? "bg-green-100 text-green-700"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {coleccion.gbif ? "Sí" : "No"}
-                  </span>
-                </div>
+                {coleccion.latitud != null && coleccion.longitud != null && (
+                  <ColeccionMiniMap
+                    latitud={coleccion.latitud}
+                    longitud={coleccion.longitud}
+                    localidad={coleccion.campobase_localidad || coleccion.detalle_localidad}
+                    provincia={coleccion.campobase_provincia || coleccion.provincia}
+                  />
+                )}
               </div>
             </div>
           </div>

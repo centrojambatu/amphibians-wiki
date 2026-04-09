@@ -28,7 +28,7 @@ export default function MapotecaHistogramaChart({ data, activeProvincias = [], o
   const maxTotal = Math.max(...data.map((p) => p.total), 1);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-0 overflow-visible">
+    <div className="rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-2 overflow-hidden">
       <div className="mb-4">
         <p className="text-lg font-semibold text-gray-800">
           Especies por provincia{" "}

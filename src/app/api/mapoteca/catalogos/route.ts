@@ -13,23 +13,45 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   try {
-    // Search catalogo_museo and numero_museo
-    const { data, error } = await supabase
-      .from("vw_colecciones")
-      .select("catalogo_museo, numero_museo")
-      .or(`catalogo_museo.ilike.%${q}%,numero_museo.ilike.%${q}%`)
-      .not("catalogo_museo", "is", null)
-      .limit(1000);
+    let data: any[] | null = null;
+    let error: any = null;
+
+    if (q.includes(" ")) {
+      // Cuando el query tiene espacio, intentar matching AND:
+      // la parte antes del último espacio busca en catalogo_museo,
+      // la parte después en numero_museo.
+      // Ej: "CJ 6134" → catalogo_museo ILIKE %CJ% AND numero_museo ILIKE %6134%
+      const lastSpaceIdx = q.lastIndexOf(" ");
+      const catPart = q.substring(0, lastSpaceIdx);
+      const numPart = q.substring(lastSpaceIdx + 1);
+
+      ({ data, error } = await supabase
+        .from("vw_colecciones")
+        .select("catalogo_museo, numero_museo")
+        .ilike("catalogo_museo", `%${catPart}%`)
+        .ilike("numero_museo", `%${numPart}%`)
+        .not("catalogo_museo", "is", null)
+        .limit(1000));
+    } else {
+      ({ data, error } = await supabase
+        .from("vw_colecciones")
+        .select("catalogo_museo, numero_museo")
+        .or(`catalogo_museo.ilike.%${q}%,numero_museo.ilike.%${q}%`)
+        .not("catalogo_museo", "is", null)
+        .limit(1000));
+    }
 
     if (error) throw error;
 
-    // Build distinct "catalogo_museo numero_museo" strings
+    // Usar "::" como separador para poder recuperar los valores exactos al filtrar
+    // (no conflicta con "||" que separa múltiples items en la URL)
     const catalogosSet = new Set<string>();
     for (const row of data || []) {
-      const parts = [row.catalogo_museo, row.numero_museo].filter(Boolean);
-      if (parts.length > 0) {
-        catalogosSet.add(parts.join(" "));
-      }
+      if (!row.catalogo_museo) continue;
+      const key = row.numero_museo
+        ? `${row.catalogo_museo}::${row.numero_museo}`
+        : row.catalogo_museo;
+      catalogosSet.add(key);
     }
 
     const resultado = Array.from(catalogosSet)

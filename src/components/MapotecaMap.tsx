@@ -25,10 +25,16 @@ interface CacheEntry {
   timestamp: number;
 }
 const dataCache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos en memoria
+const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hora en sessionStorage
+const SESSION_STORAGE_KEY = "mapoteca_cache_v2";
+// Solo cachear en sessionStorage el dataset sin filtros (el más pesado y común)
+const EMPTY_FILTER_KEY = buildCacheKey({});
 
 function buildCacheKey(filters: {
   provinciaFilter?: string[];
+  pisoFilter?: string[];
+  snapFilter?: string[];
   especieFilter?: string[];
   catalogoFilter?: string[];
   localidadesFilter?: string[];
@@ -38,18 +44,59 @@ function buildCacheKey(filters: {
   return JSON.stringify(filters);
 }
 
-function getCached(key: string): CacheEntry | null {
-  const entry = dataCache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
-    dataCache.delete(key);
+function getSessionCached(): CacheEntry | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const entry: CacheEntry = JSON.parse(raw);
+    if (Date.now() - entry.timestamp > SESSION_TTL_MS) {
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      return null;
+    }
+    return entry;
+  } catch {
     return null;
   }
-  return entry;
+}
+
+function setSessionCache(entry: CacheEntry) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(entry));
+  } catch {
+    // sessionStorage lleno — ignorar silenciosamente
+  }
+}
+
+function getCached(key: string): CacheEntry | null {
+  // 1. Memoria
+  const mem = dataCache.get(key);
+  if (mem) {
+    if (Date.now() - mem.timestamp > CACHE_TTL_MS) {
+      dataCache.delete(key);
+    } else {
+      return mem;
+    }
+  }
+  // 2. sessionStorage (solo para dataset sin filtros)
+  if (key === EMPTY_FILTER_KEY) {
+    const session = getSessionCached();
+    if (session) {
+      dataCache.set(key, session); // restaurar en memoria
+      return session;
+    }
+  }
+  return null;
 }
 
 function setCache(key: string, data: UbicacionEspecie[], total: number) {
-  dataCache.set(key, { data, total, timestamp: Date.now() });
+  const entry: CacheEntry = { data, total, timestamp: Date.now() };
+  dataCache.set(key, entry);
+  // Persistir en sessionStorage solo el dataset completo sin filtros
+  if (key === EMPTY_FILTER_KEY) {
+    setSessionCache(entry);
+  }
 }
 
 // Componente para ajustar la vista del mapa
@@ -232,6 +279,27 @@ function GbifLink({
   );
 }
 
+const MESES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+function formatFecha(fecha: string): string {
+  // fecha puede ser "YYYY-MM-DD" o "YYYY-MM" o "YYYY"
+  const partes = fecha.split("-");
+  const anio = partes[0];
+  const mes = partes[1] ? parseInt(partes[1], 10) : null;
+  const dia = partes[2] ? parseInt(partes[2], 10) : null;
+
+  if (dia && mes) {
+    return `${String(dia).padStart(2, "0")} ${MESES[mes - 1]} ${anio}`;
+  }
+  if (mes) {
+    return `${MESES[mes - 1]} ${anio}`;
+  }
+  return anio;
+}
+
 // Contenido compacto de un registro
 function RegistroInfo({
   u,
@@ -281,11 +349,22 @@ function RegistroInfo({
       <br />
       {u.latitud}, {u.longitud}
       {u.elevacion != null && <>{" "}<span className="text-[#f97315] font-bold">|</span> {u.elevacion} msnm</>}
+      <br />
+      {u.fecha_coleccion
+        ? formatFecha(u.fecha_coleccion)
+        : <span className="text-gray-400 italic">Sin fecha</span>
+      }
+      {u.colectores && (
+        <>
+          <br />
+          <span className="text-gray-500">{u.colectores}</span>
+        </>
+      )}
       {isCJ && u.id_coleccion && onColeccionClick && (
         <>
           <br />
           <span
-            className="cursor-pointer text-[10px] font-semibold text-[#4ba24b] hover:underline hover:text-[#397a39]"
+            className="cursor-pointer text-[10px] font-semibold text-[#4ba24b] hover:text-[#397a39]"
             onClick={(e) => {
               e.stopPropagation();
               onColeccionClick(u);
@@ -374,6 +453,8 @@ export default function MapotecaMap({
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
+  // ID incremental: cada fetch guarda su ID; si al completar no coincide con el actual, descarta el resultado
+  const fetchIdRef = useRef(0);
   const router = useRouter();
   // Track current filters to know when to reset
   const filtersRef = useRef({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
@@ -426,20 +507,26 @@ export default function MapotecaMap({
     const prev = filtersRef.current;
     const filtersChanged =
       prev.provinciaFilter !== provinciaFilter ||
+      prev.pisoFilter !== pisoFilter ||
+      prev.snapFilter !== snapFilter ||
       prev.especieFilter !== especieFilter ||
       prev.catalogoFilter !== catalogoFilter ||
       prev.elevacionMin !== elevacionMin ||
       prev.elevacionMax !== elevacionMax ||
       JSON.stringify(prev.localidadesFilter) !== JSON.stringify(localidadesFilter);
 
-    filtersRef.current = { provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax };
+    filtersRef.current = { provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax };
 
     const fetchInitial = async () => {
-      const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const myFetchId = ++fetchIdRef.current;
+
+      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
       const cached = getCached(cacheKey);
       if (cached) {
+        if (myFetchId !== fetchIdRef.current) return;
         setUbicaciones(cached.data);
         setTotal(cached.total);
+        setLoading(false);
         return;
       }
 
@@ -454,29 +541,37 @@ export default function MapotecaMap({
         if (!response.ok) throw new Error("Error al cargar datos");
 
         const result: MapotecaResponse = await response.json();
+        if (myFetchId !== fetchIdRef.current) return;
         setUbicaciones(result.data);
         setTotal(result.total);
       } catch (err) {
+        if (myFetchId !== fetchIdRef.current) return;
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
-        fetchingRef.current = false;
-        setLoading(false);
+        if (myFetchId === fetchIdRef.current) {
+          fetchingRef.current = false;
+          setLoading(false);
+        }
       }
     };
 
     if (filtersChanged) {
       fetchInitial();
     }
-  }, [provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams]);
+  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams]);
 
   // Carga inicial al montar
   useEffect(() => {
     const fetchInitial = async () => {
-      const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const myFetchId = ++fetchIdRef.current;
+
+      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
       const cached = getCached(cacheKey);
       if (cached) {
+        if (myFetchId !== fetchIdRef.current) return;
         setUbicaciones(cached.data);
         setTotal(cached.total);
+        setLoading(false);
         return;
       }
 
@@ -490,13 +585,17 @@ export default function MapotecaMap({
         if (!response.ok) throw new Error("Error al cargar datos");
 
         const result: MapotecaResponse = await response.json();
+        if (myFetchId !== fetchIdRef.current) return;
         setUbicaciones(result.data);
         setTotal(result.total);
       } catch (err) {
+        if (myFetchId !== fetchIdRef.current) return;
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
-        fetchingRef.current = false;
-        setLoading(false);
+        if (myFetchId === fetchIdRef.current) {
+          fetchingRef.current = false;
+          setLoading(false);
+        }
       }
     };
 
@@ -527,7 +626,7 @@ export default function MapotecaMap({
           setUbicaciones((prev) => {
             const updated = [...prev, ...result.data];
             if (updated.length >= result.total && result.total > 0) {
-              const cacheKey = buildCacheKey({ provinciaFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+              const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
               setCache(cacheKey, updated, result.total);
             }
             return updated;
@@ -770,9 +869,9 @@ export default function MapotecaMap({
               radius={radius}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: representativeDate ? 0.9 : 0.4,
-                color: representativeDate ? "#fff" : "#ccc",
-                weight: representativeDate ? 1 : 0.5,
+                fillOpacity: representativeDate ? 0.9 : 0.8,
+                color: representativeDate ? "#fff" : "#666",
+                weight: 1,
               }}
             >
               <Popup

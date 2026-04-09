@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect, useTransition, Suspense} from "react";
+import {useState, useEffect, useTransition, useRef, Suspense} from "react";
 import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -50,6 +50,29 @@ interface ProvinciaOption {
   id: number;
   nombre: string;
   value: string;
+}
+
+// Checkbox reutilizable para los paneles de filtro
+function FilterCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <div
+      className={[
+        "h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center",
+        "transition-all duration-150",
+        checked
+          ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+          : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
+      ].join(" ")}
+    >
+      <Check
+        className={[
+          "h-[10px] w-[10px] text-white transition-all duration-150",
+          checked ? "opacity-100 scale-100" : "opacity-0 scale-50",
+        ].join(" ")}
+        strokeWidth={3}
+      />
+    </div>
+  );
 }
 
 // Hook para debounce
@@ -138,17 +161,15 @@ function EspecieMultiSelect({
                   {results.map((r) => (
                     <CommandItem
                       key={r.nombre_cientifico}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                       onSelect={() => {
                         toggleEspecie(r.nombre_cientifico);
                         setQuery("");
                         setOpen(false);
                       }}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded border flex items-center justify-center ${selected.includes(r.nombre_cientifico) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
-                          {selected.includes(r.nombre_cientifico) && <Check className="h-3 w-3 text-white" />}
-                        </div>
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected.includes(r.nombre_cientifico)} />
                         <i className="text-sm">{r.nombre_cientifico}</i>
                       </div>
                     </CommandItem>
@@ -254,14 +275,12 @@ function CatalogoMultiSelect({
                   {options.map((cat) => (
                     <CommandItem
                       key={cat}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                       onSelect={() => toggleCatalogo(cat)}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded border flex items-center justify-center ${selected.includes(cat) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
-                          {selected.includes(cat) && <Check className="h-3 w-3 text-white" />}
-                        </div>
-                        <span className="text-sm font-mono">{cat}</span>
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected.includes(cat)} />
+                        <span className="text-sm font-mono">{cat.replace("::", " ")}</span>
                       </div>
                     </CommandItem>
                   ))}
@@ -278,7 +297,7 @@ function CatalogoMultiSelect({
               key={cat}
               className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] text-orange-800 font-mono"
             >
-              {cat}
+              {cat.replace("::", " ")}
               <button type="button" onClick={() => toggleCatalogo(cat)}>
                 <X className="h-3 w-3" />
               </button>
@@ -366,13 +385,11 @@ function LocalidadMultiSelect({
                   {options.map((loc) => (
                     <CommandItem
                       key={loc}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                       onSelect={() => toggleLocalidad(loc)}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded border flex items-center justify-center ${selected.includes(loc) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
-                          {selected.includes(loc) && <Check className="h-3 w-3 text-white" />}
-                        </div>
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected.includes(loc)} />
                         <span className="text-sm">{loc}</span>
                       </div>
                     </CommandItem>
@@ -460,13 +477,11 @@ function ProvinciaMultiSelect({
                   {filtered.map((p) => (
                     <CommandItem
                       key={p.id}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                       onSelect={() => toggleProvincia(p.nombre)}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded border flex items-center justify-center ${selected.includes(p.nombre) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
-                          {selected.includes(p.nombre) && <Check className="h-3 w-3 text-white" />}
-                        </div>
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected.includes(p.nombre)} />
                         <span className="text-sm">{p.nombre}</span>
                       </div>
                     </CommandItem>
@@ -521,31 +536,73 @@ function StatCards({
   onSnapClick: (name: string) => void;
 }) {
   const [stats, setStats] = useState<MapStats | null>(null);
+  const [histogramaData, setHistogramaData] = useState<{ name: string; total: number }[]>([]);
+  const globalHistogramaRef = useRef<{ name: string; total: number }[]>([]);
 
+  // Cards: solo al montar, sin filtros activos
   useEffect(() => {
+    const STATS_KEY = "mapoteca_stats_v1";
+    const STATS_TTL = 60 * 60 * 1000; // 1 hora
+
+    const applyStats = (data: MapStats) => {
+      setStats(data);
+      globalHistogramaRef.current = data.histogramaProvincias ?? [];
+      setHistogramaData(data.histogramaProvincias ?? []);
+    };
+
+    // Intentar leer de sessionStorage primero
+    try {
+      const raw = sessionStorage.getItem(STATS_KEY);
+      if (raw) {
+        const { data, timestamp } = JSON.parse(raw);
+        if (Date.now() - timestamp < STATS_TTL) {
+          applyStats(data);
+          return; // no hace falta fetch
+        }
+      }
+    } catch { /* ignorar */ }
+
     fetch("/api/mapoteca/estadisticas")
       .then((r) => r.json())
-      .then(setStats)
+      .then((data: MapStats) => {
+        applyStats(data);
+        try {
+          sessionStorage.setItem(STATS_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+        } catch { /* ignorar */ }
+      })
       .catch(() => {});
   }, []);
+
+  // Histograma: se actualiza cuando cambia el filtro activo (piso o snap)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activePisos.length > 0) params.set("pisos", activePisos.join(","));
+    if (activeSnaps.length > 0) params.set("snaps", activeSnaps.join(","));
+    const qs = params.toString();
+    if (!qs) {
+      setHistogramaData(globalHistogramaRef.current);
+      return;
+    }
+    fetch(`/api/mapoteca/estadisticas?${qs}`)
+      .then((r) => r.json())
+      .then((data: MapStats) => setHistogramaData(data.histogramaProvincias ?? []))
+      .catch(() => {});
+  }, [activePisos, activeSnaps]);
 
   return (
     <div className="container mx-auto px-4 pb-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
 
-        {/* Distribución — link */}
+        {/* Link Distribución */}
         <a
           href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
           target="_blank"
           rel="noopener noreferrer"
-          className="block"
+          className="block h-full"
         >
-          <Card className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">→</p>
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
-                Distribución
-              </p>
+          <Card className="min-w-0 h-full overflow-visible transition-shadow hover:shadow-md cursor-pointer">
+            <CardContent className="pt-4 h-full flex flex-col justify-between">
+              <p className="text-sm font-medium text-[#4ba24b]">Distribución</p>
             </CardContent>
           </Card>
         </a>
@@ -664,7 +721,7 @@ function StatCards({
       {/* Histograma por provincia */}
       <div className="mt-4">
         <MapotecaHistogramaChart
-          data={stats?.histogramaProvincias ?? []}
+          data={histogramaData}
           activeProvincias={activeProvincias}
           onBarClick={onProvinciaClick}
         />
@@ -938,17 +995,15 @@ export default function MapotecaPage() {
 
   const handlePisoClick = (name: string) => {
     startTransition(() => {
-      setPisoFilter((prev) =>
-        prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
-      );
+      setPisoFilter((prev) => prev.includes(name) ? [] : [name]);
+      setSnapFilter([]);
     });
   };
 
   const handleSnapClick = (name: string) => {
     startTransition(() => {
-      setSnapFilter((prev) =>
-        prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
-      );
+      setSnapFilter((prev) => prev.includes(name) ? [] : [name]);
+      setPisoFilter([]);
     });
   };
 

@@ -45,7 +45,13 @@ function allEntries(rows: Row[], field: keyof Row): { name: string; total: numbe
     .sort((a, b) => b.total - a.total);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const pisosParam = searchParams.get("pisos");
+  const pisos = pisosParam ? pisosParam.split(",").map((p) => p.trim()).filter(Boolean) : null;
+  const snapsParam = searchParams.get("snaps");
+  const snaps = snapsParam ? snapsParam.split(",").map((s) => s.trim()).filter(Boolean) : null;
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -60,7 +66,19 @@ export async function GET() {
     return NextResponse.json({ error: "Error al obtener estadísticas" }, { status: 500 });
   }
 
-  const rows = data as Row[];
+  let rows = data as Row[];
+
+  // Filtrar por pisos y/o snaps activos (exact element match)
+  if (pisos && pisos.length > 0) {
+    rows = rows.filter((row) =>
+      splitField(row.awe_distribucion_altitudinal).some((v) => pisos.includes(v))
+    );
+  }
+  if (snaps && snaps.length > 0) {
+    rows = rows.filter((row) =>
+      splitField(row.awe_areas_protegidas_estado).some((v) => snaps.includes(v))
+    );
+  }
 
   return NextResponse.json({
     provincia: topEntry(rows, "ubicaciones_geopoliticas"),

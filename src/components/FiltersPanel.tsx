@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, RotateCcw, X } from "lucide-react";
+import { Search, RotateCcw, X, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -460,22 +460,16 @@ export default function FiltersPanel({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex flex-col gap-2">
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={filters.distribucion.includes("occidental")}
-                          onChange={() => handleCategoricalChange("distribucion", "occidental")}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
-                        />
+                      <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "occidental")}>
+                        <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("occidental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
+                          <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("occidental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                        </div>
                         <span className="text-sm text-gray-700">Occidental</span>
                       </label>
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={filters.distribucion.includes("oriental")}
-                          onChange={() => handleCategoricalChange("distribucion", "oriental")}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
-                        />
+                      <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "oriental")}>
+                        <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("oriental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
+                          <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("oriental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                        </div>
                         <span className="text-sm text-gray-700">Oriental</span>
                       </label>
                     </div>
@@ -836,26 +830,16 @@ export default function FiltersPanel({
                 {/* Checkboxes de distribución - encima del gráfico */}
                 <div className="space-y-2">
                   <div className="flex flex-col gap-2">
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={filters.distribucion.includes("occidental")}
-                        onChange={() =>
-                          handleCategoricalChange("distribucion", "occidental")
-                        }
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
-                      />
+                    <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "occidental")}>
+                      <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("occidental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
+                        <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("occidental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                      </div>
                       <span className="text-sm text-gray-700">Occidental</span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={filters.distribucion.includes("oriental")}
-                        onChange={() =>
-                          handleCategoricalChange("distribucion", "oriental")
-                        }
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
-                      />
+                    <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "oriental")}>
+                      <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("oriental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
+                        <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("oriental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                      </div>
                       <span className="text-sm text-gray-700">Oriental</span>
                     </label>
                   </div>
