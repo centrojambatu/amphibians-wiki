@@ -112,13 +112,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
       .eq("taxon_id", taxonId),
     supabaseClient
-      .from("taxon_catalogo_awe_region_biogeografica")
-      .select(
-        `
-      *,
-      catalogo_awe!inner(*, tipo_catalogo_awe(*))
-    `,
-      )
+      .from("taxon_catalogo_awe")
+      .select(`*, catalogo_awe!inner(*, tipo_catalogo_awe(*))`)
       .eq("taxon_id", taxonId)
       .eq("catalogo_awe.tipo_catalogo_awe_id", 6),
     supabaseClient.rpc("get_taxon_geopolitica_hierarchy", {

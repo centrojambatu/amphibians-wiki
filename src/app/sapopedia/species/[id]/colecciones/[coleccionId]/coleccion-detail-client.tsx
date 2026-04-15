@@ -152,7 +152,7 @@ export default function ColeccionDetailClient({
               {/* Colección */}
               <div className="rounded-lg border bg-muted/30 p-3">
                 <h4 className="mb-2 text-sm font-semibold">Colección</h4>
-                <Field label="Fecha" value={formatDateSimple(coleccion.fecha_col)} />
+                <Field label="Fecha" value={formatDateSimple(coleccion.fecha_coleccion)} />
               </div>
             </div>
 

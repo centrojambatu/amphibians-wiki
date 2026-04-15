@@ -21,7 +21,7 @@ export interface ColeccionCompleta {
   svl: number | null;
   peso: number | null;
   estatus_tipo: string | null;
-  fecha_col: string | null;
+  fecha_coleccion: string | null;
   hora: string | null;
   colectores: string | null;
   provincia: string | null;
@@ -94,10 +94,10 @@ export default async function getColeccionesEspecie(
   const query1 = supabaseClient
     .from("vw_coleccion_completa")
     .select(
-      "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_col, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
+      "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_coleccion, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
     )
     .eq("taxon_id", taxonId)
-    .order("fecha_col", { ascending: false, nullsFirst: false })
+    .order("fecha_coleccion", { ascending: false, nullsFirst: false })
     .order("id_coleccion", { ascending: false });
 
   queries.push(fetchAllRecords(query1));
@@ -108,10 +108,10 @@ export default async function getColeccionesEspecie(
     const query2 = supabaseClient
       .from("vw_coleccion_completa")
       .select(
-        "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_col, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
+        "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_coleccion, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
       )
       .ilike("taxon_nombre", `%${nombreCientifico}%`)
-      .order("fecha_col", { ascending: false, nullsFirst: false })
+      .order("fecha_coleccion", { ascending: false, nullsFirst: false })
       .order("id_coleccion", { ascending: false });
 
     queries.push(fetchAllRecords(query2));
@@ -137,14 +137,14 @@ export default async function getColeccionesEspecie(
   }
 
 
-  // Ordenar por fecha_col e id_coleccion (ya vienen ordenados, pero por si acaso)
+  // Ordenar por fecha_coleccion e id_coleccion (ya vienen ordenados, pero por si acaso)
   allData.sort((a, b) => {
-    if (a.fecha_col && b.fecha_col) {
-      const dateA = new Date(a.fecha_col).getTime();
-      const dateB = new Date(b.fecha_col).getTime();
+    if (a.fecha_coleccion && b.fecha_coleccion) {
+      const dateA = new Date(a.fecha_coleccion).getTime();
+      const dateB = new Date(b.fecha_coleccion).getTime();
       if (dateB !== dateA) return dateB - dateA;
-    } else if (a.fecha_col) return -1;
-    else if (b.fecha_col) return 1;
+    } else if (a.fecha_coleccion) return -1;
+    else if (b.fecha_coleccion) return 1;
     return (b.id_coleccion || 0) - (a.id_coleccion || 0);
   });
 
@@ -173,7 +173,7 @@ export default async function getColeccionesEspecie(
     svl: coleccion.svl,
     peso: coleccion.peso,
     estatus_tipo: coleccion.estatus_tipo,
-    fecha_col: coleccion.fecha_col,
+    fecha_coleccion: coleccion.fecha_coleccion,
     hora: coleccion.hora,
     colectores: coleccion.colectores,
     provincia: coleccion.provincia,

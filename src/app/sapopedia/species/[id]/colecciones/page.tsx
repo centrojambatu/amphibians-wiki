@@ -113,13 +113,13 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                             <span className="text-sm">{coleccion.num_museo}</span>
                           </div>
                         )}
-                        {coleccion.fecha_col && (
+                        {coleccion.fecha_coleccion && (
                           <div>
                             <span className="text-muted-foreground text-xs font-semibold">
                               Fecha Colección:
                             </span>{" "}
                             <span className="text-sm">
-                              {new Date(coleccion.fecha_col).toLocaleDateString("es-ES")}
+                              {new Date(coleccion.fecha_coleccion).toLocaleDateString("es-ES")}
                             </span>
                           </div>
                         )}
