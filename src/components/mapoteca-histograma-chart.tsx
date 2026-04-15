@@ -11,15 +11,23 @@ interface MapotecaHistogramaChartProps {
   data: ProvinciaPoint[];
   activeProvincias?: string[];
   onBarClick?: (name: string) => void;
+  title?: string;
+  unit?: string;
 }
 
 const ALTURA_MAX_BARRA = 200;
 
-export default function MapotecaHistogramaChart({ data, activeProvincias = [], onBarClick }: MapotecaHistogramaChartProps) {
+export default function MapotecaHistogramaChart({
+  data,
+  activeProvincias = [],
+  onBarClick,
+  title = "Especies por provincia",
+  unit = "provincias",
+}: MapotecaHistogramaChartProps) {
   if (data.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <p className="text-lg font-semibold text-gray-800">Especies por provincia</p>
+        <p className="text-lg font-semibold text-gray-800">{title}</p>
         <p className="mt-4 text-sm text-gray-500">No hay datos disponibles.</p>
       </div>
     );
@@ -28,12 +36,12 @@ export default function MapotecaHistogramaChart({ data, activeProvincias = [], o
   const maxTotal = Math.max(...data.map((p) => p.total), 1);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-2 overflow-hidden">
+    <div className="rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-4">
       <div className="mb-4">
         <p className="text-lg font-semibold text-gray-800">
-          Especies por provincia{" "}
+          {title}{" "}
           <span className="text-[#f07304]">|</span>{" "}
-          <span className="text-gray-500">{data.length} provincias</span>
+          <span className="text-gray-500">{data.length} {unit}</span>
         </p>
       </div>
 
@@ -52,8 +60,9 @@ export default function MapotecaHistogramaChart({ data, activeProvincias = [], o
             return (
               <Tooltip key={punto.name}>
                 <TooltipTrigger asChild>
-                  <div
-                    className="min-w-0 flex-1 rounded-t transition-all hover:opacity-80"
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 rounded-t border-0 p-0 transition-all hover:opacity-80"
                     style={{
                       height: Math.max(altura, 4),
                       backgroundColor: color,
@@ -82,11 +91,11 @@ export default function MapotecaHistogramaChart({ data, activeProvincias = [], o
       </div>
 
       {/* Eje X: nombres de provincias rotados */}
-      <div className="mt-1 flex w-full gap-3" style={{ height: 140 }}>
+      <div className="mt-2 flex w-full gap-3 px-8" style={{ height: 220 }}>
         {data.map((punto) => (
           <div key={punto.name} className="relative min-w-0 flex-1">
             <span
-              className="absolute left-1/2 top-0 origin-top-left rotate-45 whitespace-nowrap text-[13px] text-gray-500"
+              className="absolute left-1/2 top-0 w-20 -translate-x-1/2 origin-top rotate-45 text-center text-[12px] leading-tight text-gray-500 break-words whitespace-normal"
             >
               {punto.name}
             </span>

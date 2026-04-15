@@ -80,9 +80,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-4xl font-bold tabular-nums text-[#f07304] sm:text-5xl">
               {estadisticas.totalCientificas.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Publicaciones científicas
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones científicas</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -90,9 +88,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalDivulgacion.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Publicaciones divulgación
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones divulgación</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -100,9 +96,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalIndexadas.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Publicaciones indexadas
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones indexadas</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -110,9 +104,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalNoIndexadas.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Publicaciones no indexadas
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones no indexadas</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -130,9 +122,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.publicacionesAnioActual.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Publicaciones año actual
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones año actual</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -140,9 +130,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalTaxonomia.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Taxonomía
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Taxonomía</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -150,9 +138,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalEvolucion.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Evolución
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Evolución</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -160,9 +146,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalEcologia.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Ecología
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Ecología</p>
           </CardContent>
         </Card>
         <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
@@ -170,9 +154,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {estadisticas.totalConservacion.toLocaleString()}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Conservación
-            </p>
+            <p className="break-words text-muted-foreground text-xs sm:text-sm">Conservación</p>
           </CardContent>
         </Card>
         {estadisticas.publicacionMasCitada && (
@@ -192,9 +174,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
                 </p>
 
                 <p className="mt-1 break-words text-[10px] leading-tight text-muted-foreground sm:text-xs">
-                  Publicación más citada{" "}
-                  <span className="text-[#f07304]">|</span>{" "}
-                  Autor principal ecuatoriano
+                  Publicación más citada <span className="text-[#f07304]">|</span> Autor principal ecuatoriano
                 </p>
               </CardContent>
             </Card>
@@ -214,12 +194,10 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
               <CardContent className="flex flex-1 flex-col justify-between pt-4">
                 <p
                   className="line-clamp-2 break-words text-xs font-medium leading-tight"
-                  title={
-                    estadisticas.publicacionCientificaMasReciente.titulo.replace(
-                      /<[^>]*>/g,
-                      " ",
-                    ).replace(/\s+/g, " ").trim()
-                  }
+                  title={estadisticas.publicacionCientificaMasReciente.titulo
+                    .replace(/<[^>]*>/g, " ")
+                    .replace(/\s+/g, " ")
+                    .trim()}
                 >
                   <span
                     dangerouslySetInnerHTML={{
@@ -236,9 +214,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
         ) : (
           <Card className="flex h-full min-h-[88px] min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="pt-4">
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
-                Publicación científica más reciente
-              </p>
+              <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicación científica más reciente</p>
               <p className="text-muted-foreground text-xs">No disponible</p>
             </CardContent>
           </Card>
@@ -247,10 +223,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
 
       {/* Histograma de publicaciones por año */}
       <div className="mb-8">
-        <SapotecaHistogramaChart
-          data={histogramaData}
-          idsTiposCientificas={idsTiposCientificas}
-        />
+        <SapotecaHistogramaChart data={histogramaData} idsTiposCientificas={idsTiposCientificas} />
       </div>
 
         {/* Layout con panel de filtros y contenido */}
@@ -258,7 +231,12 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
           {/* Información de resultados */}
           <div className="mb-6 text-sm text-muted-foreground">
             Mostrando {publicaciones.length} de {total} referencias
-            {totalPaginas > 1 && ` (Página ${pagina} de ${totalPaginas})`}
+            {totalPaginas > 1 && (
+              <>
+                {" "}
+                (Página {pagina} de {totalPaginas})
+              </>
+            )}
           </div>
 
           {/* Lista de referencias */}

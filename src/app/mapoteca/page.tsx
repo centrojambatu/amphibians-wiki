@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect, useTransition, useRef, Suspense} from "react";
+import {useState, useEffect, Suspense} from "react";
 import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -8,8 +8,6 @@ import {Search, X, Mountain, Check, RotateCcw} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Card, CardContent} from "@/components/ui/card";
-import MapotecaHistogramaChart from "@/components/mapoteca-histograma-chart";
 import MapotecaTabla from "@/components/MapotecaTabla";
 import {
   Select,
@@ -541,251 +539,6 @@ function ProvinciaMultiSelect({
   );
 }
 
-interface MapStats {
-  provincia: {name: string; total: number};
-  biogeografico: {name: string; total: number};
-  ecosistema: {name: string; total: number};
-  piso: {name: string; total: number};
-  snap: {name: string; total: number};
-  biogeograficoEndemica: {name: string; total: number};
-  histogramaProvincias: {name: string; total: number}[];
-}
-
-function StatCards({
-  activeProvincias,
-  onProvinciaClick,
-  activePisos,
-  onPisoClick,
-  activeSnaps,
-  onSnapClick,
-}: {
-  activeProvincias: string[];
-  onProvinciaClick: (name: string) => void;
-  activePisos: string[];
-  onPisoClick: (name: string) => void;
-  activeSnaps: string[];
-  onSnapClick: (name: string) => void;
-}) {
-  const [stats, setStats] = useState<MapStats | null>(null);
-  const [histogramaData, setHistogramaData] = useState<{name: string; total: number}[]>([]);
-  const globalHistogramaRef = useRef<{name: string; total: number}[]>([]);
-
-  // Cards: solo al montar, sin filtros activos
-  useEffect(() => {
-    const STATS_KEY = "mapoteca_stats_v2";
-    const STATS_TTL = 60 * 60 * 1000; // 1 hora
-
-    const applyStats = (data: MapStats) => {
-      setStats(data);
-      globalHistogramaRef.current = data.histogramaProvincias ?? [];
-      setHistogramaData(data.histogramaProvincias ?? []);
-    };
-
-    // Intentar leer de sessionStorage primero
-    try {
-      const raw = sessionStorage.getItem(STATS_KEY);
-
-      if (raw) {
-        const {data, timestamp} = JSON.parse(raw);
-
-        if (Date.now() - timestamp < STATS_TTL) {
-          applyStats(data);
-
-          return; // no hace falta fetch
-        }
-      }
-    } catch {
-      /* ignorar */
-    }
-
-    fetch("/api/mapoteca/estadisticas")
-      .then((r) => r.json())
-      .then((data: MapStats) => {
-        applyStats(data);
-        try {
-          sessionStorage.setItem(STATS_KEY, JSON.stringify({data, timestamp: Date.now()}));
-        } catch {
-          /* ignorar */
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  // Histograma: se actualiza cuando cambia el filtro activo (piso o snap)
-  useEffect(() => {
-    const params = new URLSearchParams();
-
-    if (activePisos.length > 0) params.set("pisos", activePisos.join(","));
-    if (activeSnaps.length > 0) params.set("snaps", activeSnaps.join(","));
-    const qs = params.toString();
-
-    if (!qs) {
-      setHistogramaData(globalHistogramaRef.current);
-
-      return;
-    }
-    fetch(`/api/mapoteca/estadisticas?${qs}`)
-      .then((r) => r.json())
-      .then((data: MapStats) => setHistogramaData(data.histogramaProvincias ?? []))
-      .catch(() => {});
-  }, [activePisos, activeSnaps]);
-
-  return (
-    <div className="container mx-auto px-4 pb-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-7">
-        {/* Link Distribución */}
-        <a
-          className="block h-full"
-          href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <Card className="h-full min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="flex h-full flex-col justify-between pt-4">
-              <p className="text-sm font-medium text-[#4ba24b]">Distribución</p>
-            </CardContent>
-          </Card>
-        </a>
-
-        {/* Provincia más diversa */}
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.provincia.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en provincia más diversa
-            </p>
-            {stats?.provincia.name && (
-              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
-                {stats.provincia.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Región Biogeográfica más diversa */}
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.biogeografico.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en región biogeográfica más diversa
-            </p>
-            {stats?.biogeografico.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.biogeografico.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Ecosistema más diverso */}
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.ecosistema.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en ecosistema más diverso
-            </p>
-            {stats?.ecosistema.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.ecosistema.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Piso altitudinal más diverso */}
-        {stats?.piso.name ? (
-          <Card
-            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activePisos.includes(stats.piso.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
-            onClick={() => onPisoClick(stats.piso.name)}
-          >
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                {stats.piso.total.toLocaleString()}
-              </p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en piso altitudinal más diverso
-              </p>
-              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
-                {stats.piso.name}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en piso altitudinal más diverso
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Área SNAP más diversa */}
-        {stats?.snap.name ? (
-          <Card
-            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activeSnaps.includes(stats.snap.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
-            onClick={() => onSnapClick(stats.snap.name)}
-          >
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                {stats.snap.total.toLocaleString()}
-              </p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en área SNAP más diversa
-              </p>
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.snap.name}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en área SNAP más diversa
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Región biogeográfica con más endémicas */}
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Endémicas en región biogeográfica más endémica
-            </p>
-            {stats?.biogeograficoEndemica.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.biogeograficoEndemica.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Histograma por provincia */}
-      <div className="mt-4">
-        <MapotecaHistogramaChart
-          activeProvincias={activeProvincias}
-          data={histogramaData}
-          onBarClick={onProvinciaClick}
-        />
-      </div>
-    </div>
-  );
-}
-
 // Componente interno que usa useSearchParams
 function MapotecaContent({
   provinciaFilter,
@@ -1061,29 +814,6 @@ export default function MapotecaPage() {
   const [provinciaFilter, setProvinciaFilter] = useState<string[]>([]);
   const [pisoFilter, setPisoFilter] = useState<string[]>([]);
   const [snapFilter, setSnapFilter] = useState<string[]>([]);
-  const [, startTransition] = useTransition();
-
-  const handleProvinciaClick = (name: string) => {
-    startTransition(() => {
-      setProvinciaFilter((prev) =>
-        prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name],
-      );
-    });
-  };
-
-  const handlePisoClick = (name: string) => {
-    startTransition(() => {
-      setPisoFilter((prev) => (prev.includes(name) ? [] : [name]));
-      setSnapFilter([]);
-    });
-  };
-
-  const handleSnapClick = (name: string) => {
-    startTransition(() => {
-      setSnapFilter((prev) => (prev.includes(name) ? [] : [name]));
-      setPisoFilter([]);
-    });
-  };
 
   return (
     <div className="bg-background min-h-screen">
@@ -1092,15 +822,6 @@ export default function MapotecaPage() {
           <h1 className="text-3xl font-bold text-gray-900">Mapoteca</h1>
         </div>
       </div>
-
-      <StatCards
-        activePisos={pisoFilter}
-        activeProvincias={provinciaFilter}
-        activeSnaps={snapFilter}
-        onPisoClick={handlePisoClick}
-        onProvinciaClick={handleProvinciaClick}
-        onSnapClick={handleSnapClick}
-      />
 
       <Suspense fallback={<MapotecaLoading />}>
         <MapotecaContent

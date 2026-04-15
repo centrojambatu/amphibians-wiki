@@ -91,5 +91,6 @@ export async function GET(request: Request) {
     snap: topEntry(rows, "awe_areas_protegidas_estado", ["No registrada"]),
     biogeograficoEndemica: topEntry(endemicRows, "awe_regiones_biogeograficas"),
     histogramaProvincias: allEntries(rows, "ubicaciones_geopoliticas"),
+    histogramaBiogeografico: allEntries(rows, "awe_regiones_biogeograficas"),
   });
 }

@@ -1,4 +1,5 @@
 import { SapopediaContent } from "@/components/sapopedia-content";
+import MapotecaStats from "@/components/mapoteca/mapoteca-stats";
 import type { OrdenesNombresLookup } from "@/lib/organize-taxonomy";
 
 import getAllEspecies from "./get-all-especies";
@@ -18,6 +19,11 @@ export default async function SapopediaPage() {
         <h1 className="text-primary mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl lg:text-4xl">
           Anfibios Ecuador
         </h1>
+      </div>
+
+      {/* Cards de estadísticas + histograma (movidos desde Mapoteca) */}
+      <div className="mb-6 sm:mb-8">
+        <MapotecaStats />
       </div>
 
       <div className="mb-6 sm:mb-8">
