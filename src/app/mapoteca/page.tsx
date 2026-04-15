@@ -20,11 +20,7 @@ import {
 } from "@/components/ui/select";
 // Select is still used for mapType
 import {Slider} from "@/components/ui/slider";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -53,21 +49,21 @@ interface ProvinciaOption {
 }
 
 // Checkbox reutilizable para los paneles de filtro
-function FilterCheckbox({ checked }: { checked: boolean }) {
+function FilterCheckbox({checked}: {checked: boolean}) {
   return (
     <div
       className={[
-        "h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center",
+        "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px]",
         "transition-all duration-150",
         checked
-          ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+          ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
           : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
       ].join(" ")}
     >
       <Check
         className={[
           "h-[10px] w-[10px] text-white transition-all duration-150",
-          checked ? "opacity-100 scale-100" : "opacity-0 scale-50",
+          checked ? "scale-100 opacity-100" : "scale-50 opacity-0",
         ].join(" ")}
         strokeWidth={3}
       />
@@ -78,10 +74,13 @@ function FilterCheckbox({ checked }: { checked: boolean }) {
 // Hook para debounce
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedValue(value), delay);
+
     return () => clearTimeout(timer);
   }, [value, delay]);
+
   return debouncedValue;
 }
 
@@ -102,19 +101,27 @@ function EspecieMultiSelect({
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setResults([]);
+
       return;
     }
     setLoading(true);
     const fetchResults = async () => {
       try {
-        const res = await fetch(`/api/mapoteca/especies?especie=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(
+          `/api/mapoteca/especies?especie=${encodeURIComponent(debouncedQuery)}`,
+        );
+
         if (!res.ok) return;
         const data = await res.json();
+
         setResults(data.slice(0, 10));
-      } catch { /* ignore */ } finally {
+      } catch {
+        /* ignore */
+      } finally {
         setLoading(false);
       }
     };
+
     fetchResults();
   }, [debouncedQuery]);
 
@@ -131,7 +138,7 @@ function EspecieMultiSelect({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
               placeholder="Especie"
@@ -140,13 +147,15 @@ function EspecieMultiSelect({
                 setQuery(e.target.value);
                 setOpen(e.target.value.length >= 2);
               }}
-              onFocus={() => { if (query.length >= 2) setOpen(true); }}
+              onFocus={() => {
+                if (query.length >= 2) setOpen(true);
+              }}
             />
           </div>
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[--radix-popover-trigger-width] p-0 z-[1100]"
+          className="z-[1100] w-[--radix-popover-trigger-width] p-0"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command>
@@ -161,7 +170,7 @@ function EspecieMultiSelect({
                   {results.map((r) => (
                     <CommandItem
                       key={r.nombre_cientifico}
-                      className="cursor-pointer group"
+                      className="group cursor-pointer"
                       onSelect={() => {
                         toggleEspecie(r.nombre_cientifico);
                         setQuery("");
@@ -216,19 +225,25 @@ function CatalogoMultiSelect({
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setOptions([]);
+
       return;
     }
     setLoading(true);
     const fetchCatalogos = async () => {
       try {
         const res = await fetch(`/api/mapoteca/catalogos?q=${encodeURIComponent(debouncedQuery)}`);
+
         if (!res.ok) return;
         const data = await res.json();
+
         setOptions(data);
-      } catch { /* ignore */ } finally {
+      } catch {
+        /* ignore */
+      } finally {
         setLoading(false);
       }
     };
+
     fetchCatalogos();
   }, [debouncedQuery]);
 
@@ -245,22 +260,24 @@ function CatalogoMultiSelect({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
-              placeholder="Museo"
+              placeholder="KU 10441"
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setOpen(e.target.value.length >= 2);
               }}
-              onFocus={() => { if (query.length >= 2) setOpen(true); }}
+              onFocus={() => {
+                if (query.length >= 2) setOpen(true);
+              }}
             />
           </div>
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[--radix-popover-trigger-width] p-0 z-[1100] max-h-[200px] overflow-y-auto"
+          className="z-[1100] max-h-[200px] w-[--radix-popover-trigger-width] overflow-y-auto p-0"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command>
@@ -275,12 +292,12 @@ function CatalogoMultiSelect({
                   {options.map((cat) => (
                     <CommandItem
                       key={cat}
-                      className="cursor-pointer group"
+                      className="group cursor-pointer"
                       onSelect={() => toggleCatalogo(cat)}
                     >
                       <div className="flex items-center gap-2.5">
                         <FilterCheckbox checked={selected.includes(cat)} />
-                        <span className="text-sm font-mono">{cat.replace("::", " ")}</span>
+                        <span className="font-mono text-sm">{cat.replace("::", " ")}</span>
                       </div>
                     </CommandItem>
                   ))}
@@ -295,7 +312,7 @@ function CatalogoMultiSelect({
           {selected.map((cat) => (
             <span
               key={cat}
-              className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] text-orange-800 font-mono"
+              className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 font-mono text-[11px] text-orange-800"
             >
               {cat.replace("::", " ")}
               <button type="button" onClick={() => toggleCatalogo(cat)}>
@@ -326,19 +343,27 @@ function LocalidadMultiSelect({
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setOptions([]);
+
       return;
     }
     setLoading(true);
     const fetchLocalidades = async () => {
       try {
-        const res = await fetch(`/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(
+          `/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`,
+        );
+
         if (!res.ok) return;
         const data = await res.json();
+
         setOptions(data);
-      } catch { /* ignore */ } finally {
+      } catch {
+        /* ignore */
+      } finally {
         setLoading(false);
       }
     };
+
     fetchLocalidades();
   }, [debouncedQuery]);
 
@@ -355,7 +380,7 @@ function LocalidadMultiSelect({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
               placeholder="Localidad"
@@ -364,13 +389,15 @@ function LocalidadMultiSelect({
                 setQuery(e.target.value);
                 setOpen(e.target.value.length >= 2);
               }}
-              onFocus={() => { if (query.length >= 2) setOpen(true); }}
+              onFocus={() => {
+                if (query.length >= 2) setOpen(true);
+              }}
             />
           </div>
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[--radix-popover-trigger-width] p-0 z-[1100] max-h-[200px] overflow-y-auto"
+          className="z-[1100] max-h-[200px] w-[--radix-popover-trigger-width] overflow-y-auto p-0"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command>
@@ -385,7 +412,7 @@ function LocalidadMultiSelect({
                   {options.map((loc) => (
                     <CommandItem
                       key={loc}
-                      className="cursor-pointer group"
+                      className="group cursor-pointer"
                       onSelect={() => toggleLocalidad(loc)}
                     >
                       <div className="flex items-center gap-2.5">
@@ -432,9 +459,10 @@ function ProvinciaMultiSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filtered = query.length > 0
-    ? provincias.filter((p) => p.nombre.toLowerCase().includes(query.toLowerCase()))
-    : provincias;
+  const filtered =
+    query.length > 0
+      ? provincias.filter((p) => p.nombre.toLowerCase().includes(query.toLowerCase()))
+      : provincias;
 
   const toggleProvincia = (nombre: string) => {
     if (selected.includes(nombre)) {
@@ -449,7 +477,7 @@ function ProvinciaMultiSelect({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
               placeholder="Provincia"
@@ -464,20 +492,22 @@ function ProvinciaMultiSelect({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[--radix-popover-trigger-width] p-0 z-[1100] max-h-[200px] overflow-y-auto"
+          className="z-[1100] max-h-[200px] w-[--radix-popover-trigger-width] overflow-y-auto p-0"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command>
             <CommandList>
               {filtered.length === 0 && (
-                <CommandEmpty className="px-4 py-3 text-sm text-gray-400">Sin resultados.</CommandEmpty>
+                <CommandEmpty className="px-4 py-3 text-sm text-gray-400">
+                  Sin resultados.
+                </CommandEmpty>
               )}
               {filtered.length > 0 && (
                 <CommandGroup>
                   {filtered.map((p) => (
                     <CommandItem
                       key={p.id}
-                      className="cursor-pointer group"
+                      className="group cursor-pointer"
                       onSelect={() => toggleProvincia(p.nombre)}
                     >
                       <div className="flex items-center gap-2.5">
@@ -512,12 +542,13 @@ function ProvinciaMultiSelect({
 }
 
 interface MapStats {
-  provincia: { name: string; total: number };
-  biogeografico: { name: string; total: number };
-  ecosistema: { name: string; total: number };
-  piso: { name: string; total: number };
-  snap: { name: string; total: number };
-  histogramaProvincias: { name: string; total: number }[];
+  provincia: {name: string; total: number};
+  biogeografico: {name: string; total: number};
+  ecosistema: {name: string; total: number};
+  piso: {name: string; total: number};
+  snap: {name: string; total: number};
+  biogeograficoEndemica: {name: string; total: number};
+  histogramaProvincias: {name: string; total: number}[];
 }
 
 function StatCards({
@@ -536,12 +567,12 @@ function StatCards({
   onSnapClick: (name: string) => void;
 }) {
   const [stats, setStats] = useState<MapStats | null>(null);
-  const [histogramaData, setHistogramaData] = useState<{ name: string; total: number }[]>([]);
-  const globalHistogramaRef = useRef<{ name: string; total: number }[]>([]);
+  const [histogramaData, setHistogramaData] = useState<{name: string; total: number}[]>([]);
+  const globalHistogramaRef = useRef<{name: string; total: number}[]>([]);
 
   // Cards: solo al montar, sin filtros activos
   useEffect(() => {
-    const STATS_KEY = "mapoteca_stats_v1";
+    const STATS_KEY = "mapoteca_stats_v2";
     const STATS_TTL = 60 * 60 * 1000; // 1 hora
 
     const applyStats = (data: MapStats) => {
@@ -553,22 +584,29 @@ function StatCards({
     // Intentar leer de sessionStorage primero
     try {
       const raw = sessionStorage.getItem(STATS_KEY);
+
       if (raw) {
-        const { data, timestamp } = JSON.parse(raw);
+        const {data, timestamp} = JSON.parse(raw);
+
         if (Date.now() - timestamp < STATS_TTL) {
           applyStats(data);
+
           return; // no hace falta fetch
         }
       }
-    } catch { /* ignorar */ }
+    } catch {
+      /* ignorar */
+    }
 
     fetch("/api/mapoteca/estadisticas")
       .then((r) => r.json())
       .then((data: MapStats) => {
         applyStats(data);
         try {
-          sessionStorage.setItem(STATS_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-        } catch { /* ignorar */ }
+          sessionStorage.setItem(STATS_KEY, JSON.stringify({data, timestamp: Date.now()}));
+        } catch {
+          /* ignorar */
+        }
       })
       .catch(() => {});
   }, []);
@@ -576,11 +614,14 @@ function StatCards({
   // Histograma: se actualiza cuando cambia el filtro activo (piso o snap)
   useEffect(() => {
     const params = new URLSearchParams();
+
     if (activePisos.length > 0) params.set("pisos", activePisos.join(","));
     if (activeSnaps.length > 0) params.set("snaps", activeSnaps.join(","));
     const qs = params.toString();
+
     if (!qs) {
       setHistogramaData(globalHistogramaRef.current);
+
       return;
     }
     fetch(`/api/mapoteca/estadisticas?${qs}`)
@@ -591,17 +632,16 @@ function StatCards({
 
   return (
     <div className="container mx-auto px-4 pb-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
-
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-7">
         {/* Link Distribución */}
         <a
-          href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
-          target="_blank"
-          rel="noopener noreferrer"
           className="block h-full"
+          href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
+          rel="noopener noreferrer"
+          target="_blank"
         >
-          <Card className="min-w-0 h-full overflow-visible transition-shadow hover:shadow-md cursor-pointer">
-            <CardContent className="pt-4 h-full flex flex-col justify-between">
+          <Card className="h-full min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
+            <CardContent className="flex h-full flex-col justify-between pt-4">
               <p className="text-sm font-medium text-[#4ba24b]">Distribución</p>
             </CardContent>
           </Card>
@@ -613,11 +653,11 @@ function StatCards({
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {stats ? stats.provincia.total.toLocaleString() : "—"}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
               Especies en provincia más diversa
             </p>
             {stats?.provincia.name && (
-              <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-foreground sm:text-xs">
+              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
                 {stats.provincia.name}
               </p>
             )}
@@ -630,11 +670,11 @@ function StatCards({
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {stats ? stats.biogeografico.total.toLocaleString() : "—"}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
               Especies en región biogeográfica más diversa
             </p>
             {stats?.biogeografico.name && (
-              <p className="mt-0.5 line-clamp-2 text-[10px] font-medium text-foreground sm:text-xs">
+              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
                 {stats.biogeografico.name}
               </p>
             )}
@@ -647,11 +687,11 @@ function StatCards({
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {stats ? stats.ecosistema.total.toLocaleString() : "—"}
             </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
               Especies en ecosistema más diverso
             </p>
             {stats?.ecosistema.name && (
-              <p className="mt-0.5 line-clamp-2 text-[10px] font-medium text-foreground sm:text-xs">
+              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
                 {stats.ecosistema.name}
               </p>
             )}
@@ -661,17 +701,17 @@ function StatCards({
         {/* Piso altitudinal más diverso */}
         {stats?.piso.name ? (
           <Card
-            className={`min-w-0 overflow-visible transition-shadow cursor-pointer hover:shadow-md ${activePisos.includes(stats.piso.name) ? "ring-2 ring-[#f07304] bg-orange-50" : ""}`}
+            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activePisos.includes(stats.piso.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
             onClick={() => onPisoClick(stats.piso.name)}
           >
             <CardContent className="pt-4">
               <p className="text-3xl font-bold tabular-nums sm:text-4xl">
                 {stats.piso.total.toLocaleString()}
               </p>
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              <p className="text-muted-foreground text-xs break-words sm:text-sm">
                 Especies en piso altitudinal más diverso
               </p>
-              <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-foreground sm:text-xs">
+              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
                 {stats.piso.name}
               </p>
             </CardContent>
@@ -680,7 +720,7 @@ function StatCards({
           <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
             <CardContent className="pt-4">
               <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              <p className="text-muted-foreground text-xs break-words sm:text-sm">
                 Especies en piso altitudinal más diverso
               </p>
             </CardContent>
@@ -690,17 +730,17 @@ function StatCards({
         {/* Área SNAP más diversa */}
         {stats?.snap.name ? (
           <Card
-            className={`min-w-0 overflow-visible transition-shadow cursor-pointer hover:shadow-md ${activeSnaps.includes(stats.snap.name) ? "ring-2 ring-[#f07304] bg-orange-50" : ""}`}
+            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activeSnaps.includes(stats.snap.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
             onClick={() => onSnapClick(stats.snap.name)}
           >
             <CardContent className="pt-4">
               <p className="text-3xl font-bold tabular-nums sm:text-4xl">
                 {stats.snap.total.toLocaleString()}
               </p>
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              <p className="text-muted-foreground text-xs break-words sm:text-sm">
                 Especies en área SNAP más diversa
               </p>
-              <p className="mt-0.5 line-clamp-2 text-[10px] font-medium text-foreground sm:text-xs">
+              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
                 {stats.snap.name}
               </p>
             </CardContent>
@@ -709,20 +749,36 @@ function StatCards({
           <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
             <CardContent className="pt-4">
               <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">
+              <p className="text-muted-foreground text-xs break-words sm:text-sm">
                 Especies en área SNAP más diversa
               </p>
             </CardContent>
           </Card>
         )}
 
+        {/* Región biogeográfica con más endémicas */}
+        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+              {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
+            </p>
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
+              Endémicas en región biogeográfica más endémica
+            </p>
+            {stats?.biogeograficoEndemica.name && (
+              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
+                {stats.biogeograficoEndemica.name}
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Histograma por provincia */}
       <div className="mt-4">
         <MapotecaHistogramaChart
-          data={histogramaData}
           activeProvincias={activeProvincias}
+          data={histogramaData}
           onBarClick={onProvinciaClick}
         />
       </div>
@@ -753,19 +809,35 @@ function MapotecaContent({
   const getStoredState = () => {
     if (typeof window === "undefined") return null;
     const stored = sessionStorage.getItem("mapotecaState");
+
     if (stored) {
-      try { return JSON.parse(stored); } catch { return null; }
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return null;
+      }
     }
+
     return null;
   };
 
   const storedState = getStoredState();
-  const [especieFilter, setEspecieFilter] = useState<string[]>(storedState?.especieFilter || (especieFromUrl ? [especieFromUrl] : []));
+  const [especieFilter, setEspecieFilter] = useState<string[]>(
+    storedState?.especieFilter || (especieFromUrl ? [especieFromUrl] : []),
+  );
   const [catalogoFilter, setCatalogoFilter] = useState<string[]>(storedState?.catalogoFilter || []);
-  const [localidadesFilter, setLocalidadesFilter] = useState<string[]>(storedState?.localidadesFilter || []);
-  const [elevacionRange, setElevacionRange] = useState<[number, number]>(storedState?.elevacionRange || [0, 5000]);
-  const [elevacionActive, setElevacionActive] = useState<boolean>(storedState?.elevacionActive || false);
-  const [mapType, setMapType] = useState<"relief" | "terrain" | "provinces" | "satellite" | "streets">(storedState?.mapType || "provinces");
+  const [localidadesFilter, setLocalidadesFilter] = useState<string[]>(
+    storedState?.localidadesFilter || [],
+  );
+  const [elevacionRange, setElevacionRange] = useState<[number, number]>(
+    storedState?.elevacionRange || [0, 5000],
+  );
+  const [elevacionActive, setElevacionActive] = useState<boolean>(
+    storedState?.elevacionActive || false,
+  );
+  const [mapType, setMapType] = useState<
+    "relief" | "terrain" | "provinces" | "satellite" | "streets"
+  >(storedState?.mapType || "provinces");
   const [provincias, setProvincias] = useState<ProvinciaOption[]>([]);
 
   // Limpiar sessionStorage después de restaurar
@@ -819,7 +891,7 @@ function MapotecaContent({
           <Link
             className="inline-flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-80"
             href={`/sapopedia/species/${speciesSlug}`}
-            style={{ color: "#16a34a", fontSize: "14px" }}
+            style={{color: "#16a34a", fontSize: "14px"}}
           >
             <span>←</span>
             <span>Volver a la ficha de la especie</span>
@@ -830,87 +902,93 @@ function MapotecaContent({
       <div className="container mx-auto px-4 pb-6">
         <div className="flex gap-4">
           {/* Panel lateral de filtros - Desktop */}
-          <div className="hidden lg:block w-80 min-w-[320px]">
-              <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden" style={{ maxHeight: "calc(100vh - 120px)" }}>
-                <div className="flex-1 overflow-y-auto py-4">
-                  <div className="w-full space-y-5">
+          <div className="hidden w-80 min-w-[320px] lg:block">
+            <div
+              className="sticky top-4 flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+              style={{maxHeight: "calc(100vh - 120px)"}}
+            >
+              <div className="flex-1 overflow-y-auto py-4">
+                <div className="w-full space-y-5">
+                  {/* Limpiar - top derecha */}
+                  <div className="flex justify-end px-4">
+                    <Button
+                      className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+                      type="button"
+                      variant="ghost"
+                      onClick={clearFilters}
+                    >
+                      <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
+                      Limpiar
+                    </Button>
+                  </div>
 
-                    {/* Limpiar - top derecha */}
-                    <div className="flex justify-end px-4">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={clearFilters}
-                        className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
-                        Limpiar
-                      </Button>
-                    </div>
+                  <div className="space-y-5 px-4">
+                    <EspecieMultiSelect selected={especieFilter} onChange={setEspecieFilter} />
+                    <CatalogoMultiSelect selected={catalogoFilter} onChange={setCatalogoFilter} />
+                    <LocalidadMultiSelect
+                      selected={localidadesFilter}
+                      onChange={setLocalidadesFilter}
+                    />
+                    <ProvinciaMultiSelect
+                      provincias={provincias}
+                      selected={provinciaFilter}
+                      onChange={setProvinciaFilter}
+                    />
 
-                    <div className="space-y-5 px-4">
-                      <EspecieMultiSelect selected={especieFilter} onChange={setEspecieFilter} />
-                      <CatalogoMultiSelect selected={catalogoFilter} onChange={setCatalogoFilter} />
-                      <LocalidadMultiSelect selected={localidadesFilter} onChange={setLocalidadesFilter} />
-                      <ProvinciaMultiSelect
-                        provincias={provincias}
-                        selected={provinciaFilter}
-                        onChange={setProvinciaFilter}
+                    {/* Elevación */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-gray-600">
+                          Elevación (msnm)
+                        </label>
+                        <button
+                          className={`rounded px-1.5 py-0.5 text-[10px] ${elevacionActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                          onClick={() => setElevacionActive(!elevacionActive)}
+                        >
+                          {elevacionActive ? "Activo" : "Inactivo"}
+                        </button>
+                      </div>
+                      <Slider
+                        className="w-full"
+                        max={5000}
+                        min={0}
+                        step={50}
+                        value={elevacionRange}
+                        onValueChange={(v) => {
+                          setElevacionRange(v as [number, number]);
+                          if (!elevacionActive) setElevacionActive(true);
+                        }}
                       />
-
-                      {/* Elevación */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold text-gray-600">Elevación (msnm)</label>
-                          <button
-                            className={`text-[10px] px-1.5 py-0.5 rounded ${elevacionActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                            onClick={() => setElevacionActive(!elevacionActive)}
-                          >
-                            {elevacionActive ? "Activo" : "Inactivo"}
-                          </button>
-                        </div>
-                        <Slider
-                          min={0}
-                          max={5000}
-                          step={50}
-                          value={elevacionRange}
-                          onValueChange={(v) => {
-                            setElevacionRange(v as [number, number]);
-                            if (!elevacionActive) setElevacionActive(true);
-                          }}
-                          className="w-full"
-                        />
-                        <div className="flex justify-between text-[10px] text-gray-400">
-                          <span>{elevacionRange[0]} m</span>
-                          <span>{elevacionRange[1]} m</span>
-                        </div>
-                      </div>
-
-                      {/* Tipo de mapa */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-gray-600">Tipo de mapa</label>
-                        <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
-                          <SelectTrigger className="text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="z-[1100]">
-                            <SelectItem value="relief">Relieve</SelectItem>
-                            <SelectItem value="terrain">Topográfico</SelectItem>
-                            <SelectItem value="provinces">Estándar</SelectItem>
-                            <SelectItem value="satellite">Satélite</SelectItem>
-                            <SelectItem value="streets">Minimalista</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="flex justify-between text-[10px] text-gray-400">
+                        <span>{elevacionRange[0]} m</span>
+                        <span>{elevacionRange[1]} m</span>
                       </div>
                     </div>
 
+                    {/* Tipo de mapa */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-600">Tipo de mapa</label>
+                      <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
+                        <SelectTrigger className="text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="z-[1100]">
+                          <SelectItem value="relief">Relieve</SelectItem>
+                          <SelectItem value="terrain">Topográfico</SelectItem>
+                          <SelectItem value="provinces">Estándar</SelectItem>
+                          <SelectItem value="satellite">Satélite</SelectItem>
+                          <SelectItem value="streets">Minimalista</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
           </div>
 
           {/* Mapa */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             {/* Controles móviles */}
             <div className="mb-3 flex items-center gap-2 lg:hidden">
               <Mountain className="text-muted-foreground h-4 w-4" />
@@ -931,14 +1009,14 @@ function MapotecaContent({
             {/* Mapa */}
             <div className="h-[calc(100vh-180px)]">
               <MapotecaMap
-                especieFilter={especieFilter.length > 0 ? especieFilter : undefined}
                 catalogoFilter={catalogoFilter.length > 0 ? catalogoFilter : undefined}
-                localidadesFilter={localidadesFilter.length > 0 ? localidadesFilter : undefined}
-                elevacionMin={elevacionActive ? elevacionRange[0] : undefined}
                 elevacionMax={elevacionActive ? elevacionRange[1] : undefined}
+                elevacionMin={elevacionActive ? elevacionRange[0] : undefined}
+                especieFilter={especieFilter.length > 0 ? especieFilter : undefined}
+                localidadesFilter={localidadesFilter.length > 0 ? localidadesFilter : undefined}
                 mapType={mapType}
-                provinciaFilter={provinciaFilter.length > 0 ? provinciaFilter : undefined}
                 pisoFilter={pisoFilter.length > 0 ? pisoFilter : undefined}
+                provinciaFilter={provinciaFilter.length > 0 ? provinciaFilter : undefined}
                 snapFilter={snapFilter.length > 0 ? snapFilter : undefined}
                 onNavigateToSpecies={saveState}
               />
@@ -947,14 +1025,14 @@ function MapotecaContent({
             {/* Tabla de especies */}
             <div className="mt-4">
               <MapotecaTabla
-                provinciaFilter={provinciaFilter.length > 0 ? provinciaFilter : undefined}
-                pisoFilter={pisoFilter.length > 0 ? pisoFilter : undefined}
-                snapFilter={snapFilter.length > 0 ? snapFilter : undefined}
-                especieFilter={especieFilter.length > 0 ? especieFilter : undefined}
                 catalogoFilter={catalogoFilter.length > 0 ? catalogoFilter : undefined}
-                localidadesFilter={localidadesFilter.length > 0 ? localidadesFilter : undefined}
-                elevacionMin={elevacionActive ? elevacionRange[0] : undefined}
                 elevacionMax={elevacionActive ? elevacionRange[1] : undefined}
+                elevacionMin={elevacionActive ? elevacionRange[0] : undefined}
+                especieFilter={especieFilter.length > 0 ? especieFilter : undefined}
+                localidadesFilter={localidadesFilter.length > 0 ? localidadesFilter : undefined}
+                pisoFilter={pisoFilter.length > 0 ? pisoFilter : undefined}
+                provinciaFilter={provinciaFilter.length > 0 ? provinciaFilter : undefined}
+                snapFilter={snapFilter.length > 0 ? snapFilter : undefined}
               />
             </div>
           </div>
@@ -988,21 +1066,21 @@ export default function MapotecaPage() {
   const handleProvinciaClick = (name: string) => {
     startTransition(() => {
       setProvinciaFilter((prev) =>
-        prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
+        prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name],
       );
     });
   };
 
   const handlePisoClick = (name: string) => {
     startTransition(() => {
-      setPisoFilter((prev) => prev.includes(name) ? [] : [name]);
+      setPisoFilter((prev) => (prev.includes(name) ? [] : [name]));
       setSnapFilter([]);
     });
   };
 
   const handleSnapClick = (name: string) => {
     startTransition(() => {
-      setSnapFilter((prev) => prev.includes(name) ? [] : [name]);
+      setSnapFilter((prev) => (prev.includes(name) ? [] : [name]));
       setPisoFilter([]);
     });
   };
@@ -1016,22 +1094,22 @@ export default function MapotecaPage() {
       </div>
 
       <StatCards
-        activeProvincias={provinciaFilter}
-        onProvinciaClick={handleProvinciaClick}
         activePisos={pisoFilter}
-        onPisoClick={handlePisoClick}
+        activeProvincias={provinciaFilter}
         activeSnaps={snapFilter}
+        onPisoClick={handlePisoClick}
+        onProvinciaClick={handleProvinciaClick}
         onSnapClick={handleSnapClick}
       />
 
       <Suspense fallback={<MapotecaLoading />}>
         <MapotecaContent
-          provinciaFilter={provinciaFilter}
-          setProvinciaFilter={setProvinciaFilter}
           pisoFilter={pisoFilter}
+          provinciaFilter={provinciaFilter}
           setPisoFilter={setPisoFilter}
-          snapFilter={snapFilter}
+          setProvinciaFilter={setProvinciaFilter}
           setSnapFilter={setSnapFilter}
+          snapFilter={snapFilter}
         />
       </Suspense>
     </div>

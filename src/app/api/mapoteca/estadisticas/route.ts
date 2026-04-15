@@ -9,6 +9,7 @@ type Row = {
   awe_distribucion_altitudinal: string | null;
   awe_ecosistemas: string | null;
   awe_areas_protegidas_estado: string | null;
+  endemica: boolean | null;
 };
 
 function splitField(value: string | null): string[] {
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
   const { data, error } = await supabase
     .from("vw_ficha_especie_completa")
     .select(
-      "nombre_cientifico, ubicaciones_geopoliticas, awe_regiones_biogeograficas, awe_distribucion_altitudinal, awe_ecosistemas, awe_areas_protegidas_estado"
+      "nombre_cientifico, ubicaciones_geopoliticas, awe_regiones_biogeograficas, awe_distribucion_altitudinal, awe_ecosistemas, awe_areas_protegidas_estado, endemica"
     )
     .limit(2000);
 
@@ -80,12 +81,15 @@ export async function GET(request: Request) {
     );
   }
 
+  const endemicRows = rows.filter((r) => r.endemica === true);
+
   return NextResponse.json({
     provincia: topEntry(rows, "ubicaciones_geopoliticas"),
     biogeografico: topEntry(rows, "awe_regiones_biogeograficas"),
     piso: topEntry(rows, "awe_distribucion_altitudinal"),
     ecosistema: topEntry(rows, "awe_ecosistemas", ["Intervencion", "Agua Dulce"]),
     snap: topEntry(rows, "awe_areas_protegidas_estado", ["No registrada"]),
+    biogeograficoEndemica: topEntry(endemicRows, "awe_regiones_biogeograficas"),
     histogramaProvincias: allEntries(rows, "ubicaciones_geopoliticas"),
   });
 }

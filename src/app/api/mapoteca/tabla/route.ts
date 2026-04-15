@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   const especiesParam = searchParams.get("especies");
   const especies = especiesParam ? especiesParam.split("||").map((e) => e.trim()).filter(Boolean) : null;
   const localidadesParam = searchParams.get("localidades");
-  const localidades = localidadesParam ? localidadesParam.split(",").map((l) => l.trim()).filter(Boolean) : null;
+  const localidades = localidadesParam ? localidadesParam.split("||").map((l) => l.trim()).filter(Boolean) : null;
   const catalogosParam = searchParams.get("catalogos");
   const catalogos = catalogosParam ? catalogosParam.split("||").map((c) => c.trim()).filter(Boolean) : null;
   const elevacionMin = searchParams.get("elevacion_min") !== null ? parseFloat(searchParams.get("elevacion_min")!) : null;

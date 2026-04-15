@@ -63,7 +63,7 @@ export default function MapotecaTabla({
     if (snapFilter && snapFilter.length > 0) params.set("snaps", snapFilter.join(","));
     if (especieFilter && especieFilter.length > 0) params.set("especies", especieFilter.join("||"));
     if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
-    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join(","));
+    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join("||"));
     if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
     if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
     return params;

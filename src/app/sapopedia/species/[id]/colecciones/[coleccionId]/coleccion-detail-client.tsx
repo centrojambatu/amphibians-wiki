@@ -89,10 +89,6 @@ export default function ColeccionDetailClient({
   especieUrl,
   coleccionesUrl,
 }: ColeccionDetailClientProps) {
-  // Separar colectores principales y secundarios
-  const colectorPrincipal = coleccionPersonal.find((cp) => cp.principal);
-  const colectoresSecundarios = coleccionPersonal.filter((cp) => !cp.principal);
-
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -232,33 +228,23 @@ export default function ColeccionDetailClient({
                   <CardTitle className="text-sm">Colectores</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Field
-                    label="Colector Principal"
-                    value={
-                      colectorPrincipal?.personal?.nombre ||
-                      coleccion.personal_nombre ||
-                      coleccion.colectores ||
-                      "No disponible"
-                    }
-                  />
-                  {(colectoresSecundarios.length > 0 ||
-                    coleccion.personal_adicional_nombres) && (
+                  {coleccion.personal_nombre && (
+                    <Field label="Colector Principal" value={coleccion.personal_nombre} />
+                  )}
+                  {coleccion.personal_adicional_nombres && (
                     <div>
                       <span className="text-muted-foreground text-xs font-semibold">
                         Colectores secundarios:
                       </span>
                       <div className="mt-1 max-h-24 overflow-y-auto rounded border bg-muted/30 p-2">
-                        {colectoresSecundarios.length > 0 ? (
-                          colectoresSecundarios.map((cp) => (
-                            <div key={cp.id_coleccionpersonal} className="text-sm">
-                              {cp.personal?.nombre || "Sin nombre"}
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm">{coleccion.personal_adicional_nombres}</p>
-                        )}
+                        {coleccion.personal_adicional_nombres.split(";").map((nombre: string, i: number) => (
+                          <div key={i} className="text-sm">{nombre.trim()}</div>
+                        ))}
                       </div>
                     </div>
+                  )}
+                  {!coleccion.personal_nombre && !coleccion.personal_adicional_nombres && (
+                    <Field label="Colector Principal" value="No disponible" />
                   )}
                 </CardContent>
               </Card>

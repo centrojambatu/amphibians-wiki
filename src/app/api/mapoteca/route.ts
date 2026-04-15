@@ -157,7 +157,7 @@ export async function GET(request: Request) {
     : null;
   const localidadesParam = searchParams.get("localidades");
   const localidades = localidadesParam
-    ? localidadesParam.split(",").map((l) => l.trim()).filter(Boolean)
+    ? localidadesParam.split("||").map((l) => l.trim()).filter(Boolean)
     : null;
   const catalogosParam = searchParams.get("catalogos");
   const catalogos = catalogosParam

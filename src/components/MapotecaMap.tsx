@@ -349,11 +349,12 @@ function RegistroInfo({
       <br />
       {u.latitud}, {u.longitud}
       {u.elevacion != null && <>{" "}<span className="text-[#f97315] font-bold">|</span> {u.elevacion} msnm</>}
-      <br />
-      {u.fecha_coleccion
-        ? formatFecha(u.fecha_coleccion)
-        : <span className="text-gray-400 italic">Sin fecha</span>
-      }
+      {u.fecha_coleccion && (
+        <>
+          <br />
+          {formatFecha(u.fecha_coleccion)}
+        </>
+      )}
       {u.colectores && (
         <>
           <br />
@@ -467,7 +468,7 @@ export default function MapotecaMap({
     if (snapFilter && snapFilter.length > 0) params.set("snaps", snapFilter.join(","));
     if (especieFilter && especieFilter.length > 0) params.set("especies", especieFilter.join("||"));
     if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
-    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join(","));
+    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join("||"));
     if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
     if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
     params.set("limit", String(limit));
