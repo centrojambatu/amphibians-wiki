@@ -143,7 +143,7 @@ export default function MapotecaHistogramaChart({
                           {punto.total}% endémicas
                         </p>
                         <p className="text-xs text-gray-600">
-                          {punto.endemicas} endémicas de {punto.totalSpp} spp.
+                          {punto.endemicas} endémicas de {punto.totalSpp} {punto.totalSpp === 1 ? "especie" : "especies"}
                         </p>
                       </>
                     ) : (
