@@ -83,14 +83,46 @@ export async function GET(request: Request) {
 
   const endemicRows = rows.filter((r) => r.endemica === true);
 
+  const ECOSISTEMA_EXCLUDE = ["Intervencion", "Agua Dulce"];
+
+  const histogramaProvincias = allEntries(rows, "ubicaciones_geopoliticas");
+  const histogramaBiogeografico = allEntries(rows, "awe_regiones_biogeograficas");
+  const histogramaEcosistema = allEntries(rows, "awe_ecosistemas")
+    .filter((e) => !ECOSISTEMA_EXCLUDE.includes(e.name));
+  const histogramaPiso = allEntries(rows, "awe_distribucion_altitudinal");
+  const histogramaSnap = allEntries(rows, "awe_areas_protegidas_estado")
+    .filter((e) => e.name !== "No registrada");
+
+  // Endémicas por región: ordenado por PORCENTAJE (endémicas / total de la región)
+  const endemicosByRegion = allEntries(endemicRows, "awe_regiones_biogeograficas");
+  const endemicosByPorcentaje = endemicosByRegion
+    .map((e) => {
+      const totalRegion = histogramaBiogeografico.find((r) => r.name === e.name)?.total ?? 0;
+      const porcentaje = totalRegion > 0 ? Math.round((e.total / totalRegion) * 100) : 0;
+      return { name: e.name, total: e.total, totalRegion, porcentaje };
+    })
+    .sort((a, b) => b.porcentaje - a.porcentaje);
+  const topEndemica = endemicosByPorcentaje[0] ?? { name: "", total: 0, totalRegion: 0, porcentaje: 0 };
+
   return NextResponse.json({
-    provincia: topEntry(rows, "ubicaciones_geopoliticas"),
-    biogeografico: topEntry(rows, "awe_regiones_biogeograficas"),
-    piso: topEntry(rows, "awe_distribucion_altitudinal"),
-    ecosistema: topEntry(rows, "awe_ecosistemas", ["Intervencion", "Agua Dulce"]),
-    snap: topEntry(rows, "awe_areas_protegidas_estado", ["No registrada"]),
-    biogeograficoEndemica: topEntry(endemicRows, "awe_regiones_biogeograficas"),
-    histogramaProvincias: allEntries(rows, "ubicaciones_geopoliticas"),
-    histogramaBiogeografico: allEntries(rows, "awe_regiones_biogeograficas"),
+    provincia: histogramaProvincias[0] ?? { name: "", total: 0 },
+    biogeografico: histogramaBiogeografico[0] ?? { name: "", total: 0 },
+    ecosistema: histogramaEcosistema[0] ?? { name: "", total: 0 },
+    piso: histogramaPiso[0] ?? { name: "", total: 0 },
+    snap: histogramaSnap[0] ?? { name: "", total: 0 },
+    biogeograficoEndemica: topEndemica,
+    histogramaProvincias,
+    histogramaBiogeografico,
+    histogramaEcosistema,
+    histogramaPiso,
+    histogramaSnap,
+    histogramaBiogeograficoEndemica: histogramaBiogeografico
+      .map((r) => {
+        const endemicas = endemicosByRegion.find((e) => e.name === r.name)?.total ?? 0;
+        const porcentaje = r.total > 0 ? Math.round((endemicas / r.total) * 100) : 0;
+        return { name: r.name, total: porcentaje, endemicas, totalSpp: r.total };
+      })
+      .filter((r) => r.endemicas > 0)
+      .sort((a, b) => b.total - a.total),
   });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import MapotecaHistogramaChart from "@/components/mapoteca-histograma-chart";
 
@@ -10,55 +10,55 @@ interface MapStats {
   ecosistema: { name: string; total: number };
   piso: { name: string; total: number };
   snap: { name: string; total: number };
-  biogeograficoEndemica: { name: string; total: number };
+  biogeograficoEndemica: { name: string; total: number; totalRegion: number; porcentaje: number };
   histogramaProvincias: { name: string; total: number }[];
   histogramaBiogeografico: { name: string; total: number }[];
+  histogramaEcosistema: { name: string; total: number }[];
+  histogramaPiso: { name: string; total: number }[];
+  histogramaSnap: { name: string; total: number }[];
+  histogramaBiogeograficoEndemica: { name: string; total: number; endemicas: number; totalSpp: number }[];
 }
 
 export default function MapotecaStats() {
-  const [activePisos, setActivePisos] = useState<string[]>([]);
-  const [activeSnaps, setActiveSnaps] = useState<string[]>([]);
-  const [, startTransition] = useTransition();
+
 
   const [stats, setStats] = useState<MapStats | null>(null);
-  const [histogramMode, setHistogramMode] = useState<"provincias" | "biogeografico">("provincias");
+  const [histogramMode, setHistogramMode] = useState<"provincias" | "biogeografico" | "ecosistema" | "piso" | "snap" | "endemica">("provincias");
   const [histogramaProvincias, setHistogramaProvincias] = useState<{ name: string; total: number }[]>([]);
   const [histogramaBiogeografico, setHistogramaBiogeografico] = useState<{ name: string; total: number }[]>([]);
+  const [histogramaEcosistema, setHistogramaEcosistema] = useState<{ name: string; total: number }[]>([]);
+  const [histogramaPiso, setHistogramaPiso] = useState<{ name: string; total: number }[]>([]);
+  const [histogramaSnap, setHistogramaSnap] = useState<{ name: string; total: number }[]>([]);
+  const [histogramaBiogeograficoEndemica, setHistogramaBiogeograficoEndemica] = useState<{ name: string; total: number; endemicas: number; totalSpp: number }[]>([]);
   const globalHistogramaRef = useRef<{
     provincias: { name: string; total: number }[];
     biogeografico: { name: string; total: number }[];
-  }>({ provincias: [], biogeografico: [] });
+    ecosistema: { name: string; total: number }[];
+    piso: { name: string; total: number }[];
+    snap: { name: string; total: number }[];
+    endemica: { name: string; total: number; endemicas: number; totalSpp: number }[];
+  }>({ provincias: [], biogeografico: [], ecosistema: [], piso: [], snap: [], endemica: [] });
 
-  const onProvinciaClick = (name: string) => {
-    // Click sin selección persistente (solo acción momentánea)
-    void name;
-  };
-
-  const onPisoClick = (name: string) => {
-    startTransition(() => {
-      setActivePisos((prev) => (prev.includes(name) ? [] : [name]));
-      setActiveSnaps([]);
-    });
-  };
-
-  const onSnapClick = (name: string) => {
-    startTransition(() => {
-      setActiveSnaps((prev) => (prev.includes(name) ? [] : [name]));
-      setActivePisos([]);
-    });
-  };
 
   useEffect(() => {
-    const STATS_KEY = "mapoteca_stats_v3";
+    const STATS_KEY = "mapoteca_stats_v12";
     const STATS_TTL = 60 * 60 * 1000; // 1 hora
 
     const applyStats = (data: MapStats) => {
       setStats(data);
       const provincias = data.histogramaProvincias ?? [];
       const biogeografico = data.histogramaBiogeografico ?? [];
-      globalHistogramaRef.current = { provincias, biogeografico };
+      const ecosistema = data.histogramaEcosistema ?? [];
+      const piso = data.histogramaPiso ?? [];
+      const snap = data.histogramaSnap ?? [];
+      const endemica = data.histogramaBiogeograficoEndemica ?? [];
+      globalHistogramaRef.current = { provincias, biogeografico, ecosistema, piso, snap, endemica };
       setHistogramaProvincias(provincias);
       setHistogramaBiogeografico(biogeografico);
+      setHistogramaEcosistema(ecosistema);
+      setHistogramaPiso(piso);
+      setHistogramaSnap(snap);
+      setHistogramaBiogeograficoEndemica(endemica);
     };
 
     try {
@@ -66,7 +66,7 @@ export default function MapotecaStats() {
       if (raw) {
         const { data, timestamp } = JSON.parse(raw);
         // Si falta el nuevo campo, ignorar cache y hacer fetch
-        if (Date.now() - timestamp < STATS_TTL && Array.isArray(data?.histogramaBiogeografico)) {
+        if (Date.now() - timestamp < STATS_TTL && Array.isArray(data?.histogramaEcosistema)) {
           applyStats(data);
           return;
         }
@@ -88,32 +88,31 @@ export default function MapotecaStats() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (activePisos.length > 0) params.set("pisos", activePisos.join(","));
-    if (activeSnaps.length > 0) params.set("snaps", activeSnaps.join(","));
-    const qs = params.toString();
-
-    if (!qs) {
-      setHistogramaProvincias(globalHistogramaRef.current.provincias);
-      setHistogramaBiogeografico(globalHistogramaRef.current.biogeografico);
-      return;
-    }
-
-    fetch(`/api/mapoteca/estadisticas?${qs}`)
-      .then((r) => r.json())
-      .then((data: MapStats) => {
-        setHistogramaProvincias(data.histogramaProvincias ?? []);
-        setHistogramaBiogeografico(data.histogramaBiogeografico ?? []);
-      })
-      .catch(() => {});
-  }, [activePisos, activeSnaps]);
 
   const histogramaData = useMemo(() => {
-    return histogramMode === "biogeografico" ? histogramaBiogeografico : histogramaProvincias;
-  }, [histogramMode, histogramaBiogeografico, histogramaProvincias]);
+    if (histogramMode === "biogeografico") return histogramaBiogeografico;
+    if (histogramMode === "ecosistema") return histogramaEcosistema;
+    if (histogramMode === "piso") return histogramaPiso;
+    if (histogramMode === "snap") return histogramaSnap;
+    if (histogramMode === "endemica") return histogramaBiogeograficoEndemica;
+    return histogramaProvincias;
+  }, [histogramMode, histogramaBiogeografico, histogramaProvincias, histogramaEcosistema, histogramaPiso, histogramaSnap, histogramaBiogeograficoEndemica]);
 
-  const histogramaTitle = histogramMode === "biogeografico" ? "Especies por región biogeográfica" : "Especies por provincia";
+  const histogramaTitle =
+    histogramMode === "biogeografico" ? "Especies por región biogeográfica" :
+    histogramMode === "ecosistema" ? "Especies por ecosistema" :
+    histogramMode === "piso" ? "Especies por piso altitudinal" :
+    histogramMode === "snap" ? "Especies por área protegida (SNAP)" :
+    histogramMode === "endemica" ? "Endémicas por región biogeográfica" :
+    "Especies por provincia";
+
+  const histogramaUnit =
+    histogramMode === "biogeografico" ? "regiones" :
+    histogramMode === "ecosistema" ? "ecosistemas" :
+    histogramMode === "piso" ? "pisos" :
+    histogramMode === "snap" ? "áreas" :
+    histogramMode === "endemica" ? "regiones" :
+    "provincias";
 
   return (
     <div className="container mx-auto px-4 pb-4">
@@ -156,7 +155,10 @@ export default function MapotecaStats() {
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+        <Card
+          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "ecosistema" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          onClick={() => setHistogramMode("ecosistema")}
+        >
           <CardContent className="pt-4">
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {stats ? stats.ecosistema.total.toLocaleString() : "—"}
@@ -172,67 +174,57 @@ export default function MapotecaStats() {
           </CardContent>
         </Card>
 
-        {stats?.piso.name ? (
-          <Card
-            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activePisos.includes(stats.piso.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
-            onClick={() => onPisoClick(stats.piso.name)}
-          >
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                {stats.piso.total.toLocaleString()}
-              </p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en piso altitudinal más diverso
-              </p>
+        <Card
+          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "piso" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          onClick={() => setHistogramMode("piso")}
+        >
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+              {stats ? stats.piso.total.toLocaleString() : "—"}
+            </p>
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
+              Especies en piso altitudinal más diverso
+            </p>
+            {stats?.piso.name && (
               <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
                 {stats.piso.name}
               </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en piso altitudinal más diverso
-              </p>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
-        {stats?.snap.name ? (
-          <Card
-            className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${activeSnaps.includes(stats.snap.name) ? "bg-orange-50 ring-2 ring-[#f07304]" : ""}`}
-            onClick={() => onSnapClick(stats.snap.name)}
-          >
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                {stats.snap.total.toLocaleString()}
-              </p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en área SNAP más diversa
-              </p>
+        <Card
+          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "snap" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          onClick={() => setHistogramMode("snap")}
+        >
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+              {stats ? stats.snap.total.toLocaleString() : "—"}
+            </p>
+            <p className="text-muted-foreground text-xs break-words sm:text-sm">
+              Especies en área SNAP más diversa
+            </p>
+            {stats?.snap.name && (
               <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
                 {stats.snap.name}
               </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="text-3xl font-bold tabular-nums sm:text-4xl">—</p>
-              <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                Especies en área SNAP más diversa
-              </p>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
+        <Card
+          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "endemica" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          onClick={() => setHistogramMode("endemica")}
+        >
           <CardContent className="pt-4">
             <p className="text-3xl font-bold tabular-nums sm:text-4xl">
               {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
             </p>
+            {stats && stats.biogeograficoEndemica.totalRegion > 0 && (
+              <p className="text-[#f07304] text-xs font-semibold tabular-nums">
+                {stats.biogeograficoEndemica.porcentaje}% endémicas
+              </p>
+            )}
             <p className="text-muted-foreground text-xs break-words sm:text-sm">
               Endémicas en región biogeográfica más endémica
             </p>
@@ -249,9 +241,11 @@ export default function MapotecaStats() {
         <MapotecaHistogramaChart
           activeProvincias={[]}
           data={histogramaData}
-          onBarClick={onProvinciaClick}
+          onBarClick={() => {}}
           title={histogramaTitle}
-          unit={histogramMode === "biogeografico" ? "regiones" : "provincias"}
+          unit={histogramaUnit}
+          showLabels={histogramMode === "provincias" || histogramMode === "biogeografico" || histogramMode === "endemica"}
+          secondaryLabel="endémicas"
         />
       </div>
     </div>
