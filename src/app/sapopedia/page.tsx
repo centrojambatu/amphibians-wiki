@@ -42,43 +42,43 @@ export default async function SapopediaPage() {
           className="flex flex-col justify-center rounded-md border p-2"
           style={{ borderColor: "#dddddd" }}
         >
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Historia</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Arqueología</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Cultura</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Biocomercio</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Historia</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Arqueología</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Cultura</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Biocomercio</Link>
         </div>
         <div
           className="flex flex-col justify-center rounded-md border p-2"
           style={{ borderColor: "#dddddd" }}
         >
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Diversidad</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Distribución</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Extinción</Link>
-          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Conservación</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Diversidad</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Distribución</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Extinción</Link>
+          <Link href="/sapopedia" className="hover:text-gray-900" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Conservación</Link>
         </div>
 
         {/* Especies */}
         <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#f07304" }}>{totalEspecies.toLocaleString()}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Especies</h4>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Especies</h4>
         </div>
 
         {/* Anura */}
         <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalAnura.toLocaleString()}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Anura</h4>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Anura</h4>
         </div>
 
         {/* Caudata */}
         <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalCaudata.toLocaleString()}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Caudata</h4>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Caudata</h4>
         </div>
 
         {/* Gymnophiona */}
         <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalGymnophiona.toLocaleString()}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Gymnophiona</h4>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Gymnophiona</h4>
         </div>
 
         {/* Endémicas */}
@@ -87,7 +87,7 @@ export default async function SapopediaPage() {
             <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalEndemicas.toLocaleString()}</span>
             <span className="text-xs font-semibold" style={{ color: "#666666" }}>{pctEndemicas}%</span>
           </div>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Endémicas</h4>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Endémicas</h4>
         </div>
 
         {/* Posiblemente extintas */}
@@ -96,7 +96,7 @@ export default async function SapopediaPage() {
             <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalPosExtintas.toLocaleString()}</span>
             <span className="text-xs font-semibold" style={{ color: "#666666" }}>{pctPosExtintas}%</span>
           </div>
-          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "11px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Posiblemente extintas</h4>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "600" }}>Posiblemente extintas</h4>
         </div>
       </div>
 

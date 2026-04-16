@@ -8,7 +8,6 @@ import ReferenciaCard from "@/components/referencia-card";
 import Pagination from "@/components/pagination";
 import SapotecaContentLayout from "@/components/sapoteca-content-layout";
 import SapotecaHistogramaChart from "@/components/sapoteca-histograma-chart";
-import { Card, CardContent } from "@/components/ui/card";
 import type { FiltrosSapoteca } from "./get-publicaciones-paginadas";
 
 interface SearchParams {
@@ -73,90 +72,48 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
         <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
       </div>
 
-      {/* Cards de estadísticas (mismo estilo que Lista Roja: número arriba, label abajo) */}
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 sm:gap-4">
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-4xl font-bold tabular-nums text-[#f07304] sm:text-5xl">
-              {estadisticas.totalCientificas.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones científicas</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalDivulgacion.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones divulgación</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalIndexadas.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones indexadas</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalNoIndexadas.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones no indexadas</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.promedioUltimaDecada.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">
-              Promedio publicaciones (última década)
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.publicacionesAnioActual.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicaciones año actual</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalTaxonomia.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Taxonomía</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalEvolucion.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Evolución</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalEcologia.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Ecología</p>
-          </CardContent>
-        </Card>
-        <Card className="min-w-0 overflow-visible transition-shadow hover:shadow-md">
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {estadisticas.totalConservacion.toLocaleString()}
-            </p>
-            <p className="break-words text-muted-foreground text-xs sm:text-sm">Conservación</p>
-          </CardContent>
-        </Card>
+      {/* Cards de estadísticas */}
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#f07304" }}>{estadisticas.totalCientificas.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicaciones científicas</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalDivulgacion.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicaciones divulgación</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalIndexadas.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicaciones indexadas</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalNoIndexadas.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicaciones no indexadas</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.promedioUltimaDecada.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Promedio publicaciones (última década)</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.publicacionesAnioActual.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicaciones año actual</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalTaxonomia.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Taxonomía</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalEvolucion.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Evolución</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalEcologia.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Ecología</h4>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.totalConservacion.toLocaleString()}</span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Conservación</h4>
+        </div>
         {estadisticas.publicacionMasCitada && (
           <a
             href="https://scholar.google.com/citations?view_op=view_citation&hl=es&user=DuBUsasAAAAJ&citation_for_view=DuBUsasAAAAJ:mVmsd5A6BfQC"
@@ -164,20 +121,15 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             rel="noopener noreferrer"
             className="block"
           >
-            <Card className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md">
-              <CardContent className="pt-4">
-                <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-                  <span>451</span>
-                  <span className="ml-1 align-baseline text-xs font-medium text-muted-foreground sm:text-sm">
-                    citas
-                  </span>
-                </p>
-
-                <p className="mt-1 break-words text-[10px] leading-tight text-muted-foreground sm:text-xs">
-                  Publicación más citada <span className="text-[#f07304]">|</span> Autor principal ecuatoriano
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex h-full flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md" style={{ borderColor: "#dddddd" }}>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>451</span>
+                <span className="text-xs font-semibold" style={{ color: "#666666" }}>citas</span>
+              </div>
+              <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+                Publicación más citada <span style={{ color: "#f07304" }}>|</span> Autor principal ecuatoriano
+              </h4>
+            </div>
           </a>
         )}
         {estadisticas.publicacionCientificaMasReciente ? (
@@ -190,34 +142,31 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             rel={estadisticas.publicacionCientificaMasReciente.enlace ? "noopener noreferrer" : undefined}
             target={estadisticas.publicacionCientificaMasReciente.enlace ? "_blank" : undefined}
           >
-            <Card className="flex h-full min-h-[88px] min-w-0 flex-col transition-shadow hover:shadow-md">
-              <CardContent className="flex flex-1 flex-col justify-between pt-4">
-                <p
-                  className="line-clamp-2 break-words text-xs font-medium leading-tight"
-                  title={estadisticas.publicacionCientificaMasReciente.titulo
-                    .replace(/<[^>]*>/g, " ")
-                    .replace(/\s+/g, " ")
-                    .trim()}
-                >
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: estadisticas.publicacionCientificaMasReciente.titulo,
-                    }}
-                  />
-                </p>
-                <p className="mt-1 shrink-0 break-words text-muted-foreground text-[10px] sm:text-xs">
-                  Publicación científica más reciente
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex h-full flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md" style={{ borderColor: "#dddddd" }}>
+              <p
+                className="line-clamp-2 break-words text-xs font-semibold leading-tight text-center"
+                style={{ color: "#000000" }}
+                title={estadisticas.publicacionCientificaMasReciente.titulo
+                  .replace(/<[^>]*>/g, " ")
+                  .replace(/\s+/g, " ")
+                  .trim()}
+              >
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: estadisticas.publicacionCientificaMasReciente.titulo,
+                  }}
+                />
+              </p>
+              <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+                Publicación científica más reciente
+              </h4>
+            </div>
           </a>
         ) : (
-          <Card className="flex h-full min-h-[88px] min-w-0 flex-col transition-shadow hover:shadow-md">
-            <CardContent className="pt-4">
-              <p className="break-words text-muted-foreground text-xs sm:text-sm">Publicación científica más reciente</p>
-              <p className="text-muted-foreground text-xs">No disponible</p>
-            </CardContent>
-          </Card>
+          <div className="flex h-full flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+            <h4 className="text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Publicación científica más reciente</h4>
+            <span className="text-xs" style={{ color: "#666666" }}>No disponible</span>
+          </div>
         )}
       </div>
 

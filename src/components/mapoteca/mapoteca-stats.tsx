@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import MapotecaHistogramaChart from "@/components/mapoteca-histograma-chart";
 
 interface MapStats {
@@ -99,11 +98,11 @@ export default function MapotecaStats() {
   }, [histogramMode, histogramaBiogeografico, histogramaProvincias, histogramaEcosistema, histogramaPiso, histogramaSnap, histogramaBiogeograficoEndemica]);
 
   const histogramaTitle =
-    histogramMode === "biogeografico" ? "Especies por región biogeográfica" :
+    histogramMode === "biogeografico" ? "Especies por sector biogeográfico" :
     histogramMode === "ecosistema" ? "Especies por ecosistema" :
     histogramMode === "piso" ? "Especies por piso altitudinal" :
     histogramMode === "snap" ? "Especies por área protegida (SNAP)" :
-    histogramMode === "endemica" ? "Endémicas por región biogeográfica" :
+    histogramMode === "endemica" ? "Endémicas por sector biogeográfico" :
     "Especies por provincia";
 
   const histogramaUnit =
@@ -116,125 +115,121 @@ export default function MapotecaStats() {
 
   return (
     <div className="pb-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "provincias" ? "ring-2 ring-[#f07304]/70" : ""}`}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {/* Provincia */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "provincias" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("provincias")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.provincia.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en provincia más diversa
-            </p>
-            {stats?.provincia.name && (
-              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
-                {stats.provincia.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
+            {stats ? stats.provincia.total.toLocaleString() : "—"}
+          </span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Especies en provincia más diversa
+          </h4>
+          {stats?.provincia.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.provincia.name}</span>
+          )}
+        </button>
 
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "biogeografico" ? "ring-2 ring-[#f07304]/70" : ""}`}
+        {/* Biogeográfico */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "biogeografico" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("biogeografico")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.biogeografico.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en región biogeográfica más diversa
-            </p>
-            {stats?.biogeografico.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.biogeografico.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
+            {stats ? stats.biogeografico.total.toLocaleString() : "—"}
+          </span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Especies en sector biogeográfico más diverso
+          </h4>
+          {stats?.biogeografico.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.biogeografico.name}</span>
+          )}
+        </button>
 
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "ecosistema" ? "ring-2 ring-[#f07304]/70" : ""}`}
+        {/* Ecosistema */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "ecosistema" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("ecosistema")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.ecosistema.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en ecosistema más diverso
-            </p>
-            {stats?.ecosistema.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.ecosistema.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
+            {stats ? stats.ecosistema.total.toLocaleString() : "—"}
+          </span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Especies en ecosistema más diverso
+          </h4>
+          {stats?.ecosistema.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.ecosistema.name}</span>
+          )}
+        </button>
 
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "piso" ? "ring-2 ring-[#f07304]/70" : ""}`}
+        {/* Piso altitudinal */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "piso" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("piso")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.piso.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en piso altitudinal más diverso
-            </p>
-            {stats?.piso.name && (
-              <p className="text-foreground mt-0.5 line-clamp-1 text-[10px] font-medium sm:text-xs">
-                {stats.piso.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
+            {stats ? stats.piso.total.toLocaleString() : "—"}
+          </span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Especies en piso altitudinal más diverso
+          </h4>
+          {stats?.piso.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.piso.name}</span>
+          )}
+        </button>
 
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "snap" ? "ring-2 ring-[#f07304]/70" : ""}`}
+        {/* SNAP */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "snap" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("snap")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
-              {stats ? stats.snap.total.toLocaleString() : "—"}
-            </p>
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Especies en área SNAP más diversa
-            </p>
-            {stats?.snap.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.snap.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <span className="text-center text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
+            {stats ? stats.snap.total.toLocaleString() : "—"}
+          </span>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Especies en área SNAP más diversa
+          </h4>
+          {stats?.snap.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.snap.name}</span>
+          )}
+        </button>
 
-        <Card
-          className={`min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md ${histogramMode === "endemica" ? "ring-2 ring-[#f07304]/70" : ""}`}
+        {/* Endémicas biogeográfico */}
+        <button
+          type="button"
+          className={`flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md ${histogramMode === "endemica" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{ borderColor: "#dddddd" }}
           onClick={() => setHistogramMode("endemica")}
         >
-          <CardContent className="pt-4">
-            <p className="text-3xl font-bold tabular-nums sm:text-4xl">
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>
               {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
-            </p>
+            </span>
             {stats && stats.biogeograficoEndemica.totalRegion > 0 && (
-              <p className="text-[#f07304] text-xs font-semibold tabular-nums">
-                {stats.biogeograficoEndemica.porcentaje}% endémicas
-              </p>
+              <span className="text-xs font-semibold" style={{ color: "#f07304" }}>
+                {stats.biogeograficoEndemica.porcentaje}%
+              </span>
             )}
-            <p className="text-muted-foreground text-xs break-words sm:text-sm">
-              Endémicas en región biogeográfica más endémica
-            </p>
-            {stats?.biogeograficoEndemica.name && (
-              <p className="text-foreground mt-0.5 line-clamp-2 text-[10px] font-medium sm:text-xs">
-                {stats.biogeograficoEndemica.name}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+          <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
+            Endémicas en sector biogeográfico más endémico
+          </h4>
+          {stats?.biogeograficoEndemica.name && (
+            <span className="text-center text-xs font-semibold" style={{ color: "#000000" }}>{stats.biogeograficoEndemica.name}</span>
+          )}
+        </button>
       </div>
 
       <div className="mt-4">

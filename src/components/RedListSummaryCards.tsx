@@ -1,8 +1,6 @@
 "use client";
 
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
-import {Card, CardContent} from "@/components/ui/card";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface RedListSummaryCardsProps {
   readonly especies: SpeciesListItem[];
@@ -124,133 +122,117 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
     return especies.filter((e) => e.lista_roja_iucn === sigla).length;
   };
 
+  const labelStyle = { color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" as const };
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Card de especies amenazadas + no amenazadas + enlaces */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {/* Card de enlaces externos Lista Roja */}
-        <Card className="transition-shadow">
-          <CardContent>
-            <div className="mt-2 flex flex-col gap-2">
-              <a
-                className="text-primary text-sm font-medium hover:no-underline"
-                href="https://deepskyblue-beaver-511675.hostingersite.com/lista-roja/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Lista Roja Ecuador
-              </a>
-              <a
-                className="text-primary text-sm font-medium hover:no-underline"
-                href="https://www.iucnredlist.org/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Lista Roja IUCN
-              </a>
-            </div>
-          </CardContent>
-        </Card>
+        <div
+          className="flex flex-col justify-center rounded-md border p-2"
+          style={{ borderColor: "#dddddd" }}
+        >
+          <a
+            className="hover:text-gray-900"
+            style={labelStyle}
+            href="https://deepskyblue-beaver-511675.hostingersite.com/lista-roja/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Lista Roja Ecuador
+          </a>
+          <a
+            className="hover:text-gray-900"
+            style={labelStyle}
+            href="https://www.iucnredlist.org/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Lista Roja IUCN
+          </a>
+        </div>
 
         {/* Card de especies amenazadas */}
-        <Card className="transition-shadow">
-          <CardContent>
-            <div className="flex flex-wrap items-start gap-2 sm:flex-nowrap sm:items-center">
-              <button
-                className="cursor-pointer border-0 bg-transparent p-0 text-left"
-                type="button"
-                onClick={() => onCategoryClick?.("AMENAZADAS")}
-              >
-                <span className="inline-flex items-baseline gap-2">
-                  <span className="text-3xl font-bold sm:text-4xl">{totalAmenazadas}</span>
-                  <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
-                    {porcentajeAmenazadas}%
-                  </span>
-                </span>
-                <p className="text-muted-foreground mt-1 text-xs sm:text-sm">Especies amenazadas</p>
-              </button>
-              <span className="inline-flex w-full flex-wrap items-center justify-start gap-1.5 sm:ml-3 sm:w-auto sm:-translate-y-1">
-                <div
-                  className="inline-flex items-center justify-center text-[11px] font-semibold"
-                  style={{
-                    backgroundColor: getColor("CR (PE)"),
-                    color: getTextColor("CR (PE)"),
-                    borderRadius: "100% 0% 100% 100%",
-                    width: "36px",
-                    height: "36px",
-                    padding: "4px 9px",
-                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
-                  PE
-                </div>
-                {["CR", "EN", "VU"].map((sigla) => (
-                  <div
-                    key={sigla}
-                    className="inline-flex items-center justify-center text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: getColor(sigla),
-                      color: getTextColor(sigla),
-                      borderRadius: "100% 0% 100% 100%",
-                      width: "36px",
-                      height: "36px",
-                      padding: "4px 9px",
-                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    {sigla}
-                  </div>
-                ))}
-              </span>
+        <button
+          type="button"
+          className="flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md"
+          style={{ borderColor: "#dddddd" }}
+          onClick={() => onCategoryClick?.("AMENAZADAS")}
+        >
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalAmenazadas}</span>
+            <span className="text-xs font-semibold" style={{ color: "#666666" }}>{porcentajeAmenazadas}%</span>
+          </div>
+          <h4 className="mt-1 text-center" style={labelStyle}>Especies amenazadas</h4>
+          <span className="mt-1 inline-flex flex-wrap items-center justify-center gap-1.5">
+            <div
+              className="inline-flex items-center justify-center text-[11px] font-semibold"
+              style={{
+                backgroundColor: getColor("CR (PE)"),
+                color: getTextColor("CR (PE)"),
+                borderRadius: "100% 0% 100% 100%",
+                width: "32px",
+                height: "32px",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              PE
             </div>
-          </CardContent>
-        </Card>
+            {["CR", "EN", "VU"].map((sigla) => (
+              <div
+                key={sigla}
+                className="inline-flex items-center justify-center text-[11px] font-semibold"
+                style={{
+                  backgroundColor: getColor(sigla),
+                  color: getTextColor(sigla),
+                  borderRadius: "100% 0% 100% 100%",
+                  width: "32px",
+                  height: "32px",
+                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                {sigla}
+              </div>
+            ))}
+          </span>
+        </button>
 
         {/* Card de especies no amenazadas */}
-        <Card className="transition-shadow">
-          <CardContent>
-            <div className="flex flex-wrap items-start gap-2 sm:flex-nowrap sm:items-center">
-              <button
-                className="cursor-pointer border-0 bg-transparent p-0 text-left"
-                type="button"
-                onClick={() => onCategoryClick?.("NO_AMENAZADAS")}
+        <button
+          type="button"
+          className="flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md"
+          style={{ borderColor: "#dddddd" }}
+          onClick={() => onCategoryClick?.("NO_AMENAZADAS")}
+        >
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalNoAmenazadas}</span>
+            <span className="text-xs font-semibold" style={{ color: "#666666" }}>{porcentajeNoAmenazadas}%</span>
+          </div>
+          <h4 className="mt-1 text-center" style={labelStyle}>Especies no amenazadas</h4>
+          <span className="mt-1 inline-flex flex-wrap items-center justify-center gap-1.5">
+            {["NT", "LC"].map((sigla) => (
+              <div
+                key={sigla}
+                className="inline-flex items-center justify-center text-[11px] font-semibold"
+                style={{
+                  backgroundColor: getColor(sigla),
+                  color: getTextColor(sigla),
+                  borderRadius: "100% 0% 100% 100%",
+                  width: "32px",
+                  height: "32px",
+                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                }}
               >
-                <span className="inline-flex items-baseline gap-2">
-                  <span className="text-3xl font-bold sm:text-4xl">{totalNoAmenazadas}</span>
-                  <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
-                    {porcentajeNoAmenazadas}%
-                  </span>
-                </span>
-                <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
-                  Especies no amenazadas
-                </p>
-              </button>
-              <span className="inline-flex w-full flex-wrap items-center justify-start gap-1.5 sm:ml-3 sm:w-auto sm:-translate-y-1">
-                {["NT", "LC"].map((sigla) => (
-                  <div
-                    key={sigla}
-                    className="inline-flex items-center justify-center text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: getColor(sigla),
-                      color: getTextColor(sigla),
-                      borderRadius: "100% 0% 100% 100%",
-                      width: "36px",
-                      height: "36px",
-                      padding: "4px 9px",
-                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    {sigla}
-                  </div>
-                ))}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+                {sigla}
+              </div>
+            ))}
+          </span>
+        </button>
       </div>
 
       {/* 7 cards por categoría de lista roja */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {categoriasListaRoja.map(({sigla, etiqueta}) => {
           const count = contarPorCategoria(sigla);
           const pct =
@@ -260,22 +242,19 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
           const colorPE = getColor("PE");
 
           return (
-            <Card
+            <button
               key={sigla}
-              className="min-w-0 cursor-pointer overflow-visible transition-shadow hover:shadow-md"
+              type="button"
+              className="flex flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md"
+              style={{ borderColor: "#dddddd" }}
               onClick={() => onCategoryClick?.(sigla)}
             >
-              <CardContent className="pt-4">
-                <p className={esPE ? "text-4xl font-bold sm:text-5xl" : "text-3xl font-bold sm:text-4xl"}>
-                  <span style={esPE ? { color: colorPE } : undefined}>{count}</span>
-                  {" "}
-                  <span className="text-muted-foreground text-2xl font-normal sm:text-2xl">
-                    {pct}%
-                  </span>
-                </p>
-                <p className="text-muted-foreground text-xs break-words sm:text-sm">{etiqueta}</p>
-              </CardContent>
-            </Card>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold sm:text-4xl" style={{ color: esPE ? colorPE : "#000000" }}>{count}</span>
+                <span className="text-xs font-semibold" style={{ color: "#666666" }}>{pct}%</span>
+              </div>
+              <h4 className="mt-1 text-center" style={labelStyle}>{etiqueta}</h4>
+            </button>
           );
         })}
       </div>

@@ -91,7 +91,7 @@ function FieldCard({label, value, highlight}: {label: string; value: string | nu
       <span
         style={{
           color: "#666666",
-          fontSize: "11px",
+          fontSize: "13px",
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
           fontWeight: "600",
         }}

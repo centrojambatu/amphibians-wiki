@@ -79,53 +79,53 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
       </div>
 
       {/* Estadísticas */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-
-          <div className="flex flex-col gap-2  border-gray-100">
-            <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:no-underline"
-            >
-              Nombres estandarizados
-            </a>
-            <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:no-underline"
-            >
-              Jambatu
-            </a>
-            <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:no-underline"
-            >
-              Rana o sapo
-            </a>
-          </div>
+      <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-900"
+            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+          >
+            Nombres estandarizados
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-900"
+            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+          >
+            Jambatu
+          </a>
+          <a
+            href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-900"
+            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+          >
+            Rana o sapo
+          </a>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-800">Órdenes</h3>
-          <p className="text-4xl font-bold">{totalOrdenes}</p>
-          <p className="text-muted-foreground text-sm">Órdenes taxonómicos</p>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Órdenes</h4>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalOrdenes}</span>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Órdenes taxonómicos</h4>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-800">Familias</h3>
-          <p className="text-4xl font-bold">{totalFamilias}</p>
-          <p className="text-muted-foreground text-sm">Familias taxonómicas</p>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Familias</h4>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalFamilias}</span>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Familias taxonómicas</h4>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-800">Géneros</h3>
-          <p className="text-4xl font-bold">{totalGeneros}</p>
-          <p className="text-muted-foreground text-sm">Géneros taxonómicos</p>
+        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Géneros</h4>
+          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalGeneros}</span>
+          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Géneros taxonómicos</h4>
         </div>
       </div>
 
