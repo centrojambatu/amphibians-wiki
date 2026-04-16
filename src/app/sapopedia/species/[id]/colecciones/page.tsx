@@ -19,15 +19,12 @@ interface PageProps {
   }>;
 }
 
+
 export default async function ColeccionesPage({params, searchParams}: PageProps) {
   const {id} = await params;
   const searchParamsResolved = await searchParams;
 
-  // Decodificar el id de la URL
   const decodedId = decodeURIComponent(id);
-
-  // Si es un número (id_ficha_especie), usarlo directamente
-  // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
   const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
@@ -38,37 +35,77 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
 
   const pagina = searchParamsResolved.pagina ? Number.parseInt(searchParamsResolved.pagina, 10) : 1;
 
-  const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
-    ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
-    : undefined;
-
   const {colecciones, total, totalPaginas, paginaActual} = await getColeccionesPaginadas(
     fichaEspecie.taxon_id,
-    nombreCientifico,
     pagina,
   );
 
-  // Construir la URL base para la paginación
   const baseUrl = `/sapopedia/species/${encodeURIComponent(id)}/colecciones`;
+
+  // Extraer jerarquía taxonómica del lineage
+  const lineage: any[] = fichaEspecie.lineage ?? [];
+  const orden = lineage.find((l: any) => l.rank?.rank === "Orden")?.taxon ?? null;
+  const familia = lineage.find((l: any) => l.rank?.rank === "Familia")?.taxon ?? null;
+  const genero = lineage.find((l: any) => l.rank?.rank === "Género")?.taxon ?? null;
+  const especie = lineage.find((l: any) => l.rank?.rank === "especie")?.taxon ?? null;
+
+  const nombreCientifico = genero && especie ? `${genero} ${especie}` : null;
 
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <Link
-          className="text-muted-foreground mb-2 inline-block text-sm hover:no-underline"
+          className="text-muted-foreground mb-4 inline-block text-sm hover:no-underline"
           href={`/sapopedia/species/${encodeURIComponent(id)}`}
         >
           ← Volver a la ficha de la especie
         </Link>
-        <h1 className="mb-2 text-4xl font-bold">Colecciones</h1>
-        <p className="text-muted-foreground text-lg">
-          {fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""}{" "}
-          {fichaEspecie.taxones?.[0]?.taxon || ""}
-        </p>
+        <h1 className="mb-1 text-4xl font-bold">Colecciones</h1>
+        {nombreCientifico && (
+          <p className="text-muted-foreground mb-4 text-lg italic">{nombreCientifico}</p>
+        )}
+
+        {/* Clasificación taxonómica */}
+        {(orden || familia || genero) && (
+          <div className="flex flex-wrap gap-3">
+            {orden && (
+              <div className="bg-muted rounded-md px-3 py-1.5">
+                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
+                  Orden
+                </span>
+                <p className="text-sm font-medium">{orden}</p>
+              </div>
+            )}
+            {familia && (
+              <div className="bg-muted rounded-md px-3 py-1.5">
+                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
+                  Familia
+                </span>
+                <p className="text-sm font-medium">{familia}</p>
+              </div>
+            )}
+            {genero && (
+              <div className="bg-muted rounded-md px-3 py-1.5">
+                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
+                  Género
+                </span>
+                <p className="text-sm font-medium italic">{genero}</p>
+              </div>
+            )}
+            {especie && (
+              <div className="bg-muted rounded-md px-3 py-1.5">
+                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
+                  Especie
+                </span>
+                <p className="text-sm font-medium italic">{especie}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Información de resultados */}
+      {/* Contador */}
       <div className="text-muted-foreground mb-6 text-sm">
         Mostrando {colecciones.length} de {total} colecciones
         {totalPaginas > 1 && ` (Página ${paginaActual} de ${totalPaginas})`}
@@ -76,116 +113,71 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
 
       {/* Lista de colecciones */}
       {colecciones.length > 0 ? (
-        <div className="mb-8 flex flex-col gap-4">
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {colecciones.map((coleccion: ColeccionCompleta) => {
             const coleccionUrl = `${baseUrl}/${coleccion.id_coleccion}`;
+            const fecha = coleccion.fecha_coleccion
+              ? new Date(coleccion.fecha_coleccion).toLocaleDateString("es-ES", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+              : null;
+
+            const acronimo = coleccion.catalogo_museo?.includes(" - ")
+              ? coleccion.catalogo_museo.split(" - ").pop()
+              : coleccion.catalogo_museo;
+            const catalogoLabel = [acronimo, coleccion.num_museo].filter(Boolean).join(" ");
+
+            const localidad = [coleccion.detalle_localidad, coleccion.provincia]
+              .filter(Boolean)
+              .join(", ");
+
+            const coordenadas =
+              coleccion.latitud != null && coleccion.longitud != null
+                ? `${coleccion.latitud}, ${coleccion.longitud}`
+                : null;
 
             return (
-              <Link
-                key={coleccion.id_coleccion}
-                className="coleccion-link block"
-                href={coleccionUrl}
-              >
-                <Card className="hover:bg-muted/50 cursor-pointer border transition-colors">
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {/* Información básica */}
-                      <div className="space-y-2">
-                        {coleccion.num_colector && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Número Colector:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.num_colector}</span>
-                          </div>
-                        )}
-                        {coleccion.sc && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">SC:</span>{" "}
-                            <span className="text-sm">{coleccion.sc}</span>
-                          </div>
-                        )}
-                        {coleccion.num_museo && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Número Museo:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.num_museo}</span>
-                          </div>
-                        )}
-                        {coleccion.fecha_coleccion && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Fecha Colección:
-                            </span>{" "}
-                            <span className="text-sm">
-                              {new Date(coleccion.fecha_coleccion).toLocaleDateString("es-ES")}
-                            </span>
-                          </div>
-                        )}
-                        {coleccion.colectores && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Colectores:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.colectores}</span>
-                          </div>
-                        )}
-                      </div>
+              <Link key={coleccion.id_coleccion} className="block h-full" href={coleccionUrl}>
+                <Card className="hover:bg-muted/30 h-full cursor-pointer border transition-colors">
+                  <CardContent className="flex flex-col gap-1 px-3 py-3">
+                    {/* Identificador — más prominente */}
+                    {catalogoLabel && (
+                      <p className="text-[13px] font-bold leading-tight">{catalogoLabel}</p>
+                    )}
 
-                      {/* Información de localidad */}
-                      <div className="space-y-2">
-                        {coleccion.provincia && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Provincia:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.provincia}</span>
-                          </div>
-                        )}
-                        {coleccion.detalle_localidad && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Localidad:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.detalle_localidad}</span>
-                          </div>
-                        )}
-                        {coleccion.campobase_localidad && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Campo Base:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.campobase_localidad}</span>
-                          </div>
-                        )}
-                        {coleccion.altitud !== null && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Altitud:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.altitud} m</span>
-                          </div>
-                        )}
-                        {coleccion.numero_individuos !== null && (
-                          <div>
-                            <span className="text-muted-foreground text-xs font-semibold">
-                              Individuos:
-                            </span>{" "}
-                            <span className="text-sm">{coleccion.numero_individuos}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    {/* Nombre científico */}
+                    {nombreCientifico && (
+                      <p className="text-[11px] italic leading-tight" style={{color: "#f07304"}}>
+                        {nombreCientifico}
+                      </p>
+                    )}
 
-                    {/* Observaciones si existen */}
-                    {coleccion.observacion && (
-                      <div className="mt-4 border-t pt-4">
-                        <span className="text-muted-foreground text-xs font-semibold">
-                          Observaciones:
-                        </span>{" "}
-                        <span className="text-sm">{coleccion.observacion}</span>
-                      </div>
+                    {/* Taxonomía — muy pequeño, separado visualmente */}
+                    {(orden || familia) && (
+                      <p className="text-[10px] tracking-wide text-gray-400 uppercase">
+                        {[orden, familia].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
+
+                    {/* Localidad */}
+                    {localidad && (
+                      <p className="text-[11px] leading-snug text-gray-600">{localidad}</p>
+                    )}
+
+                    {/* Coordenadas + altitud */}
+                    {(coordenadas || coleccion.altitud != null) && (
+                      <p className="text-[10px] text-gray-400 font-mono">
+                        {coordenadas}
+                        {coordenadas && coleccion.altitud != null && " | "}
+                        {coleccion.altitud != null && `${coleccion.altitud} msnm`}
+                      </p>
+                    )}
+
+                    {/* Fecha — al final, destacada */}
+                    {fecha && (
+                      <p className="text-[10px] font-semibold text-gray-500 mt-auto pt-1">{fecha}</p>
                     )}
                   </CardContent>
                 </Card>

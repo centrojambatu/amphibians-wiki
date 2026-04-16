@@ -31,6 +31,7 @@ export interface ColeccionCompleta {
   altitud: number | null;
   habitat: string | null;
   observacion: string | null;
+  catalogo_museo: string | null;
   campobase_nombre: string | null;
   campobase_localidad: string | null;
   personal_nombre: string | null;
@@ -39,154 +40,88 @@ export interface ColeccionCompleta {
 }
 
 /**
- * Obtiene todas las colecciones de una especie basado en el taxon_id y/o nombre científico
+ * Obtiene todas las colecciones de una especie desde la tabla coleccion filtrando por taxon_id
  */
 export default async function getColeccionesEspecie(
   taxonId: number,
-  nombreCientifico?: string,
 ): Promise<ColeccionCompleta[]> {
   const supabaseClient = createServiceClient();
 
-  // Función helper para obtener todos los registros con paginación
-  const fetchAllRecords = async (
-    queryBuilder: any,
-    pageSize: number = 1000,
-  ): Promise<any[]> => {
-    const allData: any[] = [];
-    let offset = 0;
-    let hasMore = true;
-    let totalFetched = 0;
-
-    while (hasMore) {
-      const { data, error } = await queryBuilder.range(offset, offset + pageSize - 1);
-
-      if (error) {
-        console.error("Error al obtener colecciones (paginación):", error);
-        break;
-      }
-
-      if (data && data.length > 0) {
-        allData.push(...data);
-        totalFetched += data.length;
-        offset += pageSize;
-        
-        // Si obtenemos menos registros que el tamaño de página, no hay más
-        if (data.length < pageSize) {
-          hasMore = false;
-        }
-      } else {
-        hasMore = false;
-      }
-    }
-
-    if (totalFetched > 0) {
-    }
-
-    return allData;
-  };
-
-  // Construir las queries base
-  // Nota: Como todas las colecciones tienen taxon_id NULL, la query por taxon_id no devolverá resultados
-  // Por lo tanto, priorizamos la búsqueda por taxon_nombre
-  const queries: Promise<any[]>[] = [];
-
-  // Query 1: buscar por taxon_id (aunque probablemente no devuelva resultados porque taxon_id está NULL)
-  const query1 = supabaseClient
-    .from("vw_coleccion_completa")
-    .select(
-      "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_coleccion, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
-    )
-    .eq("taxon_id", taxonId)
-    .order("fecha_coleccion", { ascending: false, nullsFirst: false })
-    .order("id_coleccion", { ascending: false });
-
-  queries.push(fetchAllRecords(query1));
-
-  // Query 2: buscar por taxon_nombre (esta es la que realmente funciona)
-  // Esta query es esencial porque taxon_id está NULL en todas las colecciones
-  if (nombreCientifico) {
-    const query2 = supabaseClient
-      .from("vw_coleccion_completa")
-      .select(
-        "id_coleccion, taxon_id, num_colector, sc, gui, num_museo, sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_coleccion, hora, colectores, provincia, detalle_localidad, latitud, longitud, altitud, habitat, observacion, campobase_nombre, campobase_localidad, personal_nombre, personal_siglas, taxon_nombre_cientifico",
-      )
-      .ilike("taxon_nombre", `%${nombreCientifico}%`)
-      .order("fecha_coleccion", { ascending: false, nullsFirst: false })
-      .order("id_coleccion", { ascending: false });
-
-    queries.push(fetchAllRecords(query2));
-  }
-
-  // Ejecutar ambas queries en paralelo
-  const results = await Promise.all(queries);
-
-  // Combinar resultados y eliminar duplicados basándose en id_coleccion
   const allData: any[] = [];
-  const seenIds = new Set<number>();
+  let offset = 0;
+  const pageSize = 1000;
 
-  for (const resultData of results) {
-    // resultData ya es un array de datos (no un objeto con .data)
-    if (Array.isArray(resultData)) {
-      for (const item of resultData) {
-        if (!seenIds.has(item.id_coleccion)) {
-          seenIds.add(item.id_coleccion);
-          allData.push(item);
-        }
-      }
+  while (true) {
+    const { data, error } = await supabaseClient
+      .from("coleccion")
+      .select(
+        `id_coleccion, taxon_id, num_colector, sc, gui, numero_museo, catalogo_museo, sc_acronimo, sc_numero, sc_sufijo,
+        estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio,
+        numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_col, hora, colectores,
+        localidad, latitud, longitud, elevacion, habitat, observacion, publicar,
+        geopolitica!coleccion_provincia_id_fkey(nombre),
+        campobase!coleccion_campobase_id_fkey(nombre, localidad),
+        personal!coleccion_personal_id_fkey(nombre, siglas),
+        taxon!coleccion_taxon_id_fkey(taxon)`,
+      )
+      .eq("taxon_id", taxonId)
+      .eq("publicar", true)
+      .order("fecha_col", { ascending: false, nullsFirst: false })
+      .order("id_coleccion", { ascending: false })
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      console.error("Error al obtener colecciones:", error);
+      break;
     }
+
+    if (!data || data.length === 0) break;
+
+    allData.push(...data);
+    if (data.length < pageSize) break;
+    offset += pageSize;
   }
-
-
-  // Ordenar por fecha_coleccion e id_coleccion (ya vienen ordenados, pero por si acaso)
-  allData.sort((a, b) => {
-    if (a.fecha_coleccion && b.fecha_coleccion) {
-      const dateA = new Date(a.fecha_coleccion).getTime();
-      const dateB = new Date(b.fecha_coleccion).getTime();
-      if (dateB !== dateA) return dateB - dateA;
-    } else if (a.fecha_coleccion) return -1;
-    else if (b.fecha_coleccion) return 1;
-    return (b.id_coleccion || 0) - (a.id_coleccion || 0);
-  });
 
   if (allData.length === 0) {
     return [];
   }
 
-  return allData.map((coleccion: any) => ({
-    id_coleccion: coleccion.id_coleccion,
-    taxon_id: coleccion.taxon_id,
-    num_colector: coleccion.num_colector,
-    sc: coleccion.sc,
-    gui: coleccion.gui,
-    num_museo: coleccion.num_museo,
-    sc_acronimo: coleccion.sc_acronimo,
-    sc_numero: coleccion.sc_numero,
-    sc_sufijo: coleccion.sc_sufijo,
-    estatus_identificacion: coleccion.estatus_identificacion,
-    taxon_nombre: coleccion.taxon_nombre,
-    identificado_por: coleccion.identificado_por,
-    fecha_identifica: coleccion.fecha_identifica,
-    estadio: coleccion.estadio,
-    numero_individuos: coleccion.numero_individuos,
-    sexo: coleccion.sexo,
-    estado: coleccion.estado,
-    svl: coleccion.svl,
-    peso: coleccion.peso,
-    estatus_tipo: coleccion.estatus_tipo,
-    fecha_coleccion: coleccion.fecha_coleccion,
-    hora: coleccion.hora,
-    colectores: coleccion.colectores,
-    provincia: coleccion.provincia,
-    detalle_localidad: coleccion.detalle_localidad,
-    latitud: coleccion.latitud,
-    longitud: coleccion.longitud,
-    altitud: coleccion.altitud,
-    habitat: coleccion.habitat,
-    observacion: coleccion.observacion,
-    campobase_nombre: coleccion.campobase_nombre,
-    campobase_localidad: coleccion.campobase_localidad,
-    personal_nombre: coleccion.personal_nombre,
-    personal_siglas: coleccion.personal_siglas,
-    taxon_nombre_cientifico: coleccion.taxon_nombre_cientifico,
+  return allData.map((c: any) => ({
+    id_coleccion: c.id_coleccion,
+    taxon_id: c.taxon_id,
+    num_colector: c.num_colector,
+    sc: c.sc,
+    gui: c.gui,
+    num_museo: c.numero_museo,
+    sc_acronimo: c.sc_acronimo,
+    sc_numero: c.sc_numero,
+    sc_sufijo: c.sc_sufijo,
+    estatus_identificacion: c.estatus_identificacion,
+    taxon_nombre: c.taxon_nombre,
+    identificado_por: c.identificado_por,
+    fecha_identifica: c.fecha_identifica,
+    estadio: c.estadio,
+    numero_individuos: c.numero_individuos,
+    sexo: c.sexo,
+    estado: c.estado,
+    svl: c.svl,
+    peso: c.peso,
+    estatus_tipo: c.estatus_tipo,
+    fecha_coleccion: c.fecha_col ?? null,
+    hora: c.hora,
+    colectores: c.colectores,
+    provincia: c.geopolitica?.nombre ?? null,
+    detalle_localidad: c.localidad,
+    latitud: c.latitud,
+    longitud: c.longitud,
+    altitud: c.elevacion,
+    habitat: c.habitat,
+    observacion: c.observacion,
+    catalogo_museo: c.catalogo_museo ?? null,
+    campobase_nombre: c.campobase?.nombre ?? null,
+    campobase_localidad: c.campobase?.localidad ?? null,
+    personal_nombre: c.personal?.nombre ?? null,
+    personal_siglas: c.personal?.siglas ?? null,
+    taxon_nombre_cientifico: c.taxon?.taxon ?? null,
   }));
 }

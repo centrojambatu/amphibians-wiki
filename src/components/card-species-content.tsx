@@ -10,7 +10,6 @@ import {
   processHTMLLinksNoUnderline,
   processCitationReferences,
 } from "@/lib/process-html-links";
-import {getBibliographyUrl} from "@/lib/get-bibliography-url";
 
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
@@ -1329,7 +1328,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
                       <div className="space-y-2">
                         {fichaEspecie.dataRegionBio.map((region: any) => (
-                          <div key={region.id_taxon_catalogo_awe_region_biogeografica}>
+                          <div key={region.id_taxon_catalogo_awe}>
                             <span className="text-muted-foreground text-xs">
                               {region.catalogo_awe?.nombre}
                             </span>
@@ -1869,31 +1868,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         pub.publicacion?.cita_corta ||
                         "Cita no disponible";
 
-                      // Generar URL de la bibliografía
-                      const año =
-                        pub.publicacion?.numero_publicacion_ano ||
-                        (pub.publicacion?.fecha
-                          ? new Date(pub.publicacion.fecha).getFullYear()
-                          : null);
-                      const bibliographyUrl = getBibliographyUrl(
-                        pub.publicacion?.cita_corta || null,
-                        año,
-                        pub.publicacion?.titulo || null,
-                        pub.publicacion?.id_publicacion || 0,
-                      );
-
                       return (
-                        <Link
+                        <div
                           key={pub.id_taxon_publicacion}
-                          className="literature-link hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
-                          href={bibliographyUrl}
+                          className="flex flex-col gap-2 rounded-md p-3"
                         >
                           {pub.publicacion?.titulo && (
                             <div
                               suppressHydrationWarning dangerouslySetInnerHTML={{
                                 __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
                               }}
-                              className="hover:text-primary text-sm font-medium"
+                              className="text-sm font-medium"
                             />
                           )}
                           <div
@@ -1902,7 +1887,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             }}
                             className="text-muted-foreground text-xs"
                           />
-                        </Link>
+                        </div>
                       );
                     })}
                   </div>

@@ -44,7 +44,7 @@ export default function MapotecaHistogramaChart({
   const maxTotal = Math.max(...data.map((p) => p.total), 1);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-4">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-4">
       <div className="mb-4 flex items-center gap-4">
         <p className="text-lg font-semibold text-gray-800">
           {title}{" "}
@@ -65,7 +65,7 @@ export default function MapotecaHistogramaChart({
         )}
       </div>
 
-      <div className="flex w-full items-end gap-3" style={{ height: ALTURA_MAX_BARRA + 32 }}>
+      <div className="flex w-full items-end gap-2" style={{ height: ALTURA_MAX_BARRA + 32, minWidth: data.length * 72 }}>
         <TooltipProvider delayDuration={0}>
           {data.map((punto) => {
             const alturaTotalPx = (punto.total / maxTotal) * ALTURA_MAX_BARRA;
@@ -166,7 +166,7 @@ export default function MapotecaHistogramaChart({
 
       {/* Eje X: nombres con wrap */}
       {showLabels && (
-        <div className="mt-2 flex w-full gap-3">
+        <div className="mt-2 flex w-full gap-2" style={{ minWidth: data.length * 72 }}>
           {data.map((punto) => (
             <div key={punto.name} className="min-w-0 flex-1 overflow-hidden" style={{ maxHeight: 120 }}>
               <p className="break-words text-center text-[10px] leading-snug text-gray-500">

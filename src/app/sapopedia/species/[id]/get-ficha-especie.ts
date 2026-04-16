@@ -125,7 +125,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("*, taxonPadre:taxon_id(*, taxonPadre:taxon_id(*))")
       .eq("id_taxon", taxonId),
     supabaseClient.rpc("get_taxon_lineage", {p_id_taxon: taxonId}),
-    getColeccionesEspecie(taxonId, vistaDataTyped.nombre_cientifico),
+    getColeccionesEspecie(taxonId),
   ]);
 
   // Manejar errores
