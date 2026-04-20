@@ -28,181 +28,94 @@ export interface EstadisticasSapoteca {
   publicacionCientificaMasReciente: PublicacionCientificaMasReciente | null;
 }
 
-/** Tipos de catalogo_publicaciones que cuentan como "científicas" */
-const TIPOS_CIENTIFICAS = new Set(["CIENTIFICA", "TESIS"]);
-
-/** Tipo que cuenta como "divulgación" */
-const TIPO_DIVULGACION = "DIVULGACIÓN";
-
 /**
- * Obtiene las estadísticas de la biblioteca (solo publicaciones Ecuador).
- * Científicas/divulgación se basan en catalogo_publicaciones.tipo.
+ * Obtiene las estadísticas de la biblioteca usando la vista materializada.
+ * Una sola query para todos los conteos + 2 queries para más citada y más reciente.
  */
 export default async function getEstadisticasSapoteca(): Promise<EstadisticasSapoteca> {
   const supabase = createServiceClient();
-  const añoActual = new Date().getFullYear();
-  const hace10 = añoActual - 9;
 
-  // Conteos por tipo de publicación (catalogo_publicaciones.tipo). PostgREST limita ~1000 filas; paginamos para traer todas.
-  interface PcaRow {
-    publicacion_id: number;
-    catalogo_publicaciones: { tipo: string | null } | null;
-    publicacion: { anfibios_ecuador: boolean | null } | null;
-  }
-  const idsCientificas = new Set<number>();
-  const idsDivulgacion = new Set<number>();
-  const pageSize = 1000;
-  let offset = 0;
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data: pcaPage } = await supabase
-      .from("publicacion_catalogo_awe")
-      .select("publicacion_id, catalogo_publicaciones(tipo), publicacion(anfibios_ecuador)")
-      .not("catalogo_publicaciones_id", "is", null)
-      .range(offset, offset + pageSize - 1);
-
-    const rows = (pcaPage ?? []) as unknown as PcaRow[];
-    for (const r of rows) {
-      if (r.publicacion?.anfibios_ecuador !== true) continue;
-
-      const tipo = r.catalogo_publicaciones?.tipo ?? "";
-      if (TIPOS_CIENTIFICAS.has(tipo)) idsCientificas.add(r.publicacion_id);
-      if (tipo === TIPO_DIVULGACION) idsDivulgacion.add(r.publicacion_id);
-    }
-    hasMore = rows.length === pageSize;
-    offset += pageSize;
-  }
-
-  const countCientificas = idsCientificas.size;
-  const countDivulgacion = idsDivulgacion.size;
-
-  // Estadísticas de las cards: indexadas / no indexadas solo sobre publicaciones científicas
-  const [
-    { count: countIndexadas },
-    { count: countNoIndexadas },
-    { count: countUltimaDecada },
-    { count: countAnioActual },
-    { count: countTaxonomia },
-    { count: countEvolucion },
-    { count: countEcologia },
-    { count: countConservacion },
-    masCitadaResult,
-    masRecienteResult,
-  ] = await Promise.all([
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("indexada", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .or("indexada.eq.false,indexada.is.null"),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .gte("numero_publicacion_ano", hace10)
-      .lte("numero_publicacion_ano", añoActual),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("numero_publicacion_ano", añoActual),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("rel_taxonomia", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("rel_evolucion", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("rel_ecologia", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("*", { count: "exact", head: true })
-      .eq("rel_conservacion", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
+  // 3 queries en paralelo en vez de 12+ secuenciales
+  const [statsResult, masCitadaResult, masRecienteResult] = await Promise.all([
+    // 1. Todos los conteos desde la vista materializada (1 query)
+    (supabase as any)
+      .from("mv_sapoteca_stats")
+      .select("*")
+      .single(),
+    // 2. Publicación más citada
+    (supabase as any)
+      .from("vw_publicacion_cientifica_ecuador")
       .select("id_publicacion, titulo, contador_citas")
       .gt("contador_citas", 0)
       .order("contador_citas", { ascending: false })
       .limit(1)
       .single(),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
+    // 3. Publicación más reciente
+    (supabase as any)
+      .from("vw_publicacion_cientifica_ecuador")
       .select("id_publicacion, titulo, numero_publicacion_ano, fecha")
       .order("numero_publicacion_ano", { ascending: false, nullsFirst: false })
       .limit(1)
       .single(),
   ]);
 
-  const totalUltimaDecada = countUltimaDecada ?? 0;
+  const stats = statsResult.data as any;
+
+  const totalUltimaDecada = stats?.total_ultima_decada ?? 0;
   const promedioUltimaDecada = totalUltimaDecada > 0 ? Math.round(totalUltimaDecada / 10) : 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- contador_citas no está en tipos generados
-  const masCitada = masCitadaResult.data as {
-    id_publicacion: number; titulo: string; contador_citas: number;
-  } | null;
+  // Obtener enlaces para más citada y más reciente en paralelo
+  const masCitada = masCitadaResult.data as { id_publicacion: number; titulo: string; contador_citas: number } | null;
+  const masReciente = masRecienteResult.data as { id_publicacion: number; titulo: string } | null;
 
-  let publicacionMasCitada: PublicacionMasCitada | null = null;
-  if (masCitada?.titulo && masCitada?.contador_citas) {
-    const { data: enlaceData } = await supabase
+  const enlaceIds = [masCitada?.id_publicacion, masReciente?.id_publicacion].filter(Boolean) as number[];
+
+  let enlacesMap = new Map<number, string>();
+  if (enlaceIds.length > 0) {
+    const { data: enlacesData } = await supabase
       .from("publicacion_enlace")
-      .select("enlace")
-      .eq("publicacion_id", masCitada.id_publicacion)
+      .select("publicacion_id, enlace")
+      .in("publicacion_id", enlaceIds)
       .neq("enlace", "")
       .neq("enlace", "http://")
       .not("enlace", "is", null)
-      .order("id_publicacion_enlace", { ascending: true })
-      .limit(1)
-      .single();
+      .order("id_publicacion_enlace", { ascending: true });
 
+    for (const e of (enlacesData ?? []) as { publicacion_id: number; enlace: string }[]) {
+      if (!enlacesMap.has(e.publicacion_id)) enlacesMap.set(e.publicacion_id, e.enlace);
+    }
+  }
+
+  let publicacionMasCitada: PublicacionMasCitada | null = null;
+  if (masCitada?.titulo && masCitada?.contador_citas) {
     publicacionMasCitada = {
       idPublicacion: masCitada.id_publicacion,
       titulo: masCitada.titulo,
       contadorCitas: masCitada.contador_citas,
-      enlace: enlaceData?.enlace ?? null,
+      enlace: enlacesMap.get(masCitada.id_publicacion) ?? null,
     };
   }
 
-  const masReciente = masRecienteResult.data as {
-    id_publicacion: number;
-    titulo: string | null;
-  } | null;
-
   let publicacionCientificaMasReciente: PublicacionCientificaMasReciente | null = null;
   if (masReciente?.id_publicacion && masReciente?.titulo) {
-    const { data: enlaceMasReciente } = await supabase
-      .from("publicacion_enlace")
-      .select("enlace")
-      .eq("publicacion_id", masReciente.id_publicacion)
-      .neq("enlace", "")
-      .neq("enlace", "http://")
-      .not("enlace", "is", null)
-      .order("id_publicacion_enlace", { ascending: true })
-      .limit(1)
-      .single();
-
     publicacionCientificaMasReciente = {
       idPublicacion: masReciente.id_publicacion,
       titulo: masReciente.titulo,
-      enlace: enlaceMasReciente?.enlace ?? null,
+      enlace: enlacesMap.get(masReciente.id_publicacion) ?? null,
     };
   }
 
   return {
-    totalCientificas: countCientificas ?? 0,
-    totalDivulgacion: countDivulgacion ?? 0,
-    totalIndexadas: countIndexadas ?? 0,
-    totalNoIndexadas: countNoIndexadas ?? 0,
+    totalCientificas: stats?.total_cientificas ?? 0,
+    totalDivulgacion: stats?.total_divulgacion ?? 0,
+    totalIndexadas: stats?.total_indexadas ?? 0,
+    totalNoIndexadas: stats?.total_no_indexadas ?? 0,
     promedioUltimaDecada,
-    publicacionesAnioActual: countAnioActual ?? 0,
-    totalTaxonomia: countTaxonomia ?? 0,
-    totalEvolucion: countEvolucion ?? 0,
-    totalEcologia: countEcologia ?? 0,
-    totalConservacion: countConservacion ?? 0,
+    publicacionesAnioActual: stats?.publicaciones_anio_actual ?? 0,
+    totalTaxonomia: stats?.total_taxonomia ?? 0,
+    totalEvolucion: stats?.total_evolucion ?? 0,
+    totalEcologia: stats?.total_ecologia ?? 0,
+    totalConservacion: stats?.total_conservacion ?? 0,
     publicacionMasCitada,
     publicacionCientificaMasReciente,
   };
