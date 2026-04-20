@@ -64,21 +64,26 @@ function parseCatalogos(catalogos: string[]): { cat: string; num: string | null 
 
 function buildBaseQuery(
   supabase: any,
-  origen: string,
+  origen: string | null,
   fichaFilterIds: number[] | null,
   provincias: string[] | null,
   especies: string[] | null,
   localidades: string[] | null,
   elevacionMin: number | null,
   elevacionMax: number | null,
+  fechaDesde: string | null = null,
+  fechaHasta: string | null = null,
 ) {
-  let q = supabase.from("vw_colecciones").select(SELECT_FIELDS).eq("origen", origen);
+  let q = supabase.from("mv_colecciones_mapa").select(SELECT_FIELDS);
+  if (origen) q = q.eq("origen", origen);
   if (fichaFilterIds && fichaFilterIds.length > 0) q = q.in("taxon_id", fichaFilterIds);
   if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
-  if (especies && especies.length > 0) q = q.or(especies.map((e) => `nombre_especie.ilike.%${e}%`).join(","));
+  if (especies && especies.length > 0) q = q.or(especies.map((e: string) => `nombre_especie.ilike.%${e}%`).join(","));
   if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
   if (elevacionMin !== null) q = q.gte("elevacion", elevacionMin);
   if (elevacionMax !== null) q = q.lte("elevacion", elevacionMax);
+  if (fechaDesde) q = q.gte("fecha_coleccion", fechaDesde);
+  if (fechaHasta) q = q.lte("fecha_coleccion", fechaHasta);
   return q;
 }
 
@@ -101,7 +106,7 @@ async function fetchByOrigen(
     const pairs = parseCatalogos(catalogos);
     const results: any[] = [];
     for (const { cat, num } of pairs) {
-      let q = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax);
+      let q = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta);
       q = q.eq("catalogo_museo", cat);
       if (num) q = q.eq("numero_museo", num);
       const { data, error } = await q;
@@ -118,7 +123,7 @@ async function fetchByOrigen(
 
   while (fetched < limit) {
     const batchSize = Math.min(pageSize, limit - fetched);
-    let query = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax)
+    let query = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta)
       .range(offset + fetched, offset + fetched + batchSize - 1)
       .order("taxon_id", { ascending: true });
 
@@ -167,6 +172,8 @@ export async function GET(request: Request) {
   const elevacionMin = elevacionMinParam !== null ? parseFloat(elevacionMinParam) : null;
   const elevacionMaxParam = searchParams.get("elevacion_max");
   const elevacionMax = elevacionMaxParam !== null ? parseFloat(elevacionMaxParam) : null;
+  const fechaDesde = searchParams.get("fecha_desde");
+  const fechaHasta = searchParams.get("fecha_hasta");
   const limit = Math.min(parseInt(searchParams.get("limit") || "1000", 10), 60000);
   const cjOffset = parseInt(searchParams.get("cj_offset") || "0", 10);
   const extOffset = parseInt(searchParams.get("ext_offset") || "0", 10);
@@ -193,88 +200,64 @@ export async function GET(request: Request) {
       }
     }
 
-    // Función de conteo: usa .eq() para catálogos (seguro con unicode/espacios)
-    const countForOrigen = async (origen?: string): Promise<number> => {
-      if (catalogos && catalogos.length > 0) {
-        // Sumar conteos individuales por cada entrada de catálogo
-        const pairs = parseCatalogos(catalogos);
-        let total = 0;
-        for (const { cat, num } of pairs) {
-          let q = supabase
-            .from("vw_colecciones")
-            .select("taxon_id", { count: "exact", head: true });
-          if (origen) q = q.eq("origen", origen);
-          if (fichaFilterIds && fichaFilterIds.length > 0) q = q.in("taxon_id", fichaFilterIds);
-          if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
-          if (especies && especies.length > 0) q = q.or(especies.map((e) => `nombre_especie.ilike.%${e}%`).join(","));
-          if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
-          q = q.eq("catalogo_museo", cat);
-          if (num) q = q.eq("numero_museo", num);
-          if (elevacionMin !== null) q = q.gte("elevacion", elevacionMin);
-          if (elevacionMax !== null) q = q.lte("elevacion", elevacionMax);
-          const { count, error } = await q;
-          if (error) throw error;
-          total += count ?? 0;
-        }
-        return total;
+    // Conteo rápido del total (para barra de progreso en el frontend)
+    let countQ = supabase.from("mv_colecciones_mapa").select("taxon_id", { count: "exact", head: true });
+    if (fichaFilterIds && fichaFilterIds.length > 0) countQ = countQ.in("taxon_id", fichaFilterIds);
+    if (provincias && provincias.length > 0) countQ = countQ.in("provincia", provincias);
+    if (especies && especies.length > 0) countQ = countQ.or(especies.map((e: string) => `nombre_especie.ilike.%${e}%`).join(","));
+    if (localidades && localidades.length > 0) countQ = countQ.in("localidad", localidades);
+    if (elevacionMin !== null) countQ = countQ.gte("elevacion", elevacionMin);
+    if (elevacionMax !== null) countQ = countQ.lte("elevacion", elevacionMax);
+    if (fechaDesde) countQ = countQ.gte("fecha_coleccion", fechaDesde);
+    if (fechaHasta) countQ = countQ.lte("fecha_coleccion", fechaHasta);
+    const { count: totalCount, error: countError } = await countQ;
+    if (countError) throw countError;
+    const grandTotal = totalCount ?? 0;
+
+    // Query contra la vista materializada
+    let allData: any[] = [];
+
+    if (catalogos && catalogos.length > 0) {
+      // Filtro de catálogo: queries individuales por par cat::num
+      const pairs = parseCatalogos(catalogos);
+      for (const { cat, num } of pairs) {
+        let q = buildBaseQuery(supabase, null, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta);
+        q = q.eq("catalogo_museo", cat);
+        if (num) q = q.eq("numero_museo", num);
+        q = q.limit(limit);
+        const { data, error } = await q;
+        if (error) throw error;
+        if (data) allData.push(...data);
       }
-
-      let q = supabase
-        .from("vw_colecciones")
-        .select("taxon_id", { count: "exact", head: true });
-      if (origen) q = q.eq("origen", origen);
-      if (fichaFilterIds && fichaFilterIds.length > 0) q = q.in("taxon_id", fichaFilterIds);
-      if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
-      if (especies && especies.length > 0) q = q.or(especies.map((e) => `nombre_especie.ilike.%${e}%`).join(","));
-      if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
-      if (elevacionMin !== null) q = q.gte("elevacion", elevacionMin);
-      if (elevacionMax !== null) q = q.lte("elevacion", elevacionMax);
-      const { count, error } = await q;
-      if (error) throw error;
-      return count ?? 0;
-    };
-
-    const [totalCount, cjTotal, extTotal] = await Promise.all([
-      countForOrigen(),
-      countForOrigen("coleccion"),
-      countForOrigen("coleccion_externa"),
-    ]);
-
-    // Repartir el limit 50/50, usando offsets independientes por origen
-    const halfLimit = Math.floor(limit / 2);
-    let cjLimit = Math.min(halfLimit, cjTotal - cjOffset);
-    let extLimit = Math.min(halfLimit, extTotal - extOffset);
-
-    // Si un origen tiene menos registros disponibles, dar el sobrante al otro
-    if (cjLimit < halfLimit) {
-      extLimit = Math.min(limit - Math.max(cjLimit, 0), extTotal - extOffset);
-    } else if (extLimit < halfLimit) {
-      cjLimit = Math.min(limit - Math.max(extLimit, 0), cjTotal - cjOffset);
+    } else {
+      // Sin catálogo: traer en batches de 1000 (límite Supabase) desde el offset indicado
+      const pageSize = 1000;
+      let offset = cjOffset;
+      let fetched = 0;
+      let hasMore = true;
+      while (hasMore && fetched < limit) {
+        const batchSize = Math.min(pageSize, limit - fetched);
+        const q = buildBaseQuery(supabase, null, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta)
+          .range(offset, offset + batchSize - 1)
+          .order("taxon_id", { ascending: true });
+        const { data, error } = await q;
+        if (error) throw error;
+        if (data && data.length > 0) {
+          allData.push(...data);
+          offset += data.length;
+          fetched += data.length;
+          if (data.length < batchSize) hasMore = false;
+        } else {
+          hasMore = false;
+        }
+      }
     }
 
-    cjLimit = Math.max(cjLimit, 0);
-    extLimit = Math.max(extLimit, 0);
-
-    // Fetch en paralelo de ambos orígenes
-    const [cjData, extData] = await Promise.all([
-      cjLimit > 0 ? fetchByOrigen(supabase, "coleccion", cjLimit, cjOffset, provincias, especies, localidades, catalogos, elevacionMin, elevacionMax, fichaFilterIds) : [],
-      extLimit > 0 ? fetchByOrigen(supabase, "coleccion_externa", extLimit, extOffset, provincias, especies, localidades, catalogos, elevacionMin, elevacionMax, fichaFilterIds) : [],
-    ]);
-
-    // Mezclar intercalando ambos orígenes
-    const merged: any[] = [];
-    let i = 0;
-    let j = 0;
-    while (i < cjData.length || j < extData.length) {
-      if (i < cjData.length) merged.push(cjData[i++]);
-      if (j < extData.length) merged.push(extData[j++]);
-    }
-
-    const resultado: UbicacionEspecie[] = merged.map(mapRow);
+    const resultado: UbicacionEspecie[] = allData.map(mapRow);
 
     const response: MapotecaResponse = {
       data: resultado,
-      total: totalCount,
+      total: grandTotal,
     };
 
     return NextResponse.json(response);

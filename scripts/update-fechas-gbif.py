@@ -167,32 +167,135 @@ def main():
 
     inicio = datetime.now()
 
-    with httpx.Client(headers={'User-Agent': 'amphibians-wiki-jambatu/1.0 (https://anfibiosecuador.ec)'}) as client:
-        for i in range(0, total, args.batch_size):
-            lote = registros[i:i + args.batch_size]
-            log.info(f'--- Lote {i // args.batch_size + 1} | registros {i+1}–{min(i+len(lote), total)} de {total} ---')
+    # ─── Estrategia 1: Descargar catálogos completos de GBIF ─────────────────
+    # Para catálogos grandes, descargamos TODOS los registros de esa institución
+    # de una vez y cruzamos en memoria (mucho más rápido que 1 request por registro)
 
+    # Agrupar registros por catálogo
+    por_catalogo = {}
+    for rec in registros:
+        cat = rec['catalogo_museo']
+        if cat not in por_catalogo:
+            por_catalogo[cat] = []
+        por_catalogo[cat].append(rec)
+
+    log.info(f'Catálogos a procesar: {list(por_catalogo.keys())}')
+
+    with httpx.Client(
+        headers={'User-Agent': 'amphibians-wiki-jambatu/1.0 (https://anfibiosecuador.ec)'},
+        timeout=60.0,
+    ) as client:
+
+        for catalogo, cat_registros in por_catalogo.items():
+            cat_total = len(cat_registros)
+            log.info(f'\n{"="*60}')
+            log.info(f'Catálogo: {catalogo} ({cat_total} registros sin fecha)')
+
+            # Construir índice: numero_museo → lista de ids
+            num_to_ids = {}
+            for rec in cat_registros:
+                num = str(rec['numero_museo']).strip()
+                if num not in num_to_ids:
+                    num_to_ids[num] = []
+                num_to_ids[num].append(rec['id'])
+
+            aliases = CATALOGO_GBIF_MAP.get(catalogo, [catalogo])
+            gbif_fechas = {}  # numero_museo → fecha
+
+            # Intentar descargar todos los registros del catálogo de GBIF
+            for alias in aliases:
+                log.info(f'  Descargando registros GBIF para institutionCode={alias}...')
+                offset_gbif = 0
+                gbif_total = None
+
+                while True:
+                    try:
+                        resp = client.get(GBIF_BASE, params={
+                            'institutionCode': alias,
+                            'basisOfRecord': 'PRESERVED_SPECIMEN',
+                            'classKey': '131',  # Amphibia
+                            'limit': 300,
+                            'offset': offset_gbif,
+                            'fields': 'catalogNumber,eventDate',
+                        })
+
+                        if resp.status_code == 503:
+                            log.warning(f'  GBIF 503 — esperando 30s...')
+                            time.sleep(30)
+                            continue
+
+                        if resp.status_code == 429:
+                            log.warning(f'  GBIF 429 Rate Limited — esperando 60s...')
+                            time.sleep(60)
+                            continue
+
+                        if resp.status_code != 200:
+                            log.warning(f'  GBIF HTTP {resp.status_code} para {alias}')
+                            break
+
+                        data = resp.json()
+                        if gbif_total is None:
+                            gbif_total = data.get('count', 0)
+                            log.info(f'  Total en GBIF para {alias}: {gbif_total}')
+
+                        results = data.get('results', [])
+                        if not results:
+                            break
+
+                        for rec in results:
+                            cat_num = str(rec.get('catalogNumber', '')).strip()
+                            event_date = rec.get('eventDate', '')
+
+                            if cat_num and event_date and cat_num not in gbif_fechas:
+                                partes = event_date.split('-')
+                                if len(partes) >= 3:
+                                    gbif_fechas[cat_num] = f"{partes[0]}-{partes[1]}-{partes[2][:2]}"
+                                elif len(partes) == 2:
+                                    gbif_fechas[cat_num] = f"{partes[0]}-{partes[1]}-01"
+                                elif len(partes) == 1 and partes[0].isdigit():
+                                    gbif_fechas[cat_num] = f"{partes[0]}-01-01"
+
+                        offset_gbif += len(results)
+
+                        if offset_gbif >= gbif_total or len(results) < 300:
+                            break
+
+                        # Pausa entre páginas (respetar rate limit)
+                        time.sleep(0.5)
+
+                    except (httpx.TimeoutException, httpx.NetworkError) as e:
+                        log.warning(f'  Error red: {type(e).__name__} — esperando 10s...')
+                        time.sleep(10)
+
+                log.info(f'  Fechas encontradas en GBIF para {alias}: {len(gbif_fechas)}')
+
+                if len(gbif_fechas) > 0:
+                    break  # Encontramos datos con este alias, no probar otros
+
+            # ─── Cruzar con nuestros registros ────────────────────────────────
             actualizaciones = []
 
-            for rec in lote:
-                rid = rec['id']
-                catalogo = rec['catalogo_museo']
-                numero = rec['numero_museo']
+            # Intentar match directo por numero_museo
+            for num, ids in num_to_ids.items():
+                fecha = gbif_fechas.get(num)
 
-                fecha = buscar_fecha_gbif(client, catalogo, numero)
+                # Algunos catálogos usan prefijos (ej: QCAZA12345 en GBIF vs 12345 en nuestra BD)
+                if not fecha:
+                    for prefix in aliases:
+                        fecha = gbif_fechas.get(f"{prefix}{num}")
+                        if fecha:
+                            break
 
                 if fecha:
-                    encontrados += 1
-                    log.info(f'  ✓ {catalogo} {numero} → {fecha}')
-                    actualizaciones.append({'id': rid, 'fecha': fecha})
+                    encontrados += len(ids)
+                    for rid in ids:
+                        actualizaciones.append({'id': rid, 'fecha': fecha})
                 else:
-                    no_encontrados += 1
-                    log.debug(f'  - {catalogo} {numero} → sin fecha en GBIF')
+                    no_encontrados += len(ids)
 
-                # Pausa respetuosa para no sobrecargar GBIF
-                time.sleep(0.3)
+            log.info(f'  Matches: {len(actualizaciones)} de {cat_total}')
 
-            # Actualizar en batch
+            # ─── Actualizar BD ────────────────────────────────────────────────
             if actualizaciones and not args.dry_run:
                 for upd in actualizaciones:
                     try:
@@ -204,15 +307,15 @@ def main():
                     except Exception as e:
                         log.error(f'Error actualizando id={upd["id"]}: {e}')
                         errores += 1
+                log.info(f'  Actualizados en BD: {actualizados}')
             elif actualizaciones and args.dry_run:
-                log.info(f'  [DRY RUN] Se actualizarían {len(actualizaciones)} registros en este lote')
+                log.info(f'  [DRY RUN] Se actualizarían {len(actualizaciones)} registros')
 
-            # Progreso
+            # Progreso global
+            procesados = encontrados + no_encontrados
             elapsed = (datetime.now() - inicio).seconds
-            pct = (i + len(lote)) / total * 100
-            rps = (i + len(lote)) / max(elapsed, 1)
-            restante = int((total - i - len(lote)) / max(rps, 0.01))
-            log.info(f'Progreso: {pct:.1f}% | Encontrados: {encontrados} | Sin fecha: {no_encontrados} | ETA: ~{restante}s')
+            pct = procesados / total * 100 if total > 0 else 0
+            log.info(f'Progreso global: {pct:.1f}% | Encontrados: {encontrados} | Sin fecha: {no_encontrados}')
 
     # Resumen final
     print('\n' + '='*60)

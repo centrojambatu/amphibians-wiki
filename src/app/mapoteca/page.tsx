@@ -588,6 +588,13 @@ function MapotecaContent({
   const [elevacionActive, setElevacionActive] = useState<boolean>(
     storedState?.elevacionActive || false,
   );
+  const [anioDesde, setAnioDesde] = useState<string>(storedState?.anioDesde || "");
+  const [anioHasta, setAnioHasta] = useState<string>(storedState?.anioHasta || "");
+  const [anioEspecifico, setAnioEspecifico] = useState<string>(storedState?.anioEspecifico || "");
+
+  // Calcular fechas desde/hasta a partir de años
+  const fechaDesde = anioEspecifico ? `${anioEspecifico}-01-01` : anioDesde ? `${anioDesde}-01-01` : "";
+  const fechaHasta = anioEspecifico ? `${anioEspecifico}-12-31` : anioHasta ? `${anioHasta}-12-31` : "";
   const [mapType, setMapType] = useState<
     "relief" | "terrain" | "provinces" | "satellite" | "streets"
   >(storedState?.mapType || "provinces");
@@ -615,6 +622,9 @@ function MapotecaContent({
     setLocalidadesFilter([]);
     setElevacionRange([0, 5000]);
     setElevacionActive(false);
+    setAnioDesde("");
+    setAnioHasta("");
+    setAnioEspecifico("");
   };
 
   // Link de regreso a la ficha
@@ -631,6 +641,9 @@ function MapotecaContent({
           localidadesFilter,
           elevacionRange,
           elevacionActive,
+          anioDesde,
+          anioHasta,
+          anioEspecifico,
           mapType,
         }),
       );
@@ -718,6 +731,56 @@ function MapotecaContent({
                       </div>
                     </div>
 
+                    {/* Filtro por año */}
+                    <div className="space-y-1.5">
+                      {/* Año específico */}
+                      <input
+                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                        max={new Date().getFullYear()}
+                        min={1900}
+                        placeholder="Año específico (ej. 2015)"
+                        type="number"
+                        value={anioEspecifico}
+                        onChange={(e) => {
+                          setAnioEspecifico(e.target.value);
+                          if (e.target.value) { setAnioDesde(""); setAnioHasta(""); }
+                        }}
+                      />
+                      {/* Rango de años */}
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Desde"
+                          type="number"
+                          value={anioDesde}
+                          onChange={(e) => setAnioDesde(e.target.value)}
+                        />
+                        <span className="text-xs text-gray-400">—</span>
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Hasta"
+                          type="number"
+                          value={anioHasta}
+                          onChange={(e) => setAnioHasta(e.target.value)}
+                        />
+                      </div>
+                      {(anioDesde || anioHasta || anioEspecifico) && (
+                        <button
+                          className="text-[10px] text-gray-400 hover:text-gray-600"
+                          type="button"
+                          onClick={() => { setAnioDesde(""); setAnioHasta(""); setAnioEspecifico(""); }}
+                        >
+                          Limpiar años
+                        </button>
+                      )}
+                    </div>
+
                     {/* Tipo de mapa */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-gray-600">Tipo de mapa</label>
@@ -766,6 +829,8 @@ function MapotecaContent({
                 elevacionMax={elevacionActive ? elevacionRange[1] : undefined}
                 elevacionMin={elevacionActive ? elevacionRange[0] : undefined}
                 especieFilter={especieFilter.length > 0 ? especieFilter : undefined}
+                fechaDesde={fechaDesde || undefined}
+                fechaHasta={fechaHasta || undefined}
                 localidadesFilter={localidadesFilter.length > 0 ? localidadesFilter : undefined}
                 mapType={mapType}
                 pisoFilter={pisoFilter.length > 0 ? pisoFilter : undefined}

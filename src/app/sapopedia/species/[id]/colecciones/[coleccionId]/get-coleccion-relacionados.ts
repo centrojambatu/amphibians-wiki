@@ -376,21 +376,19 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
  * Obtiene los archivos multimedia de una colección, agrupados por categoría
  */
 export async function getMediaByColeccion(coleccionId: number): Promise<MediaColeccion[]> {
-  const supabaseClient = createServiceClient();
+  try {
+    const supabaseClient = createServiceClient();
 
-  // Query sin join para evitar errores de RLS en la tabla relacionada
-  const {data, error} = await supabaseClient
-    .from("media_coleccion")
-    .select("*")
-    .eq("coleccion_id", coleccionId)
-    .eq("publicar", true)
-    .order("tipo_media", {ascending: true})
-    .order("orden", {ascending: true});
+    const {data, error} = await supabaseClient
+      .from("media_coleccion")
+      .select("*")
+      .eq("coleccion_id", coleccionId)
+      .eq("publicar", true)
+      .order("tipo_media", {ascending: true})
+      .order("orden", {ascending: true});
 
-  if (error) {
-    console.error("Error al obtener media de colección:", error);
-    return [];
-  }
+    if (error) return [];
+
 
   if (!data || data.length === 0) return [];
 
@@ -411,10 +409,13 @@ export async function getMediaByColeccion(coleccionId: number): Promise<MediaCol
     }
   }
 
-  return (data as any[]).map((row) => ({
-    ...row,
-    categoria: categoriasMap.get(row.categoria_media_id) ?? null,
-  })) as MediaColeccion[];
+    return (data as any[]).map((row) => ({
+      ...row,
+      categoria: categoriasMap.get(row.categoria_media_id) ?? null,
+    })) as MediaColeccion[];
+  } catch {
+    return [];
+  }
 }
 
 /**

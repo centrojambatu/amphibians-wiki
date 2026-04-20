@@ -43,6 +43,8 @@ function buildCacheKey(filters: {
   localidadesFilter?: string[];
   elevacionMin?: number;
   elevacionMax?: number;
+  fechaDesde?: string;
+  fechaHasta?: string;
 }): string {
   return JSON.stringify(filters);
 }
@@ -52,7 +54,18 @@ function getSessionCached(): CacheEntry | null {
   try {
     const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!raw) return null;
-    const entry: CacheEntry = JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // Formato comprimido: { d: [...], t: number, ts: number }
+    if (parsed.d && Array.isArray(parsed.d)) {
+      const ts = parsed.ts ?? 0;
+      if (Date.now() - ts > SESSION_TTL_MS) {
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+        return null;
+      }
+      return { data: decompressFromStorage(parsed.d), total: parsed.t, timestamp: ts };
+    }
+    // Formato legacy
+    const entry: CacheEntry = parsed;
     if (Date.now() - entry.timestamp > SESSION_TTL_MS) {
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
       return null;
@@ -63,10 +76,24 @@ function getSessionCached(): CacheEntry | null {
   }
 }
 
+// Comprimir datos para sessionStorage: solo lat,lon,taxon_id,nombre,origen (reduce ~80% del tamaño)
+function compressForStorage(data: UbicacionEspecie[]): any[] {
+  return data.map((u) => [u.latitud, u.longitud, u.taxon_id, u.nombre_cientifico, u.origen, u.id_coleccion, u.provincia, u.localidad, u.catalogo_museo, u.numero_museo, u.elevacion, u.fecha_coleccion, u.colectores, u.genero, u.rank_id, u.cita_corta]);
+}
+
+function decompressFromStorage(arr: any[]): UbicacionEspecie[] {
+  return arr.map((r) => ({
+    latitud: r[0], longitud: r[1], taxon_id: r[2], nombre_cientifico: r[3], origen: r[4],
+    id_coleccion: r[5], provincia: r[6], localidad: r[7], catalogo_museo: r[8], numero_museo: r[9],
+    elevacion: r[10], fecha_coleccion: r[11], colectores: r[12], genero: r[13], rank_id: r[14], cita_corta: r[15],
+  }));
+}
+
 function setSessionCache(entry: CacheEntry) {
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(entry));
+    const compressed = { d: compressForStorage(entry.data), t: entry.total, ts: entry.timestamp };
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(compressed));
   } catch {
     // sessionStorage lleno — ignorar silenciosamente
   }
@@ -435,6 +462,8 @@ interface MapotecaMapProps {
   localidadesFilter?: string[];
   elevacionMin?: number;
   elevacionMax?: number;
+  fechaDesde?: string;
+  fechaHasta?: string;
   mapType?: MapTileType;
   onNavigateToSpecies?: () => void;
 }
@@ -448,6 +477,8 @@ export default function MapotecaMap({
   localidadesFilter,
   elevacionMin,
   elevacionMax,
+  fechaDesde,
+  fechaHasta,
   mapType = "provinces",
   onNavigateToSpecies,
 }: MapotecaMapProps) {
@@ -455,13 +486,14 @@ export default function MapotecaMap({
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
   // ID incremental: cada fetch guarda su ID; si al completar no coincide con el actual, descarta el resultado
   const fetchIdRef = useRef(0);
   const router = useRouter();
   // Track current filters to know when to reset
-  const filtersRef = useRef({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+  const filtersRef = useRef({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
 
   // Build query params from all filters
   const buildFilterParams = useCallback((limit: number, cjOffset = 0, extOffset = 0) => {
@@ -474,11 +506,13 @@ export default function MapotecaMap({
     if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join("||"));
     if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
     if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
+    if (fechaDesde) params.set("fecha_desde", fechaDesde);
+    if (fechaHasta) params.set("fecha_hasta", fechaHasta);
     params.set("limit", String(limit));
     params.set("cj_offset", String(cjOffset));
     params.set("ext_offset", String(extOffset));
     return params;
-  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax]);
+  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta]);
 
   // Map state tracking
   const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
@@ -519,14 +553,16 @@ export default function MapotecaMap({
       prev.catalogoFilter !== catalogoFilter ||
       prev.elevacionMin !== elevacionMin ||
       prev.elevacionMax !== elevacionMax ||
+      prev.fechaDesde !== fechaDesde ||
+      prev.fechaHasta !== fechaHasta ||
       JSON.stringify(prev.localidadesFilter) !== JSON.stringify(localidadesFilter);
 
-    filtersRef.current = { provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax };
+    filtersRef.current = { provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta };
 
     const fetchInitial = async () => {
       const myFetchId = ++fetchIdRef.current;
 
-      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
       const cached = getCached(cacheKey);
       if (cached) {
         if (myFetchId !== fetchIdRef.current) return;
@@ -540,16 +576,57 @@ export default function MapotecaMap({
       setLoading(true);
       setError(null);
       setUbicaciones([]);
+      setLoadProgress(0);
 
       try {
-        const params = buildFilterParams(5000, 0, 0);
+        // Primer batch: carga rápida para mostrar el mapa
+        const params = buildFilterParams(10000, 0, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
         const result: MapotecaResponse = await response.json();
         if (myFetchId !== fetchIdRef.current) return;
+
         setUbicaciones(result.data);
         setTotal(result.total);
+        const pct = result.total > 0 ? Math.round((result.data.length / result.total) * 100) : 100;
+        setLoadProgress(pct);
+        setLoading(false); // Mostrar mapa inmediatamente
+
+        // Si hay más datos, cargar el resto en background
+        if (result.data.length < result.total) {
+          setLoadingMore(true);
+          let loaded = result.data.length;
+          let allData = [...result.data];
+
+          while (loaded < result.total) {
+            if (myFetchId !== fetchIdRef.current) return;
+            const moreParams = buildFilterParams(10000, loaded, 0);
+            const moreRes = await fetch(`/api/mapoteca?${moreParams.toString()}`);
+            if (!moreRes.ok) break;
+
+            const moreResult: MapotecaResponse = await moreRes.json();
+            if (myFetchId !== fetchIdRef.current) return;
+            if (moreResult.data.length === 0) break;
+
+            allData = [...allData, ...moreResult.data];
+            loaded += moreResult.data.length;
+
+            setUbicaciones(allData);
+            setLoadProgress(Math.min(Math.round((loaded / result.total) * 100), 100));
+          }
+
+          if (myFetchId === fetchIdRef.current) {
+            setLoadProgress(100);
+            setLoadingMore(false);
+            const cacheKey2 = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
+            setCache(cacheKey2, allData, result.total);
+          }
+        } else {
+          setLoadProgress(100);
+          const cacheKey2 = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
+          setCache(cacheKey2, result.data, result.total);
+        }
       } catch (err) {
         if (myFetchId !== fetchIdRef.current) return;
         setError(err instanceof Error ? err.message : "Error desconocido");
@@ -564,19 +641,20 @@ export default function MapotecaMap({
     if (filtersChanged) {
       fetchInitial();
     }
-  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, buildFilterParams]);
+  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta, buildFilterParams]);
 
   // Carga inicial al montar
   useEffect(() => {
     const fetchInitial = async () => {
       const myFetchId = ++fetchIdRef.current;
 
-      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
+      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
       const cached = getCached(cacheKey);
       if (cached) {
         if (myFetchId !== fetchIdRef.current) return;
         setUbicaciones(cached.data);
         setTotal(cached.total);
+        setLoadProgress(100);
         setLoading(false);
         return;
       }
@@ -584,16 +662,55 @@ export default function MapotecaMap({
       fetchingRef.current = true;
       setLoading(true);
       setError(null);
+      setLoadProgress(0);
 
       try {
-        const params = buildFilterParams(5000, 0, 0);
+        // Primer batch
+        const params = buildFilterParams(10000, 0, 0);
         const response = await fetch(`/api/mapoteca?${params.toString()}`);
         if (!response.ok) throw new Error("Error al cargar datos");
 
         const result: MapotecaResponse = await response.json();
         if (myFetchId !== fetchIdRef.current) return;
+
         setUbicaciones(result.data);
         setTotal(result.total);
+        const pct = result.total > 0 ? Math.round((result.data.length / result.total) * 100) : 100;
+        setLoadProgress(pct);
+        setLoading(false);
+
+        // Cargar el resto en background
+        if (result.data.length < result.total) {
+          setLoadingMore(true);
+          let loaded = result.data.length;
+          let allData = [...result.data];
+
+          while (loaded < result.total) {
+            if (myFetchId !== fetchIdRef.current) return;
+            const moreParams = buildFilterParams(10000, loaded, 0);
+            const moreRes = await fetch(`/api/mapoteca?${moreParams.toString()}`);
+            if (!moreRes.ok) break;
+
+            const moreResult: MapotecaResponse = await moreRes.json();
+            if (myFetchId !== fetchIdRef.current) return;
+            if (moreResult.data.length === 0) break;
+
+            allData = [...allData, ...moreResult.data];
+            loaded += moreResult.data.length;
+
+            setUbicaciones(allData);
+            setLoadProgress(Math.min(Math.round((loaded / result.total) * 100), 100));
+          }
+
+          if (myFetchId === fetchIdRef.current) {
+            setLoadProgress(100);
+            setLoadingMore(false);
+            setCache(cacheKey, allData, result.total);
+          }
+        } else {
+          setLoadProgress(100);
+          setCache(cacheKey, result.data, result.total);
+        }
       } catch (err) {
         if (myFetchId !== fetchIdRef.current) return;
         setError(err instanceof Error ? err.message : "Error desconocido");
@@ -608,49 +725,6 @@ export default function MapotecaMap({
     fetchInitial();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Cargar más datos en batches hasta completar los 60,000
-  useEffect(() => {
-    if (loading || fetchingRef.current) return;
-    if (ubicaciones.length >= total) return;
-    if (total === 0) return;
-
-    let cancelled = false;
-
-    const fetchMore = async () => {
-      fetchingRef.current = true;
-      setLoadingMore(true);
-      try {
-        const cjLoaded = ubicaciones.filter((u) => u.origen === "coleccion").length;
-        const extLoaded = ubicaciones.filter((u) => u.origen === "coleccion_externa").length;
-        const params = buildFilterParams(5000, cjLoaded, extLoaded);
-        const response = await fetch(`/api/mapoteca?${params.toString()}`);
-        if (!response.ok) throw new Error("Error al cargar más datos");
-
-        const result: MapotecaResponse = await response.json();
-        if (!cancelled) {
-          setUbicaciones((prev) => {
-            const updated = [...prev, ...result.data];
-            if (updated.length >= result.total && result.total > 0) {
-              const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax });
-              setCache(cacheKey, updated, result.total);
-            }
-            return updated;
-          });
-          setTotal(result.total);
-        }
-      } catch (err) {
-        console.error("Error cargando más puntos:", err);
-      } finally {
-        fetchingRef.current = false;
-        if (!cancelled) setLoadingMore(false);
-      }
-    };
-
-    fetchMore();
-
-    return () => { cancelled = true; fetchingRef.current = false; };
-  }, [loading, ubicaciones.length, total, buildFilterParams]);
 
   const ubicacionesVisibles = useMemo(() => ubicaciones, [ubicaciones]);
 
@@ -757,18 +831,6 @@ export default function MapotecaMap({
     [router, saveMapState]
   );
 
-  if (loading) {
-    return (
-      <div className="flex h-[calc(100vh-220px)] items-center justify-center rounded-lg bg-gray-100">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
-          <p className="text-muted-foreground">
-            Cargando ubicaciones de especies...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -786,10 +848,18 @@ export default function MapotecaMap({
 
   return (
     <div className="relative h-[calc(100vh-220px)] w-full overflow-hidden rounded-lg border shadow-lg">
-      {loadingMore && (
-        <div className="absolute bottom-14 left-1/2 z-[1000] -translate-x-1/2 flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-lg">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
-          Añadiendo puntos...
+      {(loading || loadingMore || loadProgress < 100) && (
+        <div className="absolute top-0 right-0 left-0 z-[1000]">
+          <div className="h-1.5 w-full overflow-hidden bg-gray-200">
+            <div
+              className="h-full rounded-r-full transition-all duration-500"
+              style={{width: `${loadProgress}%`, backgroundColor: "#f07304"}}
+            />
+          </div>
+          <div className="absolute top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-xs font-medium text-gray-600 shadow-md">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" style={{borderColor: "#f07304", borderTopColor: "transparent"}} />
+            {loadProgress}% — {ubicaciones.length.toLocaleString()} / {total > 0 ? total.toLocaleString() : "..."} puntos
+          </div>
         </div>
       )}
       <MapContainer

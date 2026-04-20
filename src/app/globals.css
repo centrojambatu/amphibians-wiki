@@ -498,3 +498,9 @@ a.processed-link.processed-link-no-underline:active {
   text-underline-offset: 0 !important;
   text-decoration-line: none !important;
 }
+
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(150%); }
+  100% { transform: translateX(-100%); }
+}
