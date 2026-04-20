@@ -20,6 +20,7 @@ import type {
   ColeccionPersonal,
   Identificacion,
   CuerpoAgua,
+  MediaColeccion,
 } from "./get-coleccion-relacionados";
 
 interface ColeccionDetailClientProps {
@@ -31,6 +32,7 @@ interface ColeccionDetailClientProps {
   coleccionPersonal: ColeccionPersonal[];
   identificaciones: Identificacion[];
   cuerposAgua: CuerpoAgua[];
+  mediaColeccion: MediaColeccion[];
   especieUrl: string;
   coleccionesUrl: string;
 }
@@ -117,6 +119,7 @@ export default function ColeccionDetailClient({
   coleccionPersonal,
   identificaciones,
   cuerposAgua,
+  mediaColeccion,
   especieUrl,
   coleccionesUrl,
 }: ColeccionDetailClientProps) {
@@ -211,6 +214,135 @@ export default function ColeccionDetailClient({
           />
         </div>
       )}
+
+      {/* Multimedia */}
+      {mediaColeccion.length > 0 && (() => {
+        const tiposOrden: MediaColeccion["tipo_media"][] = ["imagen", "video", "audio", "pdf"];
+        const tipoLabels: Record<string, string> = {
+          imagen: "Imágenes",
+          video: "Videos",
+          audio: "Audio",
+          pdf: "Documentos PDF",
+        };
+
+        // Agrupar por tipo_media → categoria
+        const porTipo = tiposOrden
+          .map((tipo) => {
+            const items = mediaColeccion.filter((m) => m.tipo_media === tipo);
+            if (items.length === 0) return null;
+
+            // Agrupar por categoría
+            const porCategoria = new Map<string, MediaColeccion[]>();
+            for (const item of items) {
+              const catNombre = item.categoria?.nombre ?? "Sin categoría";
+              if (!porCategoria.has(catNombre)) porCategoria.set(catNombre, []);
+              porCategoria.get(catNombre)!.push(item);
+            }
+
+            return {tipo, label: tipoLabels[tipo], items, porCategoria};
+          })
+          .filter(Boolean) as {tipo: string; label: string; items: MediaColeccion[]; porCategoria: Map<string, MediaColeccion[]>}[];
+
+        return porTipo.map(({tipo, label, items, porCategoria}) => (
+          <Section key={tipo} title={`${label} (${items.length})`}>
+            <div className="space-y-6">
+              {[...porCategoria.entries()].map(([catNombre, catItems]) => (
+                <div key={catNombre}>
+                  <p className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">
+                    {catNombre}
+                  </p>
+
+                  {tipo === "imagen" ? (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {catItems.map((m) => (
+                        <a
+                          key={m.id_media_coleccion}
+                          href={m.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group overflow-hidden rounded-lg border"
+                        >
+                          <div className="aspect-square overflow-hidden bg-gray-100">
+                            <img
+                              src={m.url_thumbnail || m.url}
+                              alt={m.titulo || "Imagen"}
+                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          </div>
+                          {(m.titulo || m.autor) && (
+                            <div className="p-2">
+                              {m.titulo && <p className="text-xs font-medium text-gray-900 line-clamp-1">{m.titulo}</p>}
+                              {m.autor && <p className="text-[11px] text-gray-500">{m.autor}</p>}
+                            </div>
+                          )}
+                        </a>
+                      ))}
+                    </div>
+                  ) : tipo === "audio" ? (
+                    <div className="space-y-3">
+                      {catItems.map((m) => (
+                        <div key={m.id_media_coleccion} className="rounded-lg border bg-muted/20 p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              {m.titulo && <p className="text-sm font-medium">{m.titulo}</p>}
+                              {m.autor && <p className="text-xs text-gray-500">{m.autor}</p>}
+                              {m.duracion != null && (
+                                <p className="text-xs text-gray-400">{Math.floor(m.duracion / 60)}:{String(Math.floor(m.duracion % 60)).padStart(2, "0")}</p>
+                              )}
+                            </div>
+                          </div>
+                          <audio controls className="mt-2 w-full" preload="none">
+                            <source src={m.url} />
+                          </audio>
+                        </div>
+                      ))}
+                    </div>
+                  ) : tipo === "video" ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {catItems.map((m) => (
+                        <div key={m.id_media_coleccion} className="overflow-hidden rounded-lg border">
+                          <div className="aspect-video">
+                            <video controls className="h-full w-full" preload="none" poster={m.url_thumbnail || undefined}>
+                              <source src={m.url} />
+                            </video>
+                          </div>
+                          {(m.titulo || m.autor) && (
+                            <div className="p-3">
+                              {m.titulo && <p className="text-sm font-medium">{m.titulo}</p>}
+                              {m.autor && <p className="text-xs text-gray-500">{m.autor}</p>}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    /* PDF */
+                    <div className="space-y-2">
+                      {catItems.map((m) => (
+                        <a
+                          key={m.id_media_coleccion}
+                          href={m.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-red-50 text-red-600 text-xs font-bold">
+                            PDF
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-900 truncate">{m.titulo || "Documento"}</p>
+                            {m.autor && <p className="text-xs text-gray-500">{m.autor}</p>}
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        ));
+      })()}
 
       {/* Cantos */}
       {cantos.length > 0 && (

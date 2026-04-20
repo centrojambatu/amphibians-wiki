@@ -140,15 +140,10 @@ export default async function getFichaOrden(idFichaOrden: string) {
       .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
       .eq("taxon_id", taxonId),
     supabaseClient
-      .from("taxon_catalogo_awe_region_biogeografica")
-      .select(
-        `
-      *,
-      catalogo_awe!inner(*, tipo_catalogo_awe(*))
-    `,
-      )
-      .eq("taxon_id", taxonId)
-      .eq("catalogo_awe.tipo_catalogo_awe_id", 6),
+      .from("catalogo_awe")
+      .select(`*, taxon_catalogo_awe!inner(taxon_id), tipo_catalogo_awe(*)`)
+      .eq("taxon_catalogo_awe.taxon_id", taxonId)
+      .eq("tipo_catalogo_awe_id", 6),
     supabaseClient.rpc("get_taxon_geopolitica_hierarchy", {
       _taxon_id: taxonId,
     }),

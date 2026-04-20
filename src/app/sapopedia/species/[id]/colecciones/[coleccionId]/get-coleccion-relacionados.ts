@@ -114,6 +114,28 @@ export interface ColeccionPersonal {
   };
 }
 
+export interface MediaColeccion {
+  id_media_coleccion: number;
+  coleccion_id: number;
+  categoria_media_id: number;
+  tipo_media: "imagen" | "video" | "audio" | "pdf";
+  titulo: string | null;
+  descripcion: string | null;
+  url: string;
+  url_thumbnail: string | null;
+  autor: string | null;
+  fecha: string | null;
+  duracion: number | null;
+  metadata: Record<string, unknown> | null;
+  orden: number;
+  categoria?: {
+    id_categoria_media: number;
+    nombre: string;
+    tipo_media: string;
+    orden: number;
+  };
+}
+
 export interface CuerpoAgua {
   id_cuerpoagua: number;
   campobase_id: number | null;
@@ -333,4 +355,27 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
   }
 
   return (data || []) as CuerpoAgua[];
+}
+
+/**
+ * Obtiene los archivos multimedia de una colección, agrupados por categoría
+ */
+export async function getMediaByColeccion(coleccionId: number): Promise<MediaColeccion[]> {
+  const supabaseClient = createServiceClient();
+
+  const {data, error} = await supabaseClient
+    .from("media_coleccion")
+    .select("*, categoria:categoria_media_coleccion(id_categoria_media, nombre, tipo_media, orden)")
+    .eq("coleccion_id", coleccionId)
+    .eq("publicar", true)
+    .order("tipo_media", {ascending: true})
+    .order("orden", {ascending: true});
+
+  if (error) {
+    console.error("Error al obtener media de colección:", error);
+
+    return [];
+  }
+
+  return (data || []) as MediaColeccion[];
 }

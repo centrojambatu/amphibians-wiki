@@ -19,6 +19,11 @@ export interface SpeciesListItem {
   lista_roja_iucn: string | null;
   /** Fecha último avistamiento (ISO date, ej. para posiblemente extintas) */
   ultimo_avistamiento: string | null;
+  area_distribucion: number | null;
+  pluviocidad_min: number | null;
+  pluviocidad_max: number | null;
+  temperatura_min: number | null;
+  temperatura_max: number | null;
   has_distribucion_occidental: boolean;
   has_distribucion_oriental: boolean;
   // Catálogos para filtrado (slugs)
@@ -128,7 +133,7 @@ export default async function getAllEspecies(
   const RANK_PROVINCIAS = 3;
 
   const fichaEspecieIds: number[] = especies
-    .map((e: any) => e.especie_ficha_especie_id as number)
+    .map((e: any) => e.id_ficha_especie as number)
     .filter((id: number | null | undefined): id is number => id != null);
 
   // Consultas auxiliares en paralelo; listas grandes se fragmentan en chunks (data-n-plus-one / evitar .in() enorme)
@@ -177,7 +182,7 @@ export default async function getAllEspecies(
       Promise.resolve(
         supabaseClient
           .from("ficha_especie")
-          .select("id_ficha_especie, descubridor")
+          .select("id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max")
           .in("id_ficha_especie", chunk),
       ).then((r: { data: unknown[] | null; error: unknown }) => r),
     ),
@@ -308,13 +313,26 @@ export default async function getAllEspecies(
     }
   }
 
-  const descubridorMap = new Map<number, string | null>();
+  interface FichaExtra {
+    descubridor: string | null;
+    pluviocidad_min: number | null;
+    pluviocidad_max: number | null;
+    temperatura_min: number | null;
+    temperatura_max: number | null;
+  }
+  const fichaExtraMap = new Map<number, FichaExtra>();
   if (errorFichas) {
-    console.error("Error al obtener descubridor de ficha_especie:", errorFichas);
+    console.error("Error al obtener datos de ficha_especie:", errorFichas);
   } else if (fichasData.length > 0) {
-    const fichas = fichasData as { id_ficha_especie: number; descubridor: string | null }[];
+    const fichas = fichasData as (FichaExtra & { id_ficha_especie: number })[];
     for (const ficha of fichas) {
-      descubridorMap.set(ficha.id_ficha_especie, ficha.descubridor ?? null);
+      fichaExtraMap.set(ficha.id_ficha_especie, {
+        descubridor: ficha.descubridor ?? null,
+        pluviocidad_min: ficha.pluviocidad_min ?? null,
+        pluviocidad_max: ficha.pluviocidad_max ?? null,
+        temperatura_min: ficha.temperatura_min ?? null,
+        temperatura_max: ficha.temperatura_max ?? null,
+      });
     }
   }
 
@@ -364,7 +382,7 @@ export default async function getAllEspecies(
         especie.awe_areas_protegidas_privadas,
       );
 
-      const fichaEspecieId = especie.especie_ficha_especie_id ?? null;
+      const fichaEspecieId = especie.id_ficha_especie ?? null;
 
       return {
         id_taxon: taxonId,
@@ -373,7 +391,7 @@ export default async function getAllEspecies(
         nombre_comun: especie.nombre_comun,
         nombre_comun_ingles: nombreComunInglesMap.get(taxonId) ?? null,
         descubridor: fichaEspecieId
-          ? descubridorMap.get(fichaEspecieId) ?? null
+          ? fichaExtraMap.get(fichaEspecieId)?.descubridor ?? null
           : null,
         orden: especie.orden,
         familia: especie.familia,
@@ -385,6 +403,11 @@ export default async function getAllEspecies(
         rango_altitudinal_max: especie.rango_altitudinal_max,
         lista_roja_iucn: listaRojaMap.get(taxonId) || null,
         ultimo_avistamiento: especie.ultimo_avistamiento ?? null,
+        area_distribucion: especie.area_distribucion ?? null,
+        pluviocidad_min: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.pluviocidad_min ?? null : null,
+        pluviocidad_max: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.pluviocidad_max ?? null : null,
+        temperatura_min: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.temperatura_min ?? null : null,
+        temperatura_max: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.temperatura_max ?? null : null,
         has_distribucion_occidental: hasOccidental,
         has_distribucion_oriental: hasOriental,
         catalogos: {

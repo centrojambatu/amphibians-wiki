@@ -91,6 +91,38 @@ export function filterEspecies(
       if (!hasMatch) return false;
     }
 
+    const isDefaultArea =
+      filters.areaDistribucion.min === 1 && filters.areaDistribucion.max === 100000;
+    if (!isDefaultArea) {
+      const area = especie.area_distribucion;
+      if (area == null) return false;
+      if (area < filters.areaDistribucion.min || area > filters.areaDistribucion.max) return false;
+    }
+
+    const isDefaultPluvio =
+      filters.pluviocidad.min === 640 && filters.pluviocidad.max === 4000;
+    if (!isDefaultPluvio) {
+      const pMin = especie.pluviocidad_min;
+      const pMax = especie.pluviocidad_max;
+      if (pMin == null && pMax == null) return false;
+      const specMin = pMin ?? pMax ?? 0;
+      const specMax = pMax ?? pMin ?? 0;
+      const hasOverlap = specMin <= filters.pluviocidad.max && specMax >= filters.pluviocidad.min;
+      if (!hasOverlap) return false;
+    }
+
+    const isDefaultTemp =
+      filters.temperatura.min === 5 && filters.temperatura.max === 25;
+    if (!isDefaultTemp) {
+      const tMin = especie.temperatura_min;
+      const tMax = especie.temperatura_max;
+      if (tMin == null && tMax == null) return false;
+      const specMin = tMin ?? tMax ?? 0;
+      const specMax = tMax ?? tMin ?? 0;
+      const hasOverlap = specMin <= filters.temperatura.max && specMax >= filters.temperatura.min;
+      if (!hasOverlap) return false;
+    }
+
     if (filters.distribucion.length > 0) {
       const matchesDistribucion = filters.distribucion.some((d) => {
         if (d === "occidental") return especie.has_distribucion_occidental;

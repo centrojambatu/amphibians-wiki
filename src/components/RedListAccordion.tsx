@@ -316,14 +316,14 @@ export default function RedListAccordion({
               >
                 {species.nombre_cientifico}
               </Link>
-              {species.descubridor && (
+              {/* {species.descubridor && (
                 <span
                   dangerouslySetInnerHTML={{
                     __html: processHTMLLinks(species.descubridor),
                   }}
                   className="text-xs text-gray-500"
                 />
-              )}
+              )} */}
             </div>
             {(species.nombre_comun || species.nombre_comun_ingles) && (
               <div className="text-muted-foreground mt-1 text-xs">
@@ -365,14 +365,14 @@ export default function RedListAccordion({
               >
                 {species.nombre_cientifico}
               </Link>
-              {species.descubridor && (
+              {/* {species.descubridor && (
                 <span
                   dangerouslySetInnerHTML={{
                     __html: processHTMLLinks(species.descubridor),
                   }}
                   className="text-xs text-gray-500"
                 />
-              )}
+              )} */}
             </div>
             {(species.nombre_comun || species.nombre_comun_ingles) && (
               <div className="text-muted-foreground mt-1 text-xs">
@@ -408,7 +408,7 @@ export default function RedListAccordion({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
-                  240000 km²
+                  {species.area_distribucion != null ? `${species.area_distribucion.toLocaleString()} km²` : "—"}
                 </div>
               </TooltipTrigger>
               <TooltipContent>

@@ -290,9 +290,16 @@ export default function FiltersPanel({
       );
     }
 
+    // Ordenar: "No registrada" primero
+    const sortedItems = [...catalogItems].sort((a, b) => {
+      const aNo = a.nombre.toLowerCase().includes("no registrada") ? 0 : 1;
+      const bNo = b.nombre.toLowerCase().includes("no registrada") ? 0 : 1;
+      return aNo - bNo;
+    });
+
     return (
       <div className="flex flex-col gap-2">
-        {catalogItems.map((item) => {
+        {sortedItems.map((item) => {
           const isSelected = (filters[filterKey] as string[]).includes(
             item.value,
           );
@@ -542,7 +549,7 @@ export default function FiltersPanel({
               <AccordionItem value="regionesBiogeograficas">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Regiones biogeográficas</span>
+                    <span className="font-semibold">Sectores biogeográficos</span>
                     {filters.regionesBiogeograficas.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
                         {getActiveFilterNames(catalogs.regionesBiogeograficas, "regionesBiogeograficas").join(", ")}
@@ -935,12 +942,12 @@ export default function FiltersPanel({
             </AccordionItem>
           )}
 
-          {/* Regiones Biogeográficas - desde Supabase */}
+          {/* Sectores Biogeográficos - desde Supabase */}
           {catalogs.regionesBiogeograficas.length > 0 && (
             <AccordionItem value="regionesBiogeograficas">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Regiones biogeográficas</span>
+                  <span className="font-semibold">Sectores biogeográficos</span>
                   {filters.regionesBiogeograficas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
