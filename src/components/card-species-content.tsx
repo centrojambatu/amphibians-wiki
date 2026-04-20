@@ -901,6 +901,47 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 )}
               </CardContent>
             </Card>
+            {/* Nombres Comunes */}
+            {fichaEspecie.nombresComunes && (() => {
+              const nc = fichaEspecie.nombresComunes;
+              const idiomas: {key: string; label: string; flag: string}[] = [
+                {key: "nombre_comun_espanol", label: "Español", flag: "🇪🇸"},
+                {key: "nombre_comun_ingles", label: "English", flag: "🇬🇧"},
+                {key: "nombre_comun_aleman", label: "Deutsch", flag: "🇩🇪"},
+                {key: "nombre_comun_frances", label: "Français", flag: "🇫🇷"},
+                {key: "nombre_comun_portugues", label: "Português", flag: "🇧🇷"},
+                {key: "nombre_comun_italiano", label: "Italiano", flag: "🇮🇹"},
+                {key: "nombre_comun_holandes", label: "Nederlands", flag: "🇳🇱"},
+                {key: "nombre_comun_chino", label: "中文", flag: "🇨🇳"},
+                {key: "nombre_comun_japones", label: "日本語", flag: "🇯🇵"},
+                {key: "nombre_comun_ruso", label: "Русский", flag: "🇷🇺"},
+                {key: "nombre_comun_arabe", label: "العربية", flag: "🇸🇦"},
+                {key: "nombre_comun_hindu", label: "हिन्दी", flag: "🇮🇳"},
+              ];
+              const conNombre = idiomas.filter((i) => nc[i.key]);
+              if (conNombre.length === 0) return null;
+
+              return (
+                <Card className="">
+                  <CardHeader>
+                    <CardTitle className="text-base">Nombres Comunes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {conNombre.map((idioma) => (
+                        <div key={idioma.key} className="flex items-center gap-2 rounded-md border border-gray-100 px-3 py-2">
+                          <span className="text-lg">{idioma.flag}</span>
+                          <div className="min-w-0">
+                            <p className="text-xs text-gray-500">{idioma.label}</p>
+                            <p className="truncate text-sm font-medium text-gray-900">{nc[idioma.key]}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
             {/* {Identificacion} */}
             <Card className="">
               <CardHeader>
@@ -1260,9 +1301,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div>
                     <h4 className="mb-2 text-sm font-semibold">Zonas Altitudinales</h4>
                     {fichaEspecie.distributions && fichaEspecie.distributions.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {(() => {
-                          // Eliminar duplicados basándose en id_taxon_catalogo_awe
                           const uniqueDistributions = new Map();
 
                           fichaEspecie.distributions.forEach((categoria: any) => {
@@ -1278,7 +1318,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             (categoria: any, index: number) => (
                               <div
                                 key={`zona-altitudinal-${categoria.id_taxon_catalogo_awe || categoria.catalogo_awe_id}-${index}`}
+                                className="flex items-start gap-2"
                               >
+                                <span className="text-muted-foreground text-xs">•</span>
                                 <span className="text-muted-foreground text-xs">
                                   {categoria.catalogo_awe?.nombre}
                                 </span>
@@ -1322,15 +1364,16 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 8. Regiones Biogeográficas */}
+                  {/* 8. Sectores Biogeográficos */}
                   <div>
-                    <h4 className="mb-2 text-sm font-semibold">Regiones Biogeográficas</h4>
+                    <h4 className="mb-2 text-sm font-semibold">Sectores Biogeográficos</h4>
                     {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
-                      <div className="space-y-2">
-                        {fichaEspecie.dataRegionBio.map((region: any) => (
-                          <div key={region.id_taxon_catalogo_awe}>
+                      <div className="space-y-1">
+                        {fichaEspecie.dataRegionBio.map((region: any, index: number) => (
+                          <div key={region.id_catalogo_awe || region.id_taxon_catalogo_awe || index} className="flex items-start gap-2">
+                            <span className="text-muted-foreground text-xs">•</span>
                             <span className="text-muted-foreground text-xs">
-                              {region.catalogo_awe?.nombre}
+                              {region.nombre || region.catalogo_awe?.nombre}
                             </span>
                           </div>
                         ))}
@@ -1494,48 +1537,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </div>
               </CardContent>
             </Card>
-            {/* Nombres Comunes */}
-            {fichaEspecie.nombresComunes && (() => {
-              const nc = fichaEspecie.nombresComunes;
-              const idiomas: {key: string; label: string; flag: string}[] = [
-                {key: "nombre_comun_espanol", label: "Español", flag: "🇪🇸"},
-                {key: "nombre_comun_ingles", label: "English", flag: "🇬🇧"},
-                {key: "nombre_comun_aleman", label: "Deutsch", flag: "🇩🇪"},
-                {key: "nombre_comun_frances", label: "Français", flag: "🇫🇷"},
-                {key: "nombre_comun_portugues", label: "Português", flag: "🇧🇷"},
-                {key: "nombre_comun_italiano", label: "Italiano", flag: "🇮🇹"},
-                {key: "nombre_comun_holandes", label: "Nederlands", flag: "🇳🇱"},
-                {key: "nombre_comun_chino", label: "中文", flag: "🇨🇳"},
-                {key: "nombre_comun_japones", label: "日本語", flag: "🇯🇵"},
-                {key: "nombre_comun_ruso", label: "Русский", flag: "🇷🇺"},
-                {key: "nombre_comun_arabe", label: "العربية", flag: "🇸🇦"},
-                {key: "nombre_comun_hindu", label: "हिन्दी", flag: "🇮🇳"},
-              ];
-              const conNombre = idiomas.filter((i) => nc[i.key]);
-              if (conNombre.length === 0) return null;
-
-              return (
-                <Card className="">
-                  <CardHeader>
-                    <CardTitle className="text-base">Nombres Comunes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {conNombre.map((idioma) => (
-                        <div key={idioma.key} className="flex items-center gap-2 rounded-md border border-gray-100 px-3 py-2">
-                          <span className="text-lg">{idioma.flag}</span>
-                          <div className="min-w-0">
-                            <p className="text-xs text-gray-500">{idioma.label}</p>
-                            <p className="text-sm font-medium text-gray-900 truncate">{nc[idioma.key]}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })()}
-
             {/* Conservación */}
             <Card className="">
               <CardHeader>

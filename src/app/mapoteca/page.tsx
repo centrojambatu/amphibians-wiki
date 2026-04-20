@@ -295,7 +295,7 @@ function CatalogoMultiSelect({
                     >
                       <div className="flex items-center gap-2.5">
                         <FilterCheckbox checked={selected.includes(cat)} />
-                        <span className="font-mono text-sm">{cat.replace("::", " ")}</span>
+                        <span className="font-mono text-sm">{(() => { const [museo, num] = cat.split("::"); const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo; return [acr, num].filter(Boolean).join(" "); })()}</span>
                       </div>
                     </CommandItem>
                   ))}
@@ -312,7 +312,7 @@ function CatalogoMultiSelect({
               key={cat}
               className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 font-mono text-[11px] text-orange-800"
             >
-              {cat.replace("::", " ")}
+              {(() => { const [museo, num] = cat.split("::"); const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo; return [acr, num].filter(Boolean).join(" "); })()}
               <button type="button" onClick={() => toggleCatalogo(cat)}>
                 <X className="h-3 w-3" />
               </button>

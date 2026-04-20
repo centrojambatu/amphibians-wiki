@@ -17,7 +17,7 @@ function CenterButton({ latitud, longitud }: { latitud: number; longitud: number
   return (
     <button
       type="button"
-      onClick={() => map.setView([latitud, longitud], 10, { animate: true })}
+      onClick={() => map.setView([latitud, longitud], 7, { animate: true })}
       title="Centrar"
       className="absolute bottom-2 right-2 z-[1000] flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 bg-white shadow-sm hover:bg-gray-50 transition-colors"
       style={{ lineHeight: 1 }}
@@ -35,13 +35,13 @@ function CenterButton({ latitud, longitud }: { latitud: number; longitud: number
 
 export default function ColeccionMiniMap({ latitud, longitud, localidad, provincia }: ColeccionMiniMapProps) {
   return (
-    <div className="relative mt-3 overflow-hidden rounded-lg border border-gray-200" style={{ height: 200 }}>
+    <div className="relative h-full w-full overflow-hidden">
       <MapContainer
         center={[latitud, longitud]}
-        zoom={10}
+        zoom={7}
         style={{ height: "100%", width: "100%" }}
-        zoomControl={false}
-        scrollWheelZoom={false}
+        zoomControl={true}
+        scrollWheelZoom={true}
         attributionControl={false}
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />

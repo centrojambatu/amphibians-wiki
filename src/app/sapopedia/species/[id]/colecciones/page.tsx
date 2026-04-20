@@ -117,11 +117,12 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
           {colecciones.map((coleccion: ColeccionCompleta) => {
             const coleccionUrl = `${baseUrl}/${coleccion.id_coleccion}`;
             const fecha = coleccion.fecha_coleccion
-              ? new Date(coleccion.fecha_coleccion).toLocaleDateString("es-ES", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
+              ? (() => {
+                  const d = new Date(coleccion.fecha_coleccion);
+                  const day = String(d.getDate()).padStart(2, "0");
+                  const month = d.toLocaleDateString("es-ES", {month: "long"});
+                  return `${day} ${month.charAt(0).toUpperCase() + month.slice(1)} de ${d.getFullYear()}`;
+                })()
               : null;
 
             const acronimo = coleccion.catalogo_museo?.includes(" - ")

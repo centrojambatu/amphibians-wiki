@@ -15,8 +15,11 @@ import "leaflet/dist/leaflet.css";
 import type { UbicacionEspecie, MapotecaResponse } from "@/app/api/mapoteca/route";
 
 // Canvas renderer para mejor rendimiento con miles de puntos
-const canvasRenderer =
-  typeof window !== "undefined" ? L.canvas({ padding: 0.5 }) : undefined;
+// Se crea por instancia dentro del componente para evitar errores al re-renderizar
+function createCanvasRenderer() {
+  if (typeof window === "undefined") return undefined;
+  return L.canvas({ padding: 0.5 });
+}
 
 // Caché en memoria a nivel de módulo — persiste mientras el usuario navega sin recargar
 interface CacheEntry {
@@ -327,7 +330,7 @@ function RegistroInfo({
     <div className="text-[11px]" style={{ lineHeight: "1.2" }}>
       {(u.catalogo_museo || u.numero_museo) && (
         <span className="font-bold text-[#2a6496]">
-          {[u.catalogo_museo, u.numero_museo].filter(Boolean).join(" ").replace(/Fundación/g, "Centro")}
+          {[u.catalogo_museo?.includes(" - ") ? u.catalogo_museo.split(" - ").pop() : u.catalogo_museo, u.numero_museo].filter(Boolean).join(" ")}
         </span>
       )}
       {(u.catalogo_museo || u.numero_museo) && <br />}
@@ -483,6 +486,8 @@ export default function MapotecaMap({
     zoom: 7,
   });
   const markerRefs = useRef<Map<string, L.CircleMarker>>(new Map());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const canvasRenderer = useMemo(() => createCanvasRenderer(), []);
 
   // Restore saved map state from sessionStorage
   const [savedMapState] = useState<{

@@ -114,6 +114,21 @@ export interface ColeccionPersonal {
   };
 }
 
+export interface FotografiaColeccion {
+  id_fotografia: number;
+  coleccion_id: number | null;
+  nombre: string | null;
+  enlace: string | null;
+  autor: string | null;
+  fecha: string | null;
+  localidad: string | null;
+  descripcion: string | null;
+  observaciones: string | null;
+  catalogo_museo: string | null;
+  tipo_licencia: string | null;
+  orden: number | null;
+}
+
 export interface MediaColeccion {
   id_media_coleccion: number;
   coleccion_id: number;
@@ -363,9 +378,10 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
 export async function getMediaByColeccion(coleccionId: number): Promise<MediaColeccion[]> {
   const supabaseClient = createServiceClient();
 
+  // Query sin join para evitar errores de RLS en la tabla relacionada
   const {data, error} = await supabaseClient
     .from("media_coleccion")
-    .select("*, categoria:categoria_media_coleccion(id_categoria_media, nombre, tipo_media, orden)")
+    .select("*")
     .eq("coleccion_id", coleccionId)
     .eq("publicar", true)
     .order("tipo_media", {ascending: true})
@@ -373,9 +389,53 @@ export async function getMediaByColeccion(coleccionId: number): Promise<MediaCol
 
   if (error) {
     console.error("Error al obtener media de colección:", error);
-
     return [];
   }
 
-  return (data || []) as MediaColeccion[];
+  if (!data || data.length === 0) return [];
+
+  // Obtener categorías por separado
+  const catIds = [...new Set((data as any[]).map((d) => d.categoria_media_id).filter(Boolean))];
+  let categoriasMap = new Map<number, {id_categoria_media: number; nombre: string; tipo_media: string; orden: number}>();
+
+  if (catIds.length > 0) {
+    const {data: cats} = await supabaseClient
+      .from("categoria_media_coleccion")
+      .select("id_categoria_media, nombre, tipo_media, orden")
+      .in("id_categoria_media", catIds);
+
+    if (cats) {
+      for (const cat of cats as any[]) {
+        categoriasMap.set(cat.id_categoria_media, cat);
+      }
+    }
+  }
+
+  return (data as any[]).map((row) => ({
+    ...row,
+    categoria: categoriasMap.get(row.categoria_media_id) ?? null,
+  })) as MediaColeccion[];
+}
+
+/**
+ * Obtiene las fotografías vinculadas a una colección
+ */
+export async function getFotografiasByColeccion(coleccionId: number): Promise<FotografiaColeccion[]> {
+  const supabaseClient = createServiceClient();
+
+  const {data, error} = await supabaseClient
+    .from("fotografia")
+    .select("*")
+    .eq("coleccion_id", coleccionId)
+    .order("orden", {ascending: true});
+
+  if (error) {
+    console.error("Error al obtener fotografías de colección:", error);
+    return [];
+  }
+
+  return (data || []).map((f: any) => ({
+    ...f,
+    descripcion: f["descripción"] ?? null,
+  })) as FotografiaColeccion[];
 }

@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Search, RotateCcw, X, Check } from "lucide-react";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import {Search, RotateCcw, X, Check} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Slider } from "@/components/ui/slider";
+import {Slider} from "@/components/ui/slider";
 import {
   Command,
   CommandEmpty,
@@ -19,30 +19,26 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { SpeciesListItem } from "@/app/sapopedia/get-all-especies";
-import { FilterCatalogs } from "@/app/sapopedia/get-filter-catalogs";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Input} from "@/components/ui/input";
+import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
+import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
 
 export interface FiltersState {
   provincia: string[];
   listaRoja: string[];
   endemismo: string[];
-  rangoAltitudinal: { min: number; max: number };
-  areaDistribucion: { min: number; max: number };
+  rangoAltitudinal: {min: number; max: number};
+  areaDistribucion: {min: number; max: number};
   ecosistemas: string[];
   regionesBiogeograficas: string[];
   reservasBiosfera: string[];
   bosquesProtegidos: string[];
   areasProtegidasEstado: string[];
   areasProtegidasPrivadas: string[];
-  pluviocidad: { min: number; max: number };
-  temperatura: { min: number; max: number };
+  pluviocidad: {min: number; max: number};
+  temperatura: {min: number; max: number};
   distribucion: string[]; // "oriental" | "occidental"
 }
 
@@ -52,16 +48,16 @@ export const DEFAULT_FILTERS_STATE: FiltersState = {
   provincia: [],
   listaRoja: [],
   endemismo: [],
-  rangoAltitudinal: { min: 0, max: 4800 },
-  areaDistribucion: { min: 1, max: 100000 },
+  rangoAltitudinal: {min: 0, max: 4800},
+  areaDistribucion: {min: 1, max: 100000},
   ecosistemas: [],
   regionesBiogeograficas: [],
   reservasBiosfera: [],
   bosquesProtegidos: [],
   areasProtegidasEstado: [],
   areasProtegidasPrivadas: [],
-  pluviocidad: { min: 640, max: 4000 },
-  temperatura: { min: 5, max: 25 },
+  pluviocidad: {min: 640, max: 4000},
+  temperatura: {min: 5, max: 25},
   distribucion: [],
 };
 
@@ -198,8 +194,7 @@ export default function FiltersPanel({
     const selectedOrders = orderResults.slice(0, maxOrders);
     const selectedFamilies = familyResults.slice(0, maxFamilies);
     const selectedGenera = genusResults.slice(0, maxGenera);
-    const usedSlots =
-      selectedOrders.length + selectedFamilies.length + selectedGenera.length;
+    const usedSlots = selectedOrders.length + selectedFamilies.length + selectedGenera.length;
     const remainingSlots = Math.max(0, maxTotal - usedSlots);
 
     const combinedResults: SearchResult[] = [
@@ -224,13 +219,13 @@ export default function FiltersPanel({
       newValues = [...currentValues, value];
     }
 
-    updateFilters({ ...filters, [key]: newValues });
+    updateFilters({...filters, [key]: newValues});
   };
 
   const handleSliderChange = (key: keyof FiltersState, values: number[]) => {
     updateFilters({
       ...filters,
-      [key]: { min: values[0], max: values[1] },
+      [key]: {min: values[0], max: values[1]},
     });
   };
 
@@ -271,9 +266,7 @@ export default function FiltersPanel({
 
     return catalogItems
       .filter((item) => activeValues.includes(item.value))
-      .map((item) =>
-        useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre,
-      );
+      .map((item) => (useSigla && item.sigla ? `${item.nombre} (${item.sigla})` : item.nombre));
   };
 
   // Componente reutilizable para renderizar opciones de catálogo
@@ -283,26 +276,21 @@ export default function FiltersPanel({
     useSigla = false,
   ) => {
     if (!catalogItems || catalogItems.length === 0) {
-      return (
-        <p className="py-2 text-xs text-gray-500">
-          No hay opciones disponibles
-        </p>
-      );
+      return <p className="py-2 text-xs text-gray-500">No hay opciones disponibles</p>;
     }
 
     // Ordenar: "No registrada" primero
     const sortedItems = [...catalogItems].sort((a, b) => {
       const aNo = a.nombre.toLowerCase().includes("no registrada") ? 0 : 1;
       const bNo = b.nombre.toLowerCase().includes("no registrada") ? 0 : 1;
+
       return aNo - bNo;
     });
 
     return (
       <div className="flex flex-col gap-2">
         {sortedItems.map((item) => {
-          const isSelected = (filters[filterKey] as string[]).includes(
-            item.value,
-          );
+          const isSelected = (filters[filterKey] as string[]).includes(item.value);
 
           return (
             <Button
@@ -319,9 +307,7 @@ export default function FiltersPanel({
               {useSigla && item.sigla ? (
                 <>
                   {item.nombre}
-                  <span className="mx-1 font-semibold text-gray-400">
-                    |
-                  </span>
+                  <span className="mx-1 font-semibold text-gray-400">|</span>
                   {item.sigla}
                 </>
               ) : (
@@ -336,23 +322,23 @@ export default function FiltersPanel({
 
   if (embedded) {
     return (
-      <div className="flex flex-col h-full min-h-0 w-full">
+      <div className="flex h-full min-h-0 w-full flex-col">
         {onSearchQueryChange != null && (
           <div className="flex-shrink-0 px-6 pb-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
+                className="pr-10 pl-10"
+                placeholder="me apfico o común"
                 type="text"
-                placeholder="Nombre científico o común"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10"
               />
               {searchQuery && (
                 <Button
-                  variant="ghost"
+                  className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
                   size="sm"
-                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                  variant="ghost"
                   onClick={() => setSearchQuery("")}
                 >
                   <X className="h-4 w-4" />
@@ -360,24 +346,22 @@ export default function FiltersPanel({
               )}
             </div>
             {searchQuery && (
-              <p className="mt-2 text-xs text-gray-500">
-                Filtrando: &quot;{searchQuery}&quot;
-              </p>
+              <p className="mt-2 text-xs text-gray-500">Filtrando: &quot;{searchQuery}&quot;</p>
             )}
           </div>
         )}
-        <div className="flex-shrink-0 py-2 flex justify-end px-6">
+        <div className="flex flex-shrink-0 justify-end px-6 py-2">
           <Button
+            className="gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
             type="button"
             variant="ghost"
             onClick={resetFilters}
-            className="gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
             Limpiar
           </Button>
         </div>
-        <div className="min-h-0 w-full flex-1 overflow-y-auto max-h-[75vh] border-t mt-2 px-6">
+        <div className="mt-2 max-h-[75vh] min-h-0 w-full flex-1 overflow-y-auto border-t px-6">
           <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b" type="multiple">
             {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
               <AccordionItem value="listaRoja">
@@ -391,7 +375,9 @@ export default function FiltersPanel({
                     )}
                   </div>
                 </AccordionTrigger>
-                <AccordionContent>{renderCatalogOptions(catalogs.listaRoja, "listaRoja", true)}</AccordionContent>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.listaRoja, "listaRoja", true)}
+                </AccordionContent>
               </AccordionItem>
             )}
             <AccordionItem value="endemismo">
@@ -400,7 +386,9 @@ export default function FiltersPanel({
                   <span className="font-semibold">Endemismo</span>
                   {filters.endemismo.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.endemismo.map((val) => (val === "endemic" ? "Endémicas" : "No endémicas")).join(", ")}
+                      {filters.endemismo
+                        .map((val) => (val === "endemic" ? "Endémicas" : "No endémicas"))
+                        .join(", ")}
                     </span>
                   )}
                 </div>
@@ -408,16 +396,20 @@ export default function FiltersPanel({
               <AccordionContent>
                 <div className="flex flex-col gap-2">
                   {[
-                    { value: "endemic", label: "Endémicas" },
-                    { value: "non-endemic", label: "No endémicas" },
+                    {value: "endemic", label: "Endémicas"},
+                    {value: "non-endemic", label: "No endémicas"},
                   ].map((option) => {
                     const isSelected = filters.endemismo.includes(option.value);
+
                     return (
                       <Button
                         key={option.value}
                         className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
                         size="sm"
-                        style={{ borderColor: isSelected ? undefined : "#e8e8e8", color: isSelected ? undefined : "#2d2d2d" }}
+                        style={{
+                          borderColor: isSelected ? undefined : "#e8e8e8",
+                          color: isSelected ? undefined : "#2d2d2d",
+                        }}
                         variant={isSelected ? "default" : "outline"}
                         onClick={() => handleCategoricalChange("endemismo", option.value)}
                       >
@@ -440,7 +432,9 @@ export default function FiltersPanel({
                     )}
                   </div>
                 </AccordionTrigger>
-                <AccordionContent>{renderCatalogOptions(catalogs.provincias, "provincia")}</AccordionContent>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.provincias, "provincia")}
+                </AccordionContent>
               </AccordionItem>
             )}
             {/* Pisos altitudinales (gráfico + slider + distribución) */}
@@ -451,10 +445,10 @@ export default function FiltersPanel({
                   <div className="mt-1 flex flex-wrap gap-2">
                     {(filters.rangoAltitudinal.min !== 0 ||
                       filters.rangoAltitudinal.max !== 4800) && (
-                        <span className="text-xs font-normal text-gray-500">
-                          {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
-                        </span>
-                      )}
+                      <span className="text-xs font-normal text-gray-500">
+                        {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                      </span>
+                    )}
                     {filters.distribucion.length > 0 && (
                       <span className="text-xs font-normal text-gray-500">
                         {filters.distribucion.join(", ")}
@@ -467,15 +461,51 @@ export default function FiltersPanel({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex flex-col gap-2">
-                      <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "occidental")}>
-                        <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("occidental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
-                          <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("occidental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                      <label
+                        className="group flex cursor-pointer items-center gap-2"
+                        onClick={() => handleCategoricalChange("distribucion", "occidental")}
+                      >
+                        <div
+                          className={[
+                            "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-all duration-150",
+                            filters.distribucion.includes("occidental")
+                              ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+                              : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
+                          ].join(" ")}
+                        >
+                          <Check
+                            className={[
+                              "h-[10px] w-[10px] text-white transition-all duration-150",
+                              filters.distribucion.includes("occidental")
+                                ? "scale-100 opacity-100"
+                                : "scale-50 opacity-0",
+                            ].join(" ")}
+                            strokeWidth={3}
+                          />
                         </div>
                         <span className="text-sm text-gray-700">Occidental</span>
                       </label>
-                      <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "oriental")}>
-                        <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("oriental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
-                          <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("oriental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                      <label
+                        className="group flex cursor-pointer items-center gap-2"
+                        onClick={() => handleCategoricalChange("distribucion", "oriental")}
+                      >
+                        <div
+                          className={[
+                            "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-all duration-150",
+                            filters.distribucion.includes("oriental")
+                              ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+                              : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
+                          ].join(" ")}
+                        >
+                          <Check
+                            className={[
+                              "h-[10px] w-[10px] text-white transition-all duration-150",
+                              filters.distribucion.includes("oriental")
+                                ? "scale-100 opacity-100"
+                                : "scale-50 opacity-0",
+                            ].join(" ")}
+                            strokeWidth={3}
+                          />
                         </div>
                         <span className="text-sm text-gray-700">Oriental</span>
                       </label>
@@ -487,8 +517,8 @@ export default function FiltersPanel({
                       <span>{filters.rangoAltitudinal.max}m</span>
                     </div>
                     <Slider
-                      min={0}
                       max={4800}
+                      min={0}
                       step={100}
                       value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
                       onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
@@ -506,8 +536,12 @@ export default function FiltersPanel({
             <AccordionItem value="areaDistribucion">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span> EOO <span className="ml-1 font-normal text-gray-500">km²</span></span>
-                  {(filters.areaDistribucion.min !== 1 || filters.areaDistribucion.max !== 100000) && (
+                  <span className="font-semibold">
+                    Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span>{" "}
+                    EOO <span className="ml-1 font-normal text-gray-500">km²</span>
+                  </span>
+                  {(filters.areaDistribucion.min !== 1 ||
+                    filters.areaDistribucion.max !== 100000) && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
                     </span>
@@ -521,8 +555,8 @@ export default function FiltersPanel({
                     <span>{filters.areaDistribucion.max} km²</span>
                   </div>
                   <Slider
-                    min={1}
                     max={100000}
+                    min={1}
                     step={100}
                     value={[filters.areaDistribucion.min, filters.areaDistribucion.max]}
                     onValueChange={(values) => handleSliderChange("areaDistribucion", values)}
@@ -542,7 +576,9 @@ export default function FiltersPanel({
                     )}
                   </div>
                 </AccordionTrigger>
-                <AccordionContent>{renderCatalogOptions(catalogs.ecosistemas, "ecosistemas")}</AccordionContent>
+                <AccordionContent>
+                  {renderCatalogOptions(catalogs.ecosistemas, "ecosistemas")}
+                </AccordionContent>
               </AccordionItem>
             )}
             {catalogs.regionesBiogeograficas.length > 0 && (
@@ -552,7 +588,10 @@ export default function FiltersPanel({
                     <span className="font-semibold">Sectores biogeográficos</span>
                     {filters.regionesBiogeograficas.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {getActiveFilterNames(catalogs.regionesBiogeograficas, "regionesBiogeograficas").join(", ")}
+                        {getActiveFilterNames(
+                          catalogs.regionesBiogeograficas,
+                          "regionesBiogeograficas",
+                        ).join(", ")}
                       </span>
                     )}
                   </div>
@@ -569,7 +608,9 @@ export default function FiltersPanel({
                     <span className="font-semibold">Reservas de la biosfera</span>
                     {filters.reservasBiosfera.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(", ")}
+                        {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(
+                          ", ",
+                        )}
                       </span>
                     )}
                   </div>
@@ -586,7 +627,9 @@ export default function FiltersPanel({
                     <span className="font-semibold">Bosques protegidos</span>
                     {filters.bosquesProtegidos.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(", ")}
+                        {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(
+                          ", ",
+                        )}
                       </span>
                     )}
                   </div>
@@ -600,10 +643,16 @@ export default function FiltersPanel({
               <AccordionItem value="areasProtegidasEstado">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Áreas protegidas Estado <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP</span>
+                    <span className="font-semibold">
+                      Áreas protegidas Estado{" "}
+                      <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP
+                    </span>
                     {filters.areasProtegidasEstado.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {getActiveFilterNames(catalogs.areasProtegidasEstado, "areasProtegidasEstado").join(", ")}
+                        {getActiveFilterNames(
+                          catalogs.areasProtegidasEstado,
+                          "areasProtegidasEstado",
+                        ).join(", ")}
                       </span>
                     )}
                   </div>
@@ -620,13 +669,19 @@ export default function FiltersPanel({
                     <span className="font-semibold">Áreas protegidas privadas </span>
                     {filters.areasProtegidasPrivadas.length > 0 && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {getActiveFilterNames(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas").join(", ")}
+                        {getActiveFilterNames(
+                          catalogs.areasProtegidasPrivadas,
+                          "areasProtegidasPrivadas",
+                        ).join(", ")}
                       </span>
                     )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  {renderCatalogOptions(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas")}
+                  {renderCatalogOptions(
+                    catalogs.areasProtegidasPrivadas,
+                    "areasProtegidasPrivadas",
+                  )}
                 </AccordionContent>
               </AccordionItem>
             )}
@@ -637,19 +692,20 @@ export default function FiltersPanel({
   }
 
   return (
-    <div className="sticky top-0 flex h-auto lg:h-screen lg:max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div className="sticky top-0 flex h-auto flex-col overflow-hidden rounded-lg border border-gray-200 bg-white lg:h-screen lg:max-h-screen">
       {/* Buscador y Limpiar */}
-      <div className="flex-shrink-0 border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 space-y-3">
+      <div className="flex-shrink-0 space-y-3 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 shrink-0 text-muted-foreground pointer-events-none" />
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 shrink-0 -translate-y-1/2" />
               <Input
                 className="w-full pl-10"
                 placeholder="Nombre científico o común"
                 value={searchQuery}
                 onChange={(e) => {
                   const value = e.target.value;
+
                   setSearchQuery(value);
                   setOpen(value.length >= 2);
                   onSearchQueryChange?.(value);
@@ -670,9 +726,7 @@ export default function FiltersPanel({
             <Command>
               <CommandList>
                 {searchResults.length === 0 && searchQuery.length >= 2 && (
-                  <CommandEmpty className="px-4 py-6">
-                    No se encontraron resultados.
-                  </CommandEmpty>
+                  <CommandEmpty className="px-4 py-6">No se encontraron resultados.</CommandEmpty>
                 )}
                 {searchResults.length > 0 && (
                   <CommandGroup>
@@ -687,9 +741,7 @@ export default function FiltersPanel({
                             <span className="text-muted-foreground text-xs">
                               {getTypeLabel(result.type)}
                             </span>
-                            <span className="font-medium italic">
-                              {result.name}
-                            </span>
+                            <span className="font-medium italic">{result.name}</span>
                           </div>
                           {result.commonName && (
                             <span className="text-muted-foreground text-xs">
@@ -707,10 +759,10 @@ export default function FiltersPanel({
         </Popover>
         <div className="flex justify-end">
           <Button
+            className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
             type="button"
             variant="ghost"
             onClick={resetFilters}
-            className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
             Limpiar
@@ -718,8 +770,11 @@ export default function FiltersPanel({
         </div>
       </div>
 
-      <div className="filters-panel-scroll min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 pt-0 pb-3 sm:pb-4 max-h-[60vh] lg:max-h-none">
-        <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:-mx-4 [&>[data-slot=accordion-item]]:px-4 sm:[&>[data-slot=accordion-item]]:-mx-6 sm:[&>[data-slot=accordion-item]]:px-6" type="multiple">
+      <div className="filters-panel-scroll max-h-[60vh] min-h-0 flex-1 overflow-y-auto px-4 pt-0 pb-3 sm:px-6 sm:pb-4 lg:max-h-none">
+        <Accordion
+          className="w-full [&>[data-slot=accordion-item]]:-mx-4 [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:px-4 sm:[&>[data-slot=accordion-item]]:-mx-6 sm:[&>[data-slot=accordion-item]]:px-6"
+          type="multiple"
+        >
           {/* Lista Roja UICN - desde Supabase */}
           {!excludeFilters.includes("listaRoja") && catalogs.listaRoja.length > 0 && (
             <AccordionItem value="listaRoja">
@@ -728,11 +783,7 @@ export default function FiltersPanel({
                   <span className="font-semibold">Lista Roja</span>
                   {filters.listaRoja.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.listaRoja,
-                        "listaRoja",
-                        true,
-                      ).join(", ")}
+                      {getActiveFilterNames(catalogs.listaRoja, "listaRoja", true).join(", ")}
                     </span>
                   )}
                 </div>
@@ -751,9 +802,7 @@ export default function FiltersPanel({
                 {filters.endemismo.length > 0 && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
                     {filters.endemismo
-                      .map((val) =>
-                        val === "endemic" ? "Endémicas" : "No endémicas",
-                      )
+                      .map((val) => (val === "endemic" ? "Endémicas" : "No endémicas"))
                       .join(", ")}
                   </span>
                 )}
@@ -762,8 +811,8 @@ export default function FiltersPanel({
             <AccordionContent>
               <div className="flex flex-col gap-2">
                 {[
-                  { value: "endemic", label: "Endémicas" },
-                  { value: "non-endemic", label: "No endémicas" },
+                  {value: "endemic", label: "Endémicas"},
+                  {value: "non-endemic", label: "No endémicas"},
                 ].map((option) => {
                   const isSelected = filters.endemismo.includes(option.value);
 
@@ -777,9 +826,7 @@ export default function FiltersPanel({
                         color: isSelected ? undefined : "#2d2d2d",
                       }}
                       variant={isSelected ? "default" : "outline"}
-                      onClick={() =>
-                        handleCategoricalChange("endemismo", option.value)
-                      }
+                      onClick={() => handleCategoricalChange("endemismo", option.value)}
                     >
                       {option.label}
                     </Button>
@@ -797,10 +844,7 @@ export default function FiltersPanel({
                   <span className="font-semibold">Provincia</span>
                   {filters.provincia.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.provincias,
-                        "provincia",
-                      ).join(", ")}
+                      {getActiveFilterNames(catalogs.provincias, "provincia").join(", ")}
                     </span>
                   )}
                 </div>
@@ -819,11 +863,10 @@ export default function FiltersPanel({
                 <div className="mt-1 flex flex-wrap gap-2">
                   {(filters.rangoAltitudinal.min !== 0 ||
                     filters.rangoAltitudinal.max !== 4800) && (
-                      <span className="text-xs font-normal text-gray-500">
-                        {filters.rangoAltitudinal.min}m -{" "}
-                        {filters.rangoAltitudinal.max}m
-                      </span>
-                    )}
+                    <span className="text-xs font-normal text-gray-500">
+                      {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                    </span>
+                  )}
                   {filters.distribucion.length > 0 && (
                     <span className="text-xs font-normal text-gray-500">
                       {filters.distribucion.join(", ")}
@@ -837,15 +880,51 @@ export default function FiltersPanel({
                 {/* Checkboxes de distribución - encima del gráfico */}
                 <div className="space-y-2">
                   <div className="flex flex-col gap-2">
-                    <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "occidental")}>
-                      <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("occidental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
-                        <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("occidental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                    <label
+                      className="group flex cursor-pointer items-center gap-2"
+                      onClick={() => handleCategoricalChange("distribucion", "occidental")}
+                    >
+                      <div
+                        className={[
+                          "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-all duration-150",
+                          filters.distribucion.includes("occidental")
+                            ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+                            : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
+                        ].join(" ")}
+                      >
+                        <Check
+                          className={[
+                            "h-[10px] w-[10px] text-white transition-all duration-150",
+                            filters.distribucion.includes("occidental")
+                              ? "scale-100 opacity-100"
+                              : "scale-50 opacity-0",
+                          ].join(" ")}
+                          strokeWidth={3}
+                        />
                       </div>
                       <span className="text-sm text-gray-700">Occidental</span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 group" onClick={() => handleCategoricalChange("distribucion", "oriental")}>
-                      <div className={["h-[17px] w-[17px] shrink-0 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all duration-150", filters.distribucion.includes("oriental") ? "bg-[#4ba24b] border-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]" : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5"].join(" ")}>
-                        <Check className={["h-[10px] w-[10px] text-white transition-all duration-150", filters.distribucion.includes("oriental") ? "opacity-100 scale-100" : "opacity-0 scale-50"].join(" ")} strokeWidth={3} />
+                    <label
+                      className="group flex cursor-pointer items-center gap-2"
+                      onClick={() => handleCategoricalChange("distribucion", "oriental")}
+                    >
+                      <div
+                        className={[
+                          "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-all duration-150",
+                          filters.distribucion.includes("oriental")
+                            ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+                            : "border-gray-300 bg-white group-hover:border-[#4ba24b] group-hover:bg-[#4ba24b]/5",
+                        ].join(" ")}
+                      >
+                        <Check
+                          className={[
+                            "h-[10px] w-[10px] text-white transition-all duration-150",
+                            filters.distribucion.includes("oriental")
+                              ? "scale-100 opacity-100"
+                              : "scale-50 opacity-0",
+                          ].join(" ")}
+                          strokeWidth={3}
+                        />
                       </div>
                       <span className="text-sm text-gray-700">Oriental</span>
                     </label>
@@ -861,13 +940,8 @@ export default function FiltersPanel({
                     max={4800}
                     min={0}
                     step={100}
-                    value={[
-                      filters.rangoAltitudinal.min,
-                      filters.rangoAltitudinal.max,
-                    ]}
-                    onValueChange={(values) =>
-                      handleSliderChange("rangoAltitudinal", values)
-                    }
+                    value={[filters.rangoAltitudinal.min, filters.rangoAltitudinal.max]}
+                    onValueChange={(values) => handleSliderChange("rangoAltitudinal", values)}
                   />
                 </div>
 
@@ -878,8 +952,6 @@ export default function FiltersPanel({
                     max: filters.rangoAltitudinal.max,
                   }}
                 />
-
-
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -888,14 +960,16 @@ export default function FiltersPanel({
           <AccordionItem value="areaDistribucion">
             <AccordionTrigger className="!items-start">
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span> EOO <span className="ml-1 font-normal text-gray-500">km²</span></span>
+                <span className="font-semibold">
+                  Área de distribución <span className="mx-1 font-normal text-[#f07304]">|</span>{" "}
+                  EOO <span className="ml-1 font-normal text-gray-500">km²</span>
+                </span>
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
-                    <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.areaDistribucion.min} km² -{" "}
-                      {filters.areaDistribucion.max} km²
-                    </span>
-                  )}
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                  </span>
+                )}
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -908,13 +982,8 @@ export default function FiltersPanel({
                   max={100000}
                   min={1}
                   step={100}
-                  value={[
-                    filters.areaDistribucion.min,
-                    filters.areaDistribucion.max,
-                  ]}
-                  onValueChange={(values) =>
-                    handleSliderChange("areaDistribucion", values)
-                  }
+                  value={[filters.areaDistribucion.min, filters.areaDistribucion.max]}
+                  onValueChange={(values) => handleSliderChange("areaDistribucion", values)}
                 />
               </div>
             </AccordionContent>
@@ -928,10 +997,7 @@ export default function FiltersPanel({
                   <span className="font-semibold">Ecosistemas</span>
                   {filters.ecosistemas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.ecosistemas,
-                        "ecosistemas",
-                      ).join(", ")}
+                      {getActiveFilterNames(catalogs.ecosistemas, "ecosistemas").join(", ")}
                     </span>
                   )}
                 </div>
@@ -959,10 +1025,7 @@ export default function FiltersPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.regionesBiogeograficas,
-                  "regionesBiogeograficas",
-                )}
+                {renderCatalogOptions(catalogs.regionesBiogeograficas, "regionesBiogeograficas")}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -975,19 +1038,15 @@ export default function FiltersPanel({
                   <span className="font-semibold">Reservas biosfera</span>
                   {filters.reservasBiosfera.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.reservasBiosfera,
-                        "reservasBiosfera",
-                      ).join(", ")}
+                      {getActiveFilterNames(catalogs.reservasBiosfera, "reservasBiosfera").join(
+                        ", ",
+                      )}
                     </span>
                   )}
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.reservasBiosfera,
-                  "reservasBiosfera",
-                )}
+                {renderCatalogOptions(catalogs.reservasBiosfera, "reservasBiosfera")}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -998,7 +1057,8 @@ export default function FiltersPanel({
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
                   <span className="font-semibold">
-                    Áreas protegidas Estado <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP
+                    Áreas protegidas Estado{" "}
+                    <span className="mx-1 font-normal text-[#f07304]">|</span> SNAP
                   </span>
                   {filters.areasProtegidasEstado.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
@@ -1011,10 +1071,7 @@ export default function FiltersPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.areasProtegidasEstado,
-                  "areasProtegidasEstado",
-                )}
+                {renderCatalogOptions(catalogs.areasProtegidasEstado, "areasProtegidasEstado")}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -1024,9 +1081,7 @@ export default function FiltersPanel({
             <AccordionItem value="areasProtegidasPrivadas">
               <AccordionTrigger className="!items-start">
                 <div className="flex flex-col items-start">
-                  <span className="font-semibold">
-                    Áreas protegidas privadas
-                  </span>
+                  <span className="font-semibold">Áreas protegidas privadas</span>
                   {filters.areasProtegidasPrivadas.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
                       {getActiveFilterNames(
@@ -1038,10 +1093,7 @@ export default function FiltersPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.areasProtegidasPrivadas,
-                  "areasProtegidasPrivadas",
-                )}
+                {renderCatalogOptions(catalogs.areasProtegidasPrivadas, "areasProtegidasPrivadas")}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -1054,19 +1106,15 @@ export default function FiltersPanel({
                   <span className="font-semibold">Bosques protegidos</span>
                   {filters.bosquesProtegidos.length > 0 && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {getActiveFilterNames(
-                        catalogs.bosquesProtegidos,
-                        "bosquesProtegidos",
-                      ).join(", ")}
+                      {getActiveFilterNames(catalogs.bosquesProtegidos, "bosquesProtegidos").join(
+                        ", ",
+                      )}
                     </span>
                   )}
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {renderCatalogOptions(
-                  catalogs.bosquesProtegidos,
-                  "bosquesProtegidos",
-                )}
+                {renderCatalogOptions(catalogs.bosquesProtegidos, "bosquesProtegidos")}
               </AccordionContent>
             </AccordionItem>
           )}
@@ -1077,13 +1125,15 @@ export default function FiltersPanel({
               <AccordionItem value="pluviocidad">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Precipitación<span className="ml-1 font-normal text-gray-500">media anual</span></span>
-                    {(filters.pluviocidad.min !== 640 ||
-                      filters.pluviocidad.max !== 4000) && (
-                        <span className="mt-1 text-xs font-normal text-gray-500">
-                          {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
-                        </span>
-                      )}
+                    <span className="font-semibold">
+                      Precipitación
+                      <span className="ml-1 font-normal text-gray-500">media anual</span>
+                    </span>
+                    {(filters.pluviocidad.min !== 640 || filters.pluviocidad.max !== 4000) && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
+                      </span>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -1097,9 +1147,7 @@ export default function FiltersPanel({
                       min={640}
                       step={50}
                       value={[filters.pluviocidad.min, filters.pluviocidad.max]}
-                      onValueChange={(values) =>
-                        handleSliderChange("pluviocidad", values)
-                      }
+                      onValueChange={(values) => handleSliderChange("pluviocidad", values)}
                     />
                   </div>
                 </AccordionContent>
@@ -1113,13 +1161,14 @@ export default function FiltersPanel({
               <AccordionItem value="temperatura">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold">Temperatura<span className="ml-1 font-normal text-gray-500">media anual</span></span>
-                    {(filters.temperatura.min !== 5 ||
-                      filters.temperatura.max !== 25) && (
-                        <span className="mt-1 text-xs font-normal text-gray-500">
-                          {filters.temperatura.min} - {filters.temperatura.max} °C
-                        </span>
-                      )}
+                    <span className="font-semibold">
+                      Temperatura<span className="ml-1 font-normal text-gray-500">media anual</span>
+                    </span>
+                    {(filters.temperatura.min !== 5 || filters.temperatura.max !== 25) && (
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {filters.temperatura.min} - {filters.temperatura.max} °C
+                      </span>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -1133,9 +1182,7 @@ export default function FiltersPanel({
                       min={5}
                       step={1}
                       value={[filters.temperatura.min, filters.temperatura.max]}
-                      onValueChange={(values) =>
-                        handleSliderChange("temperatura", values)
-                      }
+                      onValueChange={(values) => handleSliderChange("temperatura", values)}
                     />
                   </div>
                 </AccordionContent>
