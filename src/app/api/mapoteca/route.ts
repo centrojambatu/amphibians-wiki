@@ -26,8 +26,13 @@ export interface MapotecaResponse {
   total: number;
 }
 
-const SELECT_FIELDS =
-  "origen, id_coleccion, taxon_id, rank_id, nombre_especie, latitud, longitud, localidad, elevacion, catalogo_museo, numero_museo, provincia, cita_corta, fecha_coleccion, colectores";
+// ── Server-side in-memory cache ──
+interface ServerCacheEntry {
+  data: UbicacionEspecie[];
+  timestamp: number;
+}
+const serverCache = new Map<string, ServerCacheEntry>();
+const SERVER_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 function mapRow(row: any): UbicacionEspecie {
   const nombreEspecie = row.nombre_especie || "";
@@ -62,86 +67,6 @@ function parseCatalogos(catalogos: string[]): { cat: string; num: string | null 
   });
 }
 
-function buildBaseQuery(
-  supabase: any,
-  origen: string | null,
-  fichaFilterIds: number[] | null,
-  provincias: string[] | null,
-  especies: string[] | null,
-  localidades: string[] | null,
-  elevacionMin: number | null,
-  elevacionMax: number | null,
-  fechaDesde: string | null = null,
-  fechaHasta: string | null = null,
-) {
-  let q = supabase.from("mv_colecciones_mapa").select(SELECT_FIELDS);
-  if (origen) q = q.eq("origen", origen);
-  if (fichaFilterIds && fichaFilterIds.length > 0) q = q.in("taxon_id", fichaFilterIds);
-  if (provincias && provincias.length > 0) q = q.in("provincia", provincias);
-  if (especies && especies.length > 0) q = q.or(especies.map((e: string) => `nombre_especie.ilike.%${e}%`).join(","));
-  if (localidades && localidades.length > 0) q = q.in("localidad", localidades);
-  if (elevacionMin !== null) q = q.gte("elevacion", elevacionMin);
-  if (elevacionMax !== null) q = q.lte("elevacion", elevacionMax);
-  if (fechaDesde) q = q.gte("fecha_coleccion", fechaDesde);
-  if (fechaHasta) q = q.lte("fecha_coleccion", fechaHasta);
-  return q;
-}
-
-async function fetchByOrigen(
-  supabase: any,
-  origen: string,
-  limit: number,
-  offset: number,
-  provincias: string[] | null,
-  especies: string[] | null,
-  localidades: string[] | null,
-  catalogos: string[] | null,
-  elevacionMin: number | null,
-  elevacionMax: number | null,
-  fichaFilterIds: number[] | null,
-): Promise<any[]> {
-  // Cuando hay filtro de catálogo, hacer una query por cada entrada usando .eq()
-  // (evita problemas de PostgREST con unicode/espacios en valores)
-  if (catalogos && catalogos.length > 0) {
-    const pairs = parseCatalogos(catalogos);
-    const results: any[] = [];
-    for (const { cat, num } of pairs) {
-      let q = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta);
-      q = q.eq("catalogo_museo", cat);
-      if (num) q = q.eq("numero_museo", num);
-      const { data, error } = await q;
-      if (error) throw error;
-      if (data) results.push(...data);
-    }
-    return results;
-  }
-
-  // Sin filtro de catálogo: paginación normal
-  const pageSize = 1000;
-  let allData: any[] = [];
-  let fetched = 0;
-
-  while (fetched < limit) {
-    const batchSize = Math.min(pageSize, limit - fetched);
-    let query = buildBaseQuery(supabase, origen, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta)
-      .range(offset + fetched, offset + fetched + batchSize - 1)
-      .order("taxon_id", { ascending: true });
-
-    const { data, error } = await query;
-    if (error) throw error;
-
-    if (data && data.length > 0) {
-      allData = [...allData, ...data];
-      fetched += data.length;
-      if (data.length < batchSize) break;
-    } else {
-      break;
-    }
-  }
-
-  return allData;
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const provinciasParam = searchParams.get("provincias");
@@ -174,17 +99,25 @@ export async function GET(request: Request) {
   const elevacionMax = elevacionMaxParam !== null ? parseFloat(elevacionMaxParam) : null;
   const fechaDesde = searchParams.get("fecha_desde");
   const fechaHasta = searchParams.get("fecha_hasta");
-  const limit = Math.min(parseInt(searchParams.get("limit") || "1000", 10), 60000);
-  const cjOffset = parseInt(searchParams.get("cj_offset") || "0", 10);
-  const extOffset = parseInt(searchParams.get("ext_offset") || "0", 10);
+
+  // Build cache key from all params
+  const cacheKey = JSON.stringify({ provincias, pisos, snaps, especies, localidades, catalogos, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
+
+  // Check server cache
+  const cached = serverCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < SERVER_CACHE_TTL_MS) {
+    const res = NextResponse.json({ data: cached.data, total: cached.data.length } as MapotecaResponse);
+    res.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    return res;
+  }
 
   const supabase = await createClient();
 
   try {
-    // Si hay filtro de piso o SNAP, obtener taxon_ids desde vw_ficha_especie_completa via RPC
+    // Si hay filtro de piso o SNAP, obtener taxon_ids via RPC
     let fichaFilterIds: number[] | null = null;
     if ((pisos && pisos.length > 0) || (snaps && snaps.length > 0)) {
-      const { data: fichaData } = await supabase.rpc("get_tabla_taxon_ids", {
+      const { data: fichaData } = await (supabase as any).rpc("get_tabla_taxon_ids", {
         p_pisos: pisos ?? null,
         p_snaps: snaps ?? null,
         p_provincias: null,
@@ -194,75 +127,88 @@ export async function GET(request: Request) {
         p_elevacion_min: null,
         p_elevacion_max: null,
       });
-      fichaFilterIds = (fichaData ?? []).map((r: { taxon_id: number }) => Number(r.taxon_id));
-      if (fichaFilterIds.length === 0) {
+      fichaFilterIds = ((fichaData as any[]) ?? []).map((r: { taxon_id: number }) => Number(r.taxon_id));
+      if (!fichaFilterIds || fichaFilterIds.length === 0) {
         return NextResponse.json({ data: [], total: 0 });
       }
     }
 
-    // Conteo rápido del total (para barra de progreso en el frontend)
-    let countQ = supabase.from("mv_colecciones_mapa").select("taxon_id", { count: "exact", head: true });
-    if (fichaFilterIds && fichaFilterIds.length > 0) countQ = countQ.in("taxon_id", fichaFilterIds);
-    if (provincias && provincias.length > 0) countQ = countQ.in("provincia", provincias);
-    if (especies && especies.length > 0) countQ = countQ.or(especies.map((e: string) => `nombre_especie.ilike.%${e}%`).join(","));
-    if (localidades && localidades.length > 0) countQ = countQ.in("localidad", localidades);
-    if (elevacionMin !== null) countQ = countQ.gte("elevacion", elevacionMin);
-    if (elevacionMax !== null) countQ = countQ.lte("elevacion", elevacionMax);
-    if (fechaDesde) countQ = countQ.gte("fecha_coleccion", fechaDesde);
-    if (fechaHasta) countQ = countQ.lte("fecha_coleccion", fechaHasta);
-    const { count: totalCount, error: countError } = await countQ;
-    if (countError) throw countError;
-    const grandTotal = totalCount ?? 0;
+    const PAGE_SIZE = 1000;
+    const rpcParams = {
+      p_provincias: provincias ?? undefined,
+      p_especies: especies ?? undefined,
+      p_localidades: localidades ?? undefined,
+      p_catalogo_museo: undefined as string | undefined,
+      p_numero_museo: undefined as string | undefined,
+      p_elevacion_min: elevacionMin ?? undefined,
+      p_elevacion_max: elevacionMax ?? undefined,
+      p_fecha_desde: fechaDesde ?? undefined,
+      p_fecha_hasta: fechaHasta ?? undefined,
+      p_taxon_ids: fichaFilterIds ?? undefined,
+    };
 
-    // Query contra la vista materializada
-    let allData: any[] = [];
+    let allData: any[];
 
     if (catalogos && catalogos.length > 0) {
-      // Filtro de catálogo: queries individuales por par cat::num
       const pairs = parseCatalogos(catalogos);
+      allData = [];
       for (const { cat, num } of pairs) {
-        let q = buildBaseQuery(supabase, null, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta);
-        q = q.eq("catalogo_museo", cat);
-        if (num) q = q.eq("numero_museo", num);
-        q = q.limit(limit);
-        const { data, error } = await q;
+        const { data, error } = await supabase.rpc("get_colecciones_mapa", {
+          ...rpcParams,
+          p_catalogo_museo: cat,
+          p_numero_museo: num ?? undefined,
+        });
         if (error) throw error;
         if (data) allData.push(...data);
       }
     } else {
-      // Sin catálogo: traer en batches de 1000 (límite Supabase) desde el offset indicado
-      const pageSize = 1000;
-      let offset = cjOffset;
-      let fetched = 0;
-      let hasMore = true;
-      while (hasMore && fetched < limit) {
-        const batchSize = Math.min(pageSize, limit - fetched);
-        const q = buildBaseQuery(supabase, null, fichaFilterIds, provincias, especies, localidades, elevacionMin, elevacionMax, fechaDesde, fechaHasta)
-          .range(offset, offset + batchSize - 1)
-          .order("taxon_id", { ascending: true });
-        const { data, error } = await q;
-        if (error) throw error;
-        if (data && data.length > 0) {
-          allData.push(...data);
-          offset += data.length;
-          fetched += data.length;
-          if (data.length < batchSize) hasMore = false;
-        } else {
-          hasMore = false;
+      // Primer batch para ver el total
+      const { data: first, error: firstErr } = await supabase
+        .rpc("get_colecciones_mapa", rpcParams)
+        .range(0, PAGE_SIZE - 1);
+      if (firstErr) throw firstErr;
+      allData = first ?? [];
+
+      if (allData.length === PAGE_SIZE) {
+        // Lanzar batches en paralelo (grupos de 20)
+        let offset = PAGE_SIZE;
+        let hasMore = true;
+        while (hasMore) {
+          const batch = [];
+          for (let i = 0; i < 20 && hasMore; i++) {
+            batch.push(
+              supabase
+                .rpc("get_colecciones_mapa", rpcParams)
+                .range(offset, offset + PAGE_SIZE - 1)
+            );
+            offset += PAGE_SIZE;
+          }
+          const results = await Promise.all(batch);
+          for (const { data, error: bErr } of results) {
+            if (bErr) throw bErr;
+            if (!data || data.length === 0) { hasMore = false; break; }
+            allData.push(...data);
+            if (data.length < PAGE_SIZE) { hasMore = false; break; }
+          }
         }
       }
     }
 
     const resultado: UbicacionEspecie[] = allData.map(mapRow);
 
+    // Save to server cache
+    serverCache.set(cacheKey, { data: resultado, timestamp: Date.now() });
+
     const response: MapotecaResponse = {
       data: resultado,
-      total: grandTotal,
+      total: resultado.length,
     };
 
-    return NextResponse.json(response);
+    const res = NextResponse.json(response);
+    res.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    return res;
   } catch (err) {
-    console.error("Error fetching vw_colecciones:", err);
+    console.error("Error fetching colecciones:", err);
     return NextResponse.json(
       { error: "Error fetching colecciones" },
       { status: 500 }

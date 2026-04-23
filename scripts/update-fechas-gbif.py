@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 """
 Script para actualizar fechas en coleccion_externa consultando la API de GBIF.
-Busca registros por catalogNumber + institutionCode y actualiza el campo fecha.
+Busca registros por catalogNumber + institutionCode (misma lógica que la mapoteca)
+y actualiza el campo fecha.
 
 Uso:
-    python3 scripts/update-fechas-gbif.py [--dry-run] [--batch-size 100] [--catalogo QCAZA]
-
-Opciones:
-    --dry-run       Solo muestra lo que haría, sin actualizar la base de datos
-    --batch-size    Número de registros a procesar por lote (default: 100)
-    --catalogo      Procesar solo un catálogo específico (ej: QCAZA, QCAZ, KU)
-    --limit         Límite total de registros a procesar (útil para pruebas)
+    python3 scripts/update-fechas-gbif.py [--dry-run] [--batch-size 100] [--catalogo QCAZA] [--limit 500]
 """
 import os
 import sys
@@ -41,77 +36,178 @@ log = logging.getLogger(__name__)
 
 GBIF_BASE = 'https://api.gbif.org/v1/occurrence/search'
 
-# Algunos catálogos tienen nombres distintos en GBIF. Este mapeo indica cómo
-# aparecen en los campos institutionCode o collectionCode de GBIF.
-CATALOGO_GBIF_MAP = {
-    'QCAZA': ['QCAZA', 'QCAZ'],
-    'QCAZ':  ['QCAZ', 'QCAZA'],
-    'DHMECN': ['DHMECN'],
-    'KU':    ['KU', 'KUBI'],
-    'USNM':  ['USNM'],
-    'MCZ':   ['MCZ'],
-    'AMNH':  ['AMNH'],
-    'LACM':  ['LACM'],
-    'UMMZ':  ['UMMZ'],
-    'ANSP':  ['ANSP'],
-    'FMNH':  ['FMNH'],
-    'CAS':   ['CAS'],
-    'MHNG':  ['MHNG'],
-    'RMNH':  ['RMNH', 'RNMH'],
-}
 
+# ─── Mapeo de catálogos — misma lógica que MapotecaMap.tsx GbifLink ───────────
 
-# ─── GBIF ─────────────────────────────────────────────────────────────────────
-
-def buscar_fecha_gbif(client: httpx.Client, catalogo: str, numero: str, retries: int = 3) -> str | None:
+def get_gbif_params(catalogo: str, numero: str) -> list[dict]:
     """
-    Busca la eventDate en GBIF para un espécimen dado.
-    Retorna la fecha como string 'YYYY-MM-DD' o None si no se encuentra.
+    Retorna una lista de dicts de parámetros GBIF a probar para un catálogo+número.
+    Misma lógica que el componente GbifLink de la mapoteca.
     """
-    aliases = CATALOGO_GBIF_MAP.get(catalogo, [catalogo])
+    variantes = []
 
-    for alias in aliases:
-        for intento in range(retries):
+    if catalogo == 'KU':
+        variantes.append({
+            'institutionCode': 'KU',
+            'catalogNumber': numero,
+            'collectionCode': 'KUH',
+        })
+        # También probar sin collectionCode
+        variantes.append({
+            'institutionCode': 'KU',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'QCAZA':
+        variantes.append({
+            'institutionCode': 'QCAZ',
+            'catalogNumber': f'QCAZA{numero}',
+        })
+        variantes.append({
+            'institutionCode': 'QCAZ',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'QCAZ':
+        variantes.append({
+            'institutionCode': 'QCAZ',
+            'catalogNumber': f'QCAZA{numero}',
+        })
+        variantes.append({
+            'institutionCode': 'QCAZ',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'AMNH':
+        variantes.append({
+            'institutionCode': 'AMNH',
+            'catalogNumber': f'A-{numero}',
+        })
+        variantes.append({
+            'institutionCode': 'AMNH',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'USNM':
+        variantes.append({
+            'institutionCode': 'USNM',
+            'catalogNumber': f'USNM {numero}',
+        })
+        variantes.append({
+            'institutionCode': 'USNM',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'DHMECN':
+        variantes.append({
+            'institutionCode': 'DHMECN',
+            'catalogNumber': f'DHMECN {numero}',
+        })
+        variantes.append({
+            'institutionCode': 'DHMECN',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'MCZ':
+        variantes.append({
+            'institutionCode': 'MCZ',
+            'catalogNumber': f'MCZ:Herp:A-{numero}',
+        })
+        variantes.append({
+            'institutionCode': 'MCZ',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'LACM':
+        variantes.append({
+            'institutionCode': 'LACM',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'UMMZ':
+        variantes.append({
+            'institutionCode': 'UMMZ',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'ANSP':
+        variantes.append({
+            'institutionCode': 'ANSP',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'FMNH':
+        variantes.append({
+            'institutionCode': 'FMNH',
+            'catalogNumber': numero,
+        })
+    elif catalogo == 'CAS':
+        variantes.append({
+            'institutionCode': 'CAS',
+            'catalogNumber': numero,
+        })
+    else:
+        # Genérico: probar tal cual
+        variantes.append({
+            'institutionCode': catalogo,
+            'catalogNumber': numero,
+        })
+
+    return variantes
+
+
+def parse_event_date(event_date: str) -> str | None:
+    """Parsea eventDate de GBIF a formato YYYY-MM-DD."""
+    if not event_date:
+        return None
+    partes = event_date.split('-')
+    if len(partes) >= 3:
+        return f"{partes[0]}-{partes[1]}-{partes[2][:2]}"
+    elif len(partes) == 2:
+        return f"{partes[0]}-{partes[1]}-01"
+    elif len(partes) == 1 and partes[0].isdigit() and len(partes[0]) == 4:
+        return f"{partes[0]}-01-01"
+    return None
+
+
+# ─── GBIF búsqueda individual (misma lógica que la mapoteca) ──────────────────
+
+def buscar_fecha_gbif(client: httpx.Client, catalogo: str, numero: str) -> str | None:
+    """
+    Busca la eventDate en GBIF para un espécimen.
+    Prueba múltiples variantes de catalogNumber según el catálogo.
+    """
+    variantes = get_gbif_params(catalogo, numero)
+
+    for params_dict in variantes:
+        search_params = {
+            **params_dict,
+            'classKey': '131',  # Amphibia
+            'limit': '1',
+        }
+
+        for intento in range(3):
             try:
-                resp = client.get(
-                    GBIF_BASE,
-                    params={
-                        'catalogNumber': numero,
-                        'institutionCode': alias,
-                        'basisOfRecord': 'PRESERVED_SPECIMEN',
-                        'limit': 5,
-                    },
-                    timeout=30.0,
-                )
+                resp = client.get(GBIF_BASE, params=search_params, timeout=30.0)
+
+                if resp.status_code == 429:
+                    wait = 60
+                    log.warning(f'GBIF 429 Rate Limited — esperando {wait}s')
+                    time.sleep(wait)
+                    continue
 
                 if resp.status_code == 503:
-                    wait = 2 ** intento * 5  # 5s, 10s, 20s
-                    log.warning(f'GBIF 503 para {alias}:{numero} – esperando {wait}s (intento {intento+1})')
+                    wait = 2 ** intento * 10
+                    log.warning(f'GBIF 503 — esperando {wait}s (intento {intento+1})')
                     time.sleep(wait)
                     continue
 
                 if resp.status_code != 200:
-                    log.warning(f'GBIF HTTP {resp.status_code} para {alias}:{numero}')
                     break
 
                 data = resp.json()
-                for rec in data.get('results', []):
-                    event_date = rec.get('eventDate')
-                    if event_date:
-                        # eventDate puede ser 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
-                        # Solo guardamos si tiene al menos año-mes-día
-                        partes = event_date.split('-')
-                        if len(partes) >= 3:
-                            return f"{partes[0]}-{partes[1]}-{partes[2][:2]}"
-                        elif len(partes) == 2:
-                            return f"{partes[0]}-{partes[1]}-01"
-                        elif len(partes) == 1 and partes[0].isdigit():
-                            return f"{partes[0]}-01-01"
-                break  # Sin resultados pero sin error → pasar al siguiente alias
+                results = data.get('results', [])
+                if results:
+                    event_date = results[0].get('eventDate', '')
+                    fecha = parse_event_date(event_date)
+                    if fecha:
+                        return fecha
+
+                break  # Sin resultados, probar siguiente variante
 
             except (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError) as e:
-                wait = 2 ** intento * 3
-                log.warning(f'Error conexión para {alias}:{numero} – esperando {wait}s (intento {intento+1}): {type(e).__name__}')
+                wait = 2 ** intento * 5
+                log.warning(f'Error red: {type(e).__name__} — esperando {wait}s')
                 time.sleep(wait)
 
     return None
@@ -121,215 +217,127 @@ def buscar_fecha_gbif(client: httpx.Client, catalogo: str, numero: str, retries:
 
 def main():
     parser = argparse.ArgumentParser(description='Actualizar fechas de coleccion_externa desde GBIF')
-    parser.add_argument('--dry-run', action='store_true', help='No actualiza la BD, solo muestra resultados')
-    parser.add_argument('--batch-size', type=int, default=100, help='Registros por lote (default: 100)')
-    parser.add_argument('--catalogo', type=str, default=None, help='Procesar solo este catálogo (ej: QCAZA)')
-    parser.add_argument('--limit', type=int, default=None, help='Límite total de registros a procesar')
+    parser.add_argument('--dry-run', action='store_true', help='No actualiza la BD')
+    parser.add_argument('--batch-size', type=int, default=50, help='Registros por lote antes de reportar progreso')
+    parser.add_argument('--catalogo', type=str, default=None, help='Procesar solo este catálogo')
+    parser.add_argument('--limit', type=int, default=None, help='Límite total de registros')
+    parser.add_argument('--delay', type=float, default=0.35, help='Segundos entre requests GBIF (default: 0.35)')
     args = parser.parse_args()
 
-    # Supabase
     url = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
     key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
     if not url or not key:
-        log.error('Variables de entorno NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY requeridas')
+        log.error('Variables NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY requeridas')
         sys.exit(1)
 
     supabase: Client = create_client(url, key)
 
-    # Obtener registros sin fecha
-    log.info('Obteniendo registros sin fecha de coleccion_externa...')
-    query = supabase.table('coleccion_externa') \
-        .select('id, catalogo_museo, numero_museo') \
-        .is_('fecha', 'null') \
-        .not_.is_('catalogo_museo', 'null') \
-        .not_.is_('numero_museo', 'null')
+    # Obtener registros sin fecha — paginar para superar límite de 1000
+    log.info('Obteniendo registros sin fecha...')
+    all_registros = []
+    page_size = 1000
+    offset = 0
 
-    if args.catalogo:
-        query = query.eq('catalogo_museo', args.catalogo)
+    while True:
+        query = supabase.table('coleccion_externa') \
+            .select('id, catalogo_museo, numero_museo') \
+            .is_('fecha', 'null') \
+            .not_.is_('catalogo_museo', 'null') \
+            .not_.is_('numero_museo', 'null') \
+            .range(offset, offset + page_size - 1)
+
+        if args.catalogo:
+            query = query.eq('catalogo_museo', args.catalogo)
+
+        resp = query.execute()
+        batch = resp.data
+        if not batch:
+            break
+
+        all_registros.extend(batch)
+        offset += len(batch)
+
+        if len(batch) < page_size:
+            break
+
+        if args.limit and len(all_registros) >= args.limit:
+            all_registros = all_registros[:args.limit]
+            break
 
     if args.limit:
-        query = query.limit(args.limit)
+        all_registros = all_registros[:args.limit]
 
-    resp = query.execute()
-    registros = resp.data
-    total = len(registros)
+    total = len(all_registros)
     log.info(f'Total registros a procesar: {total}')
 
     if total == 0:
         log.info('No hay registros para procesar.')
         return
 
-    # Estadísticas
     encontrados = 0
     no_encontrados = 0
-    errores = 0
     actualizados = 0
-
+    errores = 0
     inicio = datetime.now()
 
-    # ─── Estrategia 1: Descargar catálogos completos de GBIF ─────────────────
-    # Para catálogos grandes, descargamos TODOS los registros de esa institución
-    # de una vez y cruzamos en memoria (mucho más rápido que 1 request por registro)
-
-    # Agrupar registros por catálogo
-    por_catalogo = {}
-    for rec in registros:
-        cat = rec['catalogo_museo']
-        if cat not in por_catalogo:
-            por_catalogo[cat] = []
-        por_catalogo[cat].append(rec)
-
-    log.info(f'Catálogos a procesar: {list(por_catalogo.keys())}')
-
     with httpx.Client(
-        headers={'User-Agent': 'amphibians-wiki-jambatu/1.0 (https://anfibiosecuador.ec)'},
-        timeout=60.0,
+        headers={'User-Agent': 'amphibians-wiki-jambatu/1.0 (https://anfibiosecuador.ec)'}
     ) as client:
 
-        for catalogo, cat_registros in por_catalogo.items():
-            cat_total = len(cat_registros)
-            log.info(f'\n{"="*60}')
-            log.info(f'Catálogo: {catalogo} ({cat_total} registros sin fecha)')
+        for i, rec in enumerate(all_registros):
+            rid = rec['id']
+            catalogo = rec['catalogo_museo']
+            numero = str(rec['numero_museo']).strip()
 
-            # Construir índice: numero_museo → lista de ids
-            num_to_ids = {}
-            for rec in cat_registros:
-                num = str(rec['numero_museo']).strip()
-                if num not in num_to_ids:
-                    num_to_ids[num] = []
-                num_to_ids[num].append(rec['id'])
+            fecha = buscar_fecha_gbif(client, catalogo, numero)
 
-            aliases = CATALOGO_GBIF_MAP.get(catalogo, [catalogo])
-            gbif_fechas = {}  # numero_museo → fecha
-
-            # Intentar descargar todos los registros del catálogo de GBIF
-            for alias in aliases:
-                log.info(f'  Descargando registros GBIF para institutionCode={alias}...')
-                offset_gbif = 0
-                gbif_total = None
-
-                while True:
-                    try:
-                        resp = client.get(GBIF_BASE, params={
-                            'institutionCode': alias,
-                            'basisOfRecord': 'PRESERVED_SPECIMEN',
-                            'classKey': '131',  # Amphibia
-                            'limit': 300,
-                            'offset': offset_gbif,
-                            'fields': 'catalogNumber,eventDate',
-                        })
-
-                        if resp.status_code == 503:
-                            log.warning(f'  GBIF 503 — esperando 30s...')
-                            time.sleep(30)
-                            continue
-
-                        if resp.status_code == 429:
-                            log.warning(f'  GBIF 429 Rate Limited — esperando 60s...')
-                            time.sleep(60)
-                            continue
-
-                        if resp.status_code != 200:
-                            log.warning(f'  GBIF HTTP {resp.status_code} para {alias}')
-                            break
-
-                        data = resp.json()
-                        if gbif_total is None:
-                            gbif_total = data.get('count', 0)
-                            log.info(f'  Total en GBIF para {alias}: {gbif_total}')
-
-                        results = data.get('results', [])
-                        if not results:
-                            break
-
-                        for rec in results:
-                            cat_num = str(rec.get('catalogNumber', '')).strip()
-                            event_date = rec.get('eventDate', '')
-
-                            if cat_num and event_date and cat_num not in gbif_fechas:
-                                partes = event_date.split('-')
-                                if len(partes) >= 3:
-                                    gbif_fechas[cat_num] = f"{partes[0]}-{partes[1]}-{partes[2][:2]}"
-                                elif len(partes) == 2:
-                                    gbif_fechas[cat_num] = f"{partes[0]}-{partes[1]}-01"
-                                elif len(partes) == 1 and partes[0].isdigit():
-                                    gbif_fechas[cat_num] = f"{partes[0]}-01-01"
-
-                        offset_gbif += len(results)
-
-                        if offset_gbif >= gbif_total or len(results) < 300:
-                            break
-
-                        # Pausa entre páginas (respetar rate limit)
-                        time.sleep(0.5)
-
-                    except (httpx.TimeoutException, httpx.NetworkError) as e:
-                        log.warning(f'  Error red: {type(e).__name__} — esperando 10s...')
-                        time.sleep(10)
-
-                log.info(f'  Fechas encontradas en GBIF para {alias}: {len(gbif_fechas)}')
-
-                if len(gbif_fechas) > 0:
-                    break  # Encontramos datos con este alias, no probar otros
-
-            # ─── Cruzar con nuestros registros ────────────────────────────────
-            actualizaciones = []
-
-            # Intentar match directo por numero_museo
-            for num, ids in num_to_ids.items():
-                fecha = gbif_fechas.get(num)
-
-                # Algunos catálogos usan prefijos (ej: QCAZA12345 en GBIF vs 12345 en nuestra BD)
-                if not fecha:
-                    for prefix in aliases:
-                        fecha = gbif_fechas.get(f"{prefix}{num}")
-                        if fecha:
-                            break
-
-                if fecha:
-                    encontrados += len(ids)
-                    for rid in ids:
-                        actualizaciones.append({'id': rid, 'fecha': fecha})
-                else:
-                    no_encontrados += len(ids)
-
-            log.info(f'  Matches: {len(actualizaciones)} de {cat_total}')
-
-            # ─── Actualizar BD ────────────────────────────────────────────────
-            if actualizaciones and not args.dry_run:
-                for upd in actualizaciones:
+            if fecha:
+                encontrados += 1
+                if not args.dry_run:
                     try:
                         supabase.table('coleccion_externa') \
-                            .update({'fecha': upd['fecha']}) \
-                            .eq('id', upd['id']) \
+                            .update({'fecha': fecha}) \
+                            .eq('id', rid) \
                             .execute()
                         actualizados += 1
                     except Exception as e:
-                        log.error(f'Error actualizando id={upd["id"]}: {e}')
+                        log.error(f'Error actualizando id={rid}: {e}')
                         errores += 1
-                log.info(f'  Actualizados en BD: {actualizados}')
-            elif actualizaciones and args.dry_run:
-                log.info(f'  [DRY RUN] Se actualizarían {len(actualizaciones)} registros')
 
-            # Progreso global
-            procesados = encontrados + no_encontrados
-            elapsed = (datetime.now() - inicio).seconds
-            pct = procesados / total * 100 if total > 0 else 0
-            log.info(f'Progreso global: {pct:.1f}% | Encontrados: {encontrados} | Sin fecha: {no_encontrados}')
+                if (encontrados % 10 == 0) or encontrados == 1:
+                    log.info(f'  ✓ {catalogo} {numero} → {fecha} (total encontrados: {encontrados})')
+            else:
+                no_encontrados += 1
 
-    # Resumen final
-    print('\n' + '='*60)
-    print(f'RESUMEN FINAL')
+            # Pausa respetuosa para GBIF
+            time.sleep(args.delay)
+
+            # Progreso cada batch_size registros
+            if (i + 1) % args.batch_size == 0 or (i + 1) == total:
+                elapsed = (datetime.now() - inicio).total_seconds()
+                pct = (i + 1) / total * 100
+                rps = (i + 1) / max(elapsed, 1)
+                eta = int((total - i - 1) / max(rps, 0.01))
+                log.info(
+                    f'[{pct:.1f}%] {i+1}/{total} | '
+                    f'Encontrados: {encontrados} | Sin fecha: {no_encontrados} | '
+                    f'ETA: {eta//60}m{eta%60}s'
+                )
+
+    # Resumen
+    elapsed_total = datetime.now() - inicio
+    print('\n' + '=' * 60)
+    print('RESUMEN FINAL')
     print(f'  Total procesados:     {total}')
-    print(f'  Fecha encontrada:     {encontrados} ({encontrados/total*100:.1f}%)')
-    print(f'  Sin fecha en GBIF:    {no_encontrados} ({no_encontrados/total*100:.1f}%)')
+    print(f'  Fecha encontrada:     {encontrados} ({encontrados/max(total,1)*100:.1f}%)')
+    print(f'  Sin fecha en GBIF:    {no_encontrados} ({no_encontrados/max(total,1)*100:.1f}%)')
     if not args.dry_run:
         print(f'  Actualizados en BD:   {actualizados}')
-        print(f'  Errores al actualizar:{errores}')
+        print(f'  Errores:              {errores}')
     else:
-        print(f'  [DRY RUN] No se realizaron cambios en la BD')
-    print(f'  Tiempo total:         {datetime.now() - inicio}')
-    print('='*60)
+        print('  [DRY RUN] No se realizaron cambios')
+    print(f'  Tiempo total:         {elapsed_total}')
+    print('=' * 60)
 
 
 if __name__ == '__main__':

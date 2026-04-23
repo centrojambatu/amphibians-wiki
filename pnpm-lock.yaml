@@ -44,6 +44,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: 4.0.9
         version: 4.0.9
+      '@tanstack/react-query':
+        specifier: ^5.99.2
+        version: 5.99.2(react@19.1.1)
       '@tiptap/extension-link':
         specifier: ^3.13.0
         version: 3.13.0(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)
@@ -1347,6 +1350,14 @@ packages:
 
   '@tailwindcss/postcss@4.0.9':
     resolution: {integrity: sha512-BT/E+pdMqulavEAVM5NCpxmGEwHiLDPpkmg/c/X25ZBW+izTe+aZ+v1gf/HXTrihRoCxrUp5U4YyHsBTzspQKQ==}
+
+  '@tanstack/query-core@5.99.2':
+    resolution: {integrity: sha512-1HunU0bXVsR1ZJMZbcOPE6VtaBJxsW809RE9xPe4Gz7MlB0GWwQvuTPhMoEmQ/hIzFKJ/DWAuttIe7BOaWx0tA==}
+
+  '@tanstack/react-query@5.99.2':
+    resolution: {integrity: sha512-vM91UEe45QUS9ED6OklsVL15i8qKcRqNwpWzPTVWvRPRSEgDudDgHpvyTjcdlwHcrKNa80T+xXYcchT2noPnZA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tiptap/core@3.13.0':
     resolution: {integrity: sha512-iUelgiTMgPVMpY5ZqASUpk8mC8HuR9FWKaDzK27w9oWip9tuB54Z8mePTxNcQaSPb6ErzEaC8x8egrRt7OsdGQ==}
@@ -4880,6 +4891,13 @@ snapshots:
       lightningcss: 1.30.1
       postcss: 8.5.6
       tailwindcss: 4.0.9
+
+  '@tanstack/query-core@5.99.2': {}
+
+  '@tanstack/react-query@5.99.2(react@19.1.1)':
+    dependencies:
+      '@tanstack/query-core': 5.99.2
+      react: 19.1.1
 
   '@tiptap/core@3.13.0(@tiptap/pm@3.13.0)':
     dependencies:

@@ -35,14 +35,14 @@ export async function GET(request: Request) {
 
   // Paso 1: obtener taxon_ids distintos via RPC (evita el límite de filas de PostgREST)
   const { data: idData, error: idError } = await supabase.rpc("get_tabla_taxon_ids", {
-    p_provincias: provincias,
-    p_pisos: pisos,
-    p_snaps: snaps,
-    p_especies: especies,
-    p_localidades: localidades,
-    p_catalogos: catalogos,
-    p_elevacion_min: elevacionMin,
-    p_elevacion_max: elevacionMax,
+    p_provincias: provincias ?? undefined,
+    p_pisos: pisos ?? undefined,
+    p_snaps: snaps ?? undefined,
+    p_especies: especies ?? undefined,
+    p_localidades: localidades ?? undefined,
+    p_catalogos: catalogos ?? undefined,
+    p_elevacion_min: elevacionMin ?? undefined,
+    p_elevacion_max: elevacionMax ?? undefined,
   });
 
   if (idError) {

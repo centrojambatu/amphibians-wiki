@@ -92,7 +92,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   const [
     {data: fichaEspecieData, error: errorFichaEspecie},
     {data: taxon_catalogo_awe_results, error: taxon_catalogo_aweError},
-    {data: dataRegionBio, error: errorAweRegionBio},
     {data: geoPolitica, error: errorGeoPolitica},
     {data: publicaciones, error: errorPublicaciones},
     {data: taxones, error: errorTaxones},
@@ -112,11 +111,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .from("taxon_catalogo_awe")
       .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
       .eq("taxon_id", taxonId),
-    supabaseClient
-      .from("catalogo_awe")
-      .select(`*, taxon_catalogo_awe!inner(taxon_id), tipo_catalogo_awe(*)`)
-      .eq("taxon_catalogo_awe.taxon_id", taxonId)
-      .eq("tipo_catalogo_awe_id", 6),
     supabaseClient.rpc("get_taxon_geopolitica_hierarchy", {
       _taxon_id: taxonId,
     }),
@@ -140,9 +134,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   }
   if (taxon_catalogo_aweError) {
     console.error("Error taxon_catalogo_awe:", taxon_catalogo_aweError);
-  }
-  if (errorAweRegionBio) {
-    console.error("Error dataRegionBio:", errorAweRegionBio);
   }
   if (errorGeoPolitica) {
     console.error("Error geoPolitica:", errorGeoPolitica);
@@ -439,7 +430,15 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
       return Array.from(uniqueMap.values());
     })(),
-    dataRegionBio: Array.isArray(dataRegionBio) ? dataRegionBio : [],
+    dataRegionBio: Array.isArray(taxon_catalogo_awe_results)
+      ? taxon_catalogo_awe_results
+          .filter((item: any) => item.catalogo_awe?.tipo_catalogo_awe_id === 6)
+          .map((item: any) => ({
+            ...item.catalogo_awe,
+            id_taxon_catalogo_awe: item.id_taxon_catalogo_awe,
+            catalogo_awe: item.catalogo_awe,
+          }))
+      : [],
     geoPolitica: Array.isArray(geoPolitica) ? geoPolitica : [],
     publicaciones: publicacionesParaMostrar,
     publicacionesOrdenadas: todasLasPublicaciones, // Todas las publicaciones (incluyendo adicionales) para procesar citas

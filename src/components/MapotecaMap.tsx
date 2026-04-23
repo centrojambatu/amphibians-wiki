@@ -12,121 +12,13 @@ import L from "leaflet";
 import { useRouter } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 
-import type { UbicacionEspecie, MapotecaResponse } from "@/app/api/mapoteca/route";
+import type { UbicacionEspecie } from "@/app/api/mapoteca/route";
+import { useMapotecaData } from "@/hooks/use-mapoteca-data";
 
 // Canvas renderer para mejor rendimiento con miles de puntos
-// Se crea por instancia dentro del componente para evitar errores al re-renderizar
 function createCanvasRenderer() {
   if (typeof window === "undefined") return undefined;
   return L.canvas({ padding: 0.5 });
-}
-
-// Caché en memoria a nivel de módulo — persiste mientras el usuario navega sin recargar
-interface CacheEntry {
-  data: UbicacionEspecie[];
-  total: number;
-  timestamp: number;
-}
-const dataCache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos en memoria
-const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hora en sessionStorage
-const SESSION_STORAGE_KEY = "mapoteca_cache_v2";
-// Solo cachear en sessionStorage el dataset sin filtros (el más pesado y común)
-const EMPTY_FILTER_KEY = buildCacheKey({});
-
-function buildCacheKey(filters: {
-  provinciaFilter?: string[];
-  pisoFilter?: string[];
-  snapFilter?: string[];
-  especieFilter?: string[];
-  catalogoFilter?: string[];
-  localidadesFilter?: string[];
-  elevacionMin?: number;
-  elevacionMax?: number;
-  fechaDesde?: string;
-  fechaHasta?: string;
-}): string {
-  return JSON.stringify(filters);
-}
-
-function getSessionCached(): CacheEntry | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // Formato comprimido: { d: [...], t: number, ts: number }
-    if (parsed.d && Array.isArray(parsed.d)) {
-      const ts = parsed.ts ?? 0;
-      if (Date.now() - ts > SESSION_TTL_MS) {
-        sessionStorage.removeItem(SESSION_STORAGE_KEY);
-        return null;
-      }
-      return { data: decompressFromStorage(parsed.d), total: parsed.t, timestamp: ts };
-    }
-    // Formato legacy
-    const entry: CacheEntry = parsed;
-    if (Date.now() - entry.timestamp > SESSION_TTL_MS) {
-      sessionStorage.removeItem(SESSION_STORAGE_KEY);
-      return null;
-    }
-    return entry;
-  } catch {
-    return null;
-  }
-}
-
-// Comprimir datos para sessionStorage: solo lat,lon,taxon_id,nombre,origen (reduce ~80% del tamaño)
-function compressForStorage(data: UbicacionEspecie[]): any[] {
-  return data.map((u) => [u.latitud, u.longitud, u.taxon_id, u.nombre_cientifico, u.origen, u.id_coleccion, u.provincia, u.localidad, u.catalogo_museo, u.numero_museo, u.elevacion, u.fecha_coleccion, u.colectores, u.genero, u.rank_id, u.cita_corta]);
-}
-
-function decompressFromStorage(arr: any[]): UbicacionEspecie[] {
-  return arr.map((r) => ({
-    latitud: r[0], longitud: r[1], taxon_id: r[2], nombre_cientifico: r[3], origen: r[4],
-    id_coleccion: r[5], provincia: r[6], localidad: r[7], catalogo_museo: r[8], numero_museo: r[9],
-    elevacion: r[10], fecha_coleccion: r[11], colectores: r[12], genero: r[13], rank_id: r[14], cita_corta: r[15],
-  }));
-}
-
-function setSessionCache(entry: CacheEntry) {
-  if (typeof window === "undefined") return;
-  try {
-    const compressed = { d: compressForStorage(entry.data), t: entry.total, ts: entry.timestamp };
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(compressed));
-  } catch {
-    // sessionStorage lleno — ignorar silenciosamente
-  }
-}
-
-function getCached(key: string): CacheEntry | null {
-  // 1. Memoria
-  const mem = dataCache.get(key);
-  if (mem) {
-    if (Date.now() - mem.timestamp > CACHE_TTL_MS) {
-      dataCache.delete(key);
-    } else {
-      return mem;
-    }
-  }
-  // 2. sessionStorage (solo para dataset sin filtros)
-  if (key === EMPTY_FILTER_KEY) {
-    const session = getSessionCached();
-    if (session) {
-      dataCache.set(key, session); // restaurar en memoria
-      return session;
-    }
-  }
-  return null;
-}
-
-function setCache(key: string, data: UbicacionEspecie[], total: number) {
-  const entry: CacheEntry = { data, total, timestamp: Date.now() };
-  dataCache.set(key, entry);
-  // Persistir en sessionStorage solo el dataset completo sin filtros
-  if (key === EMPTY_FILTER_KEY) {
-    setSessionCache(entry);
-  }
 }
 
 // Componente para ajustar la vista del mapa
@@ -482,37 +374,18 @@ export default function MapotecaMap({
   mapType = "provinces",
   onNavigateToSpecies,
 }: MapotecaMapProps) {
-  const [ubicaciones, setUbicaciones] = useState<UbicacionEspecie[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const fetchingRef = useRef(false);
-  // ID incremental: cada fetch guarda su ID; si al completar no coincide con el actual, descarta el resultado
-  const fetchIdRef = useRef(0);
-  const router = useRouter();
-  // Track current filters to know when to reset
-  const filtersRef = useRef({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
+  // TanStack Query — cache automático, deduplicación, IndexedDB
+  const { data: queryData, isLoading: loading, error: queryError } = useMapotecaData({
+    provinciaFilter, pisoFilter, snapFilter, especieFilter,
+    catalogoFilter, localidadesFilter, elevacionMin, elevacionMax,
+    fechaDesde, fechaHasta,
+  });
 
-  // Build query params from all filters
-  const buildFilterParams = useCallback((limit: number, cjOffset = 0, extOffset = 0) => {
-    const params = new URLSearchParams();
-    if (provinciaFilter && provinciaFilter.length > 0) params.set("provincias", provinciaFilter.join(","));
-    if (pisoFilter && pisoFilter.length > 0) params.set("pisos", pisoFilter.join(","));
-    if (snapFilter && snapFilter.length > 0) params.set("snaps", snapFilter.join(","));
-    if (especieFilter && especieFilter.length > 0) params.set("especies", especieFilter.join("||"));
-    if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
-    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join("||"));
-    if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
-    if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
-    if (fechaDesde) params.set("fecha_desde", fechaDesde);
-    if (fechaHasta) params.set("fecha_hasta", fechaHasta);
-    params.set("limit", String(limit));
-    params.set("cj_offset", String(cjOffset));
-    params.set("ext_offset", String(extOffset));
-    return params;
-  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta]);
+  const ubicaciones = queryData?.data ?? [];
+  const total = queryData?.total ?? 0;
+  const error = queryError ? (queryError instanceof Error ? queryError.message : "Error desconocido") : null;
+
+  const router = useRouter();
 
   // Map state tracking
   const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
@@ -541,190 +414,6 @@ export default function MapotecaMap({
     }
     return null;
   });
-
-  // Reset y carga cuando cambian los filtros
-  useEffect(() => {
-    const prev = filtersRef.current;
-    const filtersChanged =
-      prev.provinciaFilter !== provinciaFilter ||
-      prev.pisoFilter !== pisoFilter ||
-      prev.snapFilter !== snapFilter ||
-      prev.especieFilter !== especieFilter ||
-      prev.catalogoFilter !== catalogoFilter ||
-      prev.elevacionMin !== elevacionMin ||
-      prev.elevacionMax !== elevacionMax ||
-      prev.fechaDesde !== fechaDesde ||
-      prev.fechaHasta !== fechaHasta ||
-      JSON.stringify(prev.localidadesFilter) !== JSON.stringify(localidadesFilter);
-
-    filtersRef.current = { provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta };
-
-    const fetchInitial = async () => {
-      const myFetchId = ++fetchIdRef.current;
-
-      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
-      const cached = getCached(cacheKey);
-      if (cached) {
-        if (myFetchId !== fetchIdRef.current) return;
-        setUbicaciones(cached.data);
-        setTotal(cached.total);
-        setLoading(false);
-        return;
-      }
-
-      fetchingRef.current = true;
-      setLoading(true);
-      setError(null);
-      setUbicaciones([]);
-      setLoadProgress(0);
-
-      try {
-        // Primer batch: carga rápida para mostrar el mapa
-        const params = buildFilterParams(10000, 0, 0);
-        const response = await fetch(`/api/mapoteca?${params.toString()}`);
-        if (!response.ok) throw new Error("Error al cargar datos");
-
-        const result: MapotecaResponse = await response.json();
-        if (myFetchId !== fetchIdRef.current) return;
-
-        setUbicaciones(result.data);
-        setTotal(result.total);
-        const pct = result.total > 0 ? Math.round((result.data.length / result.total) * 100) : 100;
-        setLoadProgress(pct);
-        setLoading(false); // Mostrar mapa inmediatamente
-
-        // Si hay más datos, cargar el resto en background
-        if (result.data.length < result.total) {
-          setLoadingMore(true);
-          let loaded = result.data.length;
-          let allData = [...result.data];
-
-          while (loaded < result.total) {
-            if (myFetchId !== fetchIdRef.current) return;
-            const moreParams = buildFilterParams(10000, loaded, 0);
-            const moreRes = await fetch(`/api/mapoteca?${moreParams.toString()}`);
-            if (!moreRes.ok) break;
-
-            const moreResult: MapotecaResponse = await moreRes.json();
-            if (myFetchId !== fetchIdRef.current) return;
-            if (moreResult.data.length === 0) break;
-
-            allData = [...allData, ...moreResult.data];
-            loaded += moreResult.data.length;
-
-            setUbicaciones(allData);
-            setLoadProgress(Math.min(Math.round((loaded / result.total) * 100), 100));
-          }
-
-          if (myFetchId === fetchIdRef.current) {
-            setLoadProgress(100);
-            setLoadingMore(false);
-            const cacheKey2 = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
-            setCache(cacheKey2, allData, result.total);
-          }
-        } else {
-          setLoadProgress(100);
-          const cacheKey2 = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
-          setCache(cacheKey2, result.data, result.total);
-        }
-      } catch (err) {
-        if (myFetchId !== fetchIdRef.current) return;
-        setError(err instanceof Error ? err.message : "Error desconocido");
-      } finally {
-        if (myFetchId === fetchIdRef.current) {
-          fetchingRef.current = false;
-          setLoading(false);
-        }
-      }
-    };
-
-    if (filtersChanged) {
-      fetchInitial();
-    }
-  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta, buildFilterParams]);
-
-  // Carga inicial al montar
-  useEffect(() => {
-    const fetchInitial = async () => {
-      const myFetchId = ++fetchIdRef.current;
-
-      const cacheKey = buildCacheKey({ provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax, fechaDesde, fechaHasta });
-      const cached = getCached(cacheKey);
-      if (cached) {
-        if (myFetchId !== fetchIdRef.current) return;
-        setUbicaciones(cached.data);
-        setTotal(cached.total);
-        setLoadProgress(100);
-        setLoading(false);
-        return;
-      }
-
-      fetchingRef.current = true;
-      setLoading(true);
-      setError(null);
-      setLoadProgress(0);
-
-      try {
-        // Primer batch
-        const params = buildFilterParams(10000, 0, 0);
-        const response = await fetch(`/api/mapoteca?${params.toString()}`);
-        if (!response.ok) throw new Error("Error al cargar datos");
-
-        const result: MapotecaResponse = await response.json();
-        if (myFetchId !== fetchIdRef.current) return;
-
-        setUbicaciones(result.data);
-        setTotal(result.total);
-        const pct = result.total > 0 ? Math.round((result.data.length / result.total) * 100) : 100;
-        setLoadProgress(pct);
-        setLoading(false);
-
-        // Cargar el resto en background
-        if (result.data.length < result.total) {
-          setLoadingMore(true);
-          let loaded = result.data.length;
-          let allData = [...result.data];
-
-          while (loaded < result.total) {
-            if (myFetchId !== fetchIdRef.current) return;
-            const moreParams = buildFilterParams(10000, loaded, 0);
-            const moreRes = await fetch(`/api/mapoteca?${moreParams.toString()}`);
-            if (!moreRes.ok) break;
-
-            const moreResult: MapotecaResponse = await moreRes.json();
-            if (myFetchId !== fetchIdRef.current) return;
-            if (moreResult.data.length === 0) break;
-
-            allData = [...allData, ...moreResult.data];
-            loaded += moreResult.data.length;
-
-            setUbicaciones(allData);
-            setLoadProgress(Math.min(Math.round((loaded / result.total) * 100), 100));
-          }
-
-          if (myFetchId === fetchIdRef.current) {
-            setLoadProgress(100);
-            setLoadingMore(false);
-            setCache(cacheKey, allData, result.total);
-          }
-        } else {
-          setLoadProgress(100);
-          setCache(cacheKey, result.data, result.total);
-        }
-      } catch (err) {
-        if (myFetchId !== fetchIdRef.current) return;
-        setError(err instanceof Error ? err.message : "Error desconocido");
-      } finally {
-        if (myFetchId === fetchIdRef.current) {
-          fetchingRef.current = false;
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchInitial();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const ubicacionesVisibles = useMemo(() => ubicaciones, [ubicaciones]);
 
@@ -848,17 +537,17 @@ export default function MapotecaMap({
 
   return (
     <div className="relative h-[calc(100vh-220px)] w-full overflow-hidden rounded-lg border shadow-lg">
-      {(loading || loadingMore || loadProgress < 100) && (
+      {loading && (
         <div className="absolute top-0 right-0 left-0 z-[1000]">
           <div className="h-1.5 w-full overflow-hidden bg-gray-200">
             <div
-              className="h-full rounded-r-full transition-all duration-500"
-              style={{width: `${loadProgress}%`, backgroundColor: "#f07304"}}
+              className="h-full w-full animate-pulse rounded-r-full"
+              style={{backgroundColor: "#f07304"}}
             />
           </div>
           <div className="absolute top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-xs font-medium text-gray-600 shadow-md">
             <div className="h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" style={{borderColor: "#f07304", borderTopColor: "transparent"}} />
-            {loadProgress}% — {ubicaciones.length.toLocaleString()} / {total > 0 ? total.toLocaleString() : "..."} puntos
+            Cargando puntos...
           </div>
         </div>
       )}
@@ -989,14 +678,7 @@ export default function MapotecaMap({
         <span className="font-semibold text-green-700">
           {ubicacionesVisibles.length.toLocaleString()}
         </span>
-        <span className="text-gray-600">
-          {total > ubicacionesVisibles.length
-            ? ` / ${total.toLocaleString()} registros`
-            : " registros"}
-        </span>
-        {loadingMore && (
-          <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
-        )}
+        <span className="text-gray-600"> registros</span>
       </div>
     </div>
   );

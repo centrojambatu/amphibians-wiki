@@ -465,6 +465,7 @@ export type Database = {
       biografia: {
         Row: {
           ano_nacimiento: number | null
+          apellidos: string | null
           asociaciones_profesionales: string | null
           email: string | null
           experiencia_laboral: string | null
@@ -472,6 +473,7 @@ export type Database = {
           inicio_interes_estudio: string | null
           interes_investigacion: string | null
           lugar_nacimiento: string | null
+          nombres: string | null
           posicion_actual: string | null
           premios_reconocimientos: string | null
           titulos_academicos: string | null
@@ -479,6 +481,7 @@ export type Database = {
         }
         Insert: {
           ano_nacimiento?: number | null
+          apellidos?: string | null
           asociaciones_profesionales?: string | null
           email?: string | null
           experiencia_laboral?: string | null
@@ -486,6 +489,7 @@ export type Database = {
           inicio_interes_estudio?: string | null
           interes_investigacion?: string | null
           lugar_nacimiento?: string | null
+          nombres?: string | null
           posicion_actual?: string | null
           premios_reconocimientos?: string | null
           titulos_academicos?: string | null
@@ -493,6 +497,7 @@ export type Database = {
         }
         Update: {
           ano_nacimiento?: number | null
+          apellidos?: string | null
           asociaciones_profesionales?: string | null
           email?: string | null
           experiencia_laboral?: string | null
@@ -500,6 +505,7 @@ export type Database = {
           inicio_interes_estudio?: string | null
           interes_investigacion?: string | null
           lugar_nacimiento?: string | null
+          nombres?: string | null
           posicion_actual?: string | null
           premios_reconocimientos?: string | null
           titulos_academicos?: string | null
@@ -687,6 +693,7 @@ export type Database = {
           nombre_archivo: string | null
           nubosidad: number | null
           observacion: string | null
+          publicacion_id: number | null
           serie_campo: string | null
           temp: number | null
           updated_at: string | null
@@ -708,6 +715,7 @@ export type Database = {
           nombre_archivo?: string | null
           nubosidad?: number | null
           observacion?: string | null
+          publicacion_id?: number | null
           serie_campo?: string | null
           temp?: number | null
           updated_at?: string | null
@@ -729,6 +737,7 @@ export type Database = {
           nombre_archivo?: string | null
           nubosidad?: number | null
           observacion?: string | null
+          publicacion_id?: number | null
           serie_campo?: string | null
           temp?: number | null
           updated_at?: string | null
@@ -747,6 +756,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_coleccion_completa"
             referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_anfibios_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_cientifica_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_completa"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_completa_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "canto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
           },
         ]
       }
@@ -813,6 +864,30 @@ export type Database = {
           id?: number
           nombre?: string | null
           tipo?: string | null
+        }
+        Relationships: []
+      }
+      categoria_media_coleccion: {
+        Row: {
+          descripcion: string | null
+          id_categoria_media: number
+          nombre: string
+          orden: number | null
+          tipo_media: string
+        }
+        Insert: {
+          descripcion?: string | null
+          id_categoria_media?: number
+          nombre: string
+          orden?: number | null
+          tipo_media: string
+        }
+        Update: {
+          descripcion?: string | null
+          id_categoria_media?: number
+          nombre?: string
+          orden?: number | null
+          tipo_media?: string
         }
         Relationships: []
       }
@@ -1334,6 +1409,7 @@ export type Database = {
       coleccion_externa: {
         Row: {
           catalogo_museo: string | null
+          colectores: string | null
           created_at: string
           elevacion: number | null
           fecha: string | null
@@ -1350,6 +1426,7 @@ export type Database = {
         }
         Insert: {
           catalogo_museo?: string | null
+          colectores?: string | null
           created_at?: string
           elevacion?: number | null
           fecha?: string | null
@@ -1366,6 +1443,7 @@ export type Database = {
         }
         Update: {
           catalogo_museo?: string | null
+          colectores?: string | null
           created_at?: string
           elevacion?: number | null
           fecha?: string | null
@@ -4674,6 +4752,82 @@ export type Database = {
           valor_temporal?: string | null
         }
         Relationships: []
+      }
+      media_coleccion: {
+        Row: {
+          autor: string | null
+          categoria_media_id: number
+          coleccion_id: number
+          created_at: string | null
+          descripcion: string | null
+          duracion: number | null
+          fecha: string | null
+          id_media_coleccion: number
+          metadata: Json | null
+          orden: number | null
+          publicar: boolean | null
+          tipo_media: string
+          titulo: string | null
+          url: string
+          url_thumbnail: string | null
+        }
+        Insert: {
+          autor?: string | null
+          categoria_media_id: number
+          coleccion_id: number
+          created_at?: string | null
+          descripcion?: string | null
+          duracion?: number | null
+          fecha?: string | null
+          id_media_coleccion?: number
+          metadata?: Json | null
+          orden?: number | null
+          publicar?: boolean | null
+          tipo_media: string
+          titulo?: string | null
+          url: string
+          url_thumbnail?: string | null
+        }
+        Update: {
+          autor?: string | null
+          categoria_media_id?: number
+          coleccion_id?: number
+          created_at?: string | null
+          descripcion?: string | null
+          duracion?: number | null
+          fecha?: string | null
+          id_media_coleccion?: number
+          metadata?: Json | null
+          orden?: number | null
+          publicar?: boolean | null
+          tipo_media?: string
+          titulo?: string | null
+          url?: string
+          url_thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_coleccion_categoria_media_id_fkey"
+            columns: ["categoria_media_id"]
+            isOneToOne: false
+            referencedRelation: "categoria_media_coleccion"
+            referencedColumns: ["id_categoria_media"]
+          },
+          {
+            foreignKeyName: "media_coleccion_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "media_coleccion_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_coleccion_completa"
+            referencedColumns: ["id_coleccion"]
+          },
+        ]
       }
       menu: {
         Row: {
@@ -8293,8 +8447,106 @@ export type Database = {
         }
         Relationships: []
       }
+      z_alumno: {
+        Row: {
+          altura: number | null
+          created_at: string
+          edad: number | null
+          fecha: string | null
+          hombre: boolean | null
+          id: number
+          nombre: string | null
+        }
+        Insert: {
+          altura?: number | null
+          created_at?: string
+          edad?: number | null
+          fecha?: string | null
+          hombre?: boolean | null
+          id?: number
+          nombre?: string | null
+        }
+        Update: {
+          altura?: number | null
+          created_at?: string
+          edad?: number | null
+          fecha?: string | null
+          hombre?: boolean | null
+          id?: number
+          nombre?: string | null
+        }
+        Relationships: []
+      }
+      z_telefono: {
+        Row: {
+          created_at: string
+          id: number
+          id_alumno: number | null
+          numero: string | null
+          principal: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          id_alumno?: number | null
+          numero?: string | null
+          principal?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          id_alumno?: number | null
+          numero?: string | null
+          principal?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telefono_id_alumno_fkey"
+            columns: ["id_alumno"]
+            isOneToOne: false
+            referencedRelation: "z_alumno"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
+      mv_colecciones_mapa: {
+        Row: {
+          catalogo_museo: string | null
+          cita_corta: string | null
+          colectores: string | null
+          elevacion: number | null
+          fecha_coleccion: string | null
+          id_coleccion: number | null
+          latitud: number | null
+          localidad: string | null
+          longitud: number | null
+          nombre_especie: string | null
+          numero_museo: string | null
+          origen: string | null
+          provincia: string | null
+          rank_id: number | null
+          row_id: number | null
+          taxon_id: number | null
+        }
+        Relationships: []
+      }
+      mv_sapoteca_stats: {
+        Row: {
+          publicaciones_anio_actual: number | null
+          total_cientificas: number | null
+          total_conservacion: number | null
+          total_divulgacion: number | null
+          total_ecologia: number | null
+          total_evolucion: number | null
+          total_indexadas: number | null
+          total_no_indexadas: number | null
+          total_taxonomia: number | null
+          total_ultima_decada: number | null
+        }
+        Relationships: []
+      }
       vista_noticias_completa: {
         Row: {
           catalogo_awe_id: number | null
@@ -8362,6 +8614,7 @@ export type Database = {
           campobase_personal_nombres: string | null
           campobase_provincia: string | null
           cantos_info: string | null
+          catalogo_museo: string | null
           colectores: string | null
           coordenadas: string | null
           created_at: string | null
@@ -8395,7 +8648,7 @@ export type Database = {
           estatus_identificacion: string | null
           estatus_tipo: string | null
           extrato_piel_count: number | null
-          fecha_col: string | null
+          fecha_coleccion: string | null
           fecha_fijacion: string | null
           fecha_identifica: string | null
           foto_exsitu: boolean | null
@@ -8445,6 +8698,7 @@ export type Database = {
           prestamos_numeros: string | null
           prestamos_tejido_numeros: string | null
           provincia: string | null
+          publicar: boolean | null
           rango: string | null
           responsable_ingreso: string | null
           sc: string | null
@@ -8683,7 +8937,10 @@ export type Database = {
         Row: {
           catalogo_museo: string | null
           cita_corta: string | null
+          colectores: string | null
           elevacion: number | null
+          fecha_coleccion: string | null
+          id_coleccion: number | null
           latitud: number | null
           localidad: string | null
           longitud: number | null
@@ -8691,6 +8948,7 @@ export type Database = {
           numero_museo: string | null
           origen: string | null
           provincia: string | null
+          rank_id: number | null
           taxon_id: number | null
         }
         Relationships: []
@@ -11873,12 +12131,32 @@ export type Database = {
         }
         Returns: string
       }
+      get_anos_publicaciones_ecuador: {
+        Args: never
+        Returns: {
+          ano: number
+        }[]
+      }
       get_colecciones_mapa: {
-        Args: { p_especie?: string; p_provincia?: string }
+        Args: {
+          p_catalogo_museo?: string
+          p_elevacion_max?: number
+          p_elevacion_min?: number
+          p_especies?: string[]
+          p_fecha_desde?: string
+          p_fecha_hasta?: string
+          p_localidades?: string[]
+          p_numero_museo?: string
+          p_provincias?: string[]
+          p_taxon_ids?: number[]
+        }
         Returns: {
           catalogo_museo: string
           cita_corta: string
+          colectores: string
           elevacion: number
+          fecha_coleccion: string
+          id_coleccion: number
           latitud: number
           localidad: string
           longitud: number
@@ -11886,6 +12164,22 @@ export type Database = {
           numero_museo: string
           origen: string
           provincia: string
+          rank_id: number
+          taxon_id: number
+        }[]
+      }
+      get_tabla_taxon_ids: {
+        Args: {
+          p_catalogos?: string[]
+          p_elevacion_max?: number
+          p_elevacion_min?: number
+          p_especies?: string[]
+          p_localidades?: string[]
+          p_pisos?: string[]
+          p_provincias?: string[]
+          p_snaps?: string[]
+        }
+        Returns: {
           taxon_id: number
         }[]
       }
@@ -11921,6 +12215,8 @@ export type Database = {
           taxon: string
         }[]
       }
+      refresh_mv_colecciones_mapa: { Args: never; Returns: undefined }
+      refresh_mv_sapoteca_stats: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
@@ -12053,4 +12349,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

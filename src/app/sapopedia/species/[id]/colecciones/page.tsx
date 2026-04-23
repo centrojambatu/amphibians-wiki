@@ -148,6 +148,13 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                       <p className="text-[13px] font-bold leading-tight">{catalogoLabel}</p>
                     )}
 
+                    {/* Número de campo */}
+                    {coleccion.sc && (
+                      <p className="text-[11px] leading-tight text-gray-500">
+                        <span className="font-medium">N° Campo:</span> {coleccion.sc}
+                      </p>
+                    )}
+
                     {/* Nombre científico */}
                     {nombreCientifico && (
                       <p className="text-[11px] italic leading-tight" style={{color: "#f07304"}}>
