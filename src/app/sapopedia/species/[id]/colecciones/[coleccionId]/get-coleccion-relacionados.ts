@@ -12,7 +12,7 @@ export interface Canto {
   hora: string | null;
   fecha: string | null;
   equipo: string | null;
-  lugar: string | null;
+  localidad: string | null;
   observacion: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -23,7 +23,8 @@ export interface Tejido {
   coleccion_id: number;
   permisocontrato_id: number | null;
   codtejido: string | null;
-  tipotejido: string | null;
+  tipo_tejido_id: number | null;
+  catalogo_awe: {nombre: string} | null;
   preservacion: string | null;
   fecha: string | null;
   ubicacion: string | null;
@@ -96,7 +97,6 @@ export interface PrestamoTejido {
   tejido?: {
     id_tejido: number;
     codtejido: string | null;
-    tipotejido: string | null;
   };
 }
 
@@ -129,33 +129,12 @@ export interface FotografiaColeccion {
   orden: number | null;
 }
 
-export interface MediaColeccion {
-  id_media_coleccion: number;
-  coleccion_id: number;
-  categoria_media_id: number;
-  tipo_media: "imagen" | "video" | "audio" | "pdf";
-  titulo: string | null;
-  descripcion: string | null;
-  url: string;
-  url_thumbnail: string | null;
-  autor: string | null;
-  fecha: string | null;
-  duracion: number | null;
-  metadata: Record<string, unknown> | null;
-  orden: number;
-  categoria?: {
-    id_categoria_media: number;
-    nombre: string;
-    tipo_media: string;
-    orden: number;
-  };
-}
-
 export interface CuerpoAgua {
   id_cuerpoagua: number;
   campobase_id: number | null;
   nombre: string | null;
-  tipo: string | null;
+  tipo_microhabitat_id: number | null;
+  catalogo_awe: {nombre: string} | null;
   temperatura_ambiente: number | null;
   oxigeno_disuelto: number | null;
   mv_ph: number | null;
@@ -214,7 +193,7 @@ export async function getTejidosByColeccion(coleccionId: number): Promise<Tejido
   while (hasMore) {
     const {data, error} = await supabaseClient
       .from("tejido")
-      .select("*")
+      .select("*, catalogo_awe:tipo_tejido_id(nombre)")
       .eq("coleccion_id", coleccionId)
       .order("fecha", {ascending: false, nullsFirst: false})
       .order("id_tejido", {ascending: true})
@@ -359,7 +338,7 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
   // Obtener todos los cuerpos de agua del campobase
   const {data, error} = await supabaseClient
     .from("cuerpoagua")
-    .select("*")
+    .select("*, catalogo_awe:tipo_microhabitat_id(nombre)")
     .eq("campobase_id", coleccion.campobase_id)
     .order("id_cuerpoagua", {ascending: true});
 
@@ -370,52 +349,6 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
   }
 
   return (data || []) as CuerpoAgua[];
-}
-
-/**
- * Obtiene los archivos multimedia de una colección, agrupados por categoría
- */
-export async function getMediaByColeccion(coleccionId: number): Promise<MediaColeccion[]> {
-  try {
-    const supabaseClient = createServiceClient();
-
-    const {data, error} = await supabaseClient
-      .from("media_coleccion")
-      .select("*")
-      .eq("coleccion_id", coleccionId)
-      .eq("publicar", true)
-      .order("tipo_media", {ascending: true})
-      .order("orden", {ascending: true});
-
-    if (error) return [];
-
-
-  if (!data || data.length === 0) return [];
-
-  // Obtener categorías por separado
-  const catIds = [...new Set((data as any[]).map((d) => d.categoria_media_id).filter(Boolean))];
-  let categoriasMap = new Map<number, {id_categoria_media: number; nombre: string; tipo_media: string; orden: number}>();
-
-  if (catIds.length > 0) {
-    const {data: cats} = await supabaseClient
-      .from("categoria_media_coleccion")
-      .select("id_categoria_media, nombre, tipo_media, orden")
-      .in("id_categoria_media", catIds);
-
-    if (cats) {
-      for (const cat of cats as any[]) {
-        categoriasMap.set(cat.id_categoria_media, cat);
-      }
-    }
-  }
-
-    return (data as any[]).map((row) => ({
-      ...row,
-      categoria: categoriasMap.get(row.categoria_media_id) ?? null,
-    })) as MediaColeccion[];
-  } catch {
-    return [];
-  }
 }
 
 /**

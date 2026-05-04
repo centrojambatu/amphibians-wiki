@@ -21,7 +21,6 @@ import type {
   ColeccionPersonal,
   Identificacion,
   CuerpoAgua,
-  MediaColeccion,
   FotografiaColeccion,
 } from "./get-coleccion-relacionados";
 
@@ -35,7 +34,6 @@ interface ColeccionDetailClientProps {
   identificaciones: Identificacion[];
   cuerposAgua: CuerpoAgua[];
   fotografias: FotografiaColeccion[];
-  mediaColeccion: MediaColeccion[];
   especieUrl: string;
   coleccionesUrl: string;
 }
@@ -105,7 +103,6 @@ export default function ColeccionDetailClient({
   identificaciones,
   cuerposAgua,
   fotografias,
-  mediaColeccion,
   especieUrl,
   coleccionesUrl,
 }: ColeccionDetailClientProps) {
@@ -263,7 +260,6 @@ export default function ColeccionDetailClient({
           {id: "fotografias", label: "Fotografías", count: fotografias.length},
           {id: "cantos", label: "Cantos", count: cantos.length},
           {id: "tejidos", label: "Tejidos", count: tejidos.length},
-          {id: "media", label: "Multimedia", count: mediaColeccion.length},
           {id: "identificaciones", label: "Identificaciones", count: identificaciones.length},
         ];
 
@@ -334,7 +330,7 @@ export default function ColeccionDetailClient({
                         <Field label="Fecha" value={formatDate(canto.fecha)} />
                         <Field label="Hora" value={v(canto.hora)} />
                         <Field label="Equipo" value={v(canto.equipo)} />
-                        <Field label="Lugar" value={v(canto.lugar)} />
+                        <Field label="Localidad" value={v(canto.localidad)} />
                         <Field label="Temperatura" value={canto.temp != null ? `${canto.temp} °C` : "—"} />
                         <Field label="Humedad" value={canto.humedad != null ? `${canto.humedad} %` : "—"} />
                         <Field label="Nubosidad" value={canto.nubosidad != null ? `${canto.nubosidad} %` : "—"} />
@@ -354,7 +350,7 @@ export default function ColeccionDetailClient({
                       <p className="mb-2 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Tejido #{i + 1} · {t.codtejido ?? ""}</p>
                       <div className="grid grid-cols-1 gap-x-8 gap-y-0 sm:grid-cols-2">
                         <Field label="Código" value={v(t.codtejido)} />
-                        <Field label="Tipo" value={v(t.tipotejido)} />
+                        <Field label="Tipo" value={v(t.catalogo_awe?.nombre)} />
                         <Field label="Preservación" value={v(t.preservacion)} />
                         <Field label="Fecha" value={formatDate(t.fecha)} />
                         <Field label="Estatus" value={v(t.estatus)} />
@@ -369,66 +365,6 @@ export default function ColeccionDetailClient({
                   ))}
                 </div>
               ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
-
-              {/* Multimedia */}
-              {activeTab === "media" && (mediaColeccion.length > 0 ? (() => {
-                const tiposOrden: MediaColeccion["tipo_media"][] = ["imagen", "video", "audio", "pdf"];
-                const tipoLabels: Record<string, string> = {imagen: "Imágenes", video: "Videos", audio: "Audio", pdf: "PDF"};
-                return (
-                  <div className="space-y-6">
-                    {tiposOrden.map((tipo) => {
-                      const items = mediaColeccion.filter((m) => m.tipo_media === tipo);
-                      if (items.length === 0) return null;
-                      return (
-                        <div key={tipo}>
-                          <p className="mb-3 text-[11px] font-bold tracking-widest text-gray-400 uppercase">{tipoLabels[tipo]} ({items.length})</p>
-                          {tipo === "imagen" ? (
-                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                              {items.map((m) => (
-                                <a key={m.id_media_coleccion} className="group overflow-hidden rounded-lg border" href={m.url} rel="noopener noreferrer" target="_blank">
-                                  <div className="aspect-square overflow-hidden bg-gray-100">
-                                    <img alt={m.titulo || "Imagen"} className="h-full w-full object-cover transition-transform group-hover:scale-105" src={m.url_thumbnail || m.url} />
-                                  </div>
-                                </a>
-                              ))}
-                            </div>
-                          ) : tipo === "audio" ? (
-                            <div className="space-y-3">
-                              {items.map((m) => (
-                                <div key={m.id_media_coleccion} className="rounded-lg border p-4">
-                                  {m.titulo && <p className="text-sm font-medium">{m.titulo}</p>}
-                                  <audio className="mt-2 w-full" controls preload="none"><source src={m.url} /></audio>
-                                </div>
-                              ))}
-                            </div>
-                          ) : tipo === "video" ? (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                              {items.map((m) => (
-                                <div key={m.id_media_coleccion} className="overflow-hidden rounded-lg border">
-                                  <div className="aspect-video">
-                                    <video className="h-full w-full" controls poster={m.url_thumbnail || undefined} preload="none"><source src={m.url} /></video>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {items.map((m) => (
-                                <a key={m.id_media_coleccion} className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-gray-50" href={m.url} rel="noopener noreferrer" target="_blank">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-red-50 text-xs font-bold text-red-600">PDF</div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium text-gray-900">{m.titulo || "Documento"}</p>
-                                  </div>
-                                </a>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })() : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
 
               {/* Identificaciones */}
               {activeTab === "identificaciones" && (identificaciones.length > 0 ? (
