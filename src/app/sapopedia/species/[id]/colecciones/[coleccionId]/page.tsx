@@ -10,7 +10,6 @@ import {
   getColeccionPersonal,
   getIdentificacionesByColeccion,
   getCuerposAguaByColeccion,
-  getMediaByColeccion,
   getFotografiasByColeccion,
 } from "./get-coleccion-relacionados";
 import ColeccionDetailClient from "./coleccion-detail-client";
@@ -50,7 +49,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     coleccionPersonal,
     identificaciones,
     cuerposAgua,
-    mediaColeccion,
     fotografias,
   ] = await Promise.all([
     getColeccionById(coleccionIdNum),
@@ -61,7 +59,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getColeccionPersonal(coleccionIdNum),
     getIdentificacionesByColeccion(coleccionIdNum),
     getCuerposAguaByColeccion(coleccionIdNum),
-    getMediaByColeccion(coleccionIdNum),
     getFotografiasByColeccion(coleccionIdNum),
   ]);
 
@@ -107,7 +104,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       especieUrl={especieUrl}
       identificaciones={identificaciones}
       fotografias={fotografias}
-      mediaColeccion={mediaColeccion}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
       tejidos={tejidos}
