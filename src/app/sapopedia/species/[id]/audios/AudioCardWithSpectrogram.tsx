@@ -2,7 +2,7 @@
 
 import {useEffect, useRef, useState} from "react";
 
-import {AudioData} from "@/app/fonoteca/audios-data";
+import {AudioData} from "@/app/audioteca/audios-data";
 import AudioSpectrogram from "@/components/AudioSpectrogram";
 
 export default function AudioCardWithSpectrogram({audio}: {audio: AudioData}) {

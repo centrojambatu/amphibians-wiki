@@ -1,6 +1,6 @@
 import {notFound} from "next/navigation";
 import getFichaEspecie from "../get-ficha-especie";
-import {AudioData} from "@/app/fonoteca/audios-data";
+import {AudioData} from "@/app/audioteca/audios-data";
 import SpeciesAudiosClient from "./SpeciesAudiosClient";
 
 interface PageProps {
@@ -102,21 +102,20 @@ export default async function SpeciesAudiosPage({params, searchParams}: PageProp
     : "";
 
   const especieUrl = `/sapopedia/species/${id}`;
-  const fromFonoteca = paramsSearch.from === "fonoteca";
+  const fromAudioteca = paramsSearch.from === "audioteca";
   const searchQuery = paramsSearch.search || "";
 
-  // Construir URL de regreso a fonoteca con el estado de búsqueda
-  const fonotecaUrl = searchQuery
-    ? `/fonoteca?search=${encodeURIComponent(searchQuery)}`
-    : "/fonoteca";
+  const audiotecaUrl = searchQuery
+    ? `/audioteca?search=${encodeURIComponent(searchQuery)}`
+    : "/audioteca";
 
   return (
     <SpeciesAudiosClient
       audiosExternos={audiosExternosMuestra}
       audiosPropios={audiosPropiosMuestra}
+      audiotecaUrl={audiotecaUrl}
       especieUrl={especieUrl}
-      fonotecaUrl={fonotecaUrl}
-      fromFonoteca={fromFonoteca}
+      fromAudioteca={fromAudioteca}
       nombreCientifico={nombreCientifico}
     />
   );

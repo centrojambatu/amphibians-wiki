@@ -2217,7 +2217,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         }}
                       >
                         <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
-                        <span className="mt-1 text-xs font-medium text-gray-600">Fonoteca</span>
+                        <span className="mt-1 text-xs font-medium text-gray-600">Audioteca</span>
                       </Link>
                     );
                   })()}
