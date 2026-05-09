@@ -56,7 +56,7 @@ export default async function getColeccionesEspecie(
       .from("coleccion")
       .select(
         `id_coleccion, taxon_id, num_colector, sc, gui, numero_museo, catalogo_museo, sc_acronimo, sc_numero, sc_sufijo,
-        estatus_identificacion, taxon_nombre, identificado_por, fecha_identifica, estadio,
+        estatus_identificacion, identificado_por, fecha_identifica, estadio,
         numero_individuos, sexo, estado, svl, peso, estatus_tipo, fecha_col, hora, colectores,
         localidad, latitud, longitud, elevacion, habitat, observacion, publicar,
         geopolitica!coleccion_provincia_id_fkey(nombre),
@@ -97,7 +97,7 @@ export default async function getColeccionesEspecie(
     sc_numero: c.sc_numero,
     sc_sufijo: c.sc_sufijo,
     estatus_identificacion: c.estatus_identificacion,
-    taxon_nombre: c.taxon_nombre,
+    taxon_nombre: c.taxon?.taxon ?? null,
     identificado_por: c.identificado_por,
     fecha_identifica: c.fecha_identifica,
     estadio: c.estadio,

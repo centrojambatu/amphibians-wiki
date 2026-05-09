@@ -13,6 +13,7 @@ export async function GET(request: Request) {
       .select(
         `taxon_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
       )
+      .eq("publicar", true)
       .limit(100000);
 
     if (cantoError) {

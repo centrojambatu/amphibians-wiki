@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import {ArrowLeft, Eye} from "lucide-react";
-
-import {AudioData} from "@/app/audioteca/audios-data";
+import {useState} from "react";
 
 import AudioCardWithSpectrogram from "./AudioCardWithSpectrogram";
+import {SpeciesAudioItem} from "./types";
 
 interface SpeciesAudiosClientProps {
   nombreCientifico: string;
   especieUrl: string;
   fromAudioteca: boolean;
   audiotecaUrl: string;
-  audiosExternos: AudioData[];
-  audiosPropios: AudioData[];
+  audios: SpeciesAudioItem[];
+  speciesUrlId: string;
 }
 
 export default function SpeciesAudiosClient({
@@ -21,9 +21,11 @@ export default function SpeciesAudiosClient({
   especieUrl,
   fromAudioteca,
   audiotecaUrl,
-  audiosExternos,
-  audiosPropios,
+  audios,
+  speciesUrlId,
 }: SpeciesAudiosClientProps) {
+  const [openId, setOpenId] = useState<string | null>(null);
+
   return (
     <div className="bg-background min-h-screen">
       <main className="container mx-auto px-4 py-8">
@@ -61,33 +63,21 @@ export default function SpeciesAudiosClient({
           </h1>
         </div>
 
-        <section className="mb-12">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Audios externos</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Audios de fuentes externas relacionadas con esta especie
-            </p>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {audiosExternos.map((audio) => (
-              <AudioCardWithSpectrogram key={audio.id} audio={audio} />
+        {audios.length === 0 ? (
+          <p className="text-sm text-gray-500">No hay audios publicados.</p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {audios.map((audio) => (
+              <AudioCardWithSpectrogram
+                key={audio.id}
+                audio={audio}
+                open={openId === audio.id}
+                speciesUrlId={speciesUrlId}
+                onToggle={() => setOpenId((v) => (v === audio.id ? null : audio.id))}
+              />
             ))}
           </div>
-        </section>
-
-        <section className="mb-12">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Audios propios</h2>
-            <p className="mt-1 text-sm text-gray-600">Audios producidos por el Centro Jambatu</p>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {audiosPropios.map((audio) => (
-              <AudioCardWithSpectrogram key={audio.id} audio={audio} />
-            ))}
-          </div>
-        </section>
+        )}
       </main>
     </div>
   );

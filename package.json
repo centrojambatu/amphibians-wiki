@@ -45,9 +45,12 @@
     "react-d3-tree": "^3.6.6",
     "react-dom": "^19.1.1",
     "react-leaflet": "^5.0.0",
+    "react-photo-album": "^3.6.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "4.0.9",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "wavesurfer.js": "^7.12.6",
+    "yet-another-react-lightbox": "^3.32.0"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^1.52.3",

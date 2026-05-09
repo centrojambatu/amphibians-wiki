@@ -1,7 +1,8 @@
 import {notFound} from "next/navigation";
 import getFichaEspecie from "../get-ficha-especie";
-import {AudioData} from "@/app/audioteca/audios-data";
+import {createClient} from "@/utils/supabase/server";
 import SpeciesAudiosClient from "./SpeciesAudiosClient";
+import {SpeciesAudioItem} from "./types";
 
 interface PageProps {
   params: Promise<{
@@ -13,82 +14,71 @@ interface PageProps {
   }>;
 }
 
-// Audios de muestra para todas las especies
-const audiosExternosMuestra: AudioData[] = [
-  {
-    id: "audio-externo-1",
-    title: "Canto de Rana - Ejemplo 1",
-    source: "Macaulay Library",
-    url: "https://example.com/audio1.mp3",
-    duration: "0:45",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Pichincha",
-    date: "2024-01-15",
-  },
-  {
-    id: "audio-externo-2",
-    title: "Canto de Sapo - Ejemplo 2",
-    source: "Xeno-canto",
-    url: "https://example.com/audio2.mp3",
-    duration: "1:20",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Napo",
-    date: "2023-06-10",
-  },
-  {
-    id: "audio-externo-3",
-    title: "Llamado de Anfibio - Ejemplo 3",
-    source: "iNaturalist",
-    url: "https://example.com/audio3.mp3",
-    duration: "0:30",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Pastaza",
-    date: "2024-03-20",
-  },
-];
+async function getCantosByTaxon(taxonId: number): Promise<SpeciesAudioItem[]> {
+  const supabase = await createClient();
 
-const audiosPropiosMuestra: AudioData[] = [
-  {
-    id: "audio-propio-1",
-    title: "Canto de Rana - Centro Jambatu",
-    source: "Centro Jambatu",
-    url: "https://example.com/audio-propio1.mp3",
-    duration: "0:55",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Pichincha",
-    date: "2024-02-01",
-  },
-  {
-    id: "audio-propio-2",
-    title: "Grabación de Campo - Centro Jambatu",
-    source: "Centro Jambatu",
-    url: "https://example.com/audio-propio2.mp3",
-    duration: "1:15",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Napo",
-    date: "2024-01-20",
-  },
-  {
-    id: "audio-propio-3",
-    title: "Canto Nocturno - Centro Jambatu",
-    source: "Centro Jambatu",
-    url: "https://example.com/audio-propio3.mp3",
-    duration: "0:40",
-    species: "Rhaebo caeruleostictus",
-    location: "Ecuador, Pastaza",
-    date: "2024-03-15",
-  },
-];
+  const {data, error} = await supabase
+    .from("canto")
+    .select(
+      `id_canto, nombre, enlace, fecha, hora, colector, localidad, provincia, estado, pais,
+       latitud, longitud, elevacion, temp_aire, temp_agua, humedad, nubosidad,
+       observacion, especies_fondo, serie_campo,
+       coleccion_id, coleccion_externa_id,
+       coleccion:coleccion_id(catalogo_museo, numero_museo),
+       coleccion_externa:coleccion_externa_id(catalogo_museo, numero_museo),
+       publicacion:publicacion_id(cita_corta)`,
+    )
+    .eq("taxon_id", taxonId)
+    .eq("publicar", true)
+    .order("fecha", {ascending: false, nullsFirst: false});
+
+  if (error) {
+    console.error("Error al obtener cantos:", error);
+
+    return [];
+  }
+
+  return (data || []).map((c: any) => {
+    const fromColeccion = c.coleccion_id != null;
+    const fromExterna = !fromColeccion && c.coleccion_externa_id != null;
+    const item: SpeciesAudioItem = {
+      id: String(c.id_canto),
+      nombre: c.nombre,
+      enlace: c.enlace,
+      cita_corta: c.publicacion?.cita_corta ?? null,
+      fecha: c.fecha,
+      hora: c.hora,
+      colector: c.colector,
+      localidad: c.localidad,
+      provincia: c.provincia,
+      estado: c.estado,
+      pais: c.pais,
+      latitud: c.latitud,
+      longitud: c.longitud,
+      elevacion: c.elevacion,
+      temp_aire: c.temp_aire,
+      temp_agua: c.temp_agua,
+      humedad: c.humedad,
+      nubosidad: c.nubosidad,
+      observacion: c.observacion,
+      especies_fondo: c.especies_fondo,
+      serie_campo: c.serie_campo,
+      fuente: fromColeccion ? "coleccion" : fromExterna ? "coleccion_externa" : "taxon",
+      coleccion_id: c.coleccion_id,
+      coleccion_externa_id: c.coleccion_externa_id,
+      catalogo_museo: c.coleccion?.catalogo_museo ?? c.coleccion_externa?.catalogo_museo ?? null,
+      numero_museo: c.coleccion?.numero_museo ?? c.coleccion_externa?.numero_museo ?? null,
+    };
+
+    return item;
+  });
+}
 
 export default async function SpeciesAudiosPage({params, searchParams}: PageProps) {
   const {id} = await params;
   const paramsSearch = await searchParams;
 
-  // Decodificar el id de la URL
   const decodedId = decodeURIComponent(id);
-
-  // Si es un número (id_ficha_especie), usarlo directamente
-  // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
   const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
@@ -109,14 +99,16 @@ export default async function SpeciesAudiosPage({params, searchParams}: PageProp
     ? `/audioteca?search=${encodeURIComponent(searchQuery)}`
     : "/audioteca";
 
+  const audios = await getCantosByTaxon(fichaEspecie.taxon_id);
+
   return (
     <SpeciesAudiosClient
-      audiosExternos={audiosExternosMuestra}
-      audiosPropios={audiosPropiosMuestra}
+      audios={audios}
       audiotecaUrl={audiotecaUrl}
       especieUrl={especieUrl}
       fromAudioteca={fromAudioteca}
       nombreCientifico={nombreCientifico}
+      speciesUrlId={id}
     />
   );
 }

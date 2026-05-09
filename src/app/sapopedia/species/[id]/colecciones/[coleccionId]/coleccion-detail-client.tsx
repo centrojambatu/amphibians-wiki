@@ -93,6 +93,33 @@ function FieldGroup({title, children}: {title: string; children: React.ReactNode
   );
 }
 
+/** Tabla de dos columnas (label | valor) para mostrar todos los campos */
+function TwoColTable({title, rows}: {title: string; rows: [string, any][]}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5">
+        <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{title}</h3>
+      </div>
+      <table className="w-full text-xs">
+        <tbody>
+          {rows.map(([label, value], i) => (
+            <tr key={label} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+              <td className="w-1/2 border-b border-gray-100 px-3 py-1.5 align-top text-gray-500">
+                {label}
+              </td>
+              <td
+                className={`w-1/2 border-b border-gray-100 px-3 py-1.5 align-top font-medium ${v(value) === "—" ? "text-gray-300" : "text-gray-900"}`}
+              >
+                {v(value)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function ColeccionDetailClient({
   coleccion,
   cantos,
@@ -251,6 +278,141 @@ export default function ColeccionDetailClient({
             <p className="mt-2 text-xs italic text-gray-500">{c.observacion}</p>
           )}
         </div>
+      </div>
+
+      {/* ═══ TODOS LOS CAMPOS — tablas de dos columnas ═══ */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <TwoColTable
+          rows={[
+            ["id_coleccion", c.id_coleccion],
+            ["taxon_id", c.taxon_id],
+            ["taxon_nombre", c.taxon_nombre],
+            ["catalogo_museo", c.catalogo_museo],
+            ["numero_museo", c.numero_museo],
+            ["num_colector", c.num_colector],
+            ["sc", c.sc],
+            ["sc_acronimo", c.sc_acronimo],
+            ["sc_numero", c.sc_numero],
+            ["sc_sufijo", c.sc_sufijo],
+            ["gui", c.gui],
+            ["numero_cuadernocampo", c.numero_cuadernocampo],
+            ["responsable_ingreso", c.responsable_ingreso],
+            ["rango", c.rango],
+            ["verificado", c.verificado],
+            ["publicar", c.publicar],
+            ["gbif", c.gbif],
+          ]}
+          title="Identificación / Catálogo"
+        />
+
+        <TwoColTable
+          rows={[
+            ["estadio", c.estadio],
+            ["numero_individuos", c.numero_individuos],
+            ["sexo", c.sexo],
+            ["estado", c.estado],
+            ["svl (mm)", c.svl],
+            ["peso (g)", c.peso],
+            ["estatus_tipo", c.estatus_tipo],
+            ["condicion_reproductiva", c.condicion_reproductiva],
+            ["nombre_comun", c.nombre_comun],
+            ["idioma_nc", c.idioma_nc],
+            ["fuente_nombrecomun", c.fuente_nombrecomun],
+          ]}
+          title="Espécimen"
+        />
+
+        <TwoColTable
+          rows={[
+            ["fecha_col", c.fecha_col],
+            ["hora", c.hora],
+            ["hora_aprox", c.hora_aprox],
+            ["colectores", c.colectores],
+            ["personal_nombre", c.personal_nombre],
+            ["personal_siglas", c.personal_siglas],
+            ["personal_adicional_nombres", c.personal_adicional_nombres],
+            ["campobase_nombre", c.campobase_nombre],
+            ["campobase_localidad", c.campobase_localidad],
+          ]}
+          title="Recolección"
+        />
+
+        <TwoColTable
+          rows={[
+            ["localidad", c.localidad],
+            ["provincia", c.provincia],
+            ["latitud", c.latitud],
+            ["longitud", c.longitud],
+            ["coordenadas", c.coordenadas],
+            ["elevacion (m)", c.elevacion],
+            ["fuente_coord", c.fuente_coord],
+            ["habitat", c.habitat],
+          ]}
+          title="Localización"
+        />
+
+        <TwoColTable
+          rows={[
+            ["temperatura (°C)", c.temperatura],
+            ["humedad (%)", c.humedad],
+            ["ph", c.ph],
+            ["datos_ambientales", c.datos_ambientales],
+          ]}
+          title="Ambiente"
+        />
+
+        <TwoColTable
+          rows={[
+            ["estatus_identificacion", c.estatus_identificacion],
+            ["identificado_por", c.identificado_por],
+            ["fecha_identifica", c.fecha_identifica],
+            ["identificacion_posible", c.identificacion_posible],
+            ["identificacion_sp", c.identificacion_sp],
+            ["identificacion_cuestionable", c.identificacion_cuestionable],
+          ]}
+          title="Identificación taxonómica"
+        />
+
+        <TwoColTable
+          rows={[
+            ["metodo_fijacion", c.metodo_fijacion],
+            ["fecha_fijacion", c.fecha_fijacion],
+            ["metodo_preservacion", c.metodo_preservacion],
+            ["tejido_count", c.tejido_count],
+            ["extrato_piel_count", c.extrato_piel_count],
+          ]}
+          title="Preservación"
+        />
+
+        <TwoColTable
+          rows={[
+            ["sangre", c.sangre],
+            ["piel_exudado", c.piel_exudado],
+            ["piel_liofilizado", c.piel_liofilizado],
+            ["tejido_higado", c.tejido_higado],
+            ["tejido_musculo", c.tejido_musculo],
+            ["esqueleto_transparentacion", c.esqueleto_transparentacion],
+            ["esperma", c.esperma],
+            ["heces", c.heces],
+          ]}
+          title="Muestras biológicas"
+        />
+
+        <TwoColTable
+          rows={[
+            ["foto_insitu", c.foto_insitu],
+            ["autor_foto_is", c.autor_foto_is],
+            ["foto_exsitu", c.foto_exsitu],
+            ["autor_foto_es", c.autor_foto_es],
+            ["nota_foto", c.nota_foto],
+          ]}
+          title="Fotografía"
+        />
+
+        <TwoColTable
+          rows={[["observacion", c.observacion]]}
+          title="Observación"
+        />
       </div>
 
 

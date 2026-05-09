@@ -1,72 +1,221 @@
 "use client";
 
-import {useEffect, useRef, useState} from "react";
+import Link from "next/link";
+import {ChevronDown, ExternalLink} from "lucide-react";
+import {useEffect, useState} from "react";
 
-import {AudioData} from "@/app/audioteca/audios-data";
-import AudioSpectrogram from "@/components/AudioSpectrogram";
+import AudioSpectrogramOscillogram from "@/components/AudioSpectrogramOscillogram";
 
-export default function AudioCardWithSpectrogram({audio}: {audio: AudioData}) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+import {SpeciesAudioItem} from "./types";
+
+function GbifLink({
+  catalogoMuseo,
+  numeroMuseo,
+  label,
+}: {
+  catalogoMuseo: string;
+  numeroMuseo: string;
+  label: string;
+}) {
+  const [gbifUrl, setGbifUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const audioEl = audioRef.current;
+    const run = async () => {
+      try {
+        let institutionCode = catalogoMuseo;
+        let catNumber = numeroMuseo;
+        let collectionCode: string | null = null;
 
-    if (audioEl) {
-      // Esperar a que el audio esté listo
-      const handleCanPlay = () => {
-        setAudioElement(audioEl);
-      };
+        switch (catalogoMuseo) {
+          case "KU":
+            collectionCode = "KUH";
+            break;
+          case "QCAZA":
+            institutionCode = "QCAZ";
+            catNumber = `QCAZA${String(numeroMuseo)}`;
+            break;
+          case "QCAZ":
+            catNumber = `QCAZA${String(numeroMuseo)}`;
+            break;
+          case "AMNH":
+            catNumber = `A-${String(numeroMuseo)}`;
+            break;
+          case "USNM":
+            catNumber = `USNM ${String(numeroMuseo)}`;
+            break;
+          case "DHMECN":
+            catNumber = `DHMECN ${String(numeroMuseo)}`;
+            break;
+        }
+        const params = new URLSearchParams({
+          institutionCode,
+          catalogNumber: catNumber,
+          classKey: "131",
+          limit: "1",
+        });
 
-      if (audioEl.readyState >= 2) {
-        // Si ya está cargado, establecer inmediatamente
-        setAudioElement(audioEl);
-      } else {
-        audioEl.addEventListener("canplay", handleCanPlay);
+        if (collectionCode) params.set("collectionCode", collectionCode);
+        const res = await fetch(`https://api.gbif.org/v1/occurrence/search?${params.toString()}`);
+
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.results?.length > 0) {
+          setGbifUrl(`https://www.gbif.org/occurrence/${data.results[0].key}`);
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false);
       }
+    };
 
-      return () => {
-        audioEl.removeEventListener("canplay", handleCanPlay);
-      };
-    }
-  }, []);
+    void run();
+  }, [catalogoMuseo, numeroMuseo]);
+
+  if (loading) return <span className="text-sm font-semibold text-gray-500">{label}</span>;
+  if (!gbifUrl)
+    return (
+      <span className="text-sm font-semibold text-gray-700" title="No encontrado en GBIF">
+        {label}
+      </span>
+    );
 
   return (
-    <div className="flex-shrink-0" style={{width: "320px"}}>
-      <div className="group hover:border-primary relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-md">
-        {/* Reproductor de audio */}
-        <div className="mb-3">
-          <audio
-            ref={audioRef}
-            controls
-            className="w-full"
-            crossOrigin="anonymous"
-            preload="metadata"
-            src={audio.url}
+    <a
+      className="hover:text-primary inline-flex items-center gap-1 text-sm font-semibold text-[#4ba24b] underline"
+      href={gbifUrl}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {label}
+      <ExternalLink className="h-3 w-3" />
+    </a>
+  );
+}
+
+function Field({label, value}: {label: string; value: React.ReactNode}) {
+  if (value == null || value === "") return null;
+
+  return (
+    <div className="flex flex-col leading-tight">
+      <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">{label}</span>
+      <span className="truncate text-xs text-gray-800">{value}</span>
+    </div>
+  );
+}
+
+export default function AudioCardWithSpectrogram({
+  audio,
+  speciesUrlId,
+  open,
+  onToggle,
+}: {
+  audio: SpeciesAudioItem;
+  speciesUrlId: string;
+  open: boolean;
+  onToggle: () => void;
+}) {
+
+  const labelMuseo =
+    audio.catalogo_museo && audio.numero_museo
+      ? `${audio.catalogo_museo} ${audio.numero_museo}`
+      : audio.catalogo_museo || audio.numero_museo || "Sin catálogo";
+
+  const coords =
+    audio.latitud != null && audio.longitud != null
+      ? `${audio.latitud.toFixed(5)}, ${audio.longitud.toFixed(5)}`
+      : (null as string | null);
+
+  return (
+    <div className="rounded-md border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+      <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        {audio.fuente === "coleccion" && audio.coleccion_id ? (
+          <Link
+            className="hover:text-primary text-xs font-semibold text-[#4ba24b] underline"
+            href={`/sapopedia/species/${speciesUrlId}/colecciones/${audio.coleccion_id}`}
           >
-            Tu navegador no soporta el elemento de audio.
-          </audio>
-        </div>
-
-        {/* Espectrograma */}
-        <div className="mb-3">
-          <AudioSpectrogram audioElement={audioElement} height={150} width={288} />
-        </div>
-
-        {/* Información del audio */}
-        <div>
-          <h3 className="group-hover:text-primary line-clamp-2 text-sm font-medium text-gray-900">
-            {audio.title}
-          </h3>
-          <p className="mt-1 text-xs text-gray-600">{audio.source}</p>
-          {audio.species && <p className="mt-1 text-xs text-gray-500 italic">{audio.species}</p>}
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
-            {audio.duration && <span>Duración: {audio.duration}</span>}
-            {audio.location && <span>• {audio.location}</span>}
-            {audio.date && <span>• {audio.date}</span>}
-          </div>
-        </div>
+            {labelMuseo}
+          </Link>
+        ) : audio.fuente === "coleccion_externa" && audio.catalogo_museo && audio.numero_museo ? (
+          <GbifLink
+            catalogoMuseo={audio.catalogo_museo}
+            label={labelMuseo}
+            numeroMuseo={audio.numero_museo}
+          />
+        ) : (
+          <span className="text-xs font-semibold text-gray-700">{labelMuseo}</span>
+        )}
+        {audio.nombre && <span className="text-[11px] text-gray-600">· {audio.nombre}</span>}
+        {audio.cita_corta && (
+          <span className="text-[11px] text-gray-500 italic">· {audio.cita_corta}</span>
+        )}
       </div>
+
+      <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-4 md:grid-cols-6">
+        <Field label="Fecha" value={audio.fecha} />
+        <Field label="Hora" value={audio.hora} />
+        <Field label="Colector" value={audio.colector} />
+        <Field label="Serie de campo" value={audio.serie_campo} />
+        <Field label="Localidad" value={audio.localidad} />
+        <Field label="Provincia" value={audio.provincia} />
+        <Field label="Estado" value={audio.estado} />
+        <Field label="País" value={audio.pais} />
+        <Field label="Coordenadas" value={coords} />
+        <Field
+          label="Elevación"
+          value={audio.elevacion != null ? `${String(audio.elevacion)} m` : null}
+        />
+        <Field
+          label="Temp. aire"
+          value={audio.temp_aire != null ? `${String(audio.temp_aire)} °C` : null}
+        />
+        <Field
+          label="Temp. agua"
+          value={audio.temp_agua != null ? `${String(audio.temp_agua)} °C` : null}
+        />
+        <Field
+          label="Humedad"
+          value={audio.humedad != null ? `${String(audio.humedad)}%` : null}
+        />
+        <Field
+          label="Nubosidad"
+          value={audio.nubosidad != null ? String(audio.nubosidad) : null}
+        />
+        <Field label="Especies de fondo" value={audio.especies_fondo} />
+      </div>
+
+      {audio.observacion && (
+        <div className="mt-1.5">
+          <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+            Observación
+          </span>
+          <p className="text-xs leading-snug text-gray-700">{audio.observacion}</p>
+        </div>
+      )}
+
+      <button
+        aria-expanded={open}
+        className="mt-2 flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+        type="button"
+        onClick={onToggle}
+      >
+        <span>{open ? "Ocultar audio" : "Reproducir audio"}</span>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="mt-3">
+          {audio.enlace ? (
+            <AudioSpectrogramOscillogram src={audio.enlace} />
+          ) : (
+            <p className="text-sm text-gray-500">No hay enlace de audio disponible.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

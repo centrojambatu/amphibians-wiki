@@ -1,45 +1,69 @@
 import {notFound} from "next/navigation";
-import {ArrowLeft, Eye} from "lucide-react";
-import Link from "next/link";
 
-import {FotoData} from "@/app/fototeca/fotos-data";
+import {createClient} from "@/utils/supabase/server";
 
 import getFichaEspecie from "../get-ficha-especie";
 
 import SpeciesFotosClient from "./SpeciesFotosClient";
+import {SpeciesFotoItem} from "./types";
 
 interface PageProps {
   params: Promise<{id: string}>;
   searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 }
 
-// Fotos de muestra (reemplazar con datos reales)
-const fotosExternasMuestra: FotoData[] = [
-  {
-    id: "ext-1",
-    title: "Ejemplar en hábitat natural",
-    source: "iNaturalist",
-    url: "https://via.placeholder.com/800x600?text=Foto+Externa+1",
-    thumbnailUrl: "https://via.placeholder.com/280x280?text=Foto+Externa+1",
-    species: "Especie ejemplo",
-    location: "Ecuador",
-    date: "2024",
-  },
-];
+async function getFotosByTaxon(taxonId: number): Promise<SpeciesFotoItem[]> {
+  const supabase = await createClient();
 
-const fotosPropiasMuestra: FotoData[] = [
-  {
-    id: "propia-1",
-    title: "Ejemplar en colección",
-    source: "Centro Jambatu",
-    url: "https://via.placeholder.com/800x600?text=Foto+Centro+Jambatu+1",
-    thumbnailUrl: "https://via.placeholder.com/280x280?text=Foto+Centro+Jambatu+1",
-    species: "Especie ejemplo",
-    location: "Ecuador",
-    date: "2024",
-    photographer: "Centro Jambatu",
-  },
-];
+  const {data, error} = await supabase
+    .from("fotografia")
+    .select(
+      `id_fotografia, nombre, enlace, "descripción", fecha, autor, localidad,
+       latitud, longitud, tipo_licencia, observaciones,
+       coleccion_id, coleccion_externa_id, catalogo_awe_id,
+       coleccion:coleccion_id(catalogo_museo, numero_museo),
+       coleccion_externa:coleccion_externa_id(catalogo_museo, numero_museo),
+       publicacion:publicacion_id(cita_corta),
+       catalogo_awe:catalogo_awe_id(nombre)`,
+    )
+    .eq("taxon_id", taxonId)
+    .eq("publicar", true)
+    .order("fecha", {ascending: false, nullsFirst: false});
+
+  if (error) {
+    console.error("Error al obtener fotografías:", error);
+
+    return [];
+  }
+
+  return (data || []).map((f: any) => {
+    const fromColeccion = f.coleccion_id != null;
+    const fromExterna = !fromColeccion && f.coleccion_externa_id != null;
+    const item: SpeciesFotoItem = {
+      id: String(f.id_fotografia),
+      nombre: f.nombre,
+      enlace: f.enlace,
+      descripcion: f["descripción"] ?? null,
+      cita_corta: f.publicacion?.cita_corta ?? null,
+      fecha: f.fecha,
+      autor: f.autor,
+      localidad: f.localidad,
+      latitud: f.latitud,
+      longitud: f.longitud,
+      tipo_licencia: f.tipo_licencia,
+      observaciones: f.observaciones,
+      fuente: fromColeccion ? "coleccion" : fromExterna ? "coleccion_externa" : "taxon",
+      coleccion_id: f.coleccion_id,
+      coleccion_externa_id: f.coleccion_externa_id,
+      catalogo_museo: f.coleccion?.catalogo_museo ?? f.coleccion_externa?.catalogo_museo ?? null,
+      numero_museo: f.coleccion?.numero_museo ?? f.coleccion_externa?.numero_museo ?? null,
+      categoria_id: f.catalogo_awe_id ?? null,
+      categoria: f.catalogo_awe?.nombre ?? null,
+    };
+
+    return item;
+  });
+}
 
 export default async function SpeciesFotosPage({params, searchParams}: PageProps) {
   const {id} = await params;
@@ -47,14 +71,9 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
   const fromFototeca = searchParamsResolved.from === "fototeca";
   const search = searchParamsResolved.search as string | undefined;
 
-  // Decodificar el id de la URL
   const decodedId = decodeURIComponent(id);
-
-  // Si es un número (id_ficha_especie), usarlo directamente
-  // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
   const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
 
-  // Obtener datos de la especie
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 
   if (!fichaEspecie) {
@@ -65,24 +84,19 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
     ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
     : "";
 
-  // Usar el id original de la URL para mantener la consistencia
   const especieUrl = `/sapopedia/species/${id}`;
-
-  // Construir URL de regreso a fototeca con el estado de búsqueda
   const fototecaUrl = search ? `/fototeca?search=${encodeURIComponent(search)}` : "/fototeca";
 
-  // Filtrar fotos por especie (en producción, esto vendría de la base de datos)
-  const fotosExternos = fotosExternasMuestra;
-  const fotosPropios = fotosPropiasMuestra;
+  const fotos = await getFotosByTaxon(fichaEspecie.taxon_id);
 
   return (
     <SpeciesFotosClient
       especieUrl={especieUrl}
-      fotosExternos={fotosExternos}
-      fotosPropios={fotosPropios}
+      fotos={fotos}
       fototecaUrl={fototecaUrl}
       fromFototeca={fromFototeca}
       nombreCientifico={nombreCientifico}
+      speciesUrlId={id}
     />
   );
 }
