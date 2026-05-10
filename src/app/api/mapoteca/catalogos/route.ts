@@ -1,69 +1,57 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 
-import { createClient } from "@/utils/supabase/server";
+import {createClient} from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q");
+  const {searchParams} = new URL(request.url);
+  const q = searchParams.get("q")?.trim() || "";
 
-  if (!q || q.length < 2) {
+  if (q.length < 2) {
     return NextResponse.json([]);
   }
 
   const supabase = await createClient();
 
   try {
-    let data: any[] | null = null;
-    let error: any = null;
+    let queryBuilder = (supabase as any)
+      .from("mv_mapoteca_catalogos_busqueda")
+      .select("catalogo_museo, numero_museo")
+      .limit(50);
 
     if (q.includes(" ")) {
-      // Cuando el query tiene espacio, intentar matching AND:
-      // la parte antes del último espacio busca en catalogo_museo,
-      // la parte después en numero_museo.
-      // Ej: "CJ 6134" → catalogo_museo ILIKE %CJ% AND numero_museo ILIKE %6134%
       const lastSpaceIdx = q.lastIndexOf(" ");
       const catPart = q.substring(0, lastSpaceIdx);
       const numPart = q.substring(lastSpaceIdx + 1);
 
-      ({ data, error } = await supabase
-        .from("vw_colecciones")
-        .select("catalogo_museo, numero_museo")
+      queryBuilder = queryBuilder
         .ilike("catalogo_museo", `%${catPart}%`)
-        .ilike("numero_museo", `%${numPart}%`)
-        .not("catalogo_museo", "is", null)
-        .limit(1000));
+        .ilike("numero_museo", `%${numPart}%`);
     } else {
-      ({ data, error } = await supabase
-        .from("vw_colecciones")
-        .select("catalogo_museo, numero_museo")
-        .or(`catalogo_museo.ilike.%${q}%,numero_museo.ilike.%${q}%`)
-        .not("catalogo_museo", "is", null)
-        .limit(1000));
+      queryBuilder = queryBuilder.or(
+        `catalogo_museo.ilike.%${q}%,numero_museo.ilike.%${q}%`,
+      );
     }
+
+    const {data, error} = await queryBuilder;
 
     if (error) throw error;
 
-    // Usar "::" como separador para poder recuperar los valores exactos al filtrar
-    // (no conflicta con "||" que separa múltiples items en la URL)
-    const catalogosSet = new Set<string>();
-    for (const row of data || []) {
-      if (!row.catalogo_museo) continue;
-      const key = row.numero_museo
-        ? `${row.catalogo_museo}::${row.numero_museo}`
-        : row.catalogo_museo;
-      catalogosSet.add(key);
-    }
+    const resultado = (data || [])
+      .map((row: any) =>
+        row.numero_museo
+          ? `${row.catalogo_museo as string}::${row.numero_museo as string}`
+          : (row.catalogo_museo as string),
+      )
+      .sort((a: string, b: string) => a.localeCompare(b));
 
-    const resultado = Array.from(catalogosSet)
-      .sort((a, b) => a.localeCompare(b))
-      .slice(0, 50);
-
-    return NextResponse.json(resultado);
+    return NextResponse.json(resultado, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     console.error("Error en API de catalogos:", error);
-    return NextResponse.json(
-      { error: "Error al obtener catalogos" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({error: "Error al obtener catalogos"}, {status: 500});
   }
 }

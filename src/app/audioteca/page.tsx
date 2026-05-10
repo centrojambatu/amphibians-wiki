@@ -3,7 +3,9 @@
 import {useState} from "react";
 import Link from "next/link";
 import {useQuery} from "@tanstack/react-query";
-import {Search, Volume2} from "lucide-react";
+import {Volume2} from "lucide-react";
+
+import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 interface EspecieItem {
   id: number;
@@ -51,16 +53,12 @@ export default function AudiotecaPage() {
           </div>
 
           <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-sm focus:ring-2 focus:outline-none"
-                placeholder="Buscar por nombre científico o común..."
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </div>
+            <SpeciesSearchInput
+              apiPath="/api/audioteca/especies"
+              placeholder="Buscar por nombre científico o común..."
+              value={searchInput}
+              onChange={setSearchInput}
+            />
           </div>
 
           {loadingEspecies ? (

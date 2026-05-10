@@ -32,7 +32,7 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
        estadio, sexo, estado,
        sangre, piel_exudado, piel_liofilizado, tejido_higado, tejido_musculo,
        esqueleto_transparentacion, esperma, heces,
-       taxon!coleccion_taxon_id_fkey(taxon),
+       taxon!coleccion_taxon_id_fkey(taxon, taxonPadre:taxon_id(taxon)),
        geopolitica!coleccion_provincia_id_fkey(nombre)`,
     )
     .eq("taxon_id", taxonId)
@@ -47,7 +47,12 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
     return [];
   }
 
-  return (data || []).map((c: any) => ({
+  return (data || []).map((c: any) => {
+    const especie = c.taxon?.taxon as string | undefined;
+    const genero = c.taxon?.taxonPadre?.taxon as string | undefined;
+    const nombreCientifico = [genero, especie].filter(Boolean).join(" ") || null;
+
+    return {
     id_coleccion: c.id_coleccion,
     numero_museo: c.numero_museo,
     catalogo_museo: c.catalogo_museo,
@@ -65,7 +70,8 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
     esqueleto_transparentacion: !!c.esqueleto_transparentacion,
     esperma: !!c.esperma,
     heces: !!c.heces,
-    taxon_nombre: c.taxon?.taxon ?? null,
+    taxon_nombre: nombreCientifico,
     provincia: c.geopolitica?.nombre ?? null,
-  }));
+    };
+  });
 }

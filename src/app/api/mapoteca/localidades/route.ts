@@ -1,66 +1,40 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 
-import { createClient } from "@/utils/supabase/server";
+import {createClient} from "@/utils/supabase/server";
 
-const MAX_RESULTS = 200;
+const MAX_RESULTS = 100;
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q");
+  const {searchParams} = new URL(request.url);
+  const q = searchParams.get("q")?.trim() || "";
 
   const supabase = await createClient();
 
   try {
-    const pageSize = 1000;
-    let allData: any[] = [];
-    let page = 0;
-    let hasMore = true;
+    let query = (supabase as any)
+      .from("mv_mapoteca_localidades_busqueda")
+      .select("localidad")
+      .order("localidad", {ascending: true})
+      .limit(MAX_RESULTS);
 
-    while (hasMore) {
-      let query = supabase
-        .from("vw_colecciones")
-        .select("localidad")
-        .not("localidad", "is", null)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-
-      if (q) {
-        query = query.ilike("localidad", `%${q}%`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        allData = [...allData, ...data];
-        hasMore = data.length === pageSize;
-        page++;
-      } else {
-        hasMore = false;
-      }
+    if (q.length > 0) {
+      query = query.ilike("localidad", `%${q}%`);
     }
 
-    // Extract distinct localidad values
-    const localidadesSet = new Set<string>();
-    for (const row of allData) {
-      if (row.localidad) {
-        localidadesSet.add(row.localidad);
-      }
-    }
+    const {data, error} = await query;
 
-    // Sort and limit
-    const resultado = Array.from(localidadesSet)
-      .sort((a, b) => a.localeCompare(b))
-      .slice(0, MAX_RESULTS);
+    if (error) throw error;
 
-    return NextResponse.json(resultado);
+    const resultado = (data || []).map((r: any) => r.localidad as string);
+
+    return NextResponse.json(resultado, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     console.error("Error en API de localidades:", error);
-    return NextResponse.json(
-      { error: "Error al obtener localidades" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({error: "Error al obtener localidades"}, {status: 500});
   }
 }

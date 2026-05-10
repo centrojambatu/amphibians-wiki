@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {Slider} from "@/components/ui/slider";
+import {Input} from "@/components/ui/input";
 import {
   Command,
   CommandEmpty,
@@ -20,7 +21,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {Input} from "@/components/ui/input";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
@@ -248,10 +248,10 @@ export default function FiltersPanel({
     }
   };
 
-  const handleSelectResult = (path: string) => {
+  const handleSelectResult = (name: string) => {
+    setSearchQuery(name);
+    onSearchQueryChange?.(name);
     setOpen(false);
-    setSearchQuery("");
-    router.push(path);
   };
 
   // Función para obtener los nombres de los filtros activos de un catálogo
@@ -295,7 +295,7 @@ export default function FiltersPanel({
           return (
             <Button
               key={item.id}
-              className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm break-words whitespace-normal"
+              className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
               size="sm"
               style={{
                 borderColor: isSelected ? undefined : "#e8e8e8",
@@ -404,7 +404,7 @@ export default function FiltersPanel({
                     return (
                       <Button
                         key={option.value}
-                        className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                        className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm"
                         size="sm"
                         style={{
                           borderColor: isSelected ? undefined : "#e8e8e8",
@@ -700,22 +700,35 @@ export default function FiltersPanel({
             <div className="relative">
               <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 shrink-0 -translate-y-1/2" />
               <Input
-                className="w-full pl-10"
+                className="w-full pr-10 pl-10"
                 placeholder="Nombre científico o común"
                 value={searchQuery}
                 onChange={(e) => {
                   const value = e.target.value;
 
                   setSearchQuery(value);
-                  setOpen(value.length >= 2);
                   onSearchQueryChange?.(value);
+                  setOpen(value.length >= 2);
                 }}
                 onFocus={() => {
-                  if (searchQuery.length >= 2) {
-                    setOpen(true);
-                  }
+                  if (searchQuery.length >= 2) setOpen(true);
                 }}
               />
+              {searchQuery && (
+                <Button
+                  className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery("");
+                    onSearchQueryChange?.("");
+                    setOpen(false);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </PopoverTrigger>
           <PopoverContent
@@ -723,36 +736,41 @@ export default function FiltersPanel({
             className="w-[--radix-popover-trigger-width] p-0"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <Command>
+            <Command shouldFilter={false}>
               <CommandList>
-                {searchResults.length === 0 && searchQuery.length >= 2 && (
-                  <CommandEmpty className="px-4 py-6">No se encontraron resultados.</CommandEmpty>
-                )}
-                {searchResults.length > 0 && (
-                  <CommandGroup>
-                    {searchResults.map((result) => (
-                      <CommandItem
-                        key={`${result.type}-${String(result.id)}-${result.name}`}
-                        className="cursor-pointer"
-                        onSelect={() => handleSelectResult(result.path)}
-                      >
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground text-xs">
-                              {getTypeLabel(result.type)}
-                            </span>
+                {(() => {
+                  const especies = searchResults.filter((r) => r.type === "species").slice(0, 20);
+
+                  if (especies.length === 0 && searchQuery.length >= 2) {
+                    return (
+                      <CommandEmpty className="px-4 py-6">
+                        No se encontraron especies.
+                      </CommandEmpty>
+                    );
+                  }
+
+                  return (
+                    <CommandGroup>
+                      {especies.map((result) => (
+                        <CommandItem
+                          key={`species-${String(result.id)}-${result.name}`}
+                          className="cursor-pointer"
+                          value={result.name}
+                          onSelect={() => handleSelectResult(result.name)}
+                        >
+                          <div className="flex flex-col">
                             <span className="font-medium italic">{result.name}</span>
+                            {result.commonName && (
+                              <span className="text-muted-foreground text-xs">
+                                {result.commonName}
+                              </span>
+                            )}
                           </div>
-                          {result.commonName && (
-                            <span className="text-muted-foreground text-xs">
-                              {result.commonName}
-                            </span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  );
+                })()}
               </CommandList>
             </Command>
           </PopoverContent>
@@ -819,7 +837,7 @@ export default function FiltersPanel({
                   return (
                     <Button
                       key={option.value}
-                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                      className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm"
                       size="sm"
                       style={{
                         borderColor: isSelected ? undefined : "#e8e8e8",

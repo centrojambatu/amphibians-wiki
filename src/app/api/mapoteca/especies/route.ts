@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 
-import { createClient } from "@/utils/supabase/server";
+import {createClient} from "@/utils/supabase/server";
 
 export interface EspecieMapoteca {
   id_taxon: number;
@@ -11,142 +11,67 @@ export interface EspecieMapoteca {
   genero: string | null;
 }
 
+let siglaCache: Map<string, string> | null = null;
+let siglaCacheTime = 0;
+const SIGLA_CACHE_TTL = 60 * 60 * 1000;
+
+async function getSiglaMap(supabase: any): Promise<Map<string, string>> {
+  if (siglaCache && Date.now() - siglaCacheTime < SIGLA_CACHE_TTL) return siglaCache;
+  const {data} = await supabase
+    .from("catalogo_awe")
+    .select("nombre, sigla")
+    .eq("tipo_catalogo_awe_id", 10);
+  const map = new Map<string, string>();
+
+  (data || []).forEach((c: any) => {
+    if (c.nombre && c.sigla) map.set(c.nombre, c.sigla);
+  });
+  siglaCache = map;
+  siglaCacheTime = Date.now();
+
+  return map;
+}
+
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const provincia = searchParams.get("provincia");
-  const especie = searchParams.get("especie");
+  const {searchParams} = new URL(request.url);
+  const especie = searchParams.get("especie")?.trim() || "";
 
   const supabase = await createClient();
 
   try {
-    // Obtener taxon_ids únicos desde vw_colecciones
-    const pageSize = 1000;
-    let allData: any[] = [];
-    let page = 0;
-    let hasMore = true;
+    let query = (supabase as any)
+      .from("mv_mapoteca_especies_busqueda")
+      .select("taxon_id, nombre_especie, nombre_comun, endemica, familia, genero, lista_roja_nombre")
+      .order("nombre_especie", {ascending: true})
+      .limit(50);
 
-    while (hasMore) {
-      let query = supabase
-        .from("vw_colecciones")
-        .select("taxon_id, nombre_especie")
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-
-      if (provincia) {
-        query = query.ilike("provincia", `%${provincia}%`);
-      }
-
-      if (especie) {
-        query = query.ilike("nombre_especie", `%${especie}%`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        allData = [...allData, ...data];
-        hasMore = data.length === pageSize;
-        page++;
-      } else {
-        hasMore = false;
-      }
+    if (especie.length > 0) {
+      query = query.or(`nombre_especie.ilike.%${especie}%,nombre_comun.ilike.%${especie}%`);
     }
 
-    if (allData.length === 0) {
-      return NextResponse.json([]);
-    }
+    const {data, error} = await query;
 
-    const taxonIds = [...new Set(allData.map((u) => u.taxon_id).filter(Boolean))];
+    if (error) throw error;
 
-    if (taxonIds.length === 0) {
-      return NextResponse.json([]);
-    }
+    const siglaMap = await getSiglaMap(supabase);
 
-    // Obtener información de especies desde la vista vw_ficha_especie_completa
-    const { data: especiesData, error: especiesError } = await supabase
-      .from("vw_ficha_especie_completa" as any)
-      .select("especie_taxon_id, nombre_cientifico, endemica, familia, genero, awe_lista_roja_uicn")
-      .in("especie_taxon_id", taxonIds)
-      .not("especie_taxon_id", "is", null);
-
-    if (especiesError) {
-      console.error("Error fetching especies:", especiesError);
-      return NextResponse.json(
-        { error: "Error fetching especies" },
-        { status: 500 }
-      );
-    }
-
-    if (!especiesData || especiesData.length === 0) {
-      return NextResponse.json([]);
-    }
-
-    // Eliminar duplicados basándose en especie_taxon_id
-    const especiesUnicasMap = new Map<number, any>();
-    especiesData.forEach((e: any) => {
-      const taxonId = e.especie_taxon_id;
-      if (taxonId && !especiesUnicasMap.has(taxonId)) {
-        especiesUnicasMap.set(taxonId, e);
-      }
-    });
-
-    const especiesUnicasArray = Array.from(especiesUnicasMap.values());
-
-    // Obtener el mapeo de nombre -> sigla para categorías UICN
-    const { data: categoriasUICN, error: errorCategoriasUICN } = await supabase
-      .from("catalogo_awe")
-      .select("nombre, sigla")
-      .eq("tipo_catalogo_awe_id", 10);
-
-    if (errorCategoriasUICN) {
-      console.error("Error al obtener categorías UICN:", errorCategoriasUICN);
-    }
-
-    const nombreASiglaMap = new Map<string, string>();
-    if (categoriasUICN) {
-      for (const cat of categoriasUICN) {
-        if (cat.nombre && cat.sigla) {
-          nombreASiglaMap.set(cat.nombre, cat.sigla);
-        }
-      }
-    }
-
-    // Crear mapa de lista roja por taxon_id
-    const listaRojaMap = new Map<number, string>();
-    for (const esp of especiesUnicasArray) {
-      const taxonId = esp.especie_taxon_id as number;
-      const nombreUICN = esp.awe_lista_roja_uicn as string | null;
-
-      if (taxonId && nombreUICN) {
-        const sigla = nombreASiglaMap.get(nombreUICN);
-        if (sigla) {
-          listaRojaMap.set(taxonId, sigla);
-        }
-      }
-    }
-
-    // Formatear resultados
-    const resultado: EspecieMapoteca[] = especiesUnicasArray.map((e: any) => ({
-      id_taxon: e.especie_taxon_id,
-      nombre_cientifico: e.nombre_cientifico || "",
+    const result: EspecieMapoteca[] = (data || []).map((e: any) => ({
+      id_taxon: e.taxon_id,
+      nombre_cientifico: e.nombre_especie,
       endemica: e.endemica ?? null,
-      lista_roja_iucn: listaRojaMap.get(e.especie_taxon_id) || null,
-      familia: e.familia || null,
-      genero: e.genero || null,
+      lista_roja_iucn: e.lista_roja_nombre ? siglaMap.get(e.lista_roja_nombre) ?? null : null,
+      familia: e.familia ?? null,
+      genero: e.genero ?? null,
     }));
 
-    resultado.sort((a, b) =>
-      a.nombre_cientifico.localeCompare(b.nombre_cientifico)
-    );
-
-    return NextResponse.json(resultado);
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     console.error("Error en API de especies:", error);
-    return NextResponse.json(
-      { error: "Error al obtener especies" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({error: "Error al obtener especies"}, {status: 500});
   }
 }
