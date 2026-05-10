@@ -1,12 +1,11 @@
-import { Dna, Database, Globe } from "lucide-react";
+import {Dna} from "lucide-react";
+import Link from "next/link";
 
-import getEspeciesMoleculoteca from "./get-especies-moleculoteca";
-import { MoleculotecaSpeciesCard } from "@/components/moleculoteca-species-card";
-import Pagination from "@/components/pagination";
 import MoleculotecaFiltersPanel from "@/components/moleculoteca-filters-panel";
 
+import {getMoleculotecaTaxa, MUESTRA_FIELDS} from "./get-moleculoteca-taxa";
+
 interface SearchParams {
-  pagina?: string;
   busqueda?: string;
 }
 
@@ -14,121 +13,86 @@ interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default async function MoleculotecaPage({ searchParams }: PageProps) {
+export default async function MoleculotecaPage({searchParams}: PageProps) {
   const params = await searchParams;
-  const pagina = params.pagina ? Number.parseInt(params.pagina, 10) : 1;
-  const itemsPorPagina = 36;
-
-  // Construir filtros desde searchParams
-  const filtros = {
-    busqueda: params.busqueda || undefined,
-  };
-
-  // Obtener datos
-  const { especies, total, totalPaginas } = await getEspeciesMoleculoteca(
-    pagina,
-    itemsPorPagina,
-    filtros,
-  );
+  const taxa = await getMoleculotecaTaxa(params.busqueda);
 
   return (
     <main className="container mx-auto px-4 py-8">
-      {/* Header con introducción */}
-      <div className="mb-10 text-center">
-        <div className="mb-4 flex items-center justify-center gap-3">
+      <div className="mb-8 text-center">
+        <div className="mb-3 flex items-center justify-center gap-3">
           <Dna className="h-10 w-10 text-green-600" />
           <h1 className="text-4xl font-bold">Moleculoteca</h1>
         </div>
-        <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
-          Accede a recursos genómicos y moleculares de los anfibios de Ecuador.
-          Cada especie incluye enlaces directos a las principales bases de datos
-          de biodiversidad y genética del mundo.
+        <p className="text-muted-foreground mx-auto max-w-3xl text-base">
+          Especies con muestras biológicas (sangre, piel, tejidos, esqueleto, esperma, heces) en
+          la colección.
         </p>
       </div>
 
-      {/* Sección de información sobre las bases de datos */}
-      <div className="mb-10 grid gap-6 md:grid-cols-3">
-        <div className="rounded-lg border bg-card p-6 text-center">
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <Database className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-          <h3 className="mb-2 font-semibold">GBIF</h3>
-          <p className="text-muted-foreground text-sm">
-            Global Biodiversity Information Facility. Base de datos mundial de
-            ocurrencias y distribución de especies.
-          </p>
-        </div>
-
-        <div className="rounded-lg border bg-card p-6 text-center">
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-              <Dna className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-          <h3 className="mb-2 font-semibold">NCBI GenBank</h3>
-          <p className="text-muted-foreground text-sm">
-            National Center for Biotechnology Information. Repositorio de
-            secuencias genéticas y datos moleculares.
-          </p>
-        </div>
-
-        <div className="rounded-lg border bg-card p-6 text-center">
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
-              <Globe className="h-6 w-6 text-amber-600" />
-            </div>
-          </div>
-          <h3 className="mb-2 font-semibold">iNaturalist</h3>
-          <p className="text-muted-foreground text-sm">
-            Red social de naturalistas. Observaciones ciudadanas con
-            identificación colaborativa y fotografías geolocalizadas.
-          </p>
-        </div>
-      </div>
-
-      {/* Barra de búsqueda */}
       <div className="mb-8">
         <div className="mx-auto max-w-2xl">
           <MoleculotecaFiltersPanel />
         </div>
       </div>
 
-      {/* Información de resultados */}
-      <div className="text-muted-foreground mb-6 text-center text-sm">
-        Mostrando {especies.length} de {total} especies
-        {totalPaginas > 1 && ` (Página ${pagina} de ${totalPaginas})`}
+      <div className="text-muted-foreground mb-4 text-center text-sm">
+        {taxa.length} especies con muestras
       </div>
 
-      {/* Grid de especies */}
-      {especies.length > 0 ? (
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {especies.map((especie) => (
-            <MoleculotecaSpeciesCard key={especie.id_taxon} species={especie} />
-          ))}
+      {taxa.length === 0 ? (
+        <div className="bg-card rounded-lg border p-12 text-center">
+          <div className="mb-4 text-4xl">🧬</div>
+          <p className="text-muted-foreground text-lg">
+            No se encontraron especies con muestras biológicas.
+          </p>
         </div>
       ) : (
-        <div className="bg-card mb-8 rounded-lg border p-12 text-center">
-          <div className="mb-4 text-4xl">🔬</div>
-          <p className="text-muted-foreground text-lg">
-            No se encontraron especies con los criterios de búsqueda.
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Intenta con otro término de búsqueda.
-          </p>
-        </div>
-      )}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {taxa.map((t) => (
+            <Link
+              key={t.taxon_id}
+              className="group bg-card hover:border-primary block rounded-lg border p-4 no-underline transition-colors"
+              href={`/moleculoteca/${String(t.taxon_id)}`}
+            >
+              <div className="mb-3">
+                <p className="group-hover:text-primary text-sm font-semibold italic text-gray-900">
+                  {t.nombre_cientifico}
+                </p>
+                {t.nombre_comun && (
+                  <p className="text-xs text-gray-600">{t.nombre_comun}</p>
+                )}
+                {(t.orden || t.familia || t.genero) && (
+                  <p className="mt-0.5 text-[11px] text-gray-500">
+                    {[t.orden, t.familia, t.genero].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+              </div>
 
-      {/* Paginación */}
-      {totalPaginas > 1 && (
-        <div className="mt-8">
-          <Pagination
-            paginaActual={pagina}
-            totalPaginas={totalPaginas}
-            baseUrl="/moleculoteca"
-            searchParams={params}
-          />
+              <div className="grid grid-cols-2 gap-1.5">
+                {MUESTRA_FIELDS.map((field) => {
+                  const value = (t as any)[field.count] as number;
+                  const active = value > 0;
+
+                  return (
+                    <div
+                      key={field.key}
+                      className={`flex items-center justify-between rounded px-2 py-1 text-[11px] ${
+                        active ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-400"
+                      }`}
+                    >
+                      <span className="truncate">{field.label}</span>
+                      <span className="font-mono font-semibold">{value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 border-t border-gray-100 pt-2 text-[11px] text-gray-500">
+                Total registros: <span className="font-semibold">{t.total_registros}</span>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </main>
