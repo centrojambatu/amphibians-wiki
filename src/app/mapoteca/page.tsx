@@ -4,6 +4,7 @@ import {useState, useEffect, Suspense} from "react";
 import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import {useQuery} from "@tanstack/react-query";
 import {Search, X, Mountain, Check, RotateCcw} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -92,36 +93,22 @@ function EspecieMultiSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{nombre_cientifico: string}[]>([]);
-  const [loading, setLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length >= 2;
+  const {data: results = [], isFetching: loading} = useQuery<{nombre_cientifico: string}[]>({
+    queryKey: ["mapoteca", "especies", debouncedQuery],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/mapoteca/especies?especie=${encodeURIComponent(debouncedQuery)}`,
+      );
 
-  useEffect(() => {
-    if (debouncedQuery.length < 2) {
-      setResults([]);
+      if (!res.ok) return [];
+      const data = await res.json();
 
-      return;
-    }
-    setLoading(true);
-    const fetchResults = async () => {
-      try {
-        const res = await fetch(
-          `/api/mapoteca/especies?especie=${encodeURIComponent(debouncedQuery)}`,
-        );
-
-        if (!res.ok) return;
-        const data = await res.json();
-
-        setResults(data.slice(0, 10));
-      } catch {
-        /* ignore */
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [debouncedQuery]);
+      return (data as {nombre_cientifico: string}[]).slice(0, 10);
+    },
+    enabled,
+  });
 
   const toggleEspecie = (nombre: string) => {
     if (selected.includes(nombre)) {
@@ -216,34 +203,19 @@ function CatalogoMultiSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length >= 2;
+  const {data: options = [], isFetching: loading} = useQuery<string[]>({
+    queryKey: ["mapoteca", "catalogos", debouncedQuery],
+    queryFn: async () => {
+      const res = await fetch(`/api/mapoteca/catalogos?q=${encodeURIComponent(debouncedQuery)}`);
 
-  useEffect(() => {
-    if (debouncedQuery.length < 2) {
-      setOptions([]);
+      if (!res.ok) return [];
 
-      return;
-    }
-    setLoading(true);
-    const fetchCatalogos = async () => {
-      try {
-        const res = await fetch(`/api/mapoteca/catalogos?q=${encodeURIComponent(debouncedQuery)}`);
-
-        if (!res.ok) return;
-        const data = await res.json();
-
-        setOptions(data);
-      } catch {
-        /* ignore */
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCatalogos();
-  }, [debouncedQuery]);
+      return res.json();
+    },
+    enabled,
+  });
 
   const toggleCatalogo = (cat: string) => {
     if (selected.includes(cat)) {
@@ -334,36 +306,21 @@ function LocalidadMultiSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length >= 2;
+  const {data: options = [], isFetching: loading} = useQuery<string[]>({
+    queryKey: ["mapoteca", "localidades", debouncedQuery],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`,
+      );
 
-  useEffect(() => {
-    if (debouncedQuery.length < 2) {
-      setOptions([]);
+      if (!res.ok) return [];
 
-      return;
-    }
-    setLoading(true);
-    const fetchLocalidades = async () => {
-      try {
-        const res = await fetch(
-          `/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`,
-        );
-
-        if (!res.ok) return;
-        const data = await res.json();
-
-        setOptions(data);
-      } catch {
-        /* ignore */
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLocalidades();
-  }, [debouncedQuery]);
+      return res.json();
+    },
+    enabled,
+  });
 
   const toggleLocalidad = (loc: string) => {
     if (selected.includes(loc)) {

@@ -1,26 +1,48 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import {QueryClient} from "@tanstack/react-query";
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import {createSyncStoragePersister} from "@tanstack/query-sync-storage-persister";
+import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
+import {useState} from "react";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({children}: {children: React.ReactNode}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 60 * 1000, // 30 minutos
-            gcTime: 60 * 60 * 1000, // 1 hora en memoria
+            staleTime: 5 * 60 * 1000,
+            gcTime: 24 * 60 * 60 * 1000,
             refetchOnWindowFocus: false,
             retry: 1,
           },
         },
-      })
+      }),
   );
 
+  const [persister] = useState(() => {
+    if (typeof window === "undefined") return null;
+
+    return createSyncStoragePersister({
+      storage: window.localStorage,
+      key: "rq-cache-amphibians-v1",
+    });
+  });
+
+  if (!persister) return <>{children}</>;
+
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: 24 * 60 * 60 * 1000,
+        buster: "v1",
+      }}
+    >
       {children}
-    </QueryClientProvider>
+      <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+    </PersistQueryClientProvider>
   );
 }

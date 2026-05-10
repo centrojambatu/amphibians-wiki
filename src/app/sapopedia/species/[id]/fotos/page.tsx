@@ -15,6 +15,21 @@ interface PageProps {
 async function getFotosByTaxon(taxonId: number): Promise<SpeciesFotoItem[]> {
   const supabase = await createClient();
 
+  const [{data: cols}, {data: extCols}] = await Promise.all([
+    supabase.from("coleccion").select("id_coleccion").eq("taxon_id", taxonId),
+    supabase.from("coleccion_externa").select("id").eq("taxon_id", taxonId),
+  ]);
+
+  const colIds = (cols || []).map((c: any) => c.id_coleccion);
+  const extIds = (extCols || []).map((c: any) => c.id);
+  const orParts: string[] = [];
+
+  orParts.push(
+    `and(coleccion_id.is.null,coleccion_externa_id.is.null,taxon_id.eq.${String(taxonId)})`,
+  );
+  if (colIds.length > 0) orParts.push(`coleccion_id.in.(${colIds.join(",")})`);
+  if (extIds.length > 0) orParts.push(`coleccion_externa_id.in.(${extIds.join(",")})`);
+
   const {data, error} = await supabase
     .from("fotografia")
     .select(
@@ -26,7 +41,7 @@ async function getFotosByTaxon(taxonId: number): Promise<SpeciesFotoItem[]> {
        publicacion:publicacion_id(cita_corta),
        catalogo_awe:catalogo_awe_id(nombre)`,
     )
-    .eq("taxon_id", taxonId)
+    .or(orParts.join(","))
     .eq("publicar", true)
     .order("fecha", {ascending: false, nullsFirst: false});
 

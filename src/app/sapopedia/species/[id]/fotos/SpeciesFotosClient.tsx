@@ -16,6 +16,8 @@ import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 
+import {useGbifOccurrence} from "@/lib/gbif";
+
 import {SpeciesFotoItem} from "./types";
 
 interface SpeciesFotosClientProps {
@@ -29,25 +31,14 @@ interface SpeciesFotosClientProps {
 
 type AlbumPhoto = Photo & {item: SpeciesFotoItem};
 
-function buildCaption(foto: SpeciesFotoItem, speciesUrlId: string): string {
-  const parts: string[] = [];
-
-  if (foto.catalogo_museo && foto.numero_museo) {
-    parts.push(`${foto.catalogo_museo} ${foto.numero_museo}`);
-  }
-  if (foto.fecha) parts.push(foto.fecha);
-  if (foto.autor) parts.push(`Por ${foto.autor}`);
-  if (foto.tipo_licencia) parts.push(foto.tipo_licencia);
-  const head = parts.join(" · ");
+function buildCaption(foto: SpeciesFotoItem): string {
   const lines: string[] = [];
 
-  if (head) lines.push(head);
-  if (foto.localidad) lines.push(foto.localidad);
   if (foto.descripcion) lines.push(foto.descripcion);
-  if (foto.observaciones) lines.push(foto.observaciones);
-  if (foto.cita_corta) lines.push(foto.cita_corta);
-  // speciesUrlId is reserved for future deep-linking from caption.
-  void speciesUrlId;
+  if (foto.autor) lines.push(`Autor: ${foto.autor}`);
+  if (foto.localidad) lines.push(`Localidad: ${foto.localidad}`);
+  if (foto.latitud != null) lines.push(`Latitud: ${String(foto.latitud)}`);
+  if (foto.longitud != null) lines.push(`Longitud: ${String(foto.longitud)}`);
 
   return lines.join("\n");
 }
@@ -82,15 +73,14 @@ export default function SpeciesFotosClient({
         src: foto.enlace || "",
         alt: foto.nombre || "Fotografía",
         title: foto.nombre || undefined,
-        description: buildCaption(foto, speciesUrlId),
+        description: buildCaption(foto),
       })),
-    [allItems, speciesUrlId],
+    [allItems],
   );
 
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [dims, setDims] = useState<Record<string, {w: number; h: number}>>({});
-  const [gbifUrls, setGbifUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -115,79 +105,6 @@ export default function SpeciesFotosClient({
     };
   }, [fotos, dims]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fotos.forEach((f) => {
-      if (
-        f.fuente !== "coleccion_externa" ||
-        !f.catalogo_museo ||
-        !f.numero_museo ||
-        gbifUrls[f.id]
-      )
-        return;
-
-      const fetchGbif = async () => {
-        try {
-          let institutionCode = f.catalogo_museo as string;
-          let catNumber = f.numero_museo as string;
-          let collectionCode: string | null = null;
-
-          switch (f.catalogo_museo) {
-            case "KU":
-              collectionCode = "KUH";
-              break;
-            case "QCAZA":
-              institutionCode = "QCAZ";
-              catNumber = `QCAZA${String(f.numero_museo)}`;
-              break;
-            case "QCAZ":
-              catNumber = `QCAZA${String(f.numero_museo)}`;
-              break;
-            case "AMNH":
-              catNumber = `A-${String(f.numero_museo)}`;
-              break;
-            case "USNM":
-              catNumber = `USNM ${String(f.numero_museo)}`;
-              break;
-            case "DHMECN":
-              catNumber = `DHMECN ${String(f.numero_museo)}`;
-              break;
-          }
-          const params = new URLSearchParams({
-            institutionCode,
-            catalogNumber: catNumber,
-            classKey: "131",
-            limit: "1",
-          });
-
-          if (collectionCode) params.set("collectionCode", collectionCode);
-          const res = await fetch(
-            `https://api.gbif.org/v1/occurrence/search?${params.toString()}`,
-          );
-
-          if (!res.ok || cancelled) return;
-          const data = await res.json();
-
-          if (data.results?.length > 0) {
-            setGbifUrls((prev) => ({
-              ...prev,
-              [f.id]: `https://www.gbif.org/occurrence/${String(data.results[0].key)}`,
-            }));
-          }
-        } catch {
-          // silently fail
-        }
-      };
-
-      void fetchGbif();
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fotos, gbifUrls]);
-
   const openLightbox = (foto: SpeciesFotoItem) => {
     const idx = allItems.findIndex((f) => f.id === foto.id);
     const finalIdx = idx >= 0 ? idx : 0;
@@ -197,6 +114,10 @@ export default function SpeciesFotosClient({
   };
 
   const currentFoto = allItems[currentSlide];
+  const {data: currentGbifUrl} = useGbifOccurrence(
+    currentFoto?.fuente === "coleccion_externa" ? currentFoto.catalogo_museo : null,
+    currentFoto?.fuente === "coleccion_externa" ? currentFoto.numero_museo : null,
+  );
 
   const linkButton = (() => {
     if (!currentFoto) return null;
@@ -223,15 +144,13 @@ export default function SpeciesFotosClient({
       );
     }
     if (currentFoto.fuente === "coleccion_externa") {
-      const gbifUrl = gbifUrls[currentFoto.id];
-
-      if (!gbifUrl) return null;
+      if (!currentGbifUrl) return null;
 
       return (
         <a
           key="ctx-link"
           className="yarl__button"
-          href={gbifUrl}
+          href={currentGbifUrl}
           rel="noopener noreferrer"
           style={{
             display: "inline-flex",
@@ -330,6 +249,20 @@ export default function SpeciesFotosClient({
                             className="cursor-zoom-in rounded-md grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
                           />
                         ),
+                        extras: (_, {photo}) => {
+                          const item = (photo as AlbumPhoto).item;
+
+                          if (!item.descripcion) return null;
+
+                          return (
+                            <div
+                              aria-hidden
+                              className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-md bg-gradient-to-t from-black/80 via-black/40 to-transparent px-2 py-1.5 text-[11px] font-medium text-white"
+                            >
+                              <span className="line-clamp-2">{item.descripcion}</span>
+                            </div>
+                          );
+                        },
                       }}
                       spacing={6}
                       onClick={({photo}) => openLightbox((photo as AlbumPhoto).item)}

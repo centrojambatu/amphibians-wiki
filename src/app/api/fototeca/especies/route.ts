@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const {data: fotos, error: fotoError} = await supabase
       .from("fotografia")
       .select(
-        `taxon_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
+        `taxon_id, coleccion_id, coleccion_externa_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
       )
       .eq("publicar", true)
       .limit(100000);
@@ -26,7 +26,12 @@ export async function GET(request: Request) {
     const taxonIds = new Set<number>();
 
     (fotos || []).forEach((f: any) => {
-      const t = f.taxon_id ?? f.coleccion?.taxon_id ?? f.coleccion_externa?.taxon_id;
+      const t =
+        f.coleccion_id != null
+          ? f.coleccion?.taxon_id
+          : f.coleccion_externa_id != null
+            ? f.coleccion_externa?.taxon_id
+            : f.taxon_id;
 
       if (t != null) taxonIds.add(Number(t));
     });

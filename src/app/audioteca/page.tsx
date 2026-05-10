@@ -1,7 +1,8 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import Link from "next/link";
+import {useQuery} from "@tanstack/react-query";
 import {Search, Volume2} from "lucide-react";
 
 interface EspecieItem {
@@ -16,36 +17,20 @@ interface EspecieItem {
 
 export default function AudiotecaPage() {
   const [searchInput, setSearchInput] = useState("");
-  const [especies, setEspecies] = useState<EspecieItem[]>([]);
-  const [loadingEspecies, setLoadingEspecies] = useState(false);
+  const search = searchInput.trim();
+  const {data: especies = [], isLoading: loadingEspecies} = useQuery<EspecieItem[]>({
+    queryKey: ["audioteca", "especies", search],
+    queryFn: async () => {
+      const params = new URLSearchParams();
 
-  useEffect(() => {
-    const fetchEspecies = async () => {
-      setLoadingEspecies(true);
-      try {
-        const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      const response = await fetch(`/api/audioteca/especies?${params.toString()}`);
 
-        if (searchInput.trim()) {
-          params.set("search", searchInput.trim());
-        }
+      if (!response.ok) throw new Error("Error al cargar especies");
 
-        const response = await fetch(`/api/audioteca/especies?${params.toString()}`);
-
-        if (!response.ok) throw new Error("Error al cargar especies");
-
-        const data = await response.json();
-
-        setEspecies(data);
-      } catch (err) {
-        console.error("Error al obtener especies:", err);
-        setEspecies([]);
-      } finally {
-        setLoadingEspecies(false);
-      }
-    };
-
-    fetchEspecies();
-  }, [searchInput]);
+      return response.json();
+    },
+  });
 
   return (
     <div className="bg-background min-h-screen">

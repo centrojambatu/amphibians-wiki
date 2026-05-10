@@ -14,6 +14,7 @@ import "leaflet/dist/leaflet.css";
 
 import type { UbicacionEspecie } from "@/app/api/mapoteca/route";
 import { useMapotecaData } from "@/hooks/use-mapoteca-data";
+import { useGbifOccurrence } from "@/lib/gbif";
 
 // Canvas renderer para mejor rendimiento con miles de puntos
 function createCanvasRenderer() {
@@ -119,66 +120,9 @@ function GbifLink({
   catalogoMuseo: string;
   numeroMuseo: string;
 }) {
-  const [gbifUrl, setGbifUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: gbifUrl, isLoading } = useGbifOccurrence(catalogoMuseo, numeroMuseo);
 
-  useEffect(() => {
-    const fetchGbif = async () => {
-      try {
-        // Mapeo de códigos de institución y catálogo para GBIF
-        let institutionCode = catalogoMuseo;
-        let catNumber = numeroMuseo;
-        let collectionCode: string | null = null;
-        switch (catalogoMuseo) {
-          case "KU":
-            collectionCode = "KUH";
-            break;
-          case "QCAZA":
-            institutionCode = "QCAZ";
-            catNumber = `QCAZA${numeroMuseo}`;
-            break;
-          case "QCAZ":
-            catNumber = `QCAZA${numeroMuseo}`;
-            break;
-          case "AMNH":
-            catNumber = `A-${numeroMuseo}`;
-            break;
-          case "USNM":
-            catNumber = `USNM ${numeroMuseo}`;
-            break;
-          case "DHMECN":
-            catNumber = `DHMECN ${numeroMuseo}`;
-            break;
-        }
-        const params = new URLSearchParams({
-          institutionCode,
-          catalogNumber: catNumber,
-          classKey: "131",
-          limit: "1",
-        });
-        if (collectionCode) {
-          params.set("collectionCode", collectionCode);
-        }
-        const res = await fetch(
-          `https://api.gbif.org/v1/occurrence/search?${params.toString()}`
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          setGbifUrl(
-            `https://www.gbif.org/occurrence/${data.results[0].key}`
-          );
-        }
-      } catch {
-        // silently fail
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGbif();
-  }, [catalogoMuseo, numeroMuseo]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <span className="text-[10px] text-gray-400">
         Buscando en GBIF...

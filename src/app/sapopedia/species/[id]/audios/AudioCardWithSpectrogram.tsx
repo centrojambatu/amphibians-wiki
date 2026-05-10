@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import {ChevronDown, ExternalLink} from "lucide-react";
-import {useEffect, useState} from "react";
 
 import AudioSpectrogramOscillogram from "@/components/AudioSpectrogramOscillogram";
+import {useGbifOccurrence} from "@/lib/gbif";
 
 import {SpeciesAudioItem} from "./types";
 
@@ -17,64 +17,9 @@ function GbifLink({
   numeroMuseo: string;
   label: string;
 }) {
-  const [gbifUrl, setGbifUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {data: gbifUrl, isLoading} = useGbifOccurrence(catalogoMuseo, numeroMuseo);
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        let institutionCode = catalogoMuseo;
-        let catNumber = numeroMuseo;
-        let collectionCode: string | null = null;
-
-        switch (catalogoMuseo) {
-          case "KU":
-            collectionCode = "KUH";
-            break;
-          case "QCAZA":
-            institutionCode = "QCAZ";
-            catNumber = `QCAZA${String(numeroMuseo)}`;
-            break;
-          case "QCAZ":
-            catNumber = `QCAZA${String(numeroMuseo)}`;
-            break;
-          case "AMNH":
-            catNumber = `A-${String(numeroMuseo)}`;
-            break;
-          case "USNM":
-            catNumber = `USNM ${String(numeroMuseo)}`;
-            break;
-          case "DHMECN":
-            catNumber = `DHMECN ${String(numeroMuseo)}`;
-            break;
-        }
-        const params = new URLSearchParams({
-          institutionCode,
-          catalogNumber: catNumber,
-          classKey: "131",
-          limit: "1",
-        });
-
-        if (collectionCode) params.set("collectionCode", collectionCode);
-        const res = await fetch(`https://api.gbif.org/v1/occurrence/search?${params.toString()}`);
-
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if (data.results?.length > 0) {
-          setGbifUrl(`https://www.gbif.org/occurrence/${data.results[0].key}`);
-        }
-      } catch {
-        // silently fail
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void run();
-  }, [catalogoMuseo, numeroMuseo]);
-
-  if (loading) return <span className="text-sm font-semibold text-gray-500">{label}</span>;
+  if (isLoading) return <span className="text-sm font-semibold text-gray-500">{label}</span>;
   if (!gbifUrl)
     return (
       <span className="text-sm font-semibold text-gray-700" title="No encontrado en GBIF">

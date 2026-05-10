@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const {data: cantos, error: cantoError} = await supabase
       .from("canto")
       .select(
-        `taxon_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
+        `taxon_id, coleccion_id, coleccion_externa_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
       )
       .eq("publicar", true)
       .limit(100000);
@@ -25,7 +25,12 @@ export async function GET(request: Request) {
     const taxonIds = new Set<number>();
 
     (cantos || []).forEach((c: any) => {
-      const t = c.taxon_id ?? c.coleccion?.taxon_id ?? c.coleccion_externa?.taxon_id;
+      const t =
+        c.coleccion_id != null
+          ? c.coleccion?.taxon_id
+          : c.coleccion_externa_id != null
+            ? c.coleccion_externa?.taxon_id
+            : c.taxon_id;
 
       if (t != null) taxonIds.add(Number(t));
     });
