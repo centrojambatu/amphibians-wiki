@@ -1,9 +1,17 @@
 import {NextResponse} from "next/server";
+
 import {createClient} from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
   const {searchParams} = new URL(request.url);
   const search = searchParams.get("search") || "";
+  const catalogos = searchParams.get("catalogos") || "";
+  const catalogosList = catalogos
+    ? catalogos
+        .split("||")
+        .map((c) => c.trim())
+        .filter(Boolean)
+    : [];
 
   const supabase = await createClient();
 
@@ -11,7 +19,9 @@ export async function GET(request: Request) {
     const {data: cantos, error: cantoError} = await supabase
       .from("canto")
       .select(
-        `taxon_id, coleccion_id, coleccion_externa_id, coleccion:coleccion_id(taxon_id), coleccion_externa:coleccion_externa_id(taxon_id)`,
+        `taxon_id, coleccion_id, coleccion_externa_id,
+         coleccion:coleccion_id(taxon_id, catalogo_museo, numero_museo),
+         coleccion_externa:coleccion_externa_id(taxon_id, catalogo_museo, numero_museo)`,
       )
       .eq("publicar", true)
       .limit(100000);
@@ -22,9 +32,23 @@ export async function GET(request: Request) {
       return NextResponse.json({error: "Error al obtener cantos"}, {status: 500});
     }
 
+    const matchesCatalog = (c: any): boolean => {
+      if (catalogosList.length === 0) return true;
+      const cat =
+        c.coleccion ?? c.coleccion_externa ?? null;
+
+      if (!cat?.catalogo_museo) return false;
+      const key = cat.numero_museo
+        ? `${String(cat.catalogo_museo)}::${String(cat.numero_museo)}`
+        : (cat.catalogo_museo as string);
+
+      return catalogosList.includes(key);
+    };
+
     const taxonIds = new Set<number>();
 
     (cantos || []).forEach((c: any) => {
+      if (!matchesCatalog(c)) return;
       const t =
         c.coleccion_id != null
           ? c.coleccion?.taxon_id

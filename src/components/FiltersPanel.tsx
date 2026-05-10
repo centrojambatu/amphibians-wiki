@@ -325,26 +325,89 @@ export default function FiltersPanel({
       <div className="flex h-full min-h-0 w-full flex-col">
         {onSearchQueryChange != null && (
           <div className="flex-shrink-0 px-6 pb-2">
-            <div className="relative">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                className="pr-10 pl-10"
-                placeholder="me apfico o común"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <Button
-                  className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <div className="relative">
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    className="pr-10 pl-10"
+                    placeholder="Nombre científico o común"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setSearchQuery(value);
+                      onSearchQueryChange?.(value);
+                      setOpen(value.length >= 2);
+                    }}
+                    onFocus={() => {
+                      if (searchQuery.length >= 2) setOpen(true);
+                    }}
+                  />
+                  {searchQuery && (
+                    <Button
+                      className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchQuery("");
+                        onSearchQueryChange?.("");
+                        setOpen(false);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                className="w-[--radix-popover-trigger-width] p-0"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <Command shouldFilter={false}>
+                  <CommandList>
+                    {(() => {
+                      const especiesRes = searchResults
+                        .filter((r) => r.type === "species")
+                        .slice(0, 20);
+
+                      if (especiesRes.length === 0 && searchQuery.length >= 2) {
+                        return (
+                          <CommandEmpty className="px-4 py-6">
+                            No se encontraron especies.
+                          </CommandEmpty>
+                        );
+                      }
+
+                      return (
+                        <CommandGroup>
+                          {especiesRes.map((result) => (
+                            <CommandItem
+                              key={`emb-species-${String(result.id)}-${result.name}`}
+                              className="cursor-pointer"
+                              value={result.name}
+                              onSelect={() => handleSelectResult(result.name)}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium italic">{result.name}</span>
+                                {result.commonName && (
+                                  <span className="text-muted-foreground text-xs">
+                                    {result.commonName}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      );
+                    })()}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {searchQuery && (
               <p className="mt-2 text-xs text-gray-500">Filtrando: &quot;{searchQuery}&quot;</p>
             )}

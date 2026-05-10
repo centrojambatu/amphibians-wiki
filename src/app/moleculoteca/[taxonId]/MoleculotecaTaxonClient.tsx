@@ -117,7 +117,7 @@ export default function MoleculotecaTaxonClient({
                           <Button
                             key={f.key}
                             aria-pressed={active}
-                            className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
+                            className="h-auto min-h-[32px] w-full justify-between rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
                             disabled={disabled}
                             size="sm"
                             style={{
@@ -127,7 +127,8 @@ export default function MoleculotecaTaxonClient({
                             variant={active ? "default" : "outline"}
                             onClick={() => toggle(f.key)}
                           >
-                            {f.label}
+                            <span className="truncate">{f.label}</span>
+                            <span className="ml-2 font-mono text-xs opacity-70">{count}</span>
                           </Button>
                         );
                       })}

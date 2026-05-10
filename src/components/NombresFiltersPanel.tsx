@@ -1,18 +1,15 @@
 "use client";
 
-import {useState} from "react";
 import {useRouter} from "next/navigation";
-import {Search, X} from "lucide-react";
-import Link from "next/link";
 
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 interface Idioma {
   id: number;
@@ -47,26 +44,12 @@ export default function NombresFiltersPanel({
     <div className="flex flex-col h-full min-h-0 w-full rounded-lg border bg-white shadow-sm">
       {/* Búsqueda */}
       <div className="flex-shrink-0 px-6 pb-4 pt-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Nombre científico o común"
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
-              onClick={() => onSearchQueryChange("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        <SpeciesSearchInput
+          apiPath="/api/species/search"
+          placeholder="Nombre científico o común"
+          value={searchQuery}
+          onChange={onSearchQueryChange}
+        />
         {searchQuery && (
           <p className="mt-2 text-xs text-gray-500">
             Filtrando: &quot;{searchQuery}&quot;
