@@ -6,13 +6,15 @@ import MapotecaPrefetch from "@/components/MapotecaPrefetch";
 
 import getAllEspecies from "./get-all-especies";
 import getFilterCatalogs from "./get-filter-catalogs";
+import getMapotecaStats from "./get-mapoteca-stats";
 import getTaxonNombres from "./nombres/get-taxon-nombres";
 
 export default async function SapopediaPage() {
-  const [especies, filterCatalogs, ordenesNombres] = await Promise.all([
+  const [especies, filterCatalogs, ordenesNombres, mapotecaStats] = await Promise.all([
     getAllEspecies(),
     getFilterCatalogs(),
     getTaxonNombres(),
+    getMapotecaStats(),
   ]);
 
   // Estadísticas generales
@@ -340,7 +342,7 @@ export default async function SapopediaPage() {
 
       {/* Histograma */}
       <div className="mb-6 sm:mb-8">
-        <MapotecaStats />
+        <MapotecaStats initialStats={mapotecaStats} />
       </div>
 
       <div className="mb-6 sm:mb-8">

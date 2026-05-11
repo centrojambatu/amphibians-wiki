@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect, useRef, useState} from "react";
-import {ArrowLeft, ArrowRight} from "lucide-react";
+import {MoveLeft, MoveRight} from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -83,45 +83,6 @@ export default function MapotecaHistogramaChart({
 
   return (
     <div className="rounded-lg bg-white px-6 pt-6 pb-4">
-      <div className="mb-4 flex items-center gap-4">
-        <p className="text-lg font-semibold text-gray-800">
-          {title}{" "}
-          <span className="text-[#f07304]">|</span>{" "}
-          <span className="text-gray-500">{data.length} {unit}</span>
-        </p>
-        {hasSecondary && (
-          <div className="flex items-center gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: "#ffa04d" }} />
-              Total
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: "#f07304" }} />
-              {secondaryLabel}
-            </span>
-          </div>
-        )}
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            aria-label="Desplazar a la izquierda"
-            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
-            disabled={!canScrollLeft}
-            type="button"
-            onClick={() => scrollBy("left")}
-          >
-            <ArrowLeft className="h-5 w-5" strokeWidth={3} />
-          </button>
-          <button
-            aria-label="Desplazar a la derecha"
-            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
-            disabled={!canScrollRight}
-            type="button"
-            onClick={() => scrollBy("right")}
-          >
-            <ArrowRight className="h-5 w-5" strokeWidth={3} />
-          </button>
-        </div>
-      </div>
       <div ref={scrollRef} className="overflow-x-auto">
 
       <div className="flex w-full items-end gap-2" style={{ height: ALTURA_MAX_BARRA + 32, minWidth: data.length * 72 }}>
@@ -235,6 +196,45 @@ export default function MapotecaHistogramaChart({
           ))}
         </div>
       )}
+      </div>
+      <div className="mt-4 flex items-center gap-4">
+        <p className="text-lg font-semibold text-gray-500">
+          {title}{" "}
+          <span className="text-[#f07304]">|</span>{" "}
+          <span className="text-gray-500">{data.length} {unit}</span>
+        </p>
+        {hasSecondary && (
+          <div className="flex items-center gap-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: "#ffa04d" }} />
+              Total
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: "#f07304" }} />
+              {secondaryLabel}
+            </span>
+          </div>
+        )}
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            aria-label="Desplazar a la izquierda"
+            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+            disabled={!canScrollLeft}
+            type="button"
+            onClick={() => scrollBy("left")}
+          >
+            <MoveLeft className="h-6 w-6" strokeWidth={1.5} />
+          </button>
+          <button
+            aria-label="Desplazar a la derecha"
+            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+            disabled={!canScrollRight}
+            type="button"
+            onClick={() => scrollBy("right")}
+          >
+            <MoveRight className="h-6 w-6" strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
     </div>
   );

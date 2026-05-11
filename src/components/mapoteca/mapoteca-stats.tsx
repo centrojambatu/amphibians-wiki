@@ -24,25 +24,33 @@ interface MapStats {
   }[];
 }
 
-export default function MapotecaStats() {
-  const [stats, setStats] = useState<MapStats | null>(null);
+interface MapotecaStatsProps {
+  initialStats?: MapStats | null;
+}
+
+export default function MapotecaStats({initialStats = null}: MapotecaStatsProps = {}) {
+  const [stats, setStats] = useState<MapStats | null>(initialStats);
   const [histogramMode, setHistogramMode] = useState<
     "provincias" | "biogeografico" | "ecosistema" | "piso" | "snap" | "endemica"
   >("provincias");
   const [histogramaProvincias, setHistogramaProvincias] = useState<{name: string; total: number}[]>(
-    [],
+    initialStats?.histogramaProvincias ?? [],
   );
   const [histogramaBiogeografico, setHistogramaBiogeografico] = useState<
     {name: string; total: number}[]
-  >([]);
+  >(initialStats?.histogramaBiogeografico ?? []);
   const [histogramaEcosistema, setHistogramaEcosistema] = useState<{name: string; total: number}[]>(
-    [],
+    initialStats?.histogramaEcosistema ?? [],
   );
-  const [histogramaPiso, setHistogramaPiso] = useState<{name: string; total: number}[]>([]);
-  const [histogramaSnap, setHistogramaSnap] = useState<{name: string; total: number}[]>([]);
+  const [histogramaPiso, setHistogramaPiso] = useState<{name: string; total: number}[]>(
+    initialStats?.histogramaPiso ?? [],
+  );
+  const [histogramaSnap, setHistogramaSnap] = useState<{name: string; total: number}[]>(
+    initialStats?.histogramaSnap ?? [],
+  );
   const [histogramaBiogeograficoEndemica, setHistogramaBiogeograficoEndemica] = useState<
     {name: string; total: number; endemicas: number; totalSpp: number}[]
-  >([]);
+  >(initialStats?.histogramaBiogeograficoEndemica ?? []);
   const globalHistogramaRef = useRef<{
     provincias: {name: string; total: number}[];
     biogeografico: {name: string; total: number}[];
@@ -50,7 +58,14 @@ export default function MapotecaStats() {
     piso: {name: string; total: number}[];
     snap: {name: string; total: number}[];
     endemica: {name: string; total: number; endemicas: number; totalSpp: number}[];
-  }>({provincias: [], biogeografico: [], ecosistema: [], piso: [], snap: [], endemica: []});
+  }>({
+    provincias: initialStats?.histogramaProvincias ?? [],
+    biogeografico: initialStats?.histogramaBiogeografico ?? [],
+    ecosistema: initialStats?.histogramaEcosistema ?? [],
+    piso: initialStats?.histogramaPiso ?? [],
+    snap: initialStats?.histogramaSnap ?? [],
+    endemica: initialStats?.histogramaBiogeograficoEndemica ?? [],
+  });
 
   useEffect(() => {
     const STATS_KEY = "mapoteca_stats_v12";
@@ -73,6 +88,19 @@ export default function MapotecaStats() {
       setHistogramaSnap(snap);
       setHistogramaBiogeograficoEndemica(endemica);
     };
+
+    if (initialStats) {
+      try {
+        sessionStorage.setItem(
+          STATS_KEY,
+          JSON.stringify({data: initialStats, timestamp: Date.now()}),
+        );
+      } catch {
+        /* ignorar */
+      }
+
+      return;
+    }
 
     try {
       const raw = sessionStorage.getItem(STATS_KEY);
@@ -102,7 +130,7 @@ export default function MapotecaStats() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [initialStats]);
 
   const histogramaData = useMemo(() => {
     if (histogramMode === "biogeografico") return histogramaBiogeografico;
@@ -338,11 +366,7 @@ export default function MapotecaStats() {
           activeProvincias={[]}
           data={histogramaData}
           secondaryLabel="endémicas"
-          showLabels={
-            histogramMode === "provincias" ||
-            histogramMode === "biogeografico" ||
-            histogramMode === "endemica"
-          }
+          showLabels={histogramMode === "provincias"}
           title={histogramaTitle}
           unit={histogramaUnit}
           onBarClick={() => {}}
