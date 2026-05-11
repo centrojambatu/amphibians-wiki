@@ -831,6 +831,38 @@ function MapotecaLoading() {
   );
 }
 
+const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
+  {
+    title: "Rana toro",
+    subtitle: "Aquarana catesbeiana",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp",
+  },
+  {
+    title: "Nombres renacuajos",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg",
+  },
+  {
+    title: "Sectores biogeográficos",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBiogeographicSectors.webp",
+  },
+  {
+    title: "Bioclimas",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
+  },
+  {
+    title: "Especies amenazadas minería",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
+  },
+  {
+    title: "Mapa especies por provincias",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
+  },
+  {
+    title: "Mapa deforestación",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
+  },
+];
+
 // Página principal
 export default function MapotecaPage() {
   const [provinciaFilter, setProvinciaFilter] = useState<string[]>([]);
@@ -847,32 +879,26 @@ export default function MapotecaPage() {
 
       {/* Tarjetas destacadas */}
       <div className="container mx-auto px-4 pb-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <a
-            className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp"
-            rel="noopener noreferrer"
-            style={{borderColor: "#dddddd"}}
-            target="_blank"
-          >
-            <span className="text-base font-semibold" style={{color: "#000000"}}>
-              Rana toro
-            </span>
-            <i className="mt-1 text-sm" style={{color: "#666666"}}>
-              Aquarana catesbeiana
-            </i>
-          </a>
-          <a
-            className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg"
-            rel="noopener noreferrer"
-            style={{borderColor: "#dddddd"}}
-            target="_blank"
-          >
-            <span className="text-base font-semibold" style={{color: "#000000"}}>
-              Nombres renacuajos
-            </span>
-          </a>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+          {MAPOTECA_CARDS.map((card) => (
+            <a
+              key={card.title}
+              className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
+              href={card.href}
+              rel="noopener noreferrer"
+              style={{borderColor: "#dddddd"}}
+              target="_blank"
+            >
+              <span className="text-base font-semibold" style={{color: "#000000"}}>
+                {card.title}
+              </span>
+              {card.subtitle && (
+                <i className="mt-1 text-sm" style={{color: "#666666"}}>
+                  {card.subtitle}
+                </i>
+              )}
+            </a>
+          ))}
         </div>
       </div>
 
