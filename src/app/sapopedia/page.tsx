@@ -321,7 +321,7 @@ export default async function SapopediaPage() {
             <span className="text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
               {totalEndemicas.toLocaleString()}
             </span>
-            <span className="text-xs font-semibold" style={{color: "#666666"}}>
+            <span className="text-base font-semibold sm:text-lg" style={{color: "#f07304"}}>
               {pctEndemicas}%
             </span>
           </div>

@@ -165,7 +165,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
 
   const histogramaUnit =
     histogramMode === "biogeografico"
-      ? "regiones"
+      ? "sectores"
       : histogramMode === "ecosistema"
         ? "ecosistemas"
         : histogramMode === "piso"
@@ -173,7 +173,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           : histogramMode === "snap"
             ? "áreas"
             : histogramMode === "endemica"
-              ? "regiones"
+              ? "sectores"
               : "provincias";
 
   return (
@@ -233,6 +233,42 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           {stats?.biogeografico.name && (
             <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
               {stats.biogeografico.name}
+            </span>
+          )}
+        </button>
+
+        {/* Endémicas biogeográfico */}
+        <button
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-shadow hover:shadow-md ${histogramMode === "endemica" ? "ring-2 ring-[#f07304]/70" : ""}`}
+          style={{borderColor: "#dddddd"}}
+          type="button"
+          onClick={() => setHistogramMode("endemica")}
+        >
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
+              {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
+            </span>
+            {stats && stats.biogeograficoEndemica.totalRegion > 0 && (
+              <span className="text-base font-semibold sm:text-lg" style={{color: "#f07304"}}>
+                {stats.biogeograficoEndemica.porcentaje}%
+              </span>
+            )}
+          </div>
+          <h4
+            className="mt-1 text-center"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "400",
+            }}
+          >
+            Especies endémicas en sector biogeográfico con mayor endémismo
+          </h4>
+          {stats?.biogeograficoEndemica.name && (
+            <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
+              {stats.biogeograficoEndemica.name}
             </span>
           )}
         </button>
@@ -320,42 +356,6 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           {stats?.snap.name && (
             <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
               {stats.snap.name}
-            </span>
-          )}
-        </button>
-
-        {/* Endémicas biogeográfico */}
-        <button
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-shadow hover:shadow-md ${histogramMode === "endemica" ? "ring-2 ring-[#f07304]/70" : ""}`}
-          style={{borderColor: "#dddddd"}}
-          type="button"
-          onClick={() => setHistogramMode("endemica")}
-        >
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-              {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
-            </span>
-            {stats && stats.biogeograficoEndemica.totalRegion > 0 && (
-              <span className="text-xs font-semibold" style={{color: "#f07304"}}>
-                {stats.biogeograficoEndemica.porcentaje}%
-              </span>
-            )}
-          </div>
-          <h4
-            className="mt-1 text-center"
-            style={{
-              color: "#666666",
-              fontSize: "13px",
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-              fontWeight: "400",
-            }}
-          >
-            Especies endémicas en sector biogeográfico con mayor endémismo
-          </h4>
-          {stats?.biogeograficoEndemica.name && (
-            <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
-              {stats.biogeograficoEndemica.name}
             </span>
           )}
         </button>
