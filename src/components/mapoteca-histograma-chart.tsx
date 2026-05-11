@@ -33,7 +33,7 @@ export default function MapotecaHistogramaChart({
 }: MapotecaHistogramaChartProps) {
   if (data.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg bg-white p-6">
         <p className="text-lg font-semibold text-gray-800">{title}</p>
         <p className="mt-4 text-sm text-gray-500">No hay datos disponibles.</p>
       </div>
@@ -44,7 +44,7 @@ export default function MapotecaHistogramaChart({
   const maxTotal = Math.max(...data.map((p) => p.total), 1);
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white px-6 pt-6 pb-4">
+    <div className="overflow-x-auto rounded-lg bg-white px-6 pt-6 pb-4">
       <div className="mb-4 flex items-center gap-4">
         <p className="text-lg font-semibold text-gray-800">
           {title}{" "}

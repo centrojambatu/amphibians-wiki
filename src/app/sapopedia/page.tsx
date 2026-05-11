@@ -1,7 +1,5 @@
 import type {OrdenesNombresLookup} from "@/lib/organize-taxonomy";
 
-import Link from "next/link";
-
 import {SapopediaContent} from "@/components/sapopedia-content";
 import MapotecaStats from "@/components/mapoteca/mapoteca-stats";
 import MapotecaPrefetch from "@/components/MapotecaPrefetch";
@@ -25,11 +23,6 @@ export default async function SapopediaPage() {
   const totalEndemicas = especies.filter((e) => e.endemica).length;
   const pctEndemicas =
     totalEspecies > 0 ? ((totalEndemicas / totalEspecies) * 100).toFixed(1) : "0";
-  const totalPosExtintas = especies.filter(
-    (e) => e.lista_roja_iucn === "CR (PE)" || e.lista_roja_iucn === "CR(PE)",
-  ).length;
-  const pctPosExtintas =
-    totalEspecies > 0 ? ((totalPosExtintas / totalEspecies) * 100).toFixed(1) : "0";
 
   return (
     <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
@@ -48,9 +41,10 @@ export default async function SapopediaPage() {
           className="flex flex-col justify-center rounded-md border p-2"
           style={{borderColor: "#dddddd"}}
         >
-          <Link
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/historia/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -58,12 +52,14 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Historia
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -71,12 +67,14 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Arqueología
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/cultura/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -84,12 +82,14 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Cultura
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/biocomercio/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -97,17 +97,21 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Biocomercio
-          </Link>
+          </a>
         </div>
+
+        {/* Links temáticos adicionales */}
         <div
           className="flex flex-col justify-center rounded-md border p-2"
           style={{borderColor: "#dddddd"}}
         >
-          <Link
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/bioprospeccion/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -115,12 +119,29 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
+          >
+            Bioprospección
+          </a>
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad/"
+            rel="noopener noreferrer"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "600",
+            }}
+            target="_blank"
           >
             Diversidad
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/especies-introducidas/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -128,12 +149,51 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
+          >
+            Especies introducidas
+          </a>
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/incertae-sedis/"
+            rel="noopener noreferrer"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "600",
+            }}
+            target="_blank"
+          >
+            Incertae sedis
+          </a>
+        </div>
+
+        {/* Links temáticos: Distribución / Extinción / Conservación */}
+        <div
+          className="flex flex-col justify-start rounded-md border p-2"
+          style={{borderColor: "#dddddd"}}
+        >
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
+            rel="noopener noreferrer"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "600",
+            }}
+            target="_blank"
           >
             Distribución
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/extincion/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -141,12 +201,14 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Extinción
-          </Link>
-          <Link
+          </a>
+          <a
             className="hover:text-gray-900"
-            href="/sapopedia"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion/"
+            rel="noopener noreferrer"
             style={{
               color: "#666666",
               fontSize: "13px",
@@ -154,9 +216,10 @@ export default async function SapopediaPage() {
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
               fontWeight: "600",
             }}
+            target="_blank"
           >
             Conservación
-          </Link>
+          </a>
         </div>
 
         {/* Especies */}
@@ -271,33 +334,6 @@ export default async function SapopediaPage() {
             }}
           >
             Endémicas
-          </h4>
-        </div>
-
-        {/* Posiblemente extintas */}
-        <div
-          className="flex flex-col items-center justify-center rounded-md border p-2"
-          style={{borderColor: "#dddddd"}}
-        >
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-              {totalPosExtintas.toLocaleString()}
-            </span>
-            <span className="text-xs font-semibold" style={{color: "#666666"}}>
-              {pctPosExtintas}%
-            </span>
-          </div>
-          <h4
-            className="mt-1 text-center"
-            style={{
-              color: "#666666",
-              fontSize: "13px",
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-              fontWeight: "600",
-            }}
-          >
-            Posiblemente extintas
           </h4>
         </div>
       </div>

@@ -149,7 +149,7 @@ export default function MapotecaStats() {
               : "provincias";
 
   return (
-    <div className="pb-4">
+    <div className="rounded-md border p-3" style={{borderColor: "#dddddd"}}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {/* Provincia */}
         <button
