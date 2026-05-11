@@ -80,7 +80,7 @@ export default function Navbar() {
               className="h-22 w-auto"
               height={88}
               src={logoSrc}
-              width={293}
+              width={218}
             />
           </Link>
 

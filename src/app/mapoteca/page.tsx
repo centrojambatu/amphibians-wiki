@@ -845,6 +845,37 @@ export default function MapotecaPage() {
         </div>
       </div>
 
+      {/* Tarjetas destacadas */}
+      <div className="container mx-auto px-4 pb-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <a
+            className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp"
+            rel="noopener noreferrer"
+            style={{borderColor: "#dddddd"}}
+            target="_blank"
+          >
+            <span className="text-base font-semibold" style={{color: "#000000"}}>
+              Rana toro
+            </span>
+            <i className="mt-1 text-sm" style={{color: "#666666"}}>
+              Aquarana catesbeiana
+            </i>
+          </a>
+          <a
+            className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg"
+            rel="noopener noreferrer"
+            style={{borderColor: "#dddddd"}}
+            target="_blank"
+          >
+            <span className="text-base font-semibold" style={{color: "#000000"}}>
+              Nombres renacuajos
+            </span>
+          </a>
+        </div>
+      </div>
+
       <Suspense fallback={<MapotecaLoading />}>
         <MapotecaContent
           pisoFilter={pisoFilter}
