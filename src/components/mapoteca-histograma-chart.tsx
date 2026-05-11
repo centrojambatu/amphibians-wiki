@@ -1,5 +1,8 @@
 "use client";
 
+import {useEffect, useRef, useState} from "react";
+import {ArrowLeft, ArrowRight} from "lucide-react";
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProvinciaPoint {
@@ -31,6 +34,41 @@ export default function MapotecaHistogramaChart({
   showLabels = true,
   secondaryLabel = "endémicas",
 }: MapotecaHistogramaChartProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = () => {
+    const el = scrollRef.current;
+
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  };
+
+  useEffect(() => {
+    updateScrollState();
+    const el = scrollRef.current;
+
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollState, {passive: true});
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [data.length]);
+
+  const scrollBy = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+
+    if (!el) return;
+    const delta = el.clientWidth * 0.8;
+
+    el.scrollBy({left: dir === "left" ? -delta : delta, behavior: "smooth"});
+  };
+
   if (data.length === 0) {
     return (
       <div className="rounded-lg bg-white p-6">
@@ -44,7 +82,7 @@ export default function MapotecaHistogramaChart({
   const maxTotal = Math.max(...data.map((p) => p.total), 1);
 
   return (
-    <div className="overflow-x-auto rounded-lg bg-white px-6 pt-6 pb-4">
+    <div className="rounded-lg bg-white px-6 pt-6 pb-4">
       <div className="mb-4 flex items-center gap-4">
         <p className="text-lg font-semibold text-gray-800">
           {title}{" "}
@@ -63,7 +101,28 @@ export default function MapotecaHistogramaChart({
             </span>
           </div>
         )}
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            aria-label="Desplazar a la izquierda"
+            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+            disabled={!canScrollLeft}
+            type="button"
+            onClick={() => scrollBy("left")}
+          >
+            <ArrowLeft className="h-5 w-5" strokeWidth={3} />
+          </button>
+          <button
+            aria-label="Desplazar a la derecha"
+            className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+            disabled={!canScrollRight}
+            type="button"
+            onClick={() => scrollBy("right")}
+          >
+            <ArrowRight className="h-5 w-5" strokeWidth={3} />
+          </button>
+        </div>
       </div>
+      <div ref={scrollRef} className="overflow-x-auto">
 
       <div className="flex w-full items-end gap-2" style={{ height: ALTURA_MAX_BARRA + 32, minWidth: data.length * 72 }}>
         <TooltipProvider delayDuration={0}>
@@ -176,6 +235,7 @@ export default function MapotecaHistogramaChart({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
