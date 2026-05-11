@@ -156,7 +156,7 @@ export default function MapotecaHistogramaChart({
                   side="top"
                 >
                   <div className="space-y-0.5">
-                    <p className="font-medium">{punto.name}</p>
+                    {!showLabels && <p className="font-medium">{punto.name}</p>}
                     {punto.endemicas != null ? (
                       <>
                         <p className="text-xs font-semibold" style={{ color: "#f07304" }}>
