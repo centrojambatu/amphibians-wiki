@@ -3,6 +3,7 @@
 import {useState} from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {usePathname} from "next/navigation";
 import {Menu, X, ChevronDown} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -25,24 +26,23 @@ const navLinks: NavLink[] = [
     label: "Anfibios Ecuador",
   },
   {
-    href: "/sapopedia/lista-roja",
-    label: "Lista Roja",
-  },
-  {
     href: "#",
     label: "Nombres",
     submenu: [
       { href: "/sapopedia/nombres", label: "Nombres estándar" },
       { href: "/sapopedia/nombres-vernaculos", label: "Nombres indígenas" },
       { href: "/sapopedia/nombres-renacuajos", label: "Nombres renacuajos" },
-
     ],
   },
+  {
+    href: "/sapopedia/lista-roja",
+    label: "Lista Roja",
+  },
   {href: "/sapoteca", label: "Biblioteca"},
-  {href: "/mapoteca", label: "Mapoteca"},
-  {href: "/videoteca", label: "Videoteca"},
-  {href: "/audioteca", label: "Audioteca"},
   {href: "/fototeca", label: "Fototeca"},
+  {href: "/audioteca", label: "Audioteca"},
+  {href: "/mapoteca", label: "Mapoteca"},
+  {href: "/colecciones", label: "Colecciones"},
   {href: "/moleculoteca", label: "Moleculoteca"},
   // {href: "/sapopedia/editor-citas", label: "Editor Ficha Especie"},
 ];
@@ -51,6 +51,11 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
+  const pathname = usePathname();
+  const isBiobanco =
+    pathname?.startsWith("/colecciones") || pathname?.startsWith("/moleculoteca");
+  const logoSrc = isBiobanco ? "/assets/logo-biobanco.png" : "/assets/logo-sapopedia.png";
+  const logoAlt = isBiobanco ? "Biobanco Jambatu" : "Sapopedia Jambatu";
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => {
@@ -69,19 +74,14 @@ export default function Navbar() {
           {/* Logo */}
           <Link className="flex items-center gap-2 !no-underline hover:!no-underline" href="/sapopedia" onClick={closeMenu} style={{ textDecoration: "none" }}>
             <Image
+              key={logoSrc}
               priority
-              alt="Anfibios de Ecuador"
-              className="h-auto w-auto"
-              height={45}
-              src="/assets/references/logo.png"
-              width={150}
+              alt={logoAlt}
+              className="h-22 w-auto"
+              height={88}
+              src={logoSrc}
+              width={293}
             />
-            <span
-              className="text-[11px] font-bold tracking-widest no-underline hover:no-underline"
-              style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", color: "#f07304", textDecoration: "none" }}
-            >
-              SAPOPEDIA
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
