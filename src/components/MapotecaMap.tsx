@@ -504,7 +504,9 @@ export default function MapotecaMap({
         preferCanvas={true}
       >
         <TileLayer
+          key={mapType}
           attribution={MAP_TILES[mapType].attribution}
+          className={mapType === "satellite" ? "" : "grayscale"}
           url={MAP_TILES[mapType].url}
         />
 

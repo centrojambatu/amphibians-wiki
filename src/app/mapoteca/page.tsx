@@ -5,7 +5,15 @@ import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {useQuery} from "@tanstack/react-query";
-import {Search, X, Mountain, Check, RotateCcw} from "lucide-react";
+import {Search, X, Mountain, Check, RotateCcw, ExternalLink} from "lucide-react";
+import Lightbox, {type Slide} from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -833,13 +841,17 @@ function MapotecaLoading() {
 
 const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
   {
-    title: "Rana toro",
-    subtitle: "Aquarana catesbeiana",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp",
+    title: "Mapa especies por provincias",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
   },
   {
     title: "Nombres renacuajos",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg",
+  },
+  {
+    title: "Rana toro",
+    subtitle: "Aquarana catesbeiana",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp",
   },
   {
     title: "Sectores biogeográficos",
@@ -850,24 +862,60 @@ const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
   },
   {
-    title: "Especies amenazadas minería",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
-  },
-  {
-    title: "Mapa especies por provincias",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
-  },
-  {
     title: "Mapa deforestación",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
   },
+  {
+    title: "Especies amenazadas minería",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
+  },
 ];
+
+const PUBLICACION_URL =
+  "https://www.routledge.com/An-Introduction-to-the-Amphibians-of-Ecuador-Diversity-Conservation-and-Cultural-History/Coloma-Duellman/p/book/9780367653569";
 
 // Página principal
 export default function MapotecaPage() {
   const [provinciaFilter, setProvinciaFilter] = useState<string[]>([]);
   const [pisoFilter, setPisoFilter] = useState<string[]>([]);
   const [snapFilter, setSnapFilter] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
+
+  const mapSlides: Slide[] = MAPOTECA_CARDS.map((card) => ({
+    src: card.href,
+    alt: card.title,
+    title: (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          fontSize: 20,
+        }}
+      >
+        <span>{card.title}</span>
+        <a
+          href={PUBLICACION_URL}
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 16,
+            fontWeight: 600,
+            color: "#80ff80",
+            textDecoration: "none",
+          }}
+          target="_blank"
+        >
+          Coloma & Duellman, 2024
+          <ExternalLink size={16} />
+        </a>
+      </span>
+    ),
+    description: card.subtitle,
+  }));
 
   return (
     <div className="bg-background min-h-screen">
@@ -880,27 +928,48 @@ export default function MapotecaPage() {
       {/* Tarjetas destacadas */}
       <div className="container mx-auto px-4 pb-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
-          {MAPOTECA_CARDS.map((card) => (
-            <a
+          {MAPOTECA_CARDS.map((card, index) => (
+            <button
               key={card.title}
-              className="flex cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-center transition-shadow hover:shadow-md"
-              href={card.href}
-              rel="noopener noreferrer"
+              className="group flex cursor-pointer flex-col overflow-hidden rounded-md border text-center transition-shadow hover:shadow-md"
               style={{borderColor: "#dddddd"}}
-              target="_blank"
+              type="button"
+              onClick={() => setLightboxIndex(index)}
             >
-              <span className="text-base font-semibold" style={{color: "#000000"}}>
-                {card.title}
-              </span>
-              {card.subtitle && (
-                <i className="mt-1 text-sm" style={{color: "#666666"}}>
-                  {card.subtitle}
-                </i>
-              )}
-            </a>
+              <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
+                <img
+                  alt={card.title}
+                  className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
+                  loading="lazy"
+                  src={card.href}
+                />
+              </div>
+              <div className="flex flex-1 flex-col items-center justify-center p-2">
+                <span className="text-sm font-semibold" style={{color: "#666666"}}>
+                  {card.title}
+                </span>
+                {card.subtitle && (
+                  <i className="mt-0.5 text-xs" style={{color: "#888888"}}>
+                    {card.subtitle}
+                  </i>
+                )}
+              </div>
+            </button>
           ))}
         </div>
       </div>
+
+      <Lightbox
+        captions={{descriptionTextAlign: "start", descriptionMaxLines: 4}}
+        close={() => setLightboxIndex(-1)}
+        controller={{closeOnBackdropClick: true}}
+        counter={{container: {style: {top: 0, bottom: "unset"}}}}
+        index={lightboxIndex < 0 ? 0 : lightboxIndex}
+        open={lightboxIndex >= 0}
+        plugins={[Captions, Counter, Fullscreen, Zoom]}
+        slides={mapSlides}
+        zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
+      />
 
       <Suspense fallback={<MapotecaLoading />}>
         <MapotecaContent
