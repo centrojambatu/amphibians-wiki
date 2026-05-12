@@ -888,8 +888,8 @@ export default function MapotecaPage() {
       <span
         style={{
           display: "inline-flex",
-          alignItems: "center",
-          gap: 10,
+          alignItems: "baseline",
+          gap: 12,
           flexWrap: "wrap",
           fontSize: 20,
         }}
@@ -900,9 +900,9 @@ export default function MapotecaPage() {
           rel="noopener noreferrer"
           style={{
             display: "inline-flex",
-            alignItems: "center",
+            alignItems: "baseline",
             gap: 6,
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: 600,
             color: "#80ff80",
             textDecoration: "none",
@@ -910,7 +910,7 @@ export default function MapotecaPage() {
           target="_blank"
         >
           Coloma & Duellman, 2024
-          <ExternalLink size={16} />
+          <ExternalLink size={18} style={{transform: "translateY(3px)"}} />
         </a>
       </span>
     ),
