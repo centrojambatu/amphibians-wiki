@@ -747,8 +747,10 @@ function MapotecaContent({
                     </div>
 
                     {/* Tipo de mapa */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-gray-600">Tipo de mapa</label>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-semibold text-gray-600">
+                        Tipo de mapa
+                      </label>
                       <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
                         <SelectTrigger className="text-sm">
                           <SelectValue />
@@ -863,10 +865,6 @@ const MAPOTECA_CARDS: {
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBiogeographicSectors.webp",
   },
   {
-    title: "Bioclimas",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
-  },
-  {
     title: "Mapa deforestación",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
     citation: {
@@ -877,6 +875,14 @@ const MAPOTECA_CARDS: {
   {
     title: "Especies amenazadas minería",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
+  },
+  {
+    title: "Otros mapas MAE",
+    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
+    citation: {
+      label: "MAE, 2023",
+      url: "http://ide.ambiente.gob.ec:8080/mapainteractivo/",
+    },
   },
 ];
 
