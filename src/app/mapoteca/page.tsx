@@ -839,7 +839,12 @@ function MapotecaLoading() {
   );
 }
 
-const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
+const MAPOTECA_CARDS: {
+  title: string;
+  subtitle?: string;
+  href: string;
+  citation?: {label: string; url: string};
+}[] = [
   {
     title: "Mapa especies por provincias",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
@@ -864,6 +869,10 @@ const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
   {
     title: "Mapa deforestación",
     href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
+    citation: {
+      label: "MAE, 2023",
+      url: "http://ide.ambiente.gob.ec:8080/mapainteractivo/",
+    },
   },
   {
     title: "Especies amenazadas minería",
@@ -873,6 +882,29 @@ const MAPOTECA_CARDS: {title: string; subtitle?: string; href: string}[] = [
 
 const PUBLICACION_URL =
   "https://www.routledge.com/An-Introduction-to-the-Amphibians-of-Ecuador-Diversity-Conservation-and-Cultural-History/Coloma-Duellman/p/book/9780367653569";
+
+function CitationLink({label, url}: {label: string; url: string}) {
+  return (
+    <a
+      className="citation-link"
+      href={url}
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "baseline",
+        gap: 6,
+        fontSize: 20,
+        fontWeight: 600,
+        textDecoration: "none",
+        transition: "color 200ms",
+      }}
+      target="_blank"
+    >
+      {label}
+      <ExternalLink size={18} style={{transform: "translateY(3px)"}} />
+    </a>
+  );
+}
 
 // Página principal
 export default function MapotecaPage() {
@@ -895,23 +927,10 @@ export default function MapotecaPage() {
         }}
       >
         <span>{card.title}</span>
-        <a
-          href={PUBLICACION_URL}
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "baseline",
-            gap: 6,
-            fontSize: 20,
-            fontWeight: 600,
-            color: "#80ff80",
-            textDecoration: "none",
-          }}
-          target="_blank"
-        >
-          Coloma & Duellman, 2024
-          <ExternalLink size={18} style={{transform: "translateY(3px)"}} />
-        </a>
+        <CitationLink
+          label={card.citation?.label ?? "Coloma & Duellman, 2024"}
+          url={card.citation?.url ?? PUBLICACION_URL}
+        />
       </span>
     ),
     description: card.subtitle,

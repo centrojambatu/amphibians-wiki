@@ -115,6 +115,18 @@ a:active {
   text-decoration: none !important;
 }
 
+/* Excepción para cita de mapoteca - naranja normal, verde fluor en hover */
+a.citation-link,
+a.citation-link:link,
+a.citation-link:visited {
+  color: #f07304 !important;
+}
+
+a.citation-link:hover,
+a.citation-link:active {
+  color: #80ff80 !important;
+}
+
 /* Excepción para botones de videoteca - mantener color gris y sin subrayado */
 a.videoteca-play-button,
 a.videoteca-play-button:link,
