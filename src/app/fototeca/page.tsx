@@ -423,6 +423,9 @@ export default function FototecaPage() {
   const [catalogosFilter, setCatalogosFilter] = useState<string[]>([]);
   const [familiasFilter, setFamiliasFilter] = useState<string[]>([]);
   const [generosFilter, setGenerosFilter] = useState<string[]>([]);
+  const [anioEspecifico, setAnioEspecifico] = useState<string>("");
+  const [anioDesde, setAnioDesde] = useState<string>("");
+  const [anioHasta, setAnioHasta] = useState<string>("");
 
   const search = searchInput.trim();
   const localidadesKey = localidadesFilter.join("||");
@@ -437,7 +440,10 @@ export default function FototecaPage() {
     catalogosFilter.length > 0 ||
     familiasFilter.length > 0 ||
     generosFilter.length > 0 ||
-    searchInput.trim().length > 0;
+    searchInput.trim().length > 0 ||
+    anioEspecifico.length > 0 ||
+    anioDesde.length > 0 ||
+    anioHasta.length > 0;
 
   const clearFilters = () => {
     setSearchInput("");
@@ -446,6 +452,9 @@ export default function FototecaPage() {
     setCatalogosFilter([]);
     setFamiliasFilter([]);
     setGenerosFilter([]);
+    setAnioEspecifico("");
+    setAnioDesde("");
+    setAnioHasta("");
   };
 
   const {data: especies = [], isLoading: loadingEspecies} = useQuery<EspecieItem[]>({
@@ -458,6 +467,9 @@ export default function FototecaPage() {
       catalogosKey,
       familiasKey,
       generosKey,
+      anioEspecifico,
+      anioDesde,
+      anioHasta,
     ],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -468,6 +480,9 @@ export default function FototecaPage() {
       if (catalogosKey) params.set("catalogos", catalogosKey);
       if (familiasKey) params.set("familias", familiasKey);
       if (generosKey) params.set("generos", generosKey);
+      if (anioEspecifico) params.set("anio", anioEspecifico);
+      if (anioDesde) params.set("anio_desde", anioDesde);
+      if (anioHasta) params.set("anio_hasta", anioHasta);
       const response = await fetch(`/api/fototeca/especies?${params.toString()}`);
 
       if (!response.ok) throw new Error("Error al cargar especies");
@@ -615,6 +630,60 @@ export default function FototecaPage() {
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
                     />
+
+                    <div className="space-y-1.5">
+                      <input
+                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                        max={new Date().getFullYear()}
+                        min={1900}
+                        placeholder="Año específico (ej. 2024)"
+                        type="number"
+                        value={anioEspecifico}
+                        onChange={(e) => {
+                          setAnioEspecifico(e.target.value);
+                          if (e.target.value) {
+                            setAnioDesde("");
+                            setAnioHasta("");
+                          }
+                        }}
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Desde"
+                          type="number"
+                          value={anioDesde}
+                          onChange={(e) => setAnioDesde(e.target.value)}
+                        />
+                        <span className="text-xs text-gray-400">—</span>
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Hasta"
+                          type="number"
+                          value={anioHasta}
+                          onChange={(e) => setAnioHasta(e.target.value)}
+                        />
+                      </div>
+                      {(anioDesde || anioHasta || anioEspecifico) && (
+                        <button
+                          className="text-[10px] text-gray-400 hover:text-gray-600"
+                          type="button"
+                          onClick={() => {
+                            setAnioDesde("");
+                            setAnioHasta("");
+                            setAnioEspecifico("");
+                          }}
+                        >
+                          Limpiar años
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -19,6 +19,13 @@ export async function GET(request: Request) {
   const catalogos = parseList(searchParams.get("catalogos"));
   const familias = parseList(searchParams.get("familias"));
   const generos = parseList(searchParams.get("generos"));
+  const anioEspecifico = parseInt(searchParams.get("anio") || "", 10);
+  const anioDesde = parseInt(searchParams.get("anio_desde") || "", 10);
+  const anioHasta = parseInt(searchParams.get("anio_hasta") || "", 10);
+  const tieneFiltroAnio =
+    Number.isFinite(anioEspecifico) ||
+    Number.isFinite(anioDesde) ||
+    Number.isFinite(anioHasta);
 
   const supabase = await createClient();
 
@@ -26,9 +33,9 @@ export async function GET(request: Request) {
     const {data: fotos, error: fotoError} = await supabase
       .from("fotografia")
       .select(
-        `taxon_id, coleccion_id, coleccion_externa_id, localidad, autor,
+        `taxon_id, coleccion_id, coleccion_externa_id, localidad, autor, fecha,
          coleccion:coleccion_id(taxon_id, localidad, catalogo_museo, numero_museo),
-         coleccion_externa:coleccion_externa_id(taxon_id, localidad, catalogo_museo, numero_museo)`,
+         coleccion_externa:coleccion_externa_id(taxon_id, localidad, catalogo_museo, numero_museo, fecha)`,
       )
       .eq("publicar", true)
       .limit(100000);
@@ -56,6 +63,21 @@ export async function GET(request: Request) {
       return !!f.autor && autores.includes(f.autor);
     };
 
+    const matchesAnio = (f: any): boolean => {
+      if (!tieneFiltroAnio) return true;
+      const fechaStr = f.fecha || f.coleccion_externa?.fecha || null;
+
+      if (!fechaStr) return false;
+      const year = new Date(String(fechaStr)).getUTCFullYear();
+
+      if (!Number.isFinite(year)) return false;
+      if (Number.isFinite(anioEspecifico)) return year === anioEspecifico;
+      if (Number.isFinite(anioDesde) && year < anioDesde) return false;
+      if (Number.isFinite(anioHasta) && year > anioHasta) return false;
+
+      return true;
+    };
+
     const matchesCatalogo = (f: any): boolean => {
       if (catalogos.length === 0) return true;
       const sources = [f.coleccion, f.coleccion_externa].filter(Boolean);
@@ -73,7 +95,8 @@ export async function GET(request: Request) {
     const taxonIds = new Set<number>();
 
     (fotos || []).forEach((f: any) => {
-      if (!matchesLocalidad(f) || !matchesAutor(f) || !matchesCatalogo(f)) return;
+      if (!matchesLocalidad(f) || !matchesAutor(f) || !matchesCatalogo(f) || !matchesAnio(f))
+        return;
       const t =
         f.coleccion_id != null
           ? f.coleccion?.taxon_id
