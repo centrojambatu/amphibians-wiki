@@ -34,6 +34,7 @@ type AlbumPhoto = Photo & {item: SpeciesFotoItem};
 function buildCaption(foto: SpeciesFotoItem): string {
   const lines: string[] = [];
 
+  if (foto.categoria) lines.push(`Categoría: ${foto.categoria}`);
   if (foto.descripcion) lines.push(foto.descripcion);
   if (foto.autor) lines.push(`Autor: ${foto.autor}`);
   if (foto.localidad) lines.push(`Localidad: ${foto.localidad}`);
@@ -51,20 +52,6 @@ export default function SpeciesFotosClient({
   fotos,
   speciesUrlId,
 }: SpeciesFotosClientProps) {
-  const groups = useMemo(() => {
-    const map = new Map<string, SpeciesFotoItem[]>();
-
-    fotos.forEach((f) => {
-      const key = f.categoria || "Sin categoría";
-      const arr = map.get(key) ?? [];
-
-      arr.push(f);
-      map.set(key, arr);
-    });
-
-    return Array.from(map.entries());
-  }, [fotos]);
-
   const allItems = useMemo(() => fotos.filter((f) => f.enlace), [fotos]);
 
   const slides: Slide[] = useMemo(
@@ -211,67 +198,37 @@ export default function SpeciesFotosClient({
         {fotos.length === 0 ? (
           <p className="text-sm text-gray-500">No hay fotografías publicadas.</p>
         ) : (
-          <div className="space-y-10">
-            {groups.map(([categoria, items]) => {
-              const albumPhotos: AlbumPhoto[] = items
-                .filter((f) => f.enlace)
-                .map((f) => {
-                  const d = dims[f.enlace as string];
+          (() => {
+            const albumPhotos: AlbumPhoto[] = allItems.map((f) => {
+              const d = dims[f.enlace as string];
 
-                  return {
-                    src: f.enlace || "",
-                    width: d?.w ?? 1200,
-                    height: d?.h ?? 1200,
-                    alt: f.nombre || "Fotografía",
-                    item: f,
-                  };
-                });
+              return {
+                src: f.enlace || "",
+                width: d?.w ?? 1200,
+                height: d?.h ?? 1200,
+                alt: f.nombre || "Fotografía",
+                item: f,
+              };
+            });
 
-              return (
-                <section key={categoria}>
-                  <h2 className="mb-3 text-lg font-bold text-gray-900">
-                    {categoria}
-                    <span className="ml-2 text-sm font-normal text-gray-500">
-                      ({items.length})
-                    </span>
-                  </h2>
-                  {albumPhotos.length === 0 ? (
-                    <p className="text-sm text-gray-400">Sin imágenes.</p>
-                  ) : (
-                    <ColumnsPhotoAlbum
-                      columns={4}
-                      photos={albumPhotos}
-                      render={{
-                        image: (props) => (
-                          // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-                          <img
-                            {...props}
-                            className="cursor-zoom-in rounded-md grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
-                          />
-                        ),
-                        extras: (_, {photo}) => {
-                          const item = (photo as AlbumPhoto).item;
-
-                          if (!item.descripcion) return null;
-
-                          return (
-                            <div
-                              aria-hidden
-                              className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-md bg-gradient-to-t from-black/80 via-black/40 to-transparent px-2 py-1.5 text-[11px] font-medium text-white"
-                            >
-                              <span className="line-clamp-2">{item.descripcion}</span>
-                            </div>
-                          );
-                        },
-                      }}
-                      spacing={6}
-                      onClick={({photo}) => openLightbox((photo as AlbumPhoto).item)}
+            return (
+              <ColumnsPhotoAlbum
+                columns={4}
+                photos={albumPhotos}
+                render={{
+                  image: (props) => (
+                    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
+                    <img
+                      {...props}
+                      className="cursor-zoom-in rounded-md grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
                     />
-                  )}
-                </section>
-              );
-            })}
-          </div>
+                  ),
+                }}
+                spacing={6}
+                onClick={({photo}) => openLightbox((photo as AlbumPhoto).item)}
+              />
+            );
+          })()
         )}
       </main>
 

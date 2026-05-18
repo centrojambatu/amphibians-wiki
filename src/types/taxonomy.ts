@@ -8,7 +8,7 @@ export interface SpeciesData {
   descubridor: string | null;
   endemica: boolean | null;
   en_ecuador: boolean | null;
-  fotografia_ficha: string | null;
+  fotografia_url: string | null;
   orden: string | null;
   familia: string | null;
   genero: string | null;

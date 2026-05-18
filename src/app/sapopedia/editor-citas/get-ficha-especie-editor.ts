@@ -44,8 +44,6 @@ export interface FichaEspecieEditor {
   inaturalist: string | null;
   genbank: string | null;
   herpnet: string | null;
-  fotografia_ficha: string | null;
-  autor_foto_ficha: string | null;
   publicar: boolean;
   descubridor: string | null;
   historial: string | null;

@@ -29,12 +29,12 @@ export function SpeciesListCard({ species }: SpeciesListCardProps) {
                 </p>
               )}
             </div>
-            {species.fotografia_ficha && (
+            {species.fotografia_url && (
               <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded border">
                 <img
                   alt={species.nombre_cientifico}
                   className="h-full w-full object-cover grayscale transition-all duration-500 hover:grayscale-0"
-                  src={species.fotografia_ficha}
+                  src={species.fotografia_url}
                 />
               </div>
             )}

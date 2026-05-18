@@ -11,7 +11,7 @@ export interface SpeciesListItem {
   orden: string | null;
   familia: string | null;
   genero: string | null;
-  fotografia_ficha: string | null;
+  fotografia_url: string | null;
   en_ecuador: boolean | null;
   endemica: boolean | null;
   rango_altitudinal_min: number | null;
@@ -182,7 +182,9 @@ export default async function getAllEspecies(
       Promise.resolve(
         supabaseClient
           .from("ficha_especie")
-          .select("id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max")
+          .select(
+            "id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, fotografia_destacada:fotografia_destacada_id(enlace)",
+          )
           .in("id_ficha_especie", chunk),
       ).then((r: { data: unknown[] | null; error: unknown }) => r),
     ),
@@ -319,12 +321,16 @@ export default async function getAllEspecies(
     pluviocidad_max: number | null;
     temperatura_min: number | null;
     temperatura_max: number | null;
+    fotografia_url: string | null;
   }
   const fichaExtraMap = new Map<number, FichaExtra>();
   if (errorFichas) {
     console.error("Error al obtener datos de ficha_especie:", errorFichas);
   } else if (fichasData.length > 0) {
-    const fichas = fichasData as (FichaExtra & { id_ficha_especie: number })[];
+    const fichas = fichasData as (Omit<FichaExtra, "fotografia_url"> & {
+      id_ficha_especie: number;
+      fotografia_destacada: { enlace: string | null } | null;
+    })[];
     for (const ficha of fichas) {
       fichaExtraMap.set(ficha.id_ficha_especie, {
         descubridor: ficha.descubridor ?? null,
@@ -332,6 +338,7 @@ export default async function getAllEspecies(
         pluviocidad_max: ficha.pluviocidad_max ?? null,
         temperatura_min: ficha.temperatura_min ?? null,
         temperatura_max: ficha.temperatura_max ?? null,
+        fotografia_url: ficha.fotografia_destacada?.enlace ?? null,
       });
     }
   }
@@ -396,7 +403,9 @@ export default async function getAllEspecies(
         orden: especie.orden,
         familia: especie.familia,
         genero: especie.genero,
-        fotografia_ficha: especie.fotografia_ficha,
+        fotografia_url: fichaEspecieId
+          ? fichaExtraMap.get(fichaEspecieId)?.fotografia_url ?? null
+          : null,
         en_ecuador: especie.en_ecuador,
         endemica: especie.endemica,
         rango_altitudinal_min: especie.rango_altitudinal_min,

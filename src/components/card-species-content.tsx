@@ -280,7 +280,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       yPosition += 3;
 
       // Agregar fotografía de la especie si existe
-      if (fichaEspecie.fotografia_ficha) {
+      if (fichaEspecie.fotografia_url) {
         try {
           // Función para obtener imagen como base64 usando proxy del servidor
           const getImageAsBase64 = async (url: string): Promise<string | null> => {
@@ -333,8 +333,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             }
           };
 
-          console.log("Cargando imagen:", fichaEspecie.fotografia_ficha);
-          const imageBase64 = await getImageAsBase64(fichaEspecie.fotografia_ficha);
+          console.log("Cargando imagen:", fichaEspecie.fotografia_url);
+          const imageBase64 = await getImageAsBase64(fichaEspecie.fotografia_url);
           console.log("Imagen cargada:", imageBase64 ? "Sí" : "No");
           
           if (imageBase64) {
@@ -836,7 +836,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           <div className="space-y-4 p-4">
             {/* Secciones de contenido */}
             {/* Fotografía de la especie */}
-            {fichaEspecie.fotografia_ficha && (
+            {fichaEspecie.fotografia_url && (
               <Card className="h-[500px]">
                 <CardHeader className="py-3">
                   <CardTitle className="text-base">Fotografía</CardTitle>
@@ -849,7 +849,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     <img
                       alt="Fotografía de la especie"
                       className="max-h-full max-w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
-                      src={fichaEspecie.fotografia_ficha}
+                      src={fichaEspecie.fotografia_url}
                     />
                   </div>
                 </CardContent>

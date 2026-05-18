@@ -65,7 +65,9 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("vw_ficha_especie_completa")
-      .select("especie_taxon_id, nombre_cientifico, nombre_comun, orden, familia, genero")
+      .select(
+        "especie_taxon_id, id_ficha_especie, nombre_cientifico, nombre_comun, orden, familia, genero",
+      )
       .in("especie_taxon_id", Array.from(taxonIds))
       .order("nombre_cientifico", {ascending: true});
 
@@ -81,6 +83,31 @@ export async function GET(request: Request) {
       return NextResponse.json({error: "Error al obtener especies"}, {status: 500});
     }
 
+    // Resolver canto destacado por ficha
+    const idsFichaEspecie = (especies || [])
+      .map((e: any) => e.id_ficha_especie)
+      .filter((id: any) => id != null);
+
+    const cantoDestacadoMap = new Map<number, {enlace: string | null; nombre: string | null}>();
+
+    if (idsFichaEspecie.length > 0) {
+      const {data: fichas} = await supabase
+        .from("ficha_especie")
+        .select(
+          "id_ficha_especie, canto_destacado:canto_destacado_id(enlace, nombre)",
+        )
+        .in("id_ficha_especie", idsFichaEspecie);
+
+      if (fichas) {
+        for (const ficha of fichas as any[]) {
+          cantoDestacadoMap.set(ficha.id_ficha_especie, {
+            enlace: ficha.canto_destacado?.enlace ?? null,
+            nombre: ficha.canto_destacado?.nombre ?? null,
+          });
+        }
+      }
+    }
+
     const seen = new Set<number>();
     const especiesFormateadas = (especies || [])
       .filter((e: any) => {
@@ -89,15 +116,23 @@ export async function GET(request: Request) {
 
         return true;
       })
-      .map((especie: any) => ({
-        id: especie.especie_taxon_id,
-        nombre_cientifico: especie.nombre_cientifico,
-        nombre_comun: especie.nombre_comun,
-        slug: especie.nombre_cientifico?.replace(/\s+/g, "-") || "",
-        orden: especie.orden || null,
-        familia: especie.familia || null,
-        genero: especie.genero || null,
-      }));
+      .map((especie: any) => {
+        const destacado = especie.id_ficha_especie
+          ? cantoDestacadoMap.get(especie.id_ficha_especie)
+          : null;
+
+        return {
+          id: especie.especie_taxon_id,
+          nombre_cientifico: especie.nombre_cientifico,
+          nombre_comun: especie.nombre_comun,
+          slug: especie.nombre_cientifico?.replace(/\s+/g, "-") || "",
+          orden: especie.orden || null,
+          familia: especie.familia || null,
+          genero: especie.genero || null,
+          canto_url: destacado?.enlace ?? null,
+          canto_nombre: destacado?.nombre ?? null,
+        };
+      });
 
     return NextResponse.json(especiesFormateadas);
   } catch (error) {

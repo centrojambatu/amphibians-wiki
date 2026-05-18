@@ -103,7 +103,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
     supabaseClient
       .from("ficha_especie")
-      .select("*")
+      .select("*, fotografia_destacada:fotografia_destacada_id(enlace, autor)")
       .eq("id_ficha_especie", idFichaEspecieVista)
       .eq("taxon_id", taxonId)
       .single(),
@@ -363,7 +363,8 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     // Campos de ficha_especie (prioridad a fichaEspecieData si existe)
     id_ficha_especie: idFichaEspecieVista ?? null,
     taxon_id: taxonId,
-    fotografia_ficha: fichaEspecie?.fotografia_ficha ?? null,
+    fotografia_url: fichaEspecie?.fotografia_destacada?.enlace ?? null,
+    autor_foto: fichaEspecie?.fotografia_destacada?.autor ?? null,
     descubridor: fichaEspecie?.descubridor ?? null,
     colector: fichaEspecie?.colector ?? null,
     etimologia: fichaEspecie?.etimologia ?? null,

@@ -8,7 +8,7 @@ export interface EspecieMoleculoteca {
   orden: string | null;
   familia: string | null;
   genero: string | null;
-  fotografia_ficha: string | null;
+  fotografia_url: string | null;
 }
 
 export interface FiltrosMoleculoteca {
@@ -68,6 +68,26 @@ export default async function getEspeciesMoleculoteca(
     };
   }
 
+  // Resolver portada via FK fotografia_destacada_id → fotografia.enlace
+  const fichaIds = (especies as any[])
+    .map((e) => e.especie_ficha_especie_id as number | null)
+    .filter((id): id is number => id != null);
+
+  const fotoUrlMap = new Map<number, string | null>();
+
+  if (fichaIds.length > 0) {
+    const { data: fichas } = await supabaseClient
+      .from("ficha_especie")
+      .select("id_ficha_especie, fotografia_destacada:fotografia_destacada_id(enlace)")
+      .in("id_ficha_especie", fichaIds);
+
+    if (fichas) {
+      for (const ficha of fichas as any[]) {
+        fotoUrlMap.set(ficha.id_ficha_especie, ficha.fotografia_destacada?.enlace ?? null);
+      }
+    }
+  }
+
   // Mapear datos
   const especiesFormateadas: EspecieMoleculoteca[] = especies.map(
     (especie: any) => ({
@@ -78,7 +98,9 @@ export default async function getEspeciesMoleculoteca(
       orden: especie.orden,
       familia: especie.familia,
       genero: especie.genero,
-      fotografia_ficha: especie.fotografia_ficha,
+      fotografia_url: especie.especie_ficha_especie_id
+        ? fotoUrlMap.get(especie.especie_ficha_especie_id) ?? null
+        : null,
     }),
   );
 

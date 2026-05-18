@@ -15,6 +15,9 @@ interface EspecieItem {
   orden?: string | null;
   familia?: string | null;
   genero?: string | null;
+  video_url?: string | null;
+  video_thumbnail?: string | null;
+  video_nombre?: string | null;
 }
 
 export default function VideotecaPage() {
@@ -69,10 +72,10 @@ export default function VideotecaPage() {
                 return (
                   <Link
                     key={especie.id}
-                    className="border-border bg-card hover:border-primary flex items-center justify-between rounded-md border px-4 py-3 no-underline transition-colors"
+                    className="border-border bg-card hover:border-primary flex items-center justify-between gap-3 rounded-md border px-4 py-3 no-underline transition-colors"
                     href={href}
                   >
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-foreground text-sm italic">
                           {especie.nombre_cientifico}
@@ -91,9 +94,17 @@ export default function VideotecaPage() {
                         </p>
                       )}
                     </div>
-                    <div className="bg-primary/10 text-primary ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
-                      <Video className="h-4 w-4" />
-                    </div>
+                    {especie.video_thumbnail ? (
+                      <img
+                        alt={especie.video_nombre || especie.nombre_cientifico}
+                        className="h-14 w-24 flex-shrink-0 rounded object-cover"
+                        src={especie.video_thumbnail}
+                      />
+                    ) : (
+                      <div className="bg-primary/10 text-primary ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+                        <Video className="h-4 w-4" />
+                      </div>
+                    )}
                   </Link>
                 );
               })}

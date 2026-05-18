@@ -17,6 +17,8 @@ interface EspecieItem {
   orden?: string | null;
   familia?: string | null;
   genero?: string | null;
+  canto_url?: string | null;
+  canto_nombre?: string | null;
 }
 
 export default function AudiotecaPage() {
@@ -116,10 +118,10 @@ export default function AudiotecaPage() {
                   return (
                     <Link
                       key={especie.id}
-                      className="border-border bg-card hover:border-primary flex items-center justify-between rounded-md border px-4 py-3 no-underline transition-colors"
+                      className="border-border bg-card hover:border-primary flex items-center justify-between gap-3 rounded-md border px-4 py-3 no-underline transition-colors"
                       href={href}
                     >
-                      <div className="flex-1">
+                      <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-foreground text-sm italic">
                             {especie.nombre_cientifico}
@@ -138,9 +140,19 @@ export default function AudiotecaPage() {
                           </p>
                         )}
                       </div>
-                      <div className="bg-primary/10 text-primary ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
-                        <Volume2 className="h-4 w-4" />
-                      </div>
+                      {especie.canto_url ? (
+                        <audio
+                          controls
+                          preload="none"
+                          src={especie.canto_url}
+                          className="h-8 w-56 flex-shrink-0"
+                          onClick={(e) => e.preventDefault()}
+                        />
+                      ) : (
+                        <div className="bg-primary/10 text-primary ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+                          <Volume2 className="h-4 w-4" />
+                        </div>
+                      )}
                     </Link>
                   );
                 })}
