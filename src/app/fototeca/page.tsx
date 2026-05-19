@@ -701,7 +701,7 @@ export default function FototecaPage() {
                   <p className="text-gray-600">Cargando especies...</p>
                 </div>
               ) : especies.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {especies.map((especie) => {
                     const href = `/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
 
@@ -712,7 +712,7 @@ export default function FototecaPage() {
                         href={href}
                         style={{borderColor: "#dddddd"}}
                       >
-                        <div className="aspect-square w-full overflow-hidden bg-gray-50">
+                        <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
                           {especie.fotografia_url ? (
                             <img
                               alt={especie.nombre_cientifico}

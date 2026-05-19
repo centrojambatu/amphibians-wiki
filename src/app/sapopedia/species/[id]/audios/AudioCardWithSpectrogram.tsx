@@ -102,10 +102,8 @@ export default function AudioCardWithSpectrogram({
         <Field label="Fecha" value={audio.fecha} />
         <Field label="Hora" value={audio.hora} />
         <Field label="Colector" value={audio.colector} />
-        <Field label="Serie de campo" value={audio.serie_campo} />
         <Field label="Localidad" value={audio.localidad} />
         <Field label="Provincia" value={audio.provincia} />
-        <Field label="Estado" value={audio.estado} />
         <Field label="País" value={audio.pais} />
         <Field label="Coordenadas" value={coords} />
         <Field
@@ -130,15 +128,6 @@ export default function AudioCardWithSpectrogram({
         />
         <Field label="Especies de fondo" value={audio.especies_fondo} />
       </div>
-
-      {audio.observacion && (
-        <div className="mt-1.5">
-          <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-            Observación
-          </span>
-          <p className="text-xs leading-snug text-gray-700">{audio.observacion}</p>
-        </div>
-      )}
 
       <button
         aria-expanded={open}
