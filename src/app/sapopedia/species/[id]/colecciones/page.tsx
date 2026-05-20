@@ -50,6 +50,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
   const especie = lineage.find((l: any) => l.rank?.rank === "especie")?.taxon ?? null;
 
   const nombreCientifico = genero && especie ? `${genero} ${especie}` : null;
+  const nombreComun = (fichaEspecie as any)?.nombresComunes?.nombre_comun_espanol ?? null;
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -63,45 +64,17 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
         </Link>
         <h1 className="mb-1 text-4xl font-bold">Colecciones</h1>
         {nombreCientifico && (
-          <p className="text-muted-foreground mb-4 text-lg italic">{nombreCientifico}</p>
+          <p className="text-muted-foreground text-lg italic">{nombreCientifico}</p>
+        )}
+        {nombreComun && (
+          <p className="text-sm text-gray-600">{nombreComun}</p>
         )}
 
-        {/* Clasificación taxonómica */}
+        {/* Clasificación taxonómica condensada (estilo fototeca) */}
         {(orden || familia || genero) && (
-          <div className="flex flex-wrap gap-3">
-            {orden && (
-              <div className="bg-muted rounded-md px-3 py-1.5">
-                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
-                  Orden
-                </span>
-                <p className="text-sm font-medium">{orden}</p>
-              </div>
-            )}
-            {familia && (
-              <div className="bg-muted rounded-md px-3 py-1.5">
-                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
-                  Familia
-                </span>
-                <p className="text-sm font-medium">{familia}</p>
-              </div>
-            )}
-            {genero && (
-              <div className="bg-muted rounded-md px-3 py-1.5">
-                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
-                  Género
-                </span>
-                <p className="text-sm font-medium italic">{genero}</p>
-              </div>
-            )}
-            {especie && (
-              <div className="bg-muted rounded-md px-3 py-1.5">
-                <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wide">
-                  Especie
-                </span>
-                <p className="text-sm font-medium italic">{especie}</p>
-              </div>
-            )}
-          </div>
+          <p className="mt-0.5 text-xs text-gray-400">
+            {[orden, familia, genero].filter(Boolean).join(" · ")}
+          </p>
         )}
       </div>
 
@@ -113,7 +86,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
 
       {/* Lista de colecciones */}
       {colecciones.length > 0 ? (
-        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-8 flex flex-col gap-1.5">
           {colecciones.map((coleccion: ColeccionCompleta) => {
             const coleccionUrl = `${baseUrl}/${coleccion.id_coleccion}`;
             const fecha = coleccion.fecha_coleccion
@@ -121,7 +94,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                   const d = new Date(coleccion.fecha_coleccion);
                   const day = String(d.getDate()).padStart(2, "0");
                   const month = d.toLocaleDateString("es-ES", {month: "long"});
-                  return `${day} ${month.charAt(0).toUpperCase() + month.slice(1)} de ${d.getFullYear()}`;
+                  return `${day} ${month} ${d.getFullYear()}`;
                 })()
               : null;
 
@@ -139,53 +112,87 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                 ? `${coleccion.latitud}, ${coleccion.longitud}`
                 : null;
 
+            const colectorLabel =
+              coleccion.colectores ||
+              [coleccion.personal_nombre, coleccion.personal_siglas && `(${coleccion.personal_siglas})`]
+                .filter(Boolean)
+                .join(" ") ||
+              null;
+
+            const metaParts = [
+              coleccion.estadio,
+              coleccion.numero_individuos != null
+                ? `${String(coleccion.numero_individuos)} indiv.`
+                : null,
+              coleccion.estado,
+            ].filter(Boolean) as string[];
+
             return (
-              <Link key={coleccion.id_coleccion} className="block h-full" href={coleccionUrl}>
-                <Card className="hover:bg-muted/30 h-full cursor-pointer border transition-colors">
-                  <CardContent className="flex flex-col gap-1 px-3 py-3">
-                    {/* Identificador — más prominente */}
-                    {catalogoLabel && (
-                      <p className="text-[13px] font-bold leading-tight">{catalogoLabel}</p>
-                    )}
-
-                    {/* Número de campo */}
-                    {coleccion.sc && (
-                      <p className="text-[11px] leading-tight text-gray-500">
-                        <span className="font-medium">N° Campo:</span> {coleccion.sc}
-                      </p>
-                    )}
-
-                    {/* Nombre científico */}
-                    {nombreCientifico && (
-                      <p className="text-[11px] italic leading-tight" style={{color: "#f07304"}}>
-                        {nombreCientifico}
-                      </p>
-                    )}
-
-                    {/* Taxonomía — muy pequeño, separado visualmente */}
-                    {(orden || familia) && (
-                      <p className="text-[10px] tracking-wide text-gray-400 uppercase">
-                        {[orden, familia].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-
-                    {/* Localidad */}
-                    {localidad && (
-                      <p className="text-[11px] leading-snug text-gray-600">{localidad}</p>
-                    )}
-
-                    {/* Coordenadas + altitud */}
-                    {(coordenadas || coleccion.altitud != null) && (
-                      <p className="text-[10px] text-gray-400 font-mono">
-                        {coordenadas}
-                        {coordenadas && coleccion.altitud != null && " | "}
-                        {coleccion.altitud != null && `${coleccion.altitud} msnm`}
-                      </p>
-                    )}
-
-                    {/* Fecha — al final, destacada */}
+              <Link key={coleccion.id_coleccion} className="block w-full no-underline" href={coleccionUrl}>
+                <Card className="hover:bg-muted/30 w-full cursor-pointer gap-0 border py-0 transition-colors">
+                  <CardContent className="flex w-full flex-col gap-0.5 px-3 py-2">
+                    {/* Fila 0: fecha arriba */}
                     {fecha && (
-                      <p className="text-[10px] font-semibold text-gray-500 mt-auto pt-1">{fecha}</p>
+                      <p className="text-[11px] font-semibold whitespace-nowrap text-gray-600">
+                        {fecha}
+                      </p>
+                    )}
+
+                    {/* Fila 1: catálogo + N° Campo + GUI · chevron */}
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      {catalogoLabel && (
+                        <p className="text-[13px] font-bold leading-tight">{catalogoLabel}</p>
+                      )}
+                      {coleccion.sc && (
+                        <p className="text-[11px] leading-tight text-gray-500">
+                          N° Campo: <span className="font-medium text-gray-700">{coleccion.sc}</span>
+                        </p>
+                      )}
+                      {coleccion.gui && (
+                        <p className="text-[11px] leading-tight text-gray-500">
+                          GUI:{" "}
+                          <span className="font-mono font-medium text-gray-700">
+                            {coleccion.gui}
+                          </span>
+                        </p>
+                      )}
+                      <span className="ml-auto text-gray-400">›</span>
+                    </div>
+
+                    {/* Fila 2: localidad · coordenadas | altitud */}
+                    {(localidad || coordenadas || coleccion.altitud != null) && (
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px] leading-snug text-gray-700">
+                        {localidad && <span>{localidad}</span>}
+                        {(coordenadas || coleccion.altitud != null) && (
+                          <span className="font-mono text-[10px] text-gray-400">
+                            {coordenadas}
+                            {coordenadas && coleccion.altitud != null && (
+                              <span
+                                className="mx-1.5 font-semibold"
+                                style={{color: "#f07304"}}
+                              >
+                                |
+                              </span>
+                            )}
+                            {coleccion.altitud != null && `${coleccion.altitud} msnm`}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Fila 3: colectores · estadio · n. indiv · estado */}
+                    {(colectorLabel || metaParts.length > 0) && (
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[11px] text-gray-500">
+                        {colectorLabel && (
+                          <span>
+                            <span className="text-gray-400">Colector:</span>{" "}
+                            <span className="text-gray-700">{colectorLabel}</span>
+                          </span>
+                        )}
+                        {metaParts.length > 0 && (
+                          <span className="text-gray-500">{metaParts.join(" · ")}</span>
+                        )}
+                      </div>
                     )}
                   </CardContent>
                 </Card>

@@ -193,9 +193,9 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
             </Button>
           </div>
 
-          <div className="mt-2 max-h-[75vh] min-h-0 w-full flex-1 overflow-y-auto border-t px-6">
+          <div className="mt-2 max-h-[75vh] min-h-0 w-full flex-1 overflow-y-auto border-t">
             <Accordion
-              className="w-full [&>[data-slot=accordion-item]]:border-b"
+              className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:px-6"
               defaultValue={["tipoMuestra"]}
               type="multiple"
             >
@@ -278,12 +278,25 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
                   className="block min-w-0 flex-1 no-underline lg:max-w-xs"
                   href={`/moleculoteca/${String(t.taxon_id)}`}
                 >
-                  <p className="group-hover:text-primary truncate text-sm font-semibold italic text-gray-900">
-                    {t.nombre_cientifico}
-                  </p>
-                  <p className="truncate text-[11px] text-gray-500">
-                    {[t.nombre_comun, t.orden, t.familia].filter(Boolean).join(" · ") || "—"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="group-hover:text-primary truncate text-sm font-semibold italic text-gray-900">
+                      {t.nombre_cientifico}
+                    </p>
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+                      <span className="font-mono text-[11px] font-semibold text-gray-800">
+                        {t.total_registros}
+                      </span>
+                      {t.total_registros === 1 ? "registro" : "registros"}
+                    </span>
+                  </div>
+                  {t.nombre_comun && (
+                    <p className="truncate text-[11px] text-gray-600">{t.nombre_comun}</p>
+                  )}
+                  {(t.orden || t.familia || t.genero) && (
+                    <p className="mt-0.5 truncate text-[10px] text-gray-400">
+                      {[t.orden, t.familia, t.genero].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                 </Link>
 
                 <Link
@@ -298,33 +311,43 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
                       return (
                         <div
                           key={field.key}
-                          className={`flex flex-col items-center rounded px-1 py-1 text-[10px] leading-tight ${
+                          className={`flex min-w-0 flex-col items-center justify-center rounded px-1 py-1 text-[10px] leading-tight ${
                             active ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-400"
                           }`}
                           title={field.label}
                         >
-                          <span className="truncate text-[9px] uppercase">{field.label}</span>
-                          <span className="font-mono text-xs font-bold">{value}</span>
+                          <span className="w-full text-center text-[9px] leading-tight break-words whitespace-normal uppercase">
+                            {field.label}
+                          </span>
+                          <span className="mt-0.5 font-mono text-xs font-bold">{value}</span>
                         </div>
                       );
                     })}
                   </div>
                 </Link>
 
-                <div className="flex shrink-0 items-center gap-3 text-[11px] text-gray-500">
-                  <span className="whitespace-nowrap">
-                    Total: <span className="font-semibold">{t.total_registros}</span>
-                  </span>
+                <div className="flex shrink-0 flex-col items-stretch gap-1 text-[11px] text-gray-500">
                   {t.nombre_cientifico && (
-                    <a
-                      className="inline-flex items-center gap-1 rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700 no-underline hover:bg-orange-100"
-                      href={`https://www.morphosource.org/catalog/media?q=${encodeURIComponent(t.nombre_cientifico)}`}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      MorphoSource
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                    <>
+                      <a
+                        className="inline-flex items-center justify-between gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                        href={`https://www.morphosource.org/catalog/media?q=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        MorphoSource
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                      <a
+                        className="inline-flex items-center justify-between gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                        href={`https://www.ncbi.nlm.nih.gov/search/all/?term=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        GenBank
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </>
                   )}
                 </div>
               </div>

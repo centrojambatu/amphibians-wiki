@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Image as ImageIcon, RotateCcw, Search, X, Check} from "lucide-react";
+import {Image as ImageIcon, RotateCcw, Search, X, Check, ExternalLink} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
@@ -719,49 +719,80 @@ export default function FototecaPage() {
                 >
                   {especies.map((especie) => {
                     const href = `/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
+                    const queryParam = (especie.nombre_cientifico || "")
+                      .split(/\s+/)
+                      .map(encodeURIComponent)
+                      .join("+");
+                    const googleImagesUrl = `https://www.google.com/search?tbm=isch&q=${queryParam}`;
+                    const inaturalistUrl = `https://www.inaturalist.org/taxa/search?q=${queryParam}`;
 
                     return (
-                      <Link
+                      <div
                         key={especie.id}
-                        className="group flex flex-col overflow-hidden rounded-md border bg-white text-center no-underline transition-shadow hover:shadow-md"
-                        href={href}
+                        className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
                         style={{borderColor: "#dddddd"}}
                       >
-                        <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
-                          {especie.fotografia_url ? (
-                            <img
-                              alt={especie.nombre_cientifico}
-                              className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
-                              loading="lazy"
-                              src={especie.fotografia_url}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-gray-300">
-                              <ImageIcon className="h-10 w-10" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-1 flex-col items-center justify-center gap-0.5 px-2 py-3">
-                          <span
-                            className="text-sm font-semibold italic"
-                            style={{color: "#666666"}}
+                        <Link
+                          className="flex flex-col no-underline"
+                          href={href}
+                        >
+                          <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
+                            {especie.fotografia_url ? (
+                              <img
+                                alt={especie.nombre_cientifico}
+                                className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
+                                loading="lazy"
+                                src={especie.fotografia_url}
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-gray-300">
+                                <ImageIcon className="h-10 w-10" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-1 flex-col items-center justify-center gap-0.5 px-2 py-3">
+                            <span
+                              className="text-sm font-semibold italic"
+                              style={{color: "#666666"}}
+                            >
+                              {especie.nombre_cientifico}
+                            </span>
+                            {especie.nombre_comun && (
+                              <span className="text-xs" style={{color: "#888888"}}>
+                                {especie.nombre_comun}
+                              </span>
+                            )}
+                            {(especie.orden || especie.familia || especie.genero) && (
+                              <span className="mt-1 text-[10px] text-gray-400">
+                                {[especie.orden, especie.familia, especie.genero]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+                        <div className="flex border-t border-gray-100">
+                          <a
+                            className="flex flex-1 items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                            href={googleImagesUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
                           >
-                            {especie.nombre_cientifico}
-                          </span>
-                          {especie.nombre_comun && (
-                            <span className="text-xs" style={{color: "#888888"}}>
-                              {especie.nombre_comun}
-                            </span>
-                          )}
-                          {(especie.orden || especie.familia || especie.genero) && (
-                            <span className="mt-1 text-[10px] text-gray-400">
-                              {[especie.orden, especie.familia, especie.genero]
-                                .filter(Boolean)
-                                .join(" · ")}
-                            </span>
-                          )}
+                            Google Images
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          <div className="w-px bg-gray-100" />
+                          <a
+                            className="flex flex-1 items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                            href={inaturalistUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            iNaturalist
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

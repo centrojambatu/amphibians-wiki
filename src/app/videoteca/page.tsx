@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Video as VideoIcon, RotateCcw, Search, X, Check} from "lucide-react";
+import {Video as VideoIcon, RotateCcw, Search, X, Check, ExternalLink, Youtube} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
@@ -650,6 +650,11 @@ export default function VideotecaPage() {
                 >
                   {especies.map((especie) => {
                     const href = `/sapopedia/species/${especie.slug}/videos?from=videoteca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
+                    const queryParam = (especie.nombre_cientifico || "")
+                      .split(/\s+/)
+                      .map(encodeURIComponent)
+                      .join("+");
+                    const youtubeUrl = `https://www.youtube.com/results?search_query=${queryParam}`;
 
                     return (
                       <div
@@ -692,6 +697,16 @@ export default function VideotecaPage() {
                             </span>
                           )}
                         </Link>
+                        <a
+                          className="flex items-center justify-center gap-1 border-t border-gray-100 px-2 py-2 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                          href={youtubeUrl}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          <Youtube className="h-3.5 w-3.5" />
+                          YouTube
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
                       </div>
                     );
                   })}
