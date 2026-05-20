@@ -98,6 +98,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     {data: lineage, error: errorLineage},
     colecciones,
     {data: nombresComunes, error: errorNombresComunes},
+    {count: countColeccionesExternas},
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
@@ -126,6 +127,11 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("nombre_comun_espanol, nombre_comun_ingles, nombre_comun_aleman, nombre_comun_frances, nombre_comun_portugues, nombre_comun_chino, nombre_comun_italiano, nombre_comun_hindu, nombre_comun_arabe, nombre_comun_ruso, nombre_comun_japones, nombre_comun_holandes")
       .eq("id_taxon", taxonId)
       .single(),
+    supabaseClient
+      .from("coleccion_externa")
+      .select("id", {count: "exact", head: true})
+      .eq("taxon_id", taxonId)
+      .eq("publicar", true),
   ]);
 
   // Manejar errores
@@ -451,6 +457,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     distributions: Array.isArray(distributions) ? distributions : [],
     altitudinalRange: altitudinalRange,
     colecciones: Array.isArray(colecciones) ? colecciones : [],
+    totalColeccionesExternas: countColeccionesExternas ?? 0,
     nombresComunes: nombresComunes ?? null,
   };
 

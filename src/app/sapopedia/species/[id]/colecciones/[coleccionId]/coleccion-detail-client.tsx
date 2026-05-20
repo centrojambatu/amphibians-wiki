@@ -36,6 +36,10 @@ interface ColeccionDetailClientProps {
   fotografias: FotografiaColeccion[];
   especieUrl: string;
   coleccionesUrl: string;
+  nombreCientifico?: string | null;
+  orden?: string | null;
+  familia?: string | null;
+  genero?: string | null;
 }
 
 const formatDate = (date: string | null | undefined): string => {
@@ -132,6 +136,10 @@ export default function ColeccionDetailClient({
   fotografias,
   especieUrl,
   coleccionesUrl,
+  nombreCientifico,
+  orden,
+  familia,
+  genero,
 }: ColeccionDetailClientProps) {
   const c = coleccion;
 
@@ -139,7 +147,8 @@ export default function ColeccionDetailClient({
     const acronimo = c.catalogo_museo?.includes(" - ")
       ? c.catalogo_museo.split(" - ").pop()
       : c.catalogo_museo;
-    return [acronimo, c.num_museo].filter(Boolean).join(" ") || null;
+    const numero = c.num_museo || c.sc || null;
+    return [acronimo, numero].filter(Boolean).join(" ") || null;
   })();
 
   const hasCoords = c.latitud != null && c.longitud != null;
@@ -195,13 +204,20 @@ export default function ColeccionDetailClient({
 
       {/* ═══ HEADER ═══ */}
       <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
           <div>
             {catalogoLabel && (
               <h1 className="text-2xl font-bold tracking-tight">{catalogoLabel}</h1>
             )}
-            {c.taxon_nombre && (
-              <p className="text-sm italic" style={{color: "#f07304"}}>{c.taxon_nombre}</p>
+            {(nombreCientifico ?? c.taxon_nombre) && (
+              <p className="text-base italic" style={{color: "#f07304"}}>
+                {nombreCientifico ?? c.taxon_nombre}
+              </p>
+            )}
+            {(orden || familia || genero) && (
+              <p className="mt-0.5 text-xs text-gray-400">
+                {[orden, familia, genero].filter(Boolean).join(" · ")}
+              </p>
             )}
           </div>
           <div className="flex flex-wrap gap-2">

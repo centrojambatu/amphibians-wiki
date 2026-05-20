@@ -94,6 +94,14 @@ export default async function ColeccionDetailPage({params}: PageProps) {
   const especieUrl = `/sapopedia/species/${encodeURIComponent(id)}`;
   const coleccionesUrl = `${especieUrl}/colecciones`;
 
+  // Extraer taxonomía del lineage
+  const lineage: any[] = (fichaEspecie as any)?.lineage ?? [];
+  const orden = lineage.find((l: any) => l.rank?.rank === "Orden")?.taxon ?? null;
+  const familia = lineage.find((l: any) => l.rank?.rank === "Familia")?.taxon ?? null;
+  const genero = lineage.find((l: any) => l.rank?.rank === "Género")?.taxon ?? null;
+  const especie = lineage.find((l: any) => l.rank?.rank === "especie")?.taxon ?? null;
+  const nombreCientifico = genero && especie ? `${String(genero)} ${String(especie)}` : null;
+
   return (
     <ColeccionDetailClient
       cantos={cantos}
@@ -102,8 +110,12 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       coleccionesUrl={coleccionesUrl}
       cuerposAgua={cuerposAgua}
       especieUrl={especieUrl}
+      familia={familia}
+      genero={genero}
       identificaciones={identificaciones}
       fotografias={fotografias}
+      nombreCientifico={nombreCientifico}
+      orden={orden}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
       tejidos={tejidos}

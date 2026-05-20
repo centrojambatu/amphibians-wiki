@@ -1,14 +1,14 @@
-import type {ColeccionCompleta} from "../get-colecciones-especie";
-
 import {notFound} from "next/navigation";
 import Link from "next/link";
+import {ExternalLink} from "lucide-react";
 
 import {Card, CardContent} from "@/components/ui/card";
 import Pagination from "@/components/pagination";
 
 import getFichaEspecie from "../get-ficha-especie";
 
-import getColeccionesPaginadas from "./get-colecciones-paginadas";
+import getColeccionesPaginadas, {type ColeccionItem} from "./get-colecciones-paginadas";
+import ExternalGbifWrapper from "./external-gbif-wrapper";
 
 interface PageProps {
   params: Promise<{
@@ -87,7 +87,8 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
       {/* Lista de colecciones */}
       {colecciones.length > 0 ? (
         <div className="mb-8 flex flex-col gap-1.5">
-          {colecciones.map((coleccion: ColeccionCompleta) => {
+          {colecciones.map((coleccion: ColeccionItem) => {
+            const isExterna = coleccion.fuente === "coleccion_externa";
             const coleccionUrl = `${baseUrl}/${coleccion.id_coleccion}`;
             const fecha = coleccion.fecha_coleccion
               ? (() => {
@@ -101,7 +102,8 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
             const acronimo = coleccion.catalogo_museo?.includes(" - ")
               ? coleccion.catalogo_museo.split(" - ").pop()
               : coleccion.catalogo_museo;
-            const catalogoLabel = [acronimo, coleccion.num_museo].filter(Boolean).join(" ");
+            const numeroDisplay = coleccion.num_museo || coleccion.sc || null;
+            const catalogoLabel = [acronimo, numeroDisplay].filter(Boolean).join(" ");
 
             const localidad = [coleccion.detalle_localidad, coleccion.provincia]
               .filter(Boolean)
@@ -127,8 +129,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
               coleccion.estado,
             ].filter(Boolean) as string[];
 
-            return (
-              <Link key={coleccion.id_coleccion} className="block w-full no-underline" href={coleccionUrl}>
+            const cardInner = (
                 <Card className="hover:bg-muted/30 w-full cursor-pointer gap-0 border py-0 transition-colors">
                   <CardContent className="flex w-full flex-col gap-0.5 px-3 py-2">
                     {/* Fila 0: fecha arriba */}
@@ -156,8 +157,27 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                           </span>
                         </p>
                       )}
-                      <span className="ml-auto text-gray-400">›</span>
+                      <span className="ml-auto text-gray-400">
+                        {isExterna ? <ExternalLink className="h-3.5 w-3.5" /> : "›"}
+                      </span>
                     </div>
+
+                    {/* Fila 1b: cita_corta enlace a biblioteca */}
+                    {coleccion.cita_corta && (
+                      <p className="text-[11px] italic text-gray-500">
+                        {coleccion.publicacion_id != null ? (
+                          <a
+                            className="hover:underline"
+                            href={`/bibliography/${String(coleccion.publicacion_id)}`}
+                            style={{color: "#f07304"}}
+                          >
+                            {coleccion.cita_corta}
+                          </a>
+                        ) : (
+                          coleccion.cita_corta
+                        )}
+                      </p>
+                    )}
 
                     {/* Fila 2: localidad · coordenadas | altitud */}
                     {(localidad || coordenadas || coleccion.altitud != null) && (
@@ -196,6 +216,23 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                     )}
                   </CardContent>
                 </Card>
+            );
+
+            return isExterna ? (
+              <ExternalGbifWrapper
+                key={`ext-${coleccion.id_coleccion}`}
+                catalogoMuseo={coleccion.catalogo_museo}
+                numeroMuseo={coleccion.num_museo}
+              >
+                {cardInner}
+              </ExternalGbifWrapper>
+            ) : (
+              <Link
+                key={`int-${coleccion.id_coleccion}`}
+                className="block w-full no-underline"
+                href={coleccionUrl}
+              >
+                {cardInner}
               </Link>
             );
           })}

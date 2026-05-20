@@ -2170,7 +2170,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             className="text-center text-xs font-semibold"
                             style={{color: "#000000"}}
                           >
-                            {fichaEspecie.colecciones?.length || 0}
+                            {(fichaEspecie.colecciones?.length || 0) + (fichaEspecie.totalColeccionesExternas || 0)}
                           </span>
                         </div>
                       </Link>
