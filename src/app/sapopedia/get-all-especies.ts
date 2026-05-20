@@ -98,7 +98,7 @@ export default async function getAllEspecies(
   let query = (supabaseClient as any)
     .from("vw_ficha_especie_completa")
     .select("*")
-    // .eq("publicar", true) // ⚠️ Filtro comentado temporalmente para ver todas las especies
+    .eq("publicar", true)
     .order("nombre_cientifico", { ascending: true });
 
   // Filtrar por familia si se proporciona

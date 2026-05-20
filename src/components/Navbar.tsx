@@ -41,6 +41,7 @@ const navLinks: NavLink[] = [
   {href: "/sapoteca", label: "Biblioteca"},
   {href: "/fototeca", label: "Fototeca"},
   {href: "/audioteca", label: "Audioteca"},
+  {href: "/videoteca", label: "Videoteca"},
   {href: "/mapoteca", label: "Mapoteca"},
   {href: "/colecciones", label: "Colecciones"},
   {href: "/moleculoteca", label: "Moleculoteca"},

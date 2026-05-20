@@ -4,6 +4,7 @@ import {ExternalLink, RotateCcw} from "lucide-react";
 import Link from "next/link";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useEffect, useMemo, useState} from "react";
+import {useQuery} from "@tanstack/react-query";
 
 import {
   Accordion,
@@ -16,12 +17,84 @@ import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 import {MUESTRA_FIELDS, type MuestraField, type MuestrasTaxon} from "./get-moleculoteca-taxa";
 
+function AccordionButtonFilter({
+  label,
+  apiPath,
+  selected,
+  onChange,
+}: {
+  label: string;
+  apiPath: string;
+  selected: string[];
+  onChange: (val: string[]) => void;
+}) {
+  const {data: options = []} = useQuery<string[]>({
+    queryKey: [apiPath, "all"],
+    queryFn: async () => {
+      const res = await fetch(`${apiPath}?q=`);
+
+      if (!res.ok) return [];
+
+      return res.json();
+    },
+  });
+
+  const toggle = (opt: string) => {
+    if (selected.includes(opt)) onChange(selected.filter((s) => s !== opt));
+    else onChange([...selected, opt]);
+  };
+
+  return (
+    <AccordionItem value={label}>
+      <AccordionTrigger className="!items-start">
+        <div className="flex flex-col items-start">
+          <span className="font-semibold">{label}</span>
+          {selected.length > 0 && (
+            <span className="mt-1 text-xs font-normal text-gray-500">
+              {selected.join(", ")}
+            </span>
+          )}
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        {options.length === 0 ? (
+          <p className="py-2 text-xs text-gray-500">No hay opciones disponibles</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {options.map((opt) => {
+              const isSelected = selected.includes(opt);
+
+              return (
+                <Button
+                  key={opt}
+                  className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
+                  size="sm"
+                  style={{
+                    borderColor: isSelected ? undefined : "#e8e8e8",
+                    color: isSelected ? undefined : "#2d2d2d",
+                  }}
+                  variant={isSelected ? "default" : "outline"}
+                  onClick={() => toggle(opt)}
+                >
+                  {opt}
+                </Button>
+              );
+            })}
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
 export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [busqueda, setBusqueda] = useState(() => searchParams.get("busqueda") || "");
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [activos, setActivos] = useState<Set<MuestraField>>(new Set());
+  const [familiasFilter, setFamiliasFilter] = useState<string[]>([]);
+  const [generosFilter, setGenerosFilter] = useState<string[]>([]);
 
   useEffect(() => {
     if (isInitialMount) {
@@ -42,18 +115,28 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
   }, [busqueda, router, isInitialMount]);
 
   const filtrados = useMemo(() => {
-    if (activos.size === 0) return taxa;
+    return taxa.filter((t) => {
+      if (activos.size > 0) {
+        const allMuestras = Array.from(activos).every((k) => {
+          const field = MUESTRA_FIELDS.find((f) => f.key === k);
 
-    return taxa.filter((t) =>
-      Array.from(activos).every((k) => {
-        const field = MUESTRA_FIELDS.find((f) => f.key === k);
+          if (!field) return false;
 
-        if (!field) return false;
+          return (t as any)[field.count] > 0;
+        });
 
-        return (t as any)[field.count] > 0;
-      }),
-    );
-  }, [taxa, activos]);
+        if (!allMuestras) return false;
+      }
+      if (familiasFilter.length > 0 && !(t.familia && familiasFilter.includes(t.familia))) {
+        return false;
+      }
+      if (generosFilter.length > 0 && !(t.genero && generosFilter.includes(t.genero))) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [taxa, activos, familiasFilter, generosFilter]);
 
   const toggle = (key: MuestraField) => {
     setActivos((prev) => {
@@ -69,9 +152,15 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
   const resetAll = () => {
     setActivos(new Set());
     setBusqueda("");
+    setFamiliasFilter([]);
+    setGenerosFilter([]);
   };
 
-  const hasFilters = activos.size > 0 || busqueda.trim().length > 0;
+  const hasFilters =
+    activos.size > 0 ||
+    busqueda.trim().length > 0 ||
+    familiasFilter.length > 0 ||
+    generosFilter.length > 0;
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
@@ -110,6 +199,18 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
               defaultValue={["tipoMuestra"]}
               type="multiple"
             >
+              <AccordionButtonFilter
+                apiPath="/api/moleculoteca/familias"
+                label="Familia"
+                selected={familiasFilter}
+                onChange={setFamiliasFilter}
+              />
+              <AccordionButtonFilter
+                apiPath="/api/moleculoteca/generos"
+                label="Género"
+                selected={generosFilter}
+                onChange={setGenerosFilter}
+              />
               <AccordionItem value="tipoMuestra">
                 <AccordionTrigger className="!items-start">
                   <div className="flex flex-col items-start">

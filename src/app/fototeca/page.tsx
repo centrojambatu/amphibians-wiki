@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react";
 import Link from "next/link";
-import {useQuery} from "@tanstack/react-query";
+import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {Image as ImageIcon, RotateCcw, Search, X, Check} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -457,7 +457,11 @@ export default function FototecaPage() {
     setAnioHasta("");
   };
 
-  const {data: especies = [], isLoading: loadingEspecies} = useQuery<EspecieItem[]>({
+  const {
+    data: especies = [],
+    isLoading: loadingEspecies,
+    isFetching: fetchingEspecies,
+  } = useQuery<EspecieItem[]>({
     queryKey: [
       "fototeca",
       "especies",
@@ -489,6 +493,7 @@ export default function FototecaPage() {
 
       return response.json();
     },
+    placeholderData: keepPreviousData,
   });
 
   const {data: stats} = useQuery<EstadisticasFototeca>({
@@ -690,18 +695,28 @@ export default function FototecaPage() {
             </aside>
 
             <div className="min-w-0 flex-1">
-              <div className="text-muted-foreground mb-3 text-xs">
-                {loadingEspecies
-                  ? "Cargando..."
-                  : `${String(especies.length)} ${especies.length === 1 ? "especie" : "especies"}`}
+              <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
+                <span>
+                  {`${String(especies.length)} ${especies.length === 1 ? "especie" : "especies"}`}
+                </span>
+                {fetchingEspecies && (
+                  <span
+                    aria-label="Actualizando"
+                    className="border-muted-foreground/30 border-t-muted-foreground inline-block h-3 w-3 animate-spin rounded-full border-2"
+                  />
+                )}
               </div>
 
-              {loadingEspecies ? (
+              {loadingEspecies && especies.length === 0 ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
                   <p className="text-gray-600">Cargando especies...</p>
                 </div>
               ) : especies.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div
+                  className={`grid grid-cols-1 gap-3 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 ${
+                    fetchingEspecies ? "opacity-60" : "opacity-100"
+                  }`}
+                >
                   {especies.map((especie) => {
                     const href = `/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
 
