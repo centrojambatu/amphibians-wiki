@@ -1,10 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import {ChevronDown} from "lucide-react";
+import {ColumnsPhotoAlbum, type Photo} from "react-photo-album";
+import "react-photo-album/columns.css";
+import Lightbox, {type Slide} from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
+import "yet-another-react-lightbox/plugins/counter.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
 
 const ColeccionMiniMap = dynamic(() => import("@/components/ColeccionMiniMap"), {ssr: false});
+const AudioSpectrogramOscillogram = dynamic(
+  () => import("@/components/AudioSpectrogramOscillogram"),
+  {ssr: false},
+);
 import {
   Table,
   TableBody,
@@ -22,6 +39,7 @@ import type {
   Identificacion,
   CuerpoAgua,
   FotografiaColeccion,
+  VideoColeccion,
 } from "./get-coleccion-relacionados";
 
 interface ColeccionDetailClientProps {
@@ -34,9 +52,11 @@ interface ColeccionDetailClientProps {
   identificaciones: Identificacion[];
   cuerposAgua: CuerpoAgua[];
   fotografias: FotografiaColeccion[];
+  videos: VideoColeccion[];
   especieUrl: string;
   coleccionesUrl: string;
   nombreCientifico?: string | null;
+  nombreComun?: string | null;
   orden?: string | null;
   familia?: string | null;
   genero?: string | null;
@@ -70,6 +90,46 @@ function Section({title, children, count}: {title: string; children: React.React
       </h2>
       {children}
     </section>
+  );
+}
+
+/** Reproductor de video con poster + grayscale → color al reproducir (estilo videoteca) */
+function VideoPreview({
+  src,
+  poster,
+  onPlay,
+}: {
+  src: string;
+  poster?: string | null;
+  onPlay?: (e: React.SyntheticEvent<HTMLVideoElement>) => void;
+}) {
+  const [paused, setPaused] = useState(true);
+  return (
+    <video
+      className={`h-full w-full object-cover transition-[filter] duration-700 ease-in-out ${
+        paused ? "grayscale" : ""
+      }`}
+      controls
+      poster={poster ?? undefined}
+      preload="none"
+      src={src}
+      onPause={() => setPaused(true)}
+      onPlay={(e) => {
+        setPaused(false);
+        onPlay?.(e);
+      }}
+    />
+  );
+}
+
+/** Campo inline para grids tipo audioteca: omite valores vacíos */
+function FieldInline({label, value}: {label: string; value: React.ReactNode}) {
+  if (value == null || value === "") return null;
+  return (
+    <div className="flex flex-col leading-tight">
+      <span className="text-[9px] font-medium uppercase tracking-wide text-gray-500">{label}</span>
+      <span className="truncate text-xs text-gray-800">{value}</span>
+    </div>
   );
 }
 
@@ -134,9 +194,11 @@ export default function ColeccionDetailClient({
   identificaciones,
   cuerposAgua,
   fotografias,
+  videos,
   especieUrl,
   coleccionesUrl,
   nombreCientifico,
+  nombreComun,
   orden,
   familia,
   genero,
@@ -155,6 +217,54 @@ export default function ColeccionDetailClient({
 
   // Tab activa para datos relacionados
   const [activeTab, setActiveTab] = useState("fotografias");
+  // Canto abierto (mostrando oscilograma + espectrograma)
+  const [openCantoId, setOpenCantoId] = useState<number | null>(null);
+
+  // Lightbox para fotografías (estilo fototeca)
+  const fotosConEnlace = useMemo(
+    () => fotografias.filter((f) => f.enlace),
+    [fotografias],
+  );
+  const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
+  const [fotoDims, setFotoDims] = useState<Record<string, {w: number; h: number}>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fotosConEnlace.forEach((f) => {
+      if (!f.enlace || fotoDims[f.enlace]) return;
+      const img = new Image();
+      img.onload = () => {
+        if (cancelled) return;
+        setFotoDims((prev) => ({
+          ...prev,
+          [f.enlace as string]: {w: img.naturalWidth, h: img.naturalHeight},
+        }));
+      };
+      img.src = f.enlace;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fotosConEnlace, fotoDims]);
+
+  const fotoSlides: Slide[] = useMemo(
+    () =>
+      fotosConEnlace.map((f) => {
+        const lines: string[] = [];
+        if (f.tipo) lines.push(`Tipo: ${f.tipo}`);
+        if (f.autor) lines.push(`Autor: ${f.autor}`);
+        if (f.localidad) lines.push(`Localidad: ${f.localidad}`);
+        if (f.fecha) lines.push(`Fecha: ${formatDate(f.fecha)}`);
+        if (f.descripcion) lines.push(f.descripcion);
+        return {
+          src: f.enlace || "",
+          alt: f.nombre || "Fotografía",
+          title: f.nombre || undefined,
+          description: lines.join("\n"),
+        };
+      }),
+    [fotosConEnlace],
+  );
 
   // GBIF lookup
   const acronimo = c.catalogo_museo?.includes(" - ")
@@ -224,9 +334,6 @@ export default function ColeccionDetailClient({
             {c.fecha_coleccion && (
               <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium">{formatDate(c.fecha_coleccion)}</span>
             )}
-            {c.estatus_tipo && (
-              <span className="rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-700">{c.estatus_tipo}</span>
-            )}
             {gbifUrl && (
               <a
                 href={gbifUrl}
@@ -257,189 +364,213 @@ export default function ColeccionDetailClient({
 
       {/* ═══ MAPA — full width ═══ */}
       {hasCoords && (
-        <div className="overflow-hidden rounded-lg border border-gray-200" style={{height: 350}}>
+        <div
+          className="relative z-0 overflow-hidden rounded-lg border border-gray-200"
+          style={{height: 350}}
+        >
           <ColeccionMiniMap
+            elevacion={c.altitud}
             latitud={c.latitud}
+            localidad={c.detalle_localidad}
             longitud={c.longitud}
-            localidad={c.campobase_localidad || c.detalle_localidad}
-            provincia={c.campobase_provincia || c.provincia}
+            nombreCientifico={nombreCientifico ?? c.taxon_nombre}
+            nombreComun={nombreComun}
+            provincia={c.provincia}
           />
         </div>
       )}
 
-      {/* ═══ LOCALIDAD — full width, sin title ═══ */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <div className="space-y-1">
-          <p className="text-sm text-gray-900">
-            {v(c.detalle_localidad || c.campobase_localidad)}{c.provincia || c.campobase_provincia ? `, ${c.provincia || c.campobase_provincia}` : ""}
-          </p>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
-            {c.latitud != null && <span>{c.latitud}</span>}
-            {c.longitud != null && <span>{c.longitud}</span>}
-            {c.altitud != null && <span>{c.altitud} msnm</span>}
+      {/* ═══ INFORMACIÓN — card único ═══ */}
+      {(() => {
+        type Item = {label: string; value: any; unit?: string; italic?: boolean};
+        const renderItem = (it: Item, i: number) => {
+          const val = v(it.value);
+          const isEmpty = val === "—";
+
+          return (
+            <div key={`${it.label}-${String(i)}`} className="min-w-0">
+              <span className="block text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                {it.label}
+              </span>
+              <span
+                className={`block break-words text-xs ${
+                  isEmpty ? "text-gray-300" : "text-gray-900"
+                } ${it.italic ? "italic" : ""}`}
+              >
+                {val}
+                {!isEmpty && it.unit ? ` ${it.unit}` : ""}
+              </span>
+            </div>
+          );
+        };
+
+        const SectionBlock = ({
+          title,
+          items,
+        }: {
+          title: string;
+          items: Item[];
+        }) => (
+          <div className="border-t border-gray-100 px-4 py-3 first:border-t-0">
+            <h3 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+              {title}
+            </h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 md:grid-cols-3 lg:grid-cols-4">
+              {items.map(renderItem)}
+            </div>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {c.estadio && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{c.estadio}</span>}
-            {c.sexo && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{c.sexo}</span>}
-            {c.estado && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{c.estado}</span>}
-            {c.svl != null && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">SVL: {c.svl} mm</span>}
-            {c.peso != null && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">Peso: {c.peso} g</span>}
-            {c.numero_individuos != null && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs"># Indiv: {c.numero_individuos}</span>}
-            {c.tejido_count != null && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">Tejidos: {c.tejido_count}</span>}
-            {c.extrato_piel_count != null && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">Ext. piel: {c.extrato_piel_count}</span>}
-            {c.estatus_identificacion && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{c.estatus_identificacion}</span>}
-            {c.num_colector && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs"># Col: {c.num_colector}</span>}
+        );
+
+        const muestrasFields: {key: string; label: string}[] = [
+          {key: "sangre", label: "Sangre"},
+          {key: "piel_exudado", label: "Piel exudado"},
+          {key: "piel_liofilizado", label: "Piel liofilizado"},
+          {key: "tejido_higado", label: "Tejido hígado"},
+          {key: "tejido_musculo", label: "Tejido músculo"},
+          {key: "esqueleto_transparentacion", label: "Esqueleto"},
+          {key: "esperma", label: "Esperma"},
+          {key: "heces", label: "Heces"},
+        ];
+
+        // Catálogo CJ: acrónimo + número de museo (ej. "CJ TEST-CJ-001")
+        const acronimoCJ = c.catalogo_museo?.includes(" - ")
+          ? c.catalogo_museo.split(" - ").pop()
+          : c.catalogo_museo;
+        const catalogoCJ = [acronimoCJ, c.numero_museo].filter(Boolean).join(" ") || null;
+
+        // Coordenadas: usa el campo texto si existe, sino concatena lat/lon
+        const coordenadas =
+          c.coordenadas ||
+          (c.latitud != null && c.longitud != null
+            ? `${String(c.latitud)}, ${String(c.longitud)}`
+            : null);
+
+        return (
+          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+            <SectionBlock
+              items={[
+                {label: "Catálogo CJ", value: catalogoCJ},
+                {label: "N° campo (SC)", value: c.sc},
+                {label: "Familia", value: familia},
+                {label: "Especie", value: nombreCientifico ?? c.taxon_nombre, italic: true},
+              ]}
+              title="Identificación"
+            />
+
+            <SectionBlock
+              items={[
+                {label: "Localidad", value: c.localidad},
+                {label: "Provincia", value: c.provincia},
+                {label: "Coordenadas", value: coordenadas},
+                {label: "Fuente coordenadas", value: c.fuente_coord},
+                {label: "Altitud", value: c.elevacion, unit: "msnm"},
+                {label: "Hábitat", value: c.habitat},
+              ]}
+              title="Localización"
+            />
+
+            <SectionBlock
+              items={[
+                {label: "Fecha colección", value: c.fecha_col ? formatDate(c.fecha_col) : null},
+                {label: "Hora", value: c.hora},
+                {label: "Colector(es) principal", value: c.personal_nombre},
+                {label: "Colectores adicionales", value: c.colectores},
+              ]}
+              title="Recolección"
+            />
+
+            <SectionBlock
+              items={[
+                {label: "Sexo", value: c.sexo},
+                {label: "Estadio", value: c.estadio},
+                {label: "SVL", value: c.svl, unit: "mm"},
+                {label: "Peso", value: c.peso, unit: "g"},
+                {label: "N° individuos", value: c.numero_individuos},
+                {label: "Estado", value: c.estado},
+                {label: "Estatus tipo", value: c.estatus_tipo},
+                {label: "Condición reproductiva", value: c.condicion_reproductiva},
+              ]}
+              title="Espécimen"
+            />
+
+            <SectionBlock
+              items={[
+                {label: "Fijado en", value: c.metodo_fijacion},
+                {label: "Preservado en", value: c.metodo_preservacion},
+                {label: "Identificado por", value: c.identificado_por},
+                {label: "Fecha identificación", value: c.fecha_identifica ? formatDate(c.fecha_identifica) : null},
+              ]}
+              title="Preservación e identificación"
+            />
+
+            <SectionBlock
+              items={[
+                {label: "Temperatura", value: c.temperatura, unit: "°C"},
+                {label: "Humedad", value: c.humedad, unit: "%"},
+                {label: "pH", value: c.ph},
+                {label: "Datos ambientales", value: c.datos_ambientales},
+              ]}
+              title="Condiciones ambientales"
+            />
+
+            {/* Muestras biológicas — explícito Sí/No por cada tipo */}
+            <div className="border-t border-gray-100 px-4 py-3">
+              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                Muestras biológicas
+              </h3>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 md:grid-cols-3 lg:grid-cols-4">
+                {muestrasFields.map((m) => {
+                  const active = Boolean(c[m.key]);
+
+                  return (
+                    <div key={m.key} className="flex items-center justify-between gap-2 rounded-md border border-gray-100 px-2 py-1">
+                      <span className="text-xs text-gray-700">{m.label}</span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"
+                        }`}
+                      >
+                        {active ? "Sí" : "No"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Observaciones */}
+            {c.observacion && (
+              <div className="border-t border-gray-100 px-4 py-3">
+                <h3 className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  Observaciones
+                </h3>
+                <p className="text-xs leading-relaxed text-gray-700 italic">
+                  {c.observacion}
+                </p>
+              </div>
+            )}
           </div>
-          {c.observacion && (
-            <p className="mt-2 text-xs italic text-gray-500">{c.observacion}</p>
-          )}
-        </div>
-      </div>
-
-      {/* ═══ TODOS LOS CAMPOS — tablas de dos columnas ═══ */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <TwoColTable
-          rows={[
-            ["id_coleccion", c.id_coleccion],
-            ["taxon_id", c.taxon_id],
-            ["taxon_nombre", c.taxon_nombre],
-            ["catalogo_museo", c.catalogo_museo],
-            ["numero_museo", c.numero_museo],
-            ["num_colector", c.num_colector],
-            ["sc", c.sc],
-            ["sc_acronimo", c.sc_acronimo],
-            ["sc_numero", c.sc_numero],
-            ["sc_sufijo", c.sc_sufijo],
-            ["gui", c.gui],
-            ["numero_cuadernocampo", c.numero_cuadernocampo],
-            ["responsable_ingreso", c.responsable_ingreso],
-            ["rango", c.rango],
-            ["verificado", c.verificado],
-            ["publicar", c.publicar],
-            ["gbif", c.gbif],
-          ]}
-          title="Identificación / Catálogo"
-        />
-
-        <TwoColTable
-          rows={[
-            ["estadio", c.estadio],
-            ["numero_individuos", c.numero_individuos],
-            ["sexo", c.sexo],
-            ["estado", c.estado],
-            ["svl (mm)", c.svl],
-            ["peso (g)", c.peso],
-            ["estatus_tipo", c.estatus_tipo],
-            ["condicion_reproductiva", c.condicion_reproductiva],
-            ["nombre_comun", c.nombre_comun],
-            ["idioma_nc", c.idioma_nc],
-            ["fuente_nombrecomun", c.fuente_nombrecomun],
-          ]}
-          title="Espécimen"
-        />
-
-        <TwoColTable
-          rows={[
-            ["fecha_col", c.fecha_col],
-            ["hora", c.hora],
-            ["hora_aprox", c.hora_aprox],
-            ["colectores", c.colectores],
-            ["personal_nombre", c.personal_nombre],
-            ["personal_siglas", c.personal_siglas],
-            ["personal_adicional_nombres", c.personal_adicional_nombres],
-            ["campobase_nombre", c.campobase_nombre],
-            ["campobase_localidad", c.campobase_localidad],
-          ]}
-          title="Recolección"
-        />
-
-        <TwoColTable
-          rows={[
-            ["localidad", c.localidad],
-            ["provincia", c.provincia],
-            ["latitud", c.latitud],
-            ["longitud", c.longitud],
-            ["coordenadas", c.coordenadas],
-            ["elevacion (m)", c.elevacion],
-            ["fuente_coord", c.fuente_coord],
-            ["habitat", c.habitat],
-          ]}
-          title="Localización"
-        />
-
-        <TwoColTable
-          rows={[
-            ["temperatura (°C)", c.temperatura],
-            ["humedad (%)", c.humedad],
-            ["ph", c.ph],
-            ["datos_ambientales", c.datos_ambientales],
-          ]}
-          title="Ambiente"
-        />
-
-        <TwoColTable
-          rows={[
-            ["estatus_identificacion", c.estatus_identificacion],
-            ["identificado_por", c.identificado_por],
-            ["fecha_identifica", c.fecha_identifica],
-            ["identificacion_posible", c.identificacion_posible],
-            ["identificacion_sp", c.identificacion_sp],
-            ["identificacion_cuestionable", c.identificacion_cuestionable],
-          ]}
-          title="Identificación taxonómica"
-        />
-
-        <TwoColTable
-          rows={[
-            ["metodo_fijacion", c.metodo_fijacion],
-            ["fecha_fijacion", c.fecha_fijacion],
-            ["metodo_preservacion", c.metodo_preservacion],
-            ["tejido_count", c.tejido_count],
-            ["extrato_piel_count", c.extrato_piel_count],
-          ]}
-          title="Preservación"
-        />
-
-        <TwoColTable
-          rows={[
-            ["sangre", c.sangre],
-            ["piel_exudado", c.piel_exudado],
-            ["piel_liofilizado", c.piel_liofilizado],
-            ["tejido_higado", c.tejido_higado],
-            ["tejido_musculo", c.tejido_musculo],
-            ["esqueleto_transparentacion", c.esqueleto_transparentacion],
-            ["esperma", c.esperma],
-            ["heces", c.heces],
-          ]}
-          title="Muestras biológicas"
-        />
-
-        <TwoColTable
-          rows={[
-            ["foto_insitu", c.foto_insitu],
-            ["autor_foto_is", c.autor_foto_is],
-            ["foto_exsitu", c.foto_exsitu],
-            ["autor_foto_es", c.autor_foto_es],
-            ["nota_foto", c.nota_foto],
-          ]}
-          title="Fotografía"
-        />
-
-        <TwoColTable
-          rows={[["observacion", c.observacion]]}
-          title="Observación"
-        />
-      </div>
+        );
+      })()}
 
 
       {/* ═══ TABS DE DATOS RELACIONADOS ═══ */}
       {(() => {
         const tabs: {id: string; label: string; count: number}[] = [
-          {id: "fotografias", label: "Fotografías", count: fotografias.length},
+          {id: "fotografias", label: "Fotografías", count: fotosConEnlace.length},
           {id: "cantos", label: "Cantos", count: cantos.length},
-          {id: "tejidos", label: "Tejidos", count: tejidos.length},
-          {id: "identificaciones", label: "Identificaciones", count: identificaciones.length},
+          {id: "videos", label: "Videos", count: videos.length},
         ];
+
+        const pauseOtherMedia = (e: React.SyntheticEvent<HTMLMediaElement>) => {
+          const current = e.currentTarget;
+
+          document
+            .querySelectorAll<HTMLMediaElement>("audio, video")
+            .forEach((m) => {
+              if (m !== current && !m.paused) m.pause();
+            });
+        };
 
         return (
           <div>
@@ -464,109 +595,166 @@ export default function ColeccionDetailClient({
             {/* Tab content */}
             <div className="pt-4">
 
-              {/* Fotografías */}
-              {activeTab === "fotografias" && (fotografias.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                  {fotografias.map((foto) => (
-                    <a
-                      key={foto.id_fotografia}
-                      className="group overflow-hidden rounded-lg border"
-                      href={foto.enlace || "#"}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      <div className="aspect-square overflow-hidden bg-gray-100">
-                        {foto.enlace ? (
+              {/* Fotografías — estilo fototeca (mosaico + lightbox) */}
+              {activeTab === "fotografias" && (fotosConEnlace.length > 0 ? (
+                (() => {
+                  type AlbumPhoto = Photo & {idx: number};
+                  const albumPhotos: AlbumPhoto[] = fotosConEnlace.map((f, idx) => {
+                    const d = fotoDims[f.enlace as string];
+                    return {
+                      src: f.enlace || "",
+                      width: d?.w ?? 1200,
+                      height: d?.h ?? 1200,
+                      alt: f.nombre || "Fotografía",
+                      idx,
+                    };
+                  });
+                  return (
+                    <ColumnsPhotoAlbum
+                      columns={3}
+                      photos={albumPhotos}
+                      render={{
+                        // eslint-disable-next-line @next/next/no-img-element
+                        image: (props) => (
+                          // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
                           <img
-                            alt={foto.nombre || "Fotografía"}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            src={foto.enlace}
+                            {...props}
+                            className="cursor-zoom-in rounded-md grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
                           />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">Sin imagen</div>
+                        ),
+                      }}
+                      spacing={6}
+                      onClick={({photo}) => setLightboxIndex((photo as AlbumPhoto).idx)}
+                    />
+                  );
+                })()
+              ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
+
+              {/* Cantos — estilo audioteca (card completo con oscilograma + espectrograma) */}
+              {activeTab === "cantos" && (cantos.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {cantos.map((canto) => {
+                    const isOpen = openCantoId === canto.id_canto;
+                    const coords =
+                      (canto as any).latitud != null && (canto as any).longitud != null
+                        ? `${Number((canto as any).latitud).toFixed(5)}, ${Number((canto as any).longitud).toFixed(5)}`
+                        : null;
+                    return (
+                      <div
+                        key={canto.id_canto}
+                        className="rounded-md border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
+                      >
+                        <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          {canto.nombre && (
+                            <span className="text-xs font-semibold text-gray-800">{canto.nombre}</span>
+                          )}
+                          {canto.gui_aud && (
+                            <span className="text-[11px] text-gray-500">· {canto.gui_aud}</span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-4 md:grid-cols-6">
+                          <FieldInline label="Fecha" value={canto.fecha ? formatDate(canto.fecha) : null} />
+                          <FieldInline label="Hora" value={canto.hora} />
+                          <FieldInline label="Colector" value={canto.colector || canto.autor} />
+                          <FieldInline label="Localidad" value={canto.localidad} />
+                          <FieldInline label="Coordenadas" value={coords} />
+                          <FieldInline
+                            label="Temp."
+                            value={canto.temp != null ? `${String(canto.temp)} °C` : null}
+                          />
+                          <FieldInline
+                            label="Humedad"
+                            value={canto.humedad != null ? `${String(canto.humedad)}%` : null}
+                          />
+                          <FieldInline
+                            label="Nubosidad"
+                            value={canto.nubosidad != null ? String(canto.nubosidad) : null}
+                          />
+                          <FieldInline
+                            label="Distancia micro"
+                            value={
+                              canto.distancia_micro != null
+                                ? `${String(canto.distancia_micro)} m`
+                                : null
+                            }
+                          />
+                          <FieldInline label="Equipo" value={canto.equipo} />
+                          <FieldInline label="Observación" value={canto.observacion} />
+                        </div>
+
+                        <button
+                          aria-expanded={isOpen}
+                          className="mt-2 flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                          type="button"
+                          onClick={() =>
+                            setOpenCantoId((v) => (v === canto.id_canto ? null : canto.id_canto))
+                          }
+                        >
+                          <span>{isOpen ? "Ocultar audio" : "Reproducir audio"}</span>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                          />
+                        </button>
+
+                        {isOpen && (
+                          <div className="mt-3">
+                            {canto.enlace ? (
+                              <AudioSpectrogramOscillogram src={canto.enlace} />
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                No hay enlace de audio disponible.
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <div className="p-2">
-                        {foto.nombre && <p className="line-clamp-1 text-xs font-medium text-gray-900">{foto.nombre}</p>}
-                        {foto.autor && <p className="text-[11px] text-gray-500">{foto.autor}</p>}
-                        {foto.fecha && <p className="text-[10px] text-gray-400">{formatDate(foto.fecha)}</p>}
-                      </div>
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
 
-              {/* Cantos */}
-              {activeTab === "cantos" && (cantos.length > 0 ? (
-                <div className="space-y-4">
-                  {cantos.map((canto, i) => (
-                    <div key={canto.id_canto} className="rounded-lg border p-4">
-                      <p className="mb-2 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Canto #{i + 1} · {canto.gui_aud ?? ""}</p>
-                      <div className="grid grid-cols-1 gap-x-8 gap-y-0 sm:grid-cols-2">
-                        <Field label="GUI_AUD" value={v(canto.gui_aud)} />
-                        <Field label="Autor" value={v(canto.autor)} />
-                        <Field label="Fecha" value={formatDate(canto.fecha)} />
-                        <Field label="Hora" value={v(canto.hora)} />
-                        <Field label="Equipo" value={v(canto.equipo)} />
-                        <Field label="Localidad" value={v(canto.localidad)} />
-                        <Field label="Temperatura" value={canto.temp != null ? `${canto.temp} °C` : "—"} />
-                        <Field label="Humedad" value={canto.humedad != null ? `${canto.humedad} %` : "—"} />
-                        <Field label="Nubosidad" value={canto.nubosidad != null ? `${canto.nubosidad} %` : "—"} />
-                        <Field label="Dist. micrófono" value={canto.distancia_micro != null ? `${canto.distancia_micro} cm` : "—"} />
-                        <Field label="Observación" value={v(canto.observacion)} />
+              {/* Videos — estilo videoteca */}
+              {activeTab === "videos" && (videos.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {videos.map((video) => {
+                    const posterFallback =
+                      video.thumbnail || fotosConEnlace[0]?.enlace || null;
+                    return (
+                    <div
+                      key={video.id_video}
+                      className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
+                      style={{borderColor: "#dddddd"}}
+                    >
+                      <div className="aspect-video w-full overflow-hidden bg-gray-50">
+                        {video.enlace ? (
+                          <VideoPreview
+                            poster={posterFallback}
+                            src={video.enlace}
+                            onPlay={pauseOtherMedia}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                            Sin video
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
-
-              {/* Tejidos */}
-              {activeTab === "tejidos" && (tejidos.length > 0 ? (
-                <div className="space-y-4">
-                  {tejidos.map((t, i) => (
-                    <div key={t.id_tejido} className="rounded-lg border p-4">
-                      <p className="mb-2 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Tejido #{i + 1} · {t.codtejido ?? ""}</p>
-                      <div className="grid grid-cols-1 gap-x-8 gap-y-0 sm:grid-cols-2">
-                        <Field label="Código" value={v(t.codtejido)} />
-                        <Field label="Tipo" value={v(t.catalogo_awe?.nombre)} />
-                        <Field label="Preservación" value={v(t.preservacion)} />
-                        <Field label="Fecha" value={formatDate(t.fecha)} />
-                        <Field label="Estatus" value={v(t.estatus)} />
-                        <Field label="Ubicación" value={v(t.ubicacion)} />
-                        <Field label="Piso" value={v(t.piso)} />
-                        <Field label="Rack" value={v(t.rack)} />
-                        <Field label="Caja" value={v(t.caja)} />
-                        <Field label="Coordenada" value={v(t.coordenada)} />
-                        <Field label="Observación" value={v(t.observacion)} />
+                      <div className="flex flex-col items-center gap-0.5 border-t border-gray-100 px-3 py-2 text-center">
+                        {video.nombre && (
+                          <span className="text-xs font-semibold text-gray-700">
+                            {video.nombre}
+                          </span>
+                        )}
+                        {video.autor && (
+                          <span className="text-[11px] text-gray-500">{video.autor}</span>
+                        )}
+                        {video.fecha && (
+                          <span className="text-[10px] text-gray-400">{formatDate(video.fecha)}</span>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
-
-              {/* Identificaciones */}
-              {activeTab === "identificaciones" && (identificaciones.length > 0 ? (
-                <div className="overflow-x-auto rounded-lg border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Taxon</TableHead>
-                        <TableHead>Responsable</TableHead>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Comentario</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {identificaciones.map((ident) => (
-                        <TableRow key={ident.id_identificacion}>
-                          <TableCell className="text-sm italic">{v(ident.taxon_nombre)}</TableCell>
-                          <TableCell className="text-sm">{v(ident.responsable)}</TableCell>
-                          <TableCell className="text-sm">{formatDate(ident.fecha)}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{v(ident.comentario)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                    );
+                  })}
                 </div>
               ) : <p className="py-8 text-center text-sm text-gray-400">Sin registros</p>)}
 
@@ -575,7 +763,18 @@ export default function ColeccionDetailClient({
         );
       })()}
 
-
+      <Lightbox
+        captions={{descriptionTextAlign: "start", descriptionMaxLines: 8}}
+        close={() => setLightboxIndex(-1)}
+        controller={{closeOnBackdropClick: true}}
+        counter={{container: {style: {top: 0, bottom: "unset"}}}}
+        index={lightboxIndex < 0 ? 0 : lightboxIndex}
+        open={lightboxIndex >= 0}
+        plugins={[Captions, Counter, Fullscreen, Thumbnails, Zoom]}
+        slides={fotoSlides}
+        thumbnails={{position: "bottom", width: 80, height: 60, gap: 6}}
+        zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
+      />
     </main>
   );
 }

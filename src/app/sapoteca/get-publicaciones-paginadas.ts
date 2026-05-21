@@ -217,7 +217,9 @@ export default async function getPublicacionesPaginadas(
       .from("catalogo_publicaciones" as any)
       .select("id")
       .eq("tipo", "DIVULGACIÓN");
-    const idsCatDivulgacion = (catDivulgacion ?? []).map((r: { id: number }) => r.id);
+    const idsCatDivulgacion = ((catDivulgacion ?? []) as unknown as { id: number }[]).map(
+      (r) => r.id,
+    );
 
     const {data: pcaDivulgacion} = await supabaseClient
       .from("publicacion_catalogo_awe")

@@ -174,7 +174,7 @@ export default async function getPublicacionById(
     enlaces,
     autores,
     taxones: taxonesFiltrados,
-  } as PublicacionCompleta;
+  } as unknown as PublicacionCompleta;
 }
 
 /**

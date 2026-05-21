@@ -516,3 +516,20 @@ a.processed-link.processed-link-no-underline:active {
   50% { transform: translateX(150%); }
   100% { transform: translateX(-100%); }
 }
+
+/* Popup compacto para el mapa de coleccion */
+.coleccion-mini-popup .leaflet-popup-content-wrapper {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.coleccion-mini-popup .leaflet-popup-content {
+  margin: 6px 10px;
+  line-height: 1.35;
+  min-width: 0;
+}
+.coleccion-mini-popup .leaflet-popup-content p {
+  margin: 0;
+}
+.coleccion-mini-popup .leaflet-popup-tip {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}

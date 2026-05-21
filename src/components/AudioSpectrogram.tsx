@@ -136,7 +136,7 @@ export default function AudioSpectrogram({
 
           if (!currentAnalyser || !currentDataArray || !ctx || !canvas) return;
 
-          currentAnalyser.getByteFrequencyData(currentDataArray);
+          currentAnalyser.getByteFrequencyData(currentDataArray as Uint8Array<ArrayBuffer>);
 
           // Agregar nueva columna de datos
           const normalizedData = Array.from(currentDataArray).map((value) => value / 255);

@@ -16,6 +16,20 @@ export interface Canto {
   observacion: string | null;
   created_at: string | null;
   updated_at: string | null;
+  enlace: string | null;
+  nombre: string | null;
+  colector: string | null;
+}
+
+export interface VideoColeccion {
+  id_video: number;
+  coleccion_id: number | null;
+  nombre: string | null;
+  enlace: string | null;
+  thumbnail: string | null;
+  autor: string | null;
+  descripcion: string | null;
+  fecha: string | null;
 }
 
 export interface Tejido {
@@ -127,6 +141,7 @@ export interface FotografiaColeccion {
   catalogo_museo: string | null;
   tipo_licencia: string | null;
   orden: number | null;
+  tipo: string | null;
 }
 
 export interface CuerpoAgua {
@@ -175,7 +190,7 @@ export async function getCantosByColeccion(coleccionId: number): Promise<Canto[]
     return [];
   }
 
-  return (data || []) as Canto[];
+  return (data || []) as unknown as Canto[];
 }
 
 /**
@@ -352,6 +367,28 @@ export async function getCuerposAguaByColeccion(coleccionId: number): Promise<Cu
 }
 
 /**
+ * Obtiene los videos relacionados con una colección
+ */
+export async function getVideosByColeccion(coleccionId: number): Promise<VideoColeccion[]> {
+  const supabaseClient = createServiceClient();
+
+  const {data, error} = await supabaseClient
+    .from("video")
+    .select("id_video, coleccion_id, nombre, enlace, thumbnail, autor, descripcion, fecha")
+    .eq("coleccion_id", coleccionId)
+    .eq("publicar", true)
+    .order("fecha", {ascending: false, nullsFirst: false});
+
+  if (error) {
+    console.error("Error al obtener videos:", error);
+
+    return [];
+  }
+
+  return (data || []) as unknown as VideoColeccion[];
+}
+
+/**
  * Obtiene las fotografías vinculadas a una colección
  */
 export async function getFotografiasByColeccion(coleccionId: number): Promise<FotografiaColeccion[]> {
@@ -359,7 +396,7 @@ export async function getFotografiasByColeccion(coleccionId: number): Promise<Fo
 
   const {data, error} = await supabaseClient
     .from("fotografia")
-    .select("*")
+    .select("*, catalogo_awe:catalogo_awe_id(nombre)")
     .eq("coleccion_id", coleccionId)
     .order("orden", {ascending: true});
 
@@ -371,5 +408,6 @@ export async function getFotografiasByColeccion(coleccionId: number): Promise<Fo
   return (data || []).map((f: any) => ({
     ...f,
     descripcion: f["descripción"] ?? null,
+    tipo: f.catalogo_awe?.nombre ?? null,
   })) as FotografiaColeccion[];
 }

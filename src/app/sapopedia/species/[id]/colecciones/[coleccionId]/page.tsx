@@ -11,6 +11,7 @@ import {
   getIdentificacionesByColeccion,
   getCuerposAguaByColeccion,
   getFotografiasByColeccion,
+  getVideosByColeccion,
 } from "./get-coleccion-relacionados";
 import ColeccionDetailClient from "./coleccion-detail-client";
 
@@ -50,6 +51,7 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     identificaciones,
     cuerposAgua,
     fotografias,
+    videos,
   ] = await Promise.all([
     getColeccionById(coleccionIdNum),
     getCantosByColeccion(coleccionIdNum),
@@ -60,6 +62,7 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getIdentificacionesByColeccion(coleccionIdNum),
     getCuerposAguaByColeccion(coleccionIdNum),
     getFotografiasByColeccion(coleccionIdNum),
+    getVideosByColeccion(coleccionIdNum),
   ]);
 
   if (!coleccion) {
@@ -101,6 +104,7 @@ export default async function ColeccionDetailPage({params}: PageProps) {
   const genero = lineage.find((l: any) => l.rank?.rank === "Género")?.taxon ?? null;
   const especie = lineage.find((l: any) => l.rank?.rank === "especie")?.taxon ?? null;
   const nombreCientifico = genero && especie ? `${String(genero)} ${String(especie)}` : null;
+  const nombreComun = (fichaEspecie as any)?.nombresComunes?.nombre_comun_espanol ?? null;
 
   return (
     <ColeccionDetailClient
@@ -115,10 +119,12 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       identificaciones={identificaciones}
       fotografias={fotografias}
       nombreCientifico={nombreCientifico}
+      nombreComun={nombreComun}
       orden={orden}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
       tejidos={tejidos}
+      videos={videos}
     />
   );
 }

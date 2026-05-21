@@ -24,10 +24,10 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/postcss": "4.0.9",
-    "@tanstack/query-sync-storage-persister": "^5.100.9",
-    "@tanstack/react-query": "^5.100.9",
-    "@tanstack/react-query-devtools": "^5.100.9",
-    "@tanstack/react-query-persist-client": "^5.100.9",
+    "@tanstack/query-sync-storage-persister": "5.100.11",
+    "@tanstack/react-query": "5.100.11",
+    "@tanstack/react-query-devtools": "5.100.11",
+    "@tanstack/react-query-persist-client": "5.100.11",
     "@tiptap/extension-link": "^3.13.0",
     "@tiptap/react": "^3.13.0",
     "@tiptap/starter-kit": "^3.13.0",
@@ -84,6 +84,11 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/query-core": "5.100.11"
+    }
   },
   "packageManager": "pnpm@10.17.1+sha256.a1e0133f6801c13039ae41309e5e5a7d1058a3a1e1edd020a4944a83c5368d04"
 }

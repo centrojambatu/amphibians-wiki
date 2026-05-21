@@ -17,6 +17,7 @@ export interface SpeciesData {
   lista_roja_iucn?: string | null;
   has_distribucion_occidental?: boolean;
   has_distribucion_oriental?: boolean;
+  area_distribucion?: number | null;
 }
 
 export interface GenusGroup {

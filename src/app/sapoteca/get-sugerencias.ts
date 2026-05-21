@@ -21,7 +21,9 @@ export async function getSugerenciasTitulos(query: string, limit: number = 10): 
   }
 
   // Eliminar duplicados y retornar solo los títulos
-  const titulosUnicos = Array.from(new Set(data.map((p) => p.titulo).filter(Boolean)));
+  const titulosUnicos = Array.from(
+    new Set(data.map((p) => p.titulo).filter((t): t is string => t != null)),
+  );
   return titulosUnicos;
 }
 

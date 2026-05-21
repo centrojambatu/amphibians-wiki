@@ -69,16 +69,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Error al obtener fichas" }, { status: 500 });
   }
 
-  const result: EspecieTabla[] = (fichasData ?? []).map((r) => ({
-    taxon_id: r.especie_taxon_id,
-    nombre_cientifico: r.nombre_cientifico,
-    orden: r.orden,
-    familia: r.familia,
-    genero: r.genero,
-    especie: r.especie,
-    nombre_comun: r.nombre_comun,
-    lista_roja: r.awe_lista_roja_uicn,
-  }));
+  const result: EspecieTabla[] = (fichasData ?? [])
+    .filter((r) => r.especie_taxon_id != null && r.nombre_cientifico != null)
+    .map((r) => ({
+      taxon_id: r.especie_taxon_id as number,
+      nombre_cientifico: r.nombre_cientifico as string,
+      orden: r.orden,
+      familia: r.familia,
+      genero: r.genero,
+      especie: r.especie,
+      nombre_comun: r.nombre_comun,
+      lista_roja: r.awe_lista_roja_uicn,
+    }));
 
   return NextResponse.json({ data: result, total: result.length });
 }

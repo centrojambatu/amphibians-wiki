@@ -135,12 +135,14 @@ export function nombreComunRepresentativo(
   let mejor: { original: string; count: number } | null = null;
 
   conteo.forEach((val) => {
-    if (!mejor || val.count > mejor.count) {
+    const current = mejor;
+
+    if (!current || val.count > current.count) {
       mejor = val;
-    } else if (val.count === mejor.count && val.original.length < mejor.original.length) {
+    } else if (val.count === current.count && val.original.length < current.original.length) {
       mejor = val;
     }
   });
 
-  return mejor ? mejor.original : null;
+  return mejor ? (mejor as { original: string; count: number }).original : null;
 }

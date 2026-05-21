@@ -242,7 +242,7 @@ export default async function getPublicacionBySlug(
         enlaces,
         autores,
         taxones: taxonesFiltrados,
-      } as PublicacionCompleta;
+      } as unknown as PublicacionCompleta;
     }
   }
 
@@ -375,7 +375,7 @@ export default async function getPublicacionBySlug(
           enlaces,
           autores,
           taxones: taxonesFiltrados,
-        } as PublicacionCompleta;
+        } as unknown as PublicacionCompleta;
       }
     }
   }
@@ -606,7 +606,7 @@ export default async function getPublicacionBySlug(
         enlaces,
         autores,
         taxones: taxonesFiltrados,
-      } as PublicacionCompleta;
+      } as unknown as PublicacionCompleta;
     }
 
     // Comparación flexible: normalizar ambos slugs
@@ -708,7 +708,7 @@ export default async function getPublicacionBySlug(
         enlaces,
         autores,
         taxones: taxonesFiltrados,
-      } as PublicacionCompleta;
+      } as unknown as PublicacionCompleta;
     }
   }
 
@@ -1030,7 +1030,7 @@ export default async function getPublicacionBySlug(
       enlaces,
       autores,
       taxones: taxonesFiltrados,
-    } as PublicacionCompleta;
+    } as unknown as PublicacionCompleta;
   }
 
   // Si no se encontró, log para debug

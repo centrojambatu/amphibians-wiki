@@ -47,7 +47,7 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
 
   const countsByYear = new Map<number, number>();
   if (rows?.length) {
-    for (const row of rows as { numero_publicacion_ano: number }[]) {
+    for (const row of rows as unknown as { numero_publicacion_ano: number }[]) {
       const año = Number(row.numero_publicacion_ano);
       if (año >= AÑO_MIN_SANE && año <= añoActual) {
         countsByYear.set(año, (countsByYear.get(año) ?? 0) + 1);

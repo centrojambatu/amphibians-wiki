@@ -9,6 +9,9 @@ interface ColeccionMiniMapProps {
   longitud: number;
   localidad?: string | null;
   provincia?: string | null;
+  elevacion?: number | null;
+  nombreCientifico?: string | null;
+  nombreComun?: string | null;
 }
 
 // Botón de centrar que vive dentro del contexto del mapa
@@ -33,7 +36,7 @@ function CenterButton({ latitud, longitud }: { latitud: number; longitud: number
   );
 }
 
-export default function ColeccionMiniMap({ latitud, longitud, localidad, provincia }: ColeccionMiniMapProps) {
+export default function ColeccionMiniMap({ latitud, longitud, localidad, provincia, elevacion, nombreCientifico, nombreComun }: ColeccionMiniMapProps) {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <MapContainer
@@ -55,14 +58,36 @@ export default function ColeccionMiniMap({ latitud, longitud, localidad, provinc
             weight: 2,
           }}
         >
-          <Popup offset={[0, -5]} minWidth={160} maxWidth={220}>
-            <div className="text-[11px] text-gray-800 space-y-0.5" style={{ lineHeight: "1.4" }}>
+          <Popup
+            className="coleccion-mini-popup"
+            closeButton={false}
+            maxWidth={240}
+            minWidth={140}
+            offset={[0, -4]}
+          >
+            <div className="text-[10px] text-gray-800 [&_p]:my-0" style={{ lineHeight: "1.35" }}>
+              {nombreCientifico && (
+                <p className="font-semibold italic" style={{ color: "#f07304" }}>
+                  {nombreCientifico}
+                </p>
+              )}
+              {nombreComun && <p className="text-gray-600">{nombreComun}</p>}
               {(localidad || provincia) && (
                 <p className="font-medium">
                   {[localidad, provincia].filter(Boolean).join(", ")}
                 </p>
               )}
-              <p className="text-gray-500">{latitud}, {longitud}</p>
+              <p className="font-mono text-gray-500">
+                {latitud}, {longitud}
+                {elevacion != null && (
+                  <>
+                    <span className="mx-1.5 font-semibold" style={{ color: "#f07304" }}>
+                      |
+                    </span>
+                    {elevacion} msnm
+                  </>
+                )}
+              </p>
             </div>
           </Popup>
         </CircleMarker>
