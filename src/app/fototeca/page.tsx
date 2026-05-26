@@ -8,6 +8,7 @@ import {Image as ImageIcon, RotateCcw, Search, X, Check, ExternalLink} from "luc
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
+import YearRangeFilter from "@/components/YearRangeFilter";
 import {Input} from "@/components/ui/input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
@@ -90,9 +91,7 @@ function AccordionButtonFilter({
         <div className="flex flex-col items-start">
           <span className="font-semibold">{label}</span>
           {selected.length > 0 && (
-            <span className="mt-1 text-xs font-normal text-gray-500">
-              {selected.join(", ")}
-            </span>
+            <span className="mt-1 text-xs font-normal text-gray-500">{selected.join(", ")}</span>
           )}
         </div>
       </AccordionTrigger>
@@ -174,9 +173,7 @@ function ListMultiSelect({
             className="border-input bg-background hover:bg-accent flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors"
             type="button"
           >
-            <span
-              className={selected.length === 0 ? "text-muted-foreground" : "text-foreground"}
-            >
+            <span className={selected.length === 0 ? "text-muted-foreground" : "text-foreground"}>
               {buttonLabel}
             </span>
             <Search className="text-muted-foreground h-4 w-4" />
@@ -386,9 +383,7 @@ function StatCard({
     >
       <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
         {imageContent ? (
-          <div className="flex h-full w-full items-center justify-center">
-            {imageContent}
-          </div>
+          <div className="flex h-full w-full items-center justify-center">{imageContent}</div>
         ) : imageSrc ? (
           <img
             alt={imageAlt || label}
@@ -512,17 +507,13 @@ export default function FototecaPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-gray-900">Fototeca</h1>
-          <p className="mt-2 text-gray-600">
-            Listado de especies con fotografías disponibles
-          </p>
+          <p className="mt-2 text-gray-600">Listado de especies con fotografías disponibles</p>
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard
             imageContent={
-              <span className="text-5xl font-bold text-gray-700">
-                {stats?.total_fotos ?? "—"}
-              </span>
+              <span className="text-5xl font-bold text-gray-700">{stats?.total_fotos ?? "—"}</span>
             }
             label="Número de fotos"
           />
@@ -537,8 +528,7 @@ export default function FototecaPage() {
           <StatCard
             caption={stats?.foto_destacada_reciente?.nombre_cientifico ?? null}
             imageAlt={
-              stats?.foto_destacada_reciente?.nombre_cientifico ||
-              "Foto especie más reciente"
+              stats?.foto_destacada_reciente?.nombre_cientifico || "Foto especie más reciente"
             }
             imageSrc={stats?.foto_destacada_reciente?.enlace}
             label="Foto especie más reciente"
@@ -553,10 +543,7 @@ export default function FototecaPage() {
 
           <StatCard
             caption={stats?.foto_posiblemente_extinta?.nombre_cientifico ?? null}
-            imageAlt={
-              stats?.foto_posiblemente_extinta?.nombre_cientifico ||
-              "Posiblemente extinta"
-            }
+            imageAlt={stats?.foto_posiblemente_extinta?.nombre_cientifico || "Posiblemente extinta"}
             imageSrc={stats?.foto_posiblemente_extinta?.enlace}
             label="Foto posiblemente extinta"
           />
@@ -631,64 +618,22 @@ export default function FototecaPage() {
                     />
                     <CatalogoMultiSelect
                       apiPath="/api/fototeca/catalogos"
-                      placeholder="Catálogo Número (ej. KU 10441)"
+                      placeholder="CJ 10441"
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
                     />
 
-                    <div className="space-y-1.5">
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        placeholder="Año específico (ej. 2024)"
-                        type="number"
-                        value={anioEspecifico}
-                        onChange={(e) => {
-                          setAnioEspecifico(e.target.value);
-                          if (e.target.value) {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                          }
-                        }}
-                      />
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Desde"
-                          type="number"
-                          value={anioDesde}
-                          onChange={(e) => setAnioDesde(e.target.value)}
-                        />
-                        <span className="text-xs text-gray-400">—</span>
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Hasta"
-                          type="number"
-                          value={anioHasta}
-                          onChange={(e) => setAnioHasta(e.target.value)}
-                        />
-                      </div>
-                      {(anioDesde || anioHasta || anioEspecifico) && (
-                        <button
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          type="button"
-                          onClick={() => {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                            setAnioEspecifico("");
-                          }}
-                        >
-                          Limpiar años
-                        </button>
-                      )}
-                    </div>
+                    <YearRangeFilter
+                      desde={anioDesde}
+                      hasta={anioHasta}
+                      yearMax={new Date().getFullYear()}
+                      yearMin={1970}
+                      onChange={(d, h) => {
+                        setAnioDesde(d);
+                        setAnioHasta(h);
+                        if (anioEspecifico) setAnioEspecifico("");
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -732,10 +677,7 @@ export default function FototecaPage() {
                         className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
                         style={{borderColor: "#dddddd"}}
                       >
-                        <Link
-                          className="flex flex-col no-underline"
-                          href={href}
-                        >
+                        <Link className="flex flex-col no-underline" href={href}>
                           <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
                             {especie.fotografia_url ? (
                               <img
@@ -760,13 +702,6 @@ export default function FototecaPage() {
                             {especie.nombre_comun && (
                               <span className="text-xs" style={{color: "#888888"}}>
                                 {especie.nombre_comun}
-                              </span>
-                            )}
-                            {(especie.orden || especie.familia || especie.genero) && (
-                              <span className="mt-1 text-[10px] text-gray-400">
-                                {[especie.orden, especie.familia, especie.genero]
-                                  .filter(Boolean)
-                                  .join(" · ")}
                               </span>
                             )}
                           </div>
@@ -798,9 +733,7 @@ export default function FototecaPage() {
                 </div>
               ) : hasFilters ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">
-                    No se encontraron especies con esos filtros.
-                  </p>
+                  <p className="text-gray-600">No se encontraron especies con esos filtros.</p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">

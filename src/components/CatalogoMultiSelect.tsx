@@ -57,7 +57,7 @@ export default function CatalogoMultiSelect({
   apiPath,
   selected,
   onChange,
-  placeholder = "Catálogo Número (ej. KU 10441)",
+  placeholder = "CJ 10441",
   chipBgClass = "bg-orange-100",
   chipTextClass = "text-orange-800",
 }: Props) {

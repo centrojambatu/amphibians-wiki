@@ -51,6 +51,59 @@ export async function GET() {
     .select("*", {count: "exact", head: true})
     .eq("publicar", true);
 
+  // Card 1b: especies (ficha_especie) con al menos un canto vs sin canto.
+  // Solo se consideran especies del orden Anura (Caudata y Gymnophiona no cantan).
+  let especiesConCanto = 0;
+  let especiesSinCanto = 0;
+  {
+    const anuraTaxonIds = new Set<number>();
+    {
+      const PAGE = 1000;
+      let offset = 0;
+      while (true) {
+        const {data, error} = await supabase
+          .from("vw_ficha_especie_completa")
+          .select("especie_taxon_id, orden, publicar")
+          .eq("orden", "Anura")
+          .eq("publicar", true)
+          .not("especie_taxon_id", "is", null)
+          .range(offset, offset + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        for (const r of data as {especie_taxon_id: number | null}[]) {
+          if (r.especie_taxon_id != null) anuraTaxonIds.add(r.especie_taxon_id);
+        }
+        if (data.length < PAGE) break;
+        offset += PAGE;
+      }
+    }
+
+    const cantosTaxonIds = new Set<number>();
+    {
+      const PAGE = 1000;
+      let offset = 0;
+      while (true) {
+        const {data, error} = await supabase
+          .from("canto")
+          .select("taxon_id")
+          .eq("publicar", true)
+          .not("publicacion_id", "is", null)
+          .not("taxon_id", "is", null)
+          .range(offset, offset + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        for (const r of data as {taxon_id: number | null}[]) {
+          if (r.taxon_id != null) cantosTaxonIds.add(r.taxon_id);
+        }
+        if (data.length < PAGE) break;
+        offset += PAGE;
+      }
+    }
+
+    for (const tid of anuraTaxonIds) {
+      if (cantosTaxonIds.has(tid)) especiesConCanto++;
+      else especiesSinCanto++;
+    }
+  }
+
   // Card 2: primer canto (más antiguo por fecha)
   let primerCanto: CantoCard | null = null;
   {
@@ -191,6 +244,8 @@ export async function GET() {
 
   return NextResponse.json({
     total_cantos: totalCantos ?? 0,
+    especies_con_canto: especiesConCanto,
+    especies_sin_canto: especiesSinCanto,
     primer_canto: primerCanto,
     canto_destacado_reciente: cantoDestacadoReciente,
     canto_destacado: cantoDestacado,

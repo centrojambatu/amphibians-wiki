@@ -22,13 +22,18 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import ColeccionCard, {type ColeccionCardData} from "@/components/ColeccionCard";
+import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
+import YearRangeFilter from "@/components/YearRangeFilter";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
+
   useEffect(() => {
     const id = setTimeout(() => setDebounced(value), delay);
+
     return () => clearTimeout(id);
   }, [value, delay]);
+
   return debounced;
 }
 
@@ -68,7 +73,9 @@ function AccordionButtonFilter({
     queryKey: [apiPath, "all"],
     queryFn: async () => {
       const res = await fetch(`${apiPath}?q=`);
+
       if (!res.ok) return [];
+
       return res.json();
     },
   });
@@ -84,9 +91,7 @@ function AccordionButtonFilter({
         <div className="flex flex-col items-start">
           <span className="font-semibold">{label}</span>
           {selected.length > 0 && (
-            <span className="mt-1 text-xs font-normal text-gray-500">
-              {selected.join(", ")}
-            </span>
+            <span className="mt-1 text-xs font-normal text-gray-500">{selected.join(", ")}</span>
           )}
         </div>
       </AccordionTrigger>
@@ -97,6 +102,7 @@ function AccordionButtonFilter({
           <div className="flex flex-col gap-2">
             {options.map((opt) => {
               const isSelected = selected.includes(opt);
+
               return (
                 <Button
                   key={opt}
@@ -136,11 +142,11 @@ function EspecieSelect({
   >({
     queryKey: ["colecciones", "especies", debouncedQuery],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/colecciones/especies?q=${encodeURIComponent(debouncedQuery)}`,
-      );
+      const res = await fetch(`/api/colecciones/especies?q=${encodeURIComponent(debouncedQuery)}`);
+
       if (!res.ok) return [];
       const data = await res.json();
+
       return data.slice(0, 10);
     },
     enabled,
@@ -201,9 +207,7 @@ function EspecieSelect({
                         <div className="flex flex-col">
                           <i className="text-sm">{r.nombre_cientifico}</i>
                           {r.nombre_comun && (
-                            <span className="text-[11px] text-gray-500">
-                              {r.nombre_comun}
-                            </span>
+                            <span className="text-[11px] text-gray-500">{r.nombre_comun}</span>
                           )}
                         </div>
                       </div>
@@ -217,7 +221,7 @@ function EspecieSelect({
       </Popover>
       {selected && (
         <div className="flex flex-wrap gap-1">
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] italic text-green-800">
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800 italic">
             {selected}
             <button type="button" onClick={() => onChange(null)}>
               <X className="h-3 w-3" />
@@ -252,7 +256,9 @@ function TextMultiSelect({
     queryKey: [apiPath, debouncedQuery],
     queryFn: async () => {
       const res = await fetch(`${apiPath}?q=${encodeURIComponent(debouncedQuery)}`);
+
       if (!res.ok) return [];
+
       return res.json();
     },
     enabled,
@@ -411,7 +417,9 @@ export default function ColeccionesPage() {
     queryKey: ["colecciones", "elevacion-range"],
     queryFn: async () => {
       const res = await fetch("/api/colecciones/elevacion-range");
+
       if (!res.ok) return {min: 0, max: 6000};
+
       return res.json();
     },
   });
@@ -424,8 +432,7 @@ export default function ColeccionesPage() {
 
   const elevMin = elevRangeData?.min ?? 0;
   const elevMax = elevRangeData?.max ?? 6000;
-  const elevActive =
-    elevRange !== null && (elevRange[0] !== elevMin || elevRange[1] !== elevMax);
+  const elevActive = elevRange !== null && (elevRange[0] !== elevMin || elevRange[1] !== elevMax);
 
   // Resetear página al cambiar filtros
   useEffect(() => {
@@ -482,6 +489,7 @@ export default function ColeccionesPage() {
 
   const queryParams = useMemo(() => {
     const p = new URLSearchParams();
+
     if (familiasFilter.length) p.set("familias", familiasFilter.join("||"));
     if (generosFilter.length) p.set("generos", generosFilter.join("||"));
     if (especieFilter) p.set("especies", especieFilter);
@@ -500,6 +508,7 @@ export default function ColeccionesPage() {
       p.set("elev_max", String(elevRange[1]));
     }
     p.set("pagina", String(pagina));
+
     return p.toString();
   }, [
     familiasFilter,
@@ -524,7 +533,9 @@ export default function ColeccionesPage() {
     queryKey: ["colecciones", queryParams],
     queryFn: async () => {
       const res = await fetch(`/api/colecciones?${queryParams}`);
+
       if (!res.ok) throw new Error("Error al cargar colecciones");
+
       return res.json();
     },
     placeholderData: keepPreviousData,
@@ -534,7 +545,9 @@ export default function ColeccionesPage() {
     queryKey: ["colecciones", "estadisticas"],
     queryFn: async () => {
       const res = await fetch("/api/colecciones/estadisticas");
+
       if (!res.ok) throw new Error("Error al cargar estadísticas");
+
       return res.json();
     },
   });
@@ -543,17 +556,14 @@ export default function ColeccionesPage() {
   const total = data?.total ?? 0;
   const totalPaginas = data?.totalPaginas ?? 1;
 
-  const buildSlug = (nombre: string | null) =>
-    nombre ? nombre.replace(/\s+/g, "-") : "";
+  const buildSlug = (nombre: string | null) => (nombre ? nombre.replace(/\s+/g, "-") : "");
 
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-gray-900">Colecciones</h1>
-          <p className="mt-2 text-gray-600">
-            Listado de registros de la colección biológica
-          </p>
+          <p className="mt-2 text-gray-600">Listado de registros de la colección biológica</p>
         </div>
 
         {/* Stats */}
@@ -563,14 +573,8 @@ export default function ColeccionesPage() {
             label="Registros"
             value={stats?.total_registros?.toLocaleString() ?? null}
           />
-          <StatCard
-            label="Especies"
-            value={stats?.total_especies?.toLocaleString() ?? null}
-          />
-          <StatCard
-            label="Colectores"
-            value={stats?.total_colectores?.toLocaleString() ?? null}
-          />
+          <StatCard label="Especies" value={stats?.total_especies?.toLocaleString() ?? null} />
+          <StatCard label="Colectores" value={stats?.total_colectores?.toLocaleString() ?? null} />
           <StatCard
             label="Localidades"
             value={stats?.total_localidades?.toLocaleString() ?? null}
@@ -578,9 +582,7 @@ export default function ColeccionesPage() {
           <StatCard
             label="Rango temporal"
             value={
-              stats?.anio_min && stats?.anio_max
-                ? `${stats.anio_min}–${stats.anio_max}`
-                : null
+              stats?.anio_min && stats?.anio_max ? `${stats.anio_min}–${stats.anio_max}` : null
             }
           />
         </div>
@@ -590,10 +592,7 @@ export default function ColeccionesPage() {
             <aside className="lg:w-80 lg:flex-shrink-0">
               <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="flex-shrink-0 px-6 pt-4 pb-2">
-                  <EspecieSelect
-                    selected={especieFilter}
-                    onChange={setEspecieFilter}
-                  />
+                  <EspecieSelect selected={especieFilter} onChange={setEspecieFilter} />
                 </div>
                 <div className="flex flex-shrink-0 justify-end px-6 pb-2">
                   <Button
@@ -662,11 +661,11 @@ export default function ColeccionesPage() {
                       selected={localidadesFilter}
                       onChange={setLocalidadesFilter}
                     />
-                    <TextMultiSelect
+                    <CatalogoMultiSelect
                       apiPath="/api/colecciones/catalogos"
-                      chipBg="bg-purple-100"
-                      chipText="text-purple-800"
-                      placeholder="Número de museo (ej. QCAZ 12345)"
+                      chipBgClass="bg-purple-100"
+                      chipTextClass="text-purple-800"
+                      placeholder="Número de museo (ej. CJ 15671)"
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
                     />
@@ -681,46 +680,17 @@ export default function ColeccionesPage() {
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        placeholder="Año específico"
-                        type="number"
-                        value={anioEspecifico}
-                        onChange={(e) => {
-                          setAnioEspecifico(e.target.value);
-                          if (e.target.value) {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                          }
-                        }}
-                      />
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Desde"
-                          type="number"
-                          value={anioDesde}
-                          onChange={(e) => setAnioDesde(e.target.value)}
-                        />
-                        <span className="text-xs text-gray-400">—</span>
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Hasta"
-                          type="number"
-                          value={anioHasta}
-                          onChange={(e) => setAnioHasta(e.target.value)}
-                        />
-                      </div>
-                    </div>
+                    <YearRangeFilter
+                      yearMin={stats?.anio_min ?? 1970}
+                      yearMax={stats?.anio_max ?? new Date().getFullYear()}
+                      desde={anioDesde}
+                      hasta={anioHasta}
+                      onChange={(d, h) => {
+                        setAnioDesde(d);
+                        setAnioHasta(h);
+                        if (anioEspecifico) setAnioEspecifico("");
+                      }}
+                    />
 
                     {/* Elevación */}
                     <div className="space-y-2 pt-2">
@@ -732,9 +702,7 @@ export default function ColeccionesPage() {
                           <button
                             className="text-[10px] text-gray-400 hover:text-gray-600"
                             type="button"
-                            onClick={() =>
-                              setElevRange([elevMin, elevMax])
-                            }
+                            onClick={() => setElevRange([elevMin, elevMax])}
                           >
                             Limpiar
                           </button>
@@ -746,9 +714,7 @@ export default function ColeccionesPage() {
                         min={elevMin}
                         step={50}
                         value={elevRange ?? [elevMin, elevMax]}
-                        onValueChange={(v) =>
-                          setElevRange([v[0] ?? elevMin, v[1] ?? elevMax])
-                        }
+                        onValueChange={(v) => setElevRange([v[0] ?? elevMin, v[1] ?? elevMax])}
                       />
                       <div className="text-muted-foreground flex items-center justify-between text-xs">
                         <span>{elevMin}</span>
@@ -768,8 +734,7 @@ export default function ColeccionesPage() {
               <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
                 <span>
                   {`${total.toLocaleString()} ${total === 1 ? "registro" : "registros"}`}
-                  {totalPaginas > 1 &&
-                    ` · Página ${pagina} de ${totalPaginas}`}
+                  {totalPaginas > 1 && ` · Página ${pagina} de ${totalPaginas}`}
                 </span>
                 {isFetching && (
                   <span
@@ -795,13 +760,9 @@ export default function ColeccionesPage() {
                       const href = slug
                         ? `/sapopedia/species/${encodeURIComponent(slug)}/colecciones/${c.id_coleccion}?from=colecciones`
                         : undefined;
+
                       return (
-                        <ColeccionCard
-                          key={c.id_coleccion}
-                          coleccion={c}
-                          href={href}
-                          showEspecie
-                        />
+                        <ColeccionCard key={c.id_coleccion} showEspecie coleccion={c} href={href} />
                       );
                     })}
                   </div>
@@ -824,9 +785,7 @@ export default function ColeccionesPage() {
                         disabled={pagina >= totalPaginas}
                         size="sm"
                         variant="outline"
-                        onClick={() =>
-                          setPagina((p) => Math.min(totalPaginas, p + 1))
-                        }
+                        onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                       >
                         Siguiente
                         <ChevronRight className="h-4 w-4" />
@@ -836,9 +795,7 @@ export default function ColeccionesPage() {
                 </>
               ) : hasFilters ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">
-                    No se encontraron registros con esos filtros.
-                  </p>
+                  <p className="text-gray-600">No se encontraron registros con esos filtros.</p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">

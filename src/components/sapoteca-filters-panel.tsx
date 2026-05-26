@@ -4,7 +4,7 @@ import type {TiposPublicacionAgrupados} from "@/app/sapoteca/get-tipos-publicaci
 
 import {useState, useEffect, useTransition} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {Search, Calendar, CornerDownLeft, RotateCcw} from "lucide-react";
+import {Search, CornerDownLeft, RotateCcw} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -514,7 +514,7 @@ export default function SapotecaFiltersPanel({
           <div className="space-y-2 px-6">
             <div className="flex items-center gap-2">
               <div className="relative min-w-0 flex-1">
-                <Calendar
+                <Search
                   aria-hidden
                   className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                 />

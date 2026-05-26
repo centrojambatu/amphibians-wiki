@@ -18,6 +18,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import MapotecaTabla from "@/components/MapotecaTabla";
+import YearRangeFilter from "@/components/YearRangeFilter";
 import {
   Select,
   SelectContent,
@@ -241,7 +242,7 @@ function CatalogoMultiSelect({
             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
-              placeholder="KU 10441"
+              placeholder="CJ 10441"
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -275,7 +276,14 @@ function CatalogoMultiSelect({
                     >
                       <div className="flex items-center gap-2.5">
                         <FilterCheckbox checked={selected.includes(cat)} />
-                        <span className="font-mono text-sm">{(() => { const [museo, num] = cat.split("::"); const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo; return [acr, num].filter(Boolean).join(" "); })()}</span>
+                        <span className="font-mono text-sm">
+                          {(() => {
+                            const [museo, num] = cat.split("::");
+                            const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo;
+
+                            return [acr, num].filter(Boolean).join(" ");
+                          })()}
+                        </span>
                       </div>
                     </CommandItem>
                   ))}
@@ -292,7 +300,12 @@ function CatalogoMultiSelect({
               key={cat}
               className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 font-mono text-[11px] text-orange-800"
             >
-              {(() => { const [museo, num] = cat.split("::"); const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo; return [acr, num].filter(Boolean).join(" "); })()}
+              {(() => {
+                const [museo, num] = cat.split("::");
+                const acr = museo?.includes(" - ") ? museo.split(" - ").pop() : museo;
+
+                return [acr, num].filter(Boolean).join(" ");
+              })()}
               <button type="button" onClick={() => toggleCatalogo(cat)}>
                 <X className="h-3 w-3" />
               </button>
@@ -319,9 +332,7 @@ function LocalidadMultiSelect({
   const {data: options = [], isFetching: loading} = useQuery<string[]>({
     queryKey: ["mapoteca", "localidades", debouncedQuery],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`,
-      );
+      const res = await fetch(`/api/mapoteca/localidades?q=${encodeURIComponent(debouncedQuery)}`);
 
       if (!res.ok) return [];
 
@@ -558,8 +569,16 @@ function MapotecaContent({
   const [anioEspecifico, setAnioEspecifico] = useState<string>(storedState?.anioEspecifico || "");
 
   // Calcular fechas desde/hasta a partir de años
-  const fechaDesde = anioEspecifico ? `${anioEspecifico}-01-01` : anioDesde ? `${anioDesde}-01-01` : "";
-  const fechaHasta = anioEspecifico ? `${anioEspecifico}-12-31` : anioHasta ? `${anioHasta}-12-31` : "";
+  const fechaDesde = anioEspecifico
+    ? `${anioEspecifico}-01-01`
+    : anioDesde
+      ? `${anioDesde}-01-01`
+      : "";
+  const fechaHasta = anioEspecifico
+    ? `${anioEspecifico}-12-31`
+    : anioHasta
+      ? `${anioHasta}-12-31`
+      : "";
   const [mapType, setMapType] = useState<
     "relief" | "terrain" | "provinces" | "satellite" | "streets"
   >(storedState?.mapType || "provinces");
@@ -697,54 +716,17 @@ function MapotecaContent({
                     </div>
 
                     {/* Filtro por año */}
-                    <div className="space-y-1.5">
-                      {/* Año específico */}
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        placeholder="Año específico (ej. 2015)"
-                        type="number"
-                        value={anioEspecifico}
-                        onChange={(e) => {
-                          setAnioEspecifico(e.target.value);
-                          if (e.target.value) { setAnioDesde(""); setAnioHasta(""); }
-                        }}
-                      />
-                      {/* Rango de años */}
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Desde"
-                          type="number"
-                          value={anioDesde}
-                          onChange={(e) => setAnioDesde(e.target.value)}
-                        />
-                        <span className="text-xs text-gray-400">—</span>
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Hasta"
-                          type="number"
-                          value={anioHasta}
-                          onChange={(e) => setAnioHasta(e.target.value)}
-                        />
-                      </div>
-                      {(anioDesde || anioHasta || anioEspecifico) && (
-                        <button
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          type="button"
-                          onClick={() => { setAnioDesde(""); setAnioHasta(""); setAnioEspecifico(""); }}
-                        >
-                          Limpiar años
-                        </button>
-                      )}
-                    </div>
+                    <YearRangeFilter
+                      desde={anioDesde}
+                      hasta={anioHasta}
+                      yearMax={new Date().getFullYear()}
+                      yearMin={1970}
+                      onChange={(d, h) => {
+                        setAnioDesde(d);
+                        setAnioHasta(h);
+                        if (anioEspecifico) setAnioEspecifico("");
+                      }}
+                    />
 
                     {/* Tipo de mapa */}
                     <div className="space-y-4">

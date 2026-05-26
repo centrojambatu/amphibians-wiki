@@ -8,6 +8,8 @@ import {Volume2, RotateCcw, Search, X, Check} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
+import YearRangeFilter from "@/components/YearRangeFilter";
+import AudiotecaHistogramaChart from "@/components/audioteca-histograma-chart";
 import {Input} from "@/components/ui/input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
@@ -90,9 +92,7 @@ function AccordionButtonFilter({
         <div className="flex flex-col items-start">
           <span className="font-semibold">{label}</span>
           {selected.length > 0 && (
-            <span className="mt-1 text-xs font-normal text-gray-500">
-              {selected.join(", ")}
-            </span>
+            <span className="mt-1 text-xs font-normal text-gray-500">{selected.join(", ")}</span>
           )}
         </div>
       </AccordionTrigger>
@@ -258,6 +258,8 @@ interface CantoCard {
 
 interface EstadisticasAudioteca {
   total_cantos: number;
+  especies_con_canto: number;
+  especies_sin_canto: number;
   primer_canto: CantoCard | null;
   canto_destacado_reciente: CantoCard | null;
   canto_destacado: CantoCard | null;
@@ -278,7 +280,7 @@ function StatCard({
   audioSrc,
   headerContent,
 }: {
-  label: string;
+  label: React.ReactNode;
   caption?: string | null;
   audioSrc?: string | null;
   headerContent?: React.ReactNode;
@@ -293,8 +295,8 @@ function StatCard({
           headerContent
         ) : audioSrc ? (
           <audio
-            className="block h-10 w-full min-w-0"
             controls
+            className="block h-10 w-full min-w-0"
             preload="none"
             src={audioSrc}
             onPlay={pauseOtherAudios}
@@ -411,24 +413,53 @@ export default function AudiotecaPage() {
     },
   });
 
+  const {data: histograma} = useQuery<{
+    puntos: {colector: string; cantidad: number}[];
+    totalCantos: number;
+    totalSinColector: number;
+  }>({
+    queryKey: ["audioteca", "histograma", "colector-publicar"],
+    queryFn: async () => {
+      const response = await fetch("/api/audioteca/histograma");
+
+      if (!response.ok) throw new Error("Error al cargar histograma");
+
+      return response.json();
+    },
+  });
+
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-gray-900">Audioteca</h1>
-          <p className="mt-2 text-gray-600">
-            Listado de especies con cantos disponibles
-          </p>
         </div>
 
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+          <StatCard
+            headerContent={
+              <span className="text-3xl font-bold" style={{color: "#f07304"}}>
+                {stats?.especies_con_canto ?? "—"}
+              </span>
+            }
+            label={
+              <>
+                Especies Anura <span style={{color: "#f07304"}}>|</span> Cantos descritos
+              </>
+            }
+          />
+
           <StatCard
             headerContent={
               <span className="text-3xl font-bold text-gray-700">
-                {stats?.total_cantos ?? "—"}
+                {stats?.especies_sin_canto ?? "—"}
               </span>
             }
-            label="Número de cantos"
+            label={
+              <>
+                Especies Anura <span style={{color: "#f07304"}}>|</span> Sin cantos descritos
+              </>
+            }
           />
 
           <StatCard
@@ -440,30 +471,50 @@ export default function AudiotecaPage() {
           <StatCard
             audioSrc={stats?.canto_destacado_reciente?.enlace}
             caption={stats?.canto_destacado_reciente?.nombre_cientifico ?? null}
-            label="Canto especie más reciente"
+            label="Último canto descrito"
           />
 
           <StatCard
             audioSrc={stats?.canto_destacado?.enlace}
             caption={stats?.canto_destacado?.nombre_cientifico ?? null}
-            label="Canto destacado"
+            label="Audio destacado"
           />
 
           <StatCard
             audioSrc={stats?.canto_posiblemente_extinta?.enlace}
             caption={stats?.canto_posiblemente_extinta?.nombre_cientifico ?? null}
-            label="Canto posiblemente extinta"
+            label="Canto especie posiblemente extinta"
           />
+
+          <a
+            className="flex flex-col items-center justify-center rounded-md border bg-white p-2 text-center transition-shadow hover:shadow-md"
+            href="https://www.fonozoo.com/eng/buscar.php"
+            rel="noopener noreferrer"
+            style={{
+              borderColor: "#dddddd",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontSize: "20px",
+              fontWeight: "600",
+            }}
+            target="_blank"
+          >
+            FonoZoo
+          </a>
         </div>
 
-        <section className="mb-12">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Cantos por Especie</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Busca una especie para escuchar sus cantos
-            </p>
+        {/* Histograma de cantos por colector */}
+        {histograma && (
+          <div className="mb-8">
+            <AudiotecaHistogramaChart
+              puntos={histograma.puntos}
+              totalCantos={histograma.totalCantos}
+              totalSinColector={histograma.totalSinColector}
+            />
           </div>
+        )}
 
+        <section className="mb-12">
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
             <aside className="lg:w-80 lg:flex-shrink-0">
               <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -527,64 +578,22 @@ export default function AudiotecaPage() {
                     />
                     <CatalogoMultiSelect
                       apiPath="/api/audioteca/catalogos"
-                      placeholder="Catálogo Número (ej. KU 10441)"
+                      placeholder="CJ 10441"
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
                     />
 
-                    <div className="space-y-1.5">
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        placeholder="Año específico (ej. 2024)"
-                        type="number"
-                        value={anioEspecifico}
-                        onChange={(e) => {
-                          setAnioEspecifico(e.target.value);
-                          if (e.target.value) {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                          }
-                        }}
-                      />
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Desde"
-                          type="number"
-                          value={anioDesde}
-                          onChange={(e) => setAnioDesde(e.target.value)}
-                        />
-                        <span className="text-xs text-gray-400">—</span>
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Hasta"
-                          type="number"
-                          value={anioHasta}
-                          onChange={(e) => setAnioHasta(e.target.value)}
-                        />
-                      </div>
-                      {(anioDesde || anioHasta || anioEspecifico) && (
-                        <button
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          type="button"
-                          onClick={() => {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                            setAnioEspecifico("");
-                          }}
-                        >
-                          Limpiar años
-                        </button>
-                      )}
-                    </div>
+                    <YearRangeFilter
+                      desde={anioDesde}
+                      hasta={anioHasta}
+                      yearMax={new Date().getFullYear()}
+                      yearMin={1970}
+                      onChange={(d, h) => {
+                        setAnioDesde(d);
+                        setAnioHasta(h);
+                        if (anioEspecifico) setAnioEspecifico("");
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -625,8 +634,8 @@ export default function AudiotecaPage() {
                         <div className="overflow-hidden px-2 pt-3 pb-2">
                           {especie.canto_url ? (
                             <audio
-                              className="block h-10 w-full min-w-0"
                               controls
+                              className="block h-10 w-full min-w-0"
                               preload="none"
                               src={especie.canto_url}
                               onPlay={pauseOtherAudios}
@@ -641,22 +650,12 @@ export default function AudiotecaPage() {
                           className="flex flex-1 flex-col items-center justify-center gap-0.5 border-t border-gray-100 px-2 py-2 no-underline hover:bg-gray-50"
                           href={href}
                         >
-                          <span
-                            className="text-xs font-semibold italic"
-                            style={{color: "#666666"}}
-                          >
+                          <span className="text-xs font-semibold italic" style={{color: "#666666"}}>
                             {especie.nombre_cientifico}
                           </span>
                           {especie.nombre_comun && (
                             <span className="text-[11px]" style={{color: "#888888"}}>
                               {especie.nombre_comun}
-                            </span>
-                          )}
-                          {(especie.orden || especie.familia || especie.genero) && (
-                            <span className="mt-0.5 text-[9px] text-gray-400">
-                              {[especie.orden, especie.familia, especie.genero]
-                                .filter(Boolean)
-                                .join(" · ")}
                             </span>
                           )}
                         </Link>
@@ -666,9 +665,7 @@ export default function AudiotecaPage() {
                 </div>
               ) : hasFilters ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">
-                    No se encontraron especies con esos filtros.
-                  </p>
+                  <p className="text-gray-600">No se encontraron especies con esos filtros.</p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">

@@ -8,6 +8,7 @@ import {Video as VideoIcon, RotateCcw, Search, X, Check, ExternalLink, Youtube} 
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
+import YearRangeFilter from "@/components/YearRangeFilter";
 import {Input} from "@/components/ui/input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
@@ -90,9 +91,7 @@ function AccordionButtonFilter({
         <div className="flex flex-col items-start">
           <span className="font-semibold">{label}</span>
           {selected.length > 0 && (
-            <span className="mt-1 text-xs font-normal text-gray-500">
-              {selected.join(", ")}
-            </span>
+            <span className="mt-1 text-xs font-normal text-gray-500">{selected.join(", ")}</span>
           )}
         </div>
       </AccordionTrigger>
@@ -274,21 +273,15 @@ function pauseOtherVideos(e: React.SyntheticEvent<HTMLVideoElement>) {
   });
 }
 
-function VideoPreview({
-  src,
-  poster,
-}: {
-  src: string;
-  poster?: string | null;
-}) {
+function VideoPreview({src, poster}: {src: string; poster?: string | null}) {
   const [paused, setPaused] = useState(true);
 
   return (
     <video
+      controls
       className={`h-full w-full object-cover transition-[filter] duration-700 ease-in-out ${
         paused ? "grayscale" : ""
       }`}
-      controls
       poster={poster ?? undefined}
       preload="none"
       src={src}
@@ -447,9 +440,7 @@ export default function VideotecaPage() {
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard
             headerContent={
-              <span className="text-3xl font-bold text-gray-700">
-                {stats?.total_videos ?? "—"}
-              </span>
+              <span className="text-3xl font-bold text-gray-700">{stats?.total_videos ?? "—"}</span>
             }
             label="Número de videos"
           />
@@ -474,9 +465,7 @@ export default function VideotecaPage() {
           <StatCard
             caption={stats?.video_destacado?.nombre_cientifico ?? null}
             label="Video destacado"
-            posterSrc={
-              stats?.video_destacado?.thumbnail ?? stats?.video_destacado?.fotografia_url
-            }
+            posterSrc={stats?.video_destacado?.thumbnail ?? stats?.video_destacado?.fotografia_url}
             videoSrc={stats?.video_destacado?.enlace}
           />
 
@@ -494,9 +483,7 @@ export default function VideotecaPage() {
         <section className="mb-12">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Videos por Especie</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Busca una especie para ver sus videos
-            </p>
+            <p className="mt-1 text-sm text-gray-600">Busca una especie para ver sus videos</p>
           </div>
 
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
@@ -562,64 +549,22 @@ export default function VideotecaPage() {
                     />
                     <CatalogoMultiSelect
                       apiPath="/api/videoteca/catalogos"
-                      placeholder="Catálogo Número (ej. KU 10441)"
+                      placeholder="CJ 10441"
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
                     />
 
-                    <div className="space-y-1.5">
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        placeholder="Año específico (ej. 2024)"
-                        type="number"
-                        value={anioEspecifico}
-                        onChange={(e) => {
-                          setAnioEspecifico(e.target.value);
-                          if (e.target.value) {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                          }
-                        }}
-                      />
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Desde"
-                          type="number"
-                          value={anioDesde}
-                          onChange={(e) => setAnioDesde(e.target.value)}
-                        />
-                        <span className="text-xs text-gray-400">—</span>
-                        <input
-                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
-                          disabled={!!anioEspecifico}
-                          max={new Date().getFullYear()}
-                          min={1900}
-                          placeholder="Hasta"
-                          type="number"
-                          value={anioHasta}
-                          onChange={(e) => setAnioHasta(e.target.value)}
-                        />
-                      </div>
-                      {(anioDesde || anioHasta || anioEspecifico) && (
-                        <button
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          type="button"
-                          onClick={() => {
-                            setAnioDesde("");
-                            setAnioHasta("");
-                            setAnioEspecifico("");
-                          }}
-                        >
-                          Limpiar años
-                        </button>
-                      )}
-                    </div>
+                    <YearRangeFilter
+                      desde={anioDesde}
+                      hasta={anioHasta}
+                      yearMax={new Date().getFullYear()}
+                      yearMin={1970}
+                      onChange={(d, h) => {
+                        setAnioDesde(d);
+                        setAnioHasta(h);
+                        if (anioEspecifico) setAnioEspecifico("");
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -678,22 +623,12 @@ export default function VideotecaPage() {
                           className="flex flex-1 flex-col items-center justify-center gap-0.5 border-t border-gray-100 px-2 py-3 no-underline hover:bg-gray-50"
                           href={href}
                         >
-                          <span
-                            className="text-sm font-semibold italic"
-                            style={{color: "#666666"}}
-                          >
+                          <span className="text-sm font-semibold italic" style={{color: "#666666"}}>
                             {especie.nombre_cientifico}
                           </span>
                           {especie.nombre_comun && (
                             <span className="text-xs" style={{color: "#888888"}}>
                               {especie.nombre_comun}
-                            </span>
-                          )}
-                          {(especie.orden || especie.familia || especie.genero) && (
-                            <span className="mt-1 text-[10px] text-gray-400">
-                              {[especie.orden, especie.familia, especie.genero]
-                                .filter(Boolean)
-                                .join(" · ")}
                             </span>
                           )}
                         </Link>
@@ -713,9 +648,7 @@ export default function VideotecaPage() {
                 </div>
               ) : hasFilters ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">
-                    No se encontraron especies con esos filtros.
-                  </p>
+                  <p className="text-gray-600">No se encontraron especies con esos filtros.</p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
