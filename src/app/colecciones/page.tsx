@@ -1,0 +1,747 @@
+"use client";
+
+import {useEffect, useMemo, useState} from "react";
+import {keepPreviousData, useQuery} from "@tanstack/react-query";
+import {ChevronLeft, ChevronRight, Check, RotateCcw, Search, X} from "lucide-react";
+
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Slider} from "@/components/ui/slider";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import ColeccionCard, {type ColeccionCardData} from "@/components/ColeccionCard";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+}
+
+function FilterCheckbox({checked}: {checked: boolean}) {
+  return (
+    <div
+      className={[
+        "flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-all",
+        checked
+          ? "border-[#4ba24b] bg-[#4ba24b] shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]"
+          : "border-gray-300 bg-white",
+      ].join(" ")}
+    >
+      <Check
+        className={[
+          "h-[10px] w-[10px] text-white transition-all",
+          checked ? "scale-100 opacity-100" : "scale-50 opacity-0",
+        ].join(" ")}
+        strokeWidth={3}
+      />
+    </div>
+  );
+}
+
+function AccordionButtonFilter({
+  label,
+  apiPath,
+  selected,
+  onChange,
+}: {
+  label: string;
+  apiPath: string;
+  selected: string[];
+  onChange: (val: string[]) => void;
+}) {
+  const {data: options = []} = useQuery<string[]>({
+    queryKey: [apiPath, "all"],
+    queryFn: async () => {
+      const res = await fetch(`${apiPath}?q=`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const toggle = (opt: string) => {
+    if (selected.includes(opt)) onChange(selected.filter((s) => s !== opt));
+    else onChange([...selected, opt]);
+  };
+
+  return (
+    <AccordionItem value={label}>
+      <AccordionTrigger className="!items-start">
+        <div className="flex flex-col items-start">
+          <span className="font-semibold">{label}</span>
+          {selected.length > 0 && (
+            <span className="mt-1 text-xs font-normal text-gray-500">
+              {selected.join(", ")}
+            </span>
+          )}
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        {options.length === 0 ? (
+          <p className="py-2 text-xs text-gray-500">No hay opciones disponibles</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {options.map((opt) => {
+              const isSelected = selected.includes(opt);
+              return (
+                <Button
+                  key={opt}
+                  className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
+                  size="sm"
+                  style={{
+                    borderColor: isSelected ? undefined : "#e8e8e8",
+                    color: isSelected ? undefined : "#2d2d2d",
+                  }}
+                  variant={isSelected ? "default" : "outline"}
+                  onClick={() => toggle(opt)}
+                >
+                  {opt}
+                </Button>
+              );
+            })}
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
+function TextMultiSelect({
+  apiPath,
+  placeholder,
+  selected,
+  onChange,
+  chipBg,
+  chipText,
+}: {
+  apiPath: string;
+  placeholder: string;
+  selected: string[];
+  onChange: (val: string[]) => void;
+  chipBg: string;
+  chipText: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length >= 2;
+  const {data: options = [], isFetching: loading} = useQuery<string[]>({
+    queryKey: [apiPath, debouncedQuery],
+    queryFn: async () => {
+      const res = await fetch(`${apiPath}?q=${encodeURIComponent(debouncedQuery)}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled,
+  });
+
+  const toggle = (val: string) => {
+    if (selected.includes(val)) onChange(selected.filter((s) => s !== val));
+    else onChange([...selected, val]);
+  };
+
+  return (
+    <div className="space-y-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Input
+              className="w-full pl-10 text-sm"
+              placeholder={placeholder}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpen(e.target.value.length >= 2);
+              }}
+              onFocus={() => {
+                if (query.length >= 2) setOpen(true);
+              }}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="z-[1100] max-h-[220px] w-[--radix-popover-trigger-width] overflow-y-auto p-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <Command shouldFilter={false}>
+            <CommandList>
+              {options.length === 0 && debouncedQuery.length >= 2 && (
+                <CommandEmpty className="px-4 py-3 text-sm text-gray-400">
+                  {loading ? "Buscando..." : "Sin resultados."}
+                </CommandEmpty>
+              )}
+              {options.length > 0 && (
+                <CommandGroup>
+                  {options.map((opt) => (
+                    <CommandItem
+                      key={opt}
+                      className="cursor-pointer"
+                      value={opt}
+                      onSelect={() => toggle(opt)}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected.includes(opt)} />
+                        <span className="text-sm">{opt}</span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {selected.map((opt) => (
+            <span
+              key={opt}
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${chipBg} ${chipText}`}
+            >
+              {opt.length > 30 ? opt.slice(0, 30) + "..." : opt}
+              <button type="button" onClick={() => toggle(opt)}>
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ColeccionesResponse {
+  colecciones: ColeccionCardData[];
+  total: number;
+  totalPaginas: number;
+  paginaActual: number;
+}
+
+interface EstadisticasColecciones {
+  total_registros: number;
+  total_especies: number;
+  total_colectores: number;
+  total_localidades: number;
+  anio_min: number | null;
+  anio_max: number | null;
+}
+
+function StatCard({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string | number | null;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center rounded-md border p-2"
+      style={{borderColor: "#dddddd"}}
+    >
+      <span
+        className="text-3xl font-bold sm:text-4xl"
+        style={{color: highlight ? "#f07304" : "#000000"}}
+      >
+        {value ?? "—"}
+      </span>
+      <h4
+        className="mt-1 text-center"
+        style={{
+          color: "#666666",
+          fontSize: "13px",
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+          fontWeight: "400",
+        }}
+      >
+        {label}
+      </h4>
+    </div>
+  );
+}
+
+export default function ColeccionesPage() {
+  const [familiasFilter, setFamiliasFilter] = useState<string[]>([]);
+  const [generosFilter, setGenerosFilter] = useState<string[]>([]);
+  const [especiesFilter, setEspeciesFilter] = useState<string[]>([]);
+  const [estadiosFilter, setEstadiosFilter] = useState<string[]>([]);
+  const [sexosFilter, setSexosFilter] = useState<string[]>([]);
+  const [estadosFilter, setEstadosFilter] = useState<string[]>([]);
+  const [colectoresFilter, setColectoresFilter] = useState<string[]>([]);
+  const [localidadesFilter, setLocalidadesFilter] = useState<string[]>([]);
+  const [catalogosFilter, setCatalogosFilter] = useState<string[]>([]);
+  const [scInput, setScInput] = useState("");
+  const [anioEspecifico, setAnioEspecifico] = useState("");
+  const [anioDesde, setAnioDesde] = useState("");
+  const [anioHasta, setAnioHasta] = useState("");
+  const [elevRange, setElevRange] = useState<[number, number] | null>(null);
+  const [pagina, setPagina] = useState(1);
+
+  const debouncedSc = useDebounce(scInput, 300);
+
+  // Rango disponible de elevación
+  const {data: elevRangeData} = useQuery<{min: number; max: number}>({
+    queryKey: ["colecciones", "elevacion-range"],
+    queryFn: async () => {
+      const res = await fetch("/api/colecciones/elevacion-range");
+      if (!res.ok) return {min: 0, max: 6000};
+      return res.json();
+    },
+  });
+
+  useEffect(() => {
+    if (elevRangeData && elevRange === null) {
+      setElevRange([elevRangeData.min, elevRangeData.max]);
+    }
+  }, [elevRangeData, elevRange]);
+
+  const elevMin = elevRangeData?.min ?? 0;
+  const elevMax = elevRangeData?.max ?? 6000;
+  const elevActive =
+    elevRange !== null && (elevRange[0] !== elevMin || elevRange[1] !== elevMax);
+
+  // Resetear página al cambiar filtros
+  useEffect(() => {
+    setPagina(1);
+  }, [
+    familiasFilter,
+    generosFilter,
+    especiesFilter,
+    estadiosFilter,
+    sexosFilter,
+    estadosFilter,
+    colectoresFilter,
+    localidadesFilter,
+    catalogosFilter,
+    debouncedSc,
+    anioEspecifico,
+    anioDesde,
+    anioHasta,
+    elevRange,
+  ]);
+
+  const hasFilters =
+    familiasFilter.length > 0 ||
+    generosFilter.length > 0 ||
+    especiesFilter.length > 0 ||
+    estadiosFilter.length > 0 ||
+    sexosFilter.length > 0 ||
+    estadosFilter.length > 0 ||
+    colectoresFilter.length > 0 ||
+    localidadesFilter.length > 0 ||
+    catalogosFilter.length > 0 ||
+    scInput.trim().length > 0 ||
+    anioEspecifico.length > 0 ||
+    anioDesde.length > 0 ||
+    anioHasta.length > 0 ||
+    elevActive;
+
+  const clearFilters = () => {
+    setFamiliasFilter([]);
+    setGenerosFilter([]);
+    setEspeciesFilter([]);
+    setEstadiosFilter([]);
+    setSexosFilter([]);
+    setEstadosFilter([]);
+    setColectoresFilter([]);
+    setLocalidadesFilter([]);
+    setCatalogosFilter([]);
+    setScInput("");
+    setAnioEspecifico("");
+    setAnioDesde("");
+    setAnioHasta("");
+    if (elevRangeData) setElevRange([elevRangeData.min, elevRangeData.max]);
+  };
+
+  const queryParams = useMemo(() => {
+    const p = new URLSearchParams();
+    if (familiasFilter.length) p.set("familias", familiasFilter.join("||"));
+    if (generosFilter.length) p.set("generos", generosFilter.join("||"));
+    if (especiesFilter.length) p.set("especies", especiesFilter.join("||"));
+    if (estadiosFilter.length) p.set("estadios", estadiosFilter.join("||"));
+    if (sexosFilter.length) p.set("sexos", sexosFilter.join("||"));
+    if (estadosFilter.length) p.set("estados", estadosFilter.join("||"));
+    if (colectoresFilter.length) p.set("colectores", colectoresFilter.join("||"));
+    if (localidadesFilter.length) p.set("localidades", localidadesFilter.join("||"));
+    if (catalogosFilter.length) p.set("catalogos", catalogosFilter.join("||"));
+    if (debouncedSc.trim()) p.set("sc", debouncedSc.trim());
+    if (anioEspecifico) p.set("anio", anioEspecifico);
+    if (anioDesde) p.set("anio_desde", anioDesde);
+    if (anioHasta) p.set("anio_hasta", anioHasta);
+    if (elevActive && elevRange) {
+      p.set("elev_min", String(elevRange[0]));
+      p.set("elev_max", String(elevRange[1]));
+    }
+    p.set("pagina", String(pagina));
+    return p.toString();
+  }, [
+    familiasFilter,
+    generosFilter,
+    especiesFilter,
+    estadiosFilter,
+    sexosFilter,
+    estadosFilter,
+    colectoresFilter,
+    localidadesFilter,
+    catalogosFilter,
+    debouncedSc,
+    anioEspecifico,
+    anioDesde,
+    anioHasta,
+    elevActive,
+    elevRange,
+    pagina,
+  ]);
+
+  const {data, isLoading, isFetching} = useQuery<ColeccionesResponse>({
+    queryKey: ["colecciones", queryParams],
+    queryFn: async () => {
+      const res = await fetch(`/api/colecciones?${queryParams}`);
+      if (!res.ok) throw new Error("Error al cargar colecciones");
+      return res.json();
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const {data: stats} = useQuery<EstadisticasColecciones>({
+    queryKey: ["colecciones", "estadisticas"],
+    queryFn: async () => {
+      const res = await fetch("/api/colecciones/estadisticas");
+      if (!res.ok) throw new Error("Error al cargar estadísticas");
+      return res.json();
+    },
+  });
+
+  const colecciones = data?.colecciones ?? [];
+  const total = data?.total ?? 0;
+  const totalPaginas = data?.totalPaginas ?? 1;
+
+  const buildSlug = (nombre: string | null) =>
+    nombre ? nombre.replace(/\s+/g, "-") : "";
+
+  return (
+    <div className="bg-background min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-gray-900">Colecciones</h1>
+          <p className="mt-2 text-gray-600">
+            Listado de registros de la colección biológica
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard
+            highlight
+            label="Registros"
+            value={stats?.total_registros?.toLocaleString() ?? null}
+          />
+          <StatCard
+            label="Especies"
+            value={stats?.total_especies?.toLocaleString() ?? null}
+          />
+          <StatCard
+            label="Colectores"
+            value={stats?.total_colectores?.toLocaleString() ?? null}
+          />
+          <StatCard
+            label="Localidades"
+            value={stats?.total_localidades?.toLocaleString() ?? null}
+          />
+          <StatCard
+            label="Rango temporal"
+            value={
+              stats?.anio_min && stats?.anio_max
+                ? `${stats.anio_min}–${stats.anio_max}`
+                : null
+            }
+          />
+        </div>
+
+        <section className="mb-12">
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+            <aside className="lg:w-80 lg:flex-shrink-0">
+              <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
+                <div className="flex flex-shrink-0 justify-end px-6 pt-4 pb-2">
+                  <Button
+                    className="gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+                    disabled={!hasFilters}
+                    type="button"
+                    variant="ghost"
+                    onClick={clearFilters}
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
+                    Limpiar
+                  </Button>
+                </div>
+
+                <div className="mt-1 min-h-0 w-full flex-1 border-t">
+                  <Accordion
+                    className="[&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:px-6"
+                    type="multiple"
+                  >
+                    <AccordionButtonFilter
+                      apiPath="/api/colecciones/familias"
+                      label="Familia"
+                      selected={familiasFilter}
+                      onChange={setFamiliasFilter}
+                    />
+                    <AccordionButtonFilter
+                      apiPath="/api/colecciones/generos"
+                      label="Género"
+                      selected={generosFilter}
+                      onChange={setGenerosFilter}
+                    />
+                    <AccordionButtonFilter
+                      apiPath="/api/colecciones/estadios"
+                      label="Estadio"
+                      selected={estadiosFilter}
+                      onChange={setEstadiosFilter}
+                    />
+                    <AccordionButtonFilter
+                      apiPath="/api/colecciones/sexos"
+                      label="Sexo"
+                      selected={sexosFilter}
+                      onChange={setSexosFilter}
+                    />
+                    <AccordionButtonFilter
+                      apiPath="/api/colecciones/estados"
+                      label="Estado"
+                      selected={estadosFilter}
+                      onChange={setEstadosFilter}
+                    />
+                  </Accordion>
+
+                  <div className="space-y-3 px-6 py-4">
+                    <TextMultiSelect
+                      apiPath="/api/colecciones/especies"
+                      chipBg="bg-amber-100"
+                      chipText="text-amber-800"
+                      placeholder="Especie (nombre científico)"
+                      selected={especiesFilter}
+                      onChange={setEspeciesFilter}
+                    />
+                    <TextMultiSelect
+                      apiPath="/api/colecciones/colectores"
+                      chipBg="bg-blue-100"
+                      chipText="text-blue-800"
+                      placeholder="Colector"
+                      selected={colectoresFilter}
+                      onChange={setColectoresFilter}
+                    />
+                    <TextMultiSelect
+                      apiPath="/api/colecciones/localidades"
+                      chipBg="bg-green-100"
+                      chipText="text-green-800"
+                      placeholder="Localidad"
+                      selected={localidadesFilter}
+                      onChange={setLocalidadesFilter}
+                    />
+                    <TextMultiSelect
+                      apiPath="/api/colecciones/catalogos"
+                      chipBg="bg-purple-100"
+                      chipText="text-purple-800"
+                      placeholder="Número de museo (ej. QCAZ 12345)"
+                      selected={catalogosFilter}
+                      onChange={setCatalogosFilter}
+                    />
+
+                    <div className="relative">
+                      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                      <Input
+                        className="w-full pl-10 text-sm"
+                        placeholder="N° de campo (sc)"
+                        value={scInput}
+                        onChange={(e) => setScInput(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <input
+                        className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                        max={new Date().getFullYear()}
+                        min={1900}
+                        placeholder="Año específico"
+                        type="number"
+                        value={anioEspecifico}
+                        onChange={(e) => {
+                          setAnioEspecifico(e.target.value);
+                          if (e.target.value) {
+                            setAnioDesde("");
+                            setAnioHasta("");
+                          }
+                        }}
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Desde"
+                          type="number"
+                          value={anioDesde}
+                          onChange={(e) => setAnioDesde(e.target.value)}
+                        />
+                        <span className="text-xs text-gray-400">—</span>
+                        <input
+                          className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700"
+                          disabled={!!anioEspecifico}
+                          max={new Date().getFullYear()}
+                          min={1900}
+                          placeholder="Hasta"
+                          type="number"
+                          value={anioHasta}
+                          onChange={(e) => setAnioHasta(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Elevación */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-700">
+                          Elevación (msnm)
+                        </span>
+                        {elevActive && (
+                          <button
+                            className="text-[10px] text-gray-400 hover:text-gray-600"
+                            type="button"
+                            onClick={() =>
+                              setElevRange([elevMin, elevMax])
+                            }
+                          >
+                            Limpiar
+                          </button>
+                        )}
+                      </div>
+                      <Slider
+                        className="w-full"
+                        max={elevMax}
+                        min={elevMin}
+                        step={50}
+                        value={elevRange ?? [elevMin, elevMax]}
+                        onValueChange={(v) =>
+                          setElevRange([v[0] ?? elevMin, v[1] ?? elevMax])
+                        }
+                      />
+                      <div className="text-muted-foreground flex items-center justify-between text-xs">
+                        <span>{elevMin}</span>
+                        <span className="text-foreground font-semibold">
+                          {elevRange ? elevRange[0] : elevMin} —{" "}
+                          {elevRange ? elevRange[1] : elevMax}
+                        </span>
+                        <span>{elevMax}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <div className="min-w-0 flex-1">
+              <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
+                <span>
+                  {`${total.toLocaleString()} ${total === 1 ? "registro" : "registros"}`}
+                  {totalPaginas > 1 &&
+                    ` · Página ${pagina} de ${totalPaginas}`}
+                </span>
+                {isFetching && (
+                  <span
+                    aria-label="Actualizando"
+                    className="border-muted-foreground/30 border-t-muted-foreground inline-block h-3 w-3 animate-spin rounded-full border-2"
+                  />
+                )}
+              </div>
+
+              {isLoading && colecciones.length === 0 ? (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                  <p className="text-gray-600">Cargando colecciones...</p>
+                </div>
+              ) : colecciones.length > 0 ? (
+                <>
+                  <div
+                    className={`mb-6 flex flex-col gap-1.5 transition-opacity duration-200 ${
+                      isFetching ? "opacity-60" : "opacity-100"
+                    }`}
+                  >
+                    {colecciones.map((c) => {
+                      const slug = buildSlug(c.nombre_cientifico ?? null);
+                      const href = slug
+                        ? `/sapopedia/species/${encodeURIComponent(slug)}/colecciones/${c.id_coleccion}?from=colecciones`
+                        : undefined;
+                      return (
+                        <ColeccionCard
+                          key={c.id_coleccion}
+                          coleccion={c}
+                          href={href}
+                          showEspecie
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {totalPaginas > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        disabled={pagina <= 1}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </Button>
+                      <span className="text-sm text-gray-600">
+                        {pagina} / {totalPaginas}
+                      </span>
+                      <Button
+                        disabled={pagina >= totalPaginas}
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setPagina((p) => Math.min(totalPaginas, p + 1))
+                        }
+                      >
+                        Siguiente
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : hasFilters ? (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                  <p className="text-gray-600">
+                    No se encontraron registros con esos filtros.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                  <p className="text-gray-600">No hay registros publicados.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

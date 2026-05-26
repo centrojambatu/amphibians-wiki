@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import {ChevronDown} from "lucide-react";
+import {useSearchParams} from "next/navigation";
+import {ArrowLeft, ChevronDown} from "lucide-react";
 import {ColumnsPhotoAlbum, type Photo} from "react-photo-album";
 import "react-photo-album/columns.css";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
@@ -204,6 +205,8 @@ export default function ColeccionDetailClient({
   genero,
 }: ColeccionDetailClientProps) {
   const c = coleccion;
+  const searchParams = useSearchParams();
+  const cameFromColecciones = searchParams?.get("from") === "colecciones";
 
   const catalogoLabel = (() => {
     const acronimo = c.catalogo_museo?.includes(" - ")
@@ -302,6 +305,15 @@ export default function ColeccionDetailClient({
 
   return (
     <main className="container mx-auto max-w-5xl space-y-6 px-4 py-6">
+
+      {/* Back link al origen */}
+      <Link
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+        href={cameFromColecciones ? "/colecciones" : coleccionesUrl}
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        {cameFromColecciones ? "Volver a colecciones" : "Volver a colecciones de la especie"}
+      </Link>
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-500">
