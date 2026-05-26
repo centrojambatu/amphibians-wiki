@@ -120,6 +120,115 @@ function AccordionButtonFilter({
   );
 }
 
+function EspecieSelect({
+  selected,
+  onChange,
+}: {
+  selected: string | null;
+  onChange: (val: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length >= 2;
+  const {data: results = [], isFetching: loading} = useQuery<
+    {nombre_cientifico: string; nombre_comun: string | null}[]
+  >({
+    queryKey: ["colecciones", "especies", debouncedQuery],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/colecciones/especies?q=${encodeURIComponent(debouncedQuery)}`,
+      );
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.slice(0, 10);
+    },
+    enabled,
+  });
+
+  const handleSelect = (nombre: string) => {
+    if (selected === nombre) {
+      onChange(null);
+    } else {
+      onChange(nombre);
+    }
+    setQuery("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Input
+              className="w-full pl-10 text-sm"
+              placeholder="Especie (nombre científico o común)"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpen(e.target.value.length >= 2);
+              }}
+              onFocus={() => {
+                if (query.length >= 2) setOpen(true);
+              }}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="z-[1100] w-[--radix-popover-trigger-width] p-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <Command>
+            <CommandList>
+              {results.length === 0 && debouncedQuery.length >= 2 && (
+                <CommandEmpty className="px-4 py-3 text-sm text-gray-400">
+                  {loading ? "Buscando..." : "Sin resultados."}
+                </CommandEmpty>
+              )}
+              {results.length > 0 && (
+                <CommandGroup>
+                  {results.map((r) => (
+                    <CommandItem
+                      key={r.nombre_cientifico}
+                      className="group cursor-pointer"
+                      onSelect={() => handleSelect(r.nombre_cientifico)}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FilterCheckbox checked={selected === r.nombre_cientifico} />
+                        <div className="flex flex-col">
+                          <i className="text-sm">{r.nombre_cientifico}</i>
+                          {r.nombre_comun && (
+                            <span className="text-[11px] text-gray-500">
+                              {r.nombre_comun}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {selected && (
+        <div className="flex flex-wrap gap-1">
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] italic text-green-800">
+            {selected}
+            <button type="button" onClick={() => onChange(null)}>
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TextMultiSelect({
   apiPath,
   placeholder,
@@ -281,7 +390,7 @@ function StatCard({
 export default function ColeccionesPage() {
   const [familiasFilter, setFamiliasFilter] = useState<string[]>([]);
   const [generosFilter, setGenerosFilter] = useState<string[]>([]);
-  const [especiesFilter, setEspeciesFilter] = useState<string[]>([]);
+  const [especieFilter, setEspecieFilter] = useState<string | null>(null);
   const [estadiosFilter, setEstadiosFilter] = useState<string[]>([]);
   const [sexosFilter, setSexosFilter] = useState<string[]>([]);
   const [estadosFilter, setEstadosFilter] = useState<string[]>([]);
@@ -324,7 +433,7 @@ export default function ColeccionesPage() {
   }, [
     familiasFilter,
     generosFilter,
-    especiesFilter,
+    especieFilter,
     estadiosFilter,
     sexosFilter,
     estadosFilter,
@@ -341,7 +450,7 @@ export default function ColeccionesPage() {
   const hasFilters =
     familiasFilter.length > 0 ||
     generosFilter.length > 0 ||
-    especiesFilter.length > 0 ||
+    !!especieFilter ||
     estadiosFilter.length > 0 ||
     sexosFilter.length > 0 ||
     estadosFilter.length > 0 ||
@@ -357,7 +466,7 @@ export default function ColeccionesPage() {
   const clearFilters = () => {
     setFamiliasFilter([]);
     setGenerosFilter([]);
-    setEspeciesFilter([]);
+    setEspecieFilter(null);
     setEstadiosFilter([]);
     setSexosFilter([]);
     setEstadosFilter([]);
@@ -375,7 +484,7 @@ export default function ColeccionesPage() {
     const p = new URLSearchParams();
     if (familiasFilter.length) p.set("familias", familiasFilter.join("||"));
     if (generosFilter.length) p.set("generos", generosFilter.join("||"));
-    if (especiesFilter.length) p.set("especies", especiesFilter.join("||"));
+    if (especieFilter) p.set("especies", especieFilter);
     if (estadiosFilter.length) p.set("estadios", estadiosFilter.join("||"));
     if (sexosFilter.length) p.set("sexos", sexosFilter.join("||"));
     if (estadosFilter.length) p.set("estados", estadosFilter.join("||"));
@@ -395,7 +504,7 @@ export default function ColeccionesPage() {
   }, [
     familiasFilter,
     generosFilter,
-    especiesFilter,
+    especieFilter,
     estadiosFilter,
     sexosFilter,
     estadosFilter,
@@ -531,13 +640,9 @@ export default function ColeccionesPage() {
                   </Accordion>
 
                   <div className="space-y-3 px-6 py-4">
-                    <TextMultiSelect
-                      apiPath="/api/colecciones/especies"
-                      chipBg="bg-amber-100"
-                      chipText="text-amber-800"
-                      placeholder="Especie (nombre científico)"
-                      selected={especiesFilter}
-                      onChange={setEspeciesFilter}
+                    <EspecieSelect
+                      selected={especieFilter}
+                      onChange={setEspecieFilter}
                     />
                     <TextMultiSelect
                       apiPath="/api/colecciones/colectores"

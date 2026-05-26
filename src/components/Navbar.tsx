@@ -69,7 +69,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-[100] bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
+    <header className="sticky top-0 z-[1000] bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -100,7 +100,7 @@ export default function Navbar() {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                   {openSubmenu === link.label && (
-                    <div className="absolute left-0 top-full z-[110] min-w-[180px] rounded-md border bg-background py-0 px-0.5 shadow-lg">
+                    <div className="absolute left-0 top-full z-[1010] min-w-[180px] rounded-md border bg-background py-0 px-0.5 shadow-lg">
                       {link.submenu.map((sublink) => (
                         sublink.external ? (
                           <a
