@@ -589,7 +589,13 @@ export default function ColeccionesPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
             <aside className="lg:w-80 lg:flex-shrink-0">
               <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
-                <div className="flex flex-shrink-0 justify-end px-6 pt-4 pb-2">
+                <div className="flex-shrink-0 px-6 pt-4 pb-2">
+                  <EspecieSelect
+                    selected={especieFilter}
+                    onChange={setEspecieFilter}
+                  />
+                </div>
+                <div className="flex flex-shrink-0 justify-end px-6 pb-2">
                   <Button
                     className="gap-1.5 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
                     disabled={!hasFilters}
@@ -640,10 +646,6 @@ export default function ColeccionesPage() {
                   </Accordion>
 
                   <div className="space-y-3 px-6 py-4">
-                    <EspecieSelect
-                      selected={especieFilter}
-                      onChange={setEspecieFilter}
-                    />
                     <TextMultiSelect
                       apiPath="/api/colecciones/colectores"
                       chipBg="bg-blue-100"
