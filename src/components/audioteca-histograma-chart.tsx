@@ -53,36 +53,27 @@ export default function AudiotecaHistogramaChart({
       </div>
 
       {pocosDatos ? (
-        // Layout con barras de ancho fijo, valor encima y nombre debajo
-        <div className="flex w-full items-end justify-center gap-6 pt-6">
+        // Layout con barras de ancho fijo (pocos datos)
+        <div
+          className="flex w-full items-end justify-center gap-6"
+          style={{height: ALTURA_MAX_BARRA + 16}}
+        >
           <TooltipProvider delayDuration={0}>
             {puntosOrdenados.map((punto) => {
               const altura = (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA;
+
               return (
                 <Tooltip key={punto.colector}>
                   <TooltipTrigger asChild>
                     <button
-                      aria-label={`${punto.cantidad} cantos de ${punto.colector}`}
-                      className="group flex flex-col items-center focus:outline-none"
+                      aria-label={`${String(punto.cantidad)} cantos de ${punto.colector}`}
+                      className="w-16 cursor-pointer rounded-t transition-opacity hover:opacity-90 focus:outline-none"
+                      style={{
+                        height: Math.max(altura, 6),
+                        backgroundColor: COLOR_BARRA,
+                      }}
                       type="button"
-                    >
-                      <span className="mb-1 text-xs font-semibold tabular-nums text-gray-700">
-                        {punto.cantidad}
-                      </span>
-                      <div
-                        className="w-16 rounded-t transition-opacity group-hover:opacity-90"
-                        style={{
-                          height: Math.max(altura, 6),
-                          backgroundColor: COLOR_BARRA,
-                        }}
-                      />
-                      <span
-                        className="mt-2 line-clamp-2 w-20 break-words text-center text-[11px] text-gray-600"
-                        title={punto.colector}
-                      >
-                        {punto.colector}
-                      </span>
-                    </button>
+                    />
                   </TooltipTrigger>
                   <TooltipContent
                     className="border border-gray-200 bg-white text-gray-900 shadow-md"
