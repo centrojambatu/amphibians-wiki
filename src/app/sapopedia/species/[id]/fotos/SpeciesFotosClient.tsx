@@ -1,6 +1,6 @@
 "use client";
 
-import {ArrowLeft, ExternalLink, Eye} from "lucide-react";
+import {ArrowLeft} from "lucide-react";
 import Link from "next/link";
 import {useEffect, useMemo, useState} from "react";
 import {ColumnsPhotoAlbum, type Photo} from "react-photo-album";
@@ -16,12 +16,16 @@ import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 
-import {useGbifOccurrence} from "@/lib/gbif";
-
 import {SpeciesFotoItem} from "./types";
 
 interface SpeciesFotosClientProps {
   nombreCientifico: string;
+  orden?: string | null;
+  ordenId?: number | null;
+  familia?: string | null;
+  familiaId?: number | null;
+  genero?: string | null;
+  generoId?: number | null;
   especieUrl: string;
   fromFototeca: boolean;
   fototecaUrl: string;
@@ -31,21 +35,110 @@ interface SpeciesFotosClientProps {
 
 type AlbumPhoto = Photo & {item: SpeciesFotoItem};
 
-function buildCaption(foto: SpeciesFotoItem): string {
-  const lines: string[] = [];
+function formatFechaEs(fecha: string | null | undefined): string | null {
+  if (!fecha) return null;
+  const d = new Date(fecha);
+  if (Number.isNaN(d.getTime())) return null;
+  const day = String(d.getUTCDate());
+  const month = d.toLocaleDateString("es-ES", {month: "long", timeZone: "UTC"});
+  const year = String(d.getUTCFullYear());
+  return `${day} ${month} ${year}`;
+}
 
-  if (foto.categoria) lines.push(`Categoría: ${foto.categoria}`);
-  if (foto.descripcion) lines.push(foto.descripcion);
-  if (foto.autor) lines.push(`Autor: ${foto.autor}`);
-  if (foto.localidad) lines.push(`Localidad: ${foto.localidad}`);
-  if (foto.latitud != null) lines.push(`Latitud: ${String(foto.latitud)}`);
-  if (foto.longitud != null) lines.push(`Longitud: ${String(foto.longitud)}`);
+function buildNumeroMuseo(foto: SpeciesFotoItem): string | null {
+  const acronimo = foto.catalogo_museo?.includes(" - ")
+    ? foto.catalogo_museo.split(" - ").pop()
+    : foto.catalogo_museo;
+  const numeroMuseo = [acronimo, foto.numero_museo].filter(Boolean).join(" ");
+  return numeroMuseo || null;
+}
 
-  return lines.join("\n");
+function buildCaption(foto: SpeciesFotoItem, speciesUrlId: string): React.ReactNode {
+  const lines: React.ReactNode[] = [];
+  const numeroMuseo = buildNumeroMuseo(foto);
+
+  if (numeroMuseo) {
+    if (foto.fuente === "coleccion" && foto.coleccion_id) {
+      lines.push(
+        <a
+          key="museo"
+          className="citation-link"
+          href={`/sapopedia/species/${speciesUrlId}/colecciones/${String(foto.coleccion_id)}`}
+          rel="noopener noreferrer"
+          style={{fontWeight: 600}}
+          target="_blank"
+        >
+          {numeroMuseo}
+        </a>,
+      );
+    } else if (foto.fuente === "coleccion_externa" && foto.catalogo_museo && foto.numero_museo) {
+      const gbifSearchHref = `https://www.gbif.org/occurrence/search?q=${encodeURIComponent(
+        [foto.catalogo_museo, foto.numero_museo].filter(Boolean).join(" ").trim(),
+      )}`;
+      lines.push(
+        <a
+          key="museo"
+          className="citation-link"
+          href={gbifSearchHref}
+          rel="noopener noreferrer"
+          style={{fontWeight: 600}}
+          target="_blank"
+        >
+          {numeroMuseo}
+        </a>,
+      );
+    } else {
+      lines.push(
+        <span key="museo" style={{fontWeight: 600}}>
+          {numeroMuseo}
+        </span>,
+      );
+    }
+  }
+  if (foto.descripcion) lines.push(<span key="descripcion">{foto.descripcion}</span>);
+  if (foto.in_situ !== null && foto.in_situ !== undefined) {
+    lines.push(
+      <span key="in-situ" style={{fontStyle: "italic"}}>
+        {foto.in_situ ? "in situ" : "ex situ"}
+      </span>,
+    );
+  }
+  if (foto.localidad) lines.push(<span key="localidad">{foto.localidad}</span>);
+  const fechaFmt = formatFechaEs(foto.fecha);
+  if (fechaFmt) lines.push(<span key="fecha">{fechaFmt}</span>);
+  if (foto.autor || foto.tipo_licencia) {
+    lines.push(
+      <span key="autor">
+        {foto.autor}
+        {foto.autor && foto.tipo_licencia && (
+          <span style={{color: "#f07304", margin: "0 6px"}}>|</span>
+        )}
+        {foto.tipo_licencia}
+      </span>,
+    );
+  }
+
+  if (lines.length === 0) return null;
+
+  return (
+    <span style={{display: "block"}}>
+      {lines.map((line, i) => (
+        <span key={i} style={{display: "block"}}>
+          {line}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 export default function SpeciesFotosClient({
   nombreCientifico,
+  orden,
+  ordenId,
+  familia,
+  familiaId,
+  genero,
+  generoId,
   especieUrl,
   fromFototeca,
   fototecaUrl,
@@ -58,15 +151,19 @@ export default function SpeciesFotosClient({
     () =>
       allItems.map((foto) => ({
         src: foto.enlace || "",
-        alt: foto.nombre || "Fotografía",
-        title: foto.nombre || undefined,
-        description: buildCaption(foto),
+        alt: nombreCientifico || foto.nombre || "Fotografía",
+        title: (
+          <span style={{paddingLeft: 56, display: "inline-block"}}>
+            <i style={{fontStyle: "italic"}}>{nombreCientifico}</i>
+          </span>
+        ) as unknown as string,
+        description: buildCaption(foto, speciesUrlId),
       })),
-    [allItems],
+    [allItems, speciesUrlId, nombreCientifico],
   );
 
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [, setCurrentSlide] = useState<number>(0);
   const [dims, setDims] = useState<Record<string, {w: number; h: number}>>({});
 
   useEffect(() => {
@@ -80,7 +177,7 @@ export default function SpeciesFotosClient({
         if (!cancelled) {
           setDims((prev) => ({
             ...prev,
-            [f.enlace as string]: {w: img.naturalWidth, h: img.naturalHeight},
+            [f.enlace!]: {w: img.naturalWidth, h: img.naturalHeight},
           }));
         }
       };
@@ -100,64 +197,6 @@ export default function SpeciesFotosClient({
     setCurrentSlide(finalIdx);
   };
 
-  const currentFoto = allItems[currentSlide];
-  const {data: currentGbifUrl} = useGbifOccurrence(
-    currentFoto?.fuente === "coleccion_externa" ? currentFoto.catalogo_museo : null,
-    currentFoto?.fuente === "coleccion_externa" ? currentFoto.numero_museo : null,
-  );
-
-  const linkButton = (() => {
-    if (!currentFoto) return null;
-    if (currentFoto.fuente === "coleccion" && currentFoto.coleccion_id) {
-      return (
-        <a
-          key="ctx-link"
-          className="yarl__button"
-          href={`/sapopedia/species/${speciesUrlId}/colecciones/${String(currentFoto.coleccion_id)}`}
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "0 10px",
-            fontSize: 12,
-            fontWeight: 600,
-          }}
-          target="_blank"
-        >
-          Ver colección
-          <ExternalLink size={14} />
-        </a>
-      );
-    }
-    if (currentFoto.fuente === "coleccion_externa") {
-      if (!currentGbifUrl) return null;
-
-      return (
-        <a
-          key="ctx-link"
-          className="yarl__button"
-          href={currentGbifUrl}
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "0 10px",
-            fontSize: 12,
-            fontWeight: 600,
-          }}
-          target="_blank"
-        >
-          Ver en GBIF
-          <ExternalLink size={14} />
-        </a>
-      );
-    }
-
-    return null;
-  })();
-
   return (
     <div className="bg-background min-h-screen">
       <main className="container mx-auto px-4 py-8">
@@ -170,7 +209,7 @@ export default function SpeciesFotosClient({
                   href={fototecaUrl}
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Volver a Fototeca
+                  Volver
                 </Link>
               ) : (
                 <Link
@@ -182,16 +221,47 @@ export default function SpeciesFotosClient({
                 </Link>
               )}
             </div>
-            <Link
-              className="hover:text-primary inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 no-underline transition-colors hover:bg-gray-50"
-              href={especieUrl}
-            >
-              <Eye className="h-4 w-4" />
-              Ver ficha
-            </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Fotos de <span className="italic">{nombreCientifico}</span>
+          <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">
+            {orden && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/order/${String(ordenId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {orden}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {familia && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/family/${String(familiaId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {familia}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {genero && (
+              <>
+                <Link
+                  className="text-base font-medium italic"
+                  href={`/sapopedia/genus/${String(generoId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {genero}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            <Link className="italic" href={especieUrl} style={{color: "inherit"}}>
+              {nombreCientifico}
+            </Link>
           </h1>
         </div>
 
@@ -200,7 +270,7 @@ export default function SpeciesFotosClient({
         ) : (
           (() => {
             const albumPhotos: AlbumPhoto[] = allItems.map((f) => {
-              const d = dims[f.enlace as string];
+              const d = dims[f.enlace!];
 
               return {
                 src: f.enlace || "",
@@ -217,7 +287,7 @@ export default function SpeciesFotosClient({
                 photos={albumPhotos}
                 render={{
                   image: (props) => (
-                    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
+                    // eslint-disable-next-line jsx-a11y/alt-text
                     <img
                       {...props}
                       className="cursor-zoom-in rounded-md grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
@@ -225,7 +295,7 @@ export default function SpeciesFotosClient({
                   ),
                 }}
                 spacing={6}
-                onClick={({photo}) => openLightbox((photo as AlbumPhoto).item)}
+                onClick={({photo}) => openLightbox(photo.item)}
               />
             );
           })()
@@ -243,7 +313,7 @@ export default function SpeciesFotosClient({
         plugins={[Captions, Counter, Fullscreen, Thumbnails, Zoom]}
         slides={slides}
         thumbnails={{position: "bottom", width: 80, height: 60, gap: 6}}
-        toolbar={{buttons: [...(linkButton ? [linkButton] : []), "close"]}}
+        toolbar={{buttons: ["close"]}}
         zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
       />
     </div>

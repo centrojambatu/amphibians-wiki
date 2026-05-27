@@ -8,6 +8,9 @@ interface Props {
   height?: number;
 }
 
+const WS_PLAY_EVENT = "wavesurfer-play";
+let wsPlayCounter = 0;
+
 function formatTime(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) return "0:00";
   const m = Math.floor(seconds / 60);
@@ -31,6 +34,19 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
   useEffect(() => {
     let cancelled = false;
     let ws: any = null;
+    const instanceId = ++wsPlayCounter;
+    const onOtherPlay = (e: Event) => {
+      const detail = (e as CustomEvent<{id: number}>).detail;
+      if (detail?.id !== instanceId && ws) {
+        try {
+          ws.pause();
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    window.addEventListener(WS_PLAY_EVENT, onOtherPlay);
 
     const init = async () => {
       const waveformEl = waveformContainerRef.current;
@@ -110,7 +126,13 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
         ws.on("seeking", onAudioProcess);
         ws.on("timeupdate", onAudioProcess);
         ws.on("finish", onFinish);
-        ws.on("play", () => setIsPlaying(true));
+        ws.on("play", () => {
+          setIsPlaying(true);
+          // Avisar a otras instancias para que se pausen
+          window.dispatchEvent(
+            new CustomEvent(WS_PLAY_EVENT, {detail: {id: instanceId}}),
+          );
+        });
         ws.on("pause", () => setIsPlaying(false));
 
         const overlay = tintOverlayRef.current;
@@ -132,6 +154,7 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
 
     return () => {
       cancelled = true;
+      window.removeEventListener(WS_PLAY_EVENT, onOtherPlay);
       if (ws) {
         try {
           ws.destroy();

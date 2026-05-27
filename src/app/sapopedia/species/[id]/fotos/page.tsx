@@ -34,7 +34,7 @@ async function getFotosByTaxon(taxonId: number): Promise<SpeciesFotoItem[]> {
     .from("fotografia")
     .select(
       `id_fotografia, nombre, enlace, "descripción", fecha, autor, localidad,
-       latitud, longitud, tipo_licencia, observaciones,
+       latitud, longitud, tipo_licencia, observaciones, in_situ,
        coleccion_id, coleccion_externa_id, catalogo_awe_id,
        coleccion:coleccion_id(catalogo_museo, numero_museo),
        coleccion_externa:coleccion_externa_id(catalogo_museo, numero_museo),
@@ -74,6 +74,7 @@ async function getFotosByTaxon(taxonId: number): Promise<SpeciesFotoItem[]> {
       numero_museo: f.coleccion?.numero_museo ?? f.coleccion_externa?.numero_museo ?? null,
       categoria_id: f.catalogo_awe_id ?? null,
       categoria: f.catalogo_awe?.nombre ?? null,
+      in_situ: f.in_situ ?? null,
     };
 
     return item;
@@ -99,6 +100,17 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
     ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
     : "";
 
+  const lineage: any[] = (fichaEspecie as any)?.lineage ?? [];
+  const ordenEntry = lineage.find((l: any) => l.rank?.rank === "Orden");
+  const familiaEntry = lineage.find((l: any) => l.rank?.rank === "Familia");
+  const generoEntry = lineage.find((l: any) => l.rank?.rank === "Género");
+  const orden = ordenEntry?.taxon ?? null;
+  const familia = familiaEntry?.taxon ?? null;
+  const genero = generoEntry?.taxon ?? null;
+  const ordenId = ordenEntry?.id_taxon ?? null;
+  const familiaId = familiaEntry?.id_taxon ?? null;
+  const generoId = generoEntry?.id_taxon ?? null;
+
   const especieUrl = `/sapopedia/species/${id}`;
   const fototecaUrl = search ? `/fototeca?search=${encodeURIComponent(search)}` : "/fototeca";
 
@@ -107,10 +119,16 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
   return (
     <SpeciesFotosClient
       especieUrl={especieUrl}
+      familia={familia}
+      familiaId={familiaId}
       fotos={fotos}
       fototecaUrl={fototecaUrl}
       fromFototeca={fromFototeca}
+      genero={genero}
+      generoId={generoId}
       nombreCientifico={nombreCientifico}
+      orden={orden}
+      ordenId={ordenId}
       speciesUrlId={id}
     />
   );

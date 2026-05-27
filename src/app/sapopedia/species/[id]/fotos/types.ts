@@ -18,4 +18,5 @@ export interface SpeciesFotoItem {
   numero_museo: string | null;
   categoria_id: number | null;
   categoria: string | null;
+  in_situ: boolean | null;
 }

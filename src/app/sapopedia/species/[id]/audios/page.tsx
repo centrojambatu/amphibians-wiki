@@ -106,6 +106,17 @@ export default async function SpeciesAudiosPage({params, searchParams}: PageProp
     ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
     : "";
 
+  const lineage: any[] = (fichaEspecie as any)?.lineage ?? [];
+  const ordenEntry = lineage.find((l: any) => l.rank?.rank === "Orden");
+  const familiaEntry = lineage.find((l: any) => l.rank?.rank === "Familia");
+  const generoEntry = lineage.find((l: any) => l.rank?.rank === "Género");
+  const orden = ordenEntry?.taxon ?? null;
+  const familia = familiaEntry?.taxon ?? null;
+  const genero = generoEntry?.taxon ?? null;
+  const ordenId = ordenEntry?.id_taxon ?? null;
+  const familiaId = familiaEntry?.id_taxon ?? null;
+  const generoId = generoEntry?.id_taxon ?? null;
+
   const especieUrl = `/sapopedia/species/${id}`;
   const fromAudioteca = paramsSearch.from === "audioteca";
   const searchQuery = paramsSearch.search || "";
@@ -121,8 +132,14 @@ export default async function SpeciesAudiosPage({params, searchParams}: PageProp
       audios={audios}
       audiotecaUrl={audiotecaUrl}
       especieUrl={especieUrl}
+      familia={familia}
+      familiaId={familiaId}
       fromAudioteca={fromAudioteca}
+      genero={genero}
+      generoId={generoId}
       nombreCientifico={nombreCientifico}
+      orden={orden}
+      ordenId={ordenId}
       speciesUrlId={id}
     />
   );

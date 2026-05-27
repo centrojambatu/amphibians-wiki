@@ -9,6 +9,12 @@ import {SpeciesVideoItem} from "./types";
 
 interface SpeciesVideosClientProps {
   nombreCientifico: string;
+  orden?: string | null;
+  ordenId?: number | null;
+  familia?: string | null;
+  familiaId?: number | null;
+  genero?: string | null;
+  generoId?: number | null;
   especieUrl: string;
   fromVideoteca: boolean;
   videotecaUrl: string;
@@ -111,6 +117,12 @@ function VideoCard({
 
 export default function SpeciesVideosClient({
   nombreCientifico,
+  orden,
+  ordenId,
+  familia,
+  familiaId,
+  genero,
+  generoId,
   especieUrl,
   fromVideoteca,
   videotecaUrl,
@@ -129,7 +141,7 @@ export default function SpeciesVideosClient({
                   href={videotecaUrl}
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Volver a Videoteca
+                  Volver
                 </Link>
               ) : (
                 <Link
@@ -141,16 +153,47 @@ export default function SpeciesVideosClient({
                 </Link>
               )}
             </div>
-            <Link
-              className="hover:text-primary inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 no-underline transition-colors hover:bg-gray-50"
-              href={especieUrl}
-            >
-              <Eye className="h-4 w-4" />
-              Ver ficha
-            </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Videos de <span className="italic">{nombreCientifico}</span>
+          <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">
+            {orden && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/order/${String(ordenId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {orden}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {familia && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/family/${String(familiaId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {familia}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {genero && (
+              <>
+                <Link
+                  className="text-base font-medium italic"
+                  href={`/sapopedia/genus/${String(generoId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {genero}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            <Link className="italic" href={especieUrl} style={{color: "inherit"}}>
+              {nombreCientifico}
+            </Link>
           </h1>
         </div>
 

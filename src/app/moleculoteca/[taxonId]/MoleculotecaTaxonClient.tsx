@@ -61,7 +61,7 @@ export default function MoleculotecaTaxonClient({
         href="/moleculoteca"
       >
         <ArrowLeft className="h-4 w-4" />
-        Volver a Moleculoteca
+        Volver
       </Link>
 
       <h1 className="mb-1 text-2xl font-bold text-gray-900">

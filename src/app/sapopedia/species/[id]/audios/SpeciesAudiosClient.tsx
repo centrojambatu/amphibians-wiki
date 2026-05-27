@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import {ArrowLeft, Eye} from "lucide-react";
-import {useState} from "react";
 
 import AudioCardWithSpectrogram from "./AudioCardWithSpectrogram";
 import {SpeciesAudioItem} from "./types";
 
 interface SpeciesAudiosClientProps {
   nombreCientifico: string;
+  orden?: string | null;
+  ordenId?: number | null;
+  familia?: string | null;
+  familiaId?: number | null;
+  genero?: string | null;
+  generoId?: number | null;
   especieUrl: string;
   fromAudioteca: boolean;
   audiotecaUrl: string;
@@ -18,13 +23,18 @@ interface SpeciesAudiosClientProps {
 
 export default function SpeciesAudiosClient({
   nombreCientifico,
+  orden,
+  ordenId,
+  familia,
+  familiaId,
+  genero,
+  generoId,
   especieUrl,
   fromAudioteca,
   audiotecaUrl,
   audios,
   speciesUrlId,
 }: SpeciesAudiosClientProps) {
-  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="bg-background min-h-screen">
@@ -38,7 +48,7 @@ export default function SpeciesAudiosClient({
                   href={audiotecaUrl}
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Volver a Audioteca
+                  Volver
                 </Link>
               ) : (
                 <Link
@@ -50,16 +60,47 @@ export default function SpeciesAudiosClient({
                 </Link>
               )}
             </div>
-            <Link
-              className="audioteca-view-species-link hover:text-primary inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 no-underline transition-colors hover:bg-gray-50"
-              href={especieUrl}
-            >
-              <Eye className="h-4 w-4" />
-              Ver ficha
-            </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Audios de <span className="italic">{nombreCientifico}</span>
+          <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">
+            {orden && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/order/${String(ordenId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {orden}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {familia && (
+              <>
+                <Link
+                  className="text-base font-medium"
+                  href={`/sapopedia/family/${String(familiaId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {familia}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            {genero && (
+              <>
+                <Link
+                  className="text-base font-medium italic"
+                  href={`/sapopedia/genus/${String(generoId ?? "")}`}
+                  style={{color: "#006d1b"}}
+                >
+                  {genero}
+                </Link>
+                <span className="text-base text-gray-300">|</span>
+              </>
+            )}
+            <Link className="italic" href={especieUrl} style={{color: "inherit"}}>
+              {nombreCientifico}
+            </Link>
           </h1>
         </div>
 
@@ -71,9 +112,7 @@ export default function SpeciesAudiosClient({
               <AudioCardWithSpectrogram
                 key={audio.id}
                 audio={audio}
-                open={openId === audio.id}
                 speciesUrlId={speciesUrlId}
-                onToggle={() => setOpenId((v) => (v === audio.id ? null : audio.id))}
               />
             ))}
           </div>

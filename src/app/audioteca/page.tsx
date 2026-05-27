@@ -277,11 +277,13 @@ function pauseOtherAudios(e: React.SyntheticEvent<HTMLAudioElement>) {
 function StatCard({
   label,
   caption,
+  italicCaption = false,
   audioSrc,
   headerContent,
 }: {
   label: React.ReactNode;
-  caption?: string | null;
+  caption?: React.ReactNode;
+  italicCaption?: boolean;
   audioSrc?: string | null;
   headerContent?: React.ReactNode;
 }) {
@@ -312,14 +314,27 @@ function StatCard({
         <span className="text-sm font-semibold" style={{color: "#666666"}}>
           {label}
         </span>
-        {caption && (
-          <i className="mt-0.5 text-xs" style={{color: "#888888"}}>
+        {caption != null && caption !== "" && (
+          <span
+            className={`mt-0.5 text-xs${italicCaption ? " italic" : ""}`}
+            style={{color: "#888888"}}
+          >
             {caption}
-          </i>
+          </span>
         )}
       </div>
     </div>
   );
+}
+
+function formatFechaEs(fecha: string | null | undefined): string | null {
+  if (!fecha) return null;
+  const d = new Date(fecha);
+  if (Number.isNaN(d.getTime())) return null;
+  const day = String(d.getUTCDate());
+  const month = d.toLocaleDateString("es-ES", {month: "long", timeZone: "UTC"});
+  const year = String(d.getUTCFullYear());
+  return `${day} ${month} ${year}`;
 }
 
 export default function AudiotecaPage() {
@@ -464,23 +479,26 @@ export default function AudiotecaPage() {
 
           <StatCard
             audioSrc={stats?.primer_canto?.enlace}
-            caption={stats?.primer_canto?.fecha ?? null}
+            caption={formatFechaEs(stats?.primer_canto?.fecha)}
             label="1er canto grabado"
           />
 
           <StatCard
+            italicCaption
             audioSrc={stats?.canto_destacado_reciente?.enlace}
             caption={stats?.canto_destacado_reciente?.nombre_cientifico ?? null}
             label="Último canto descrito"
           />
 
           <StatCard
+            italicCaption
             audioSrc={stats?.canto_destacado?.enlace}
             caption={stats?.canto_destacado?.nombre_cientifico ?? null}
             label="Audio destacado"
           />
 
           <StatCard
+            italicCaption
             audioSrc={stats?.canto_posiblemente_extinta?.enlace}
             caption={stats?.canto_posiblemente_extinta?.nombre_cientifico ?? null}
             label="Canto especie posiblemente extinta"
@@ -488,7 +506,7 @@ export default function AudiotecaPage() {
 
           <a
             className="flex flex-col items-center justify-center rounded-md border bg-white p-2 text-center transition-shadow hover:shadow-md"
-            href="https://www.fonozoo.com/eng/buscar.php"
+            href="https://www.fonozoo.com/eng/registrospublicados.php"
             rel="noopener noreferrer"
             style={{
               borderColor: "#dddddd",
@@ -647,16 +665,21 @@ export default function AudiotecaPage() {
                           )}
                         </div>
                         <Link
-                          className="flex flex-1 flex-col items-center justify-center gap-0.5 border-t border-gray-100 px-2 py-2 no-underline hover:bg-gray-50"
+                          className="flex flex-1 flex-wrap items-baseline justify-center gap-x-2 px-2 py-2 text-center no-underline hover:bg-gray-50"
                           href={href}
                         >
                           <span className="text-xs font-semibold italic" style={{color: "#666666"}}>
                             {especie.nombre_cientifico}
                           </span>
                           {especie.nombre_comun && (
-                            <span className="text-[11px]" style={{color: "#888888"}}>
-                              {especie.nombre_comun}
-                            </span>
+                            <>
+                              <span className="text-[11px]" style={{color: "#f07304"}}>
+                                |
+                              </span>
+                              <span className="text-[11px]" style={{color: "#888888"}}>
+                                {especie.nombre_comun}
+                              </span>
+                            </>
                           )}
                         </Link>
                       </div>

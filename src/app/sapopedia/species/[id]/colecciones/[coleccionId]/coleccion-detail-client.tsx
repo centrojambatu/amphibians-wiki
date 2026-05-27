@@ -262,7 +262,9 @@ export default function ColeccionDetailClient({
         return {
           src: f.enlace || "",
           alt: f.nombre || "Fotografía",
-          title: f.nombre || undefined,
+          title: f.nombre ? (
+            <span style={{paddingLeft: 56, display: "inline-block"}}>{f.nombre}</span>
+          ) : undefined,
           description: lines.join("\n"),
         };
       }),

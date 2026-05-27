@@ -907,11 +907,12 @@ export default function MapotecaPage() {
     title: (
       <span
         style={{
-          display: "inline-flex",
-          alignItems: "baseline",
-          gap: 12,
-          flexWrap: "wrap",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 4,
           fontSize: 20,
+          paddingLeft: 56,
         }}
       >
         <span>{card.title}</span>

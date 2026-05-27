@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ChevronDown, ExternalLink} from "lucide-react";
+import {ExternalLink} from "lucide-react";
 
 import AudioSpectrogramOscillogram from "@/components/AudioSpectrogramOscillogram";
 import {useGbifOccurrence} from "@/lib/gbif";
@@ -40,6 +40,16 @@ function GbifLink({
   );
 }
 
+function formatFechaEs(fecha: string | null | undefined): string | null {
+  if (!fecha) return null;
+  const d = new Date(fecha);
+  if (Number.isNaN(d.getTime())) return null;
+  const day = String(d.getUTCDate());
+  const month = d.toLocaleDateString("es-ES", {month: "long", timeZone: "UTC"});
+  const year = String(d.getUTCFullYear());
+  return `${day} ${month} ${year}`;
+}
+
 function Field({label, value}: {label: string; value: React.ReactNode}) {
   if (value == null || value === "") return null;
 
@@ -54,13 +64,9 @@ function Field({label, value}: {label: string; value: React.ReactNode}) {
 export default function AudioCardWithSpectrogram({
   audio,
   speciesUrlId,
-  open,
-  onToggle,
 }: {
   audio: SpeciesAudioItem;
   speciesUrlId: string;
-  open: boolean;
-  onToggle: () => void;
 }) {
 
   const labelMuseo =
@@ -99,15 +105,16 @@ export default function AudioCardWithSpectrogram({
       </div>
 
       <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-4 md:grid-cols-6">
-        <Field label="Fecha" value={audio.fecha} />
+        <Field label="Fecha" value={formatFechaEs(audio.fecha)} />
         <Field label="Hora" value={audio.hora} />
-        <Field label="Colector" value={audio.colector} />
-        <Field label="Localidad" value={audio.localidad} />
-        <Field label="Provincia" value={audio.provincia} />
-        <Field label="País" value={audio.pais} />
+        <Field label="Autor grabación" value={audio.colector} />
+        <Field
+          label="Localidad"
+          value={[audio.localidad, audio.provincia, audio.pais].filter(Boolean).join(", ") || null}
+        />
         <Field label="Coordenadas" value={coords} />
         <Field
-          label="Elevación"
+          label="Altitud"
           value={audio.elevacion != null ? `${String(audio.elevacion)} m` : null}
         />
         <Field
@@ -122,34 +129,15 @@ export default function AudioCardWithSpectrogram({
           label="Humedad"
           value={audio.humedad != null ? `${String(audio.humedad)}%` : null}
         />
-        <Field
-          label="Nubosidad"
-          value={audio.nubosidad != null ? String(audio.nubosidad) : null}
-        />
-        <Field label="Especies de fondo" value={audio.especies_fondo} />
       </div>
 
-      <button
-        aria-expanded={open}
-        className="mt-2 flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
-        type="button"
-        onClick={onToggle}
-      >
-        <span>{open ? "Ocultar audio" : "Reproducir audio"}</span>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {open && (
-        <div className="mt-3">
-          {audio.enlace ? (
-            <AudioSpectrogramOscillogram src={audio.enlace} />
-          ) : (
-            <p className="text-sm text-gray-500">No hay enlace de audio disponible.</p>
-          )}
-        </div>
-      )}
+      <div className="mt-3">
+        {audio.enlace ? (
+          <AudioSpectrogramOscillogram src={audio.enlace} />
+        ) : (
+          <p className="text-sm text-gray-500">No hay enlace de audio disponible.</p>
+        )}
+      </div>
     </div>
   );
 }

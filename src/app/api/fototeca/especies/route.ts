@@ -19,6 +19,8 @@ export async function GET(request: Request) {
   const catalogos = parseList(searchParams.get("catalogos"));
   const familias = parseList(searchParams.get("familias"));
   const generos = parseList(searchParams.get("generos"));
+  const tipos = parseList(searchParams.get("tipos"));
+  const categorias = parseList(searchParams.get("categorias"));
   const anioEspecifico = parseInt(searchParams.get("anio") || "", 10);
   const anioDesde = parseInt(searchParams.get("anio_desde") || "", 10);
   const anioHasta = parseInt(searchParams.get("anio_hasta") || "", 10);
@@ -30,15 +32,43 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   try {
-    const {data: fotos, error: fotoError} = await supabase
+    // Resolver nombres -> ids de catalogo_awe si hay filtros de tipos/categorias
+    let catalogoAweIdsFiltro: number[] | null = null;
+    if (tipos.length > 0 || categorias.length > 0) {
+      const nombresBuscados = [...tipos, ...categorias];
+      const {data: catData, error: catErr} = await (supabase as any)
+        .from("catalogo_awe")
+        .select("id_catalogo_awe, nombre")
+        .in("nombre", nombresBuscados)
+        .in("tipo_catalogo_awe_id", [13, 14]);
+      if (catErr) {
+        console.error("Error resolviendo catalogo_awe:", catErr);
+        return NextResponse.json({error: "Error al resolver tipos"}, {status: 500});
+      }
+      const ids = (catData ?? [])
+        .map((r: any) => r.id_catalogo_awe as number)
+        .filter((id: number | null) => id != null) as number[];
+      if (ids.length === 0) {
+        return NextResponse.json([]);
+      }
+      catalogoAweIdsFiltro = ids;
+    }
+
+    let fotosQuery = supabase
       .from("fotografia")
       .select(
-        `taxon_id, coleccion_id, coleccion_externa_id, localidad, autor, fecha,
+        `taxon_id, coleccion_id, coleccion_externa_id, localidad, autor, fecha, catalogo_awe_id,
          coleccion:coleccion_id(taxon_id, localidad, catalogo_museo, numero_museo),
          coleccion_externa:coleccion_externa_id(taxon_id, localidad, catalogo_museo, numero_museo, fecha)`,
       )
       .eq("publicar", true)
       .limit(100000);
+
+    if (catalogoAweIdsFiltro) {
+      fotosQuery = fotosQuery.in("catalogo_awe_id", catalogoAweIdsFiltro);
+    }
+
+    const {data: fotos, error: fotoError} = await fotosQuery;
 
     if (fotoError) {
       console.error("Error al obtener fotografías:", fotoError);
