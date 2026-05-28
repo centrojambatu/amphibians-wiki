@@ -194,13 +194,13 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
   return (
     <div className="space-y-2">
       <div>
-        <p className="mb-1 text-[10px] font-medium tracking-wide text-gray-500">
+        <p className="mb-1 text-sm font-medium tracking-wide text-gray-600">
           Oscilograma
         </p>
         <div ref={waveformContainerRef} className="overflow-hidden rounded-md bg-black" />
       </div>
       <div>
-        <p className="mb-1 text-[10px] font-medium tracking-wide text-gray-500">
+        <p className="mb-1 text-sm font-medium tracking-wide text-gray-600">
           Espectrograma
         </p>
         <div
