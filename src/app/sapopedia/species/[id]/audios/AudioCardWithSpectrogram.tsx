@@ -125,7 +125,7 @@ export default function AudioCardWithSpectrogram({
           <span className="text-[11px] text-gray-600">· {labelMuseo}</span>
         )}
         {audio.cita_corta ? (
-          <span className="text-[11px] text-gray-500 italic">· {audio.cita_corta}</span>
+          <span className="text-sm text-gray-500 italic">· {audio.cita_corta}</span>
         ) : (
           <span className="text-sm text-gray-500">· no publicado</span>
         )}
