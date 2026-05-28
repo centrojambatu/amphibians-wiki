@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ExternalLink} from "lucide-react";
+import {Download} from "lucide-react";
 
 import AudioSpectrogramOscillogram from "@/components/AudioSpectrogramOscillogram";
 import {useGbifOccurrence} from "@/lib/gbif";
@@ -29,13 +29,12 @@ function GbifLink({
 
   return (
     <a
-      className="hover:text-primary inline-flex items-center gap-1 text-sm font-semibold text-[#4ba24b] underline"
+      className="hover:text-primary text-sm font-semibold text-[#4ba24b] underline"
       href={gbifUrl}
       rel="noopener noreferrer"
       target="_blank"
     >
       {label}
-      <ExternalLink className="h-3 w-3" />
     </a>
   );
 }
@@ -125,53 +124,93 @@ export default function AudioCardWithSpectrogram({
           <span className="text-[11px] text-gray-600">· {labelMuseo}</span>
         )}
         {audio.cita_corta ? (
-          <span className="text-sm text-gray-500 italic">· {audio.cita_corta}</span>
+          <span className="text-sm text-gray-500">· {audio.cita_corta}</span>
         ) : (
           <span className="text-sm text-gray-500">· no publicado</span>
         )}
+        {audio.enlace && audio.cita_corta && (
+          <a
+            className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900"
+            download
+            href={audio.enlace}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Descargar
+          </a>
+        )}
       </div>
 
-      <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-4 md:grid-cols-6">
+      <div className="flex flex-col gap-y-1">
         <Field
           label=""
-          value={
-            formatFechaEs(audio.fecha) || audio.hora
-              ? [formatFechaEs(audio.fecha), audio.hora].filter(Boolean).join(" · ")
-              : null
-          }
+          value={(() => {
+            const parts: React.ReactNode[] = [];
+            const localidad =
+              [audio.localidad, audio.provincia, audio.pais].filter(Boolean).join(", ") || null;
+            if (localidad) parts.push(<span key="loc">{localidad}</span>);
+            if (coords) parts.push(<span key="coords">{coords}</span>);
+            if (audio.elevacion != null)
+              parts.push(<span key="elev">{`${String(audio.elevacion)} m`}</span>);
+            if (audio.temp_aire != null)
+              parts.push(
+                <span key="aire">
+                  <span className="text-[9px] text-gray-500">aire</span>{" "}
+                  {String(audio.temp_aire)} °C
+                </span>,
+              );
+            if (audio.temp_agua != null)
+              parts.push(
+                <span key="agua">
+                  <span className="text-[9px] text-gray-500">agua</span>{" "}
+                  {String(audio.temp_agua)} °C
+                </span>,
+              );
+            if (audio.humedad != null)
+              parts.push(
+                <span key="hum">
+                  <span className="text-[9px] text-gray-500">humedad</span>{" "}
+                  {String(audio.humedad)}%
+                </span>,
+              );
+
+            if (parts.length === 0) return null;
+
+            return parts.flatMap((p, i) =>
+              i < parts.length - 1
+                ? [
+                    p,
+                    <span key={`sep-${i}`} style={{color: "#f07304", margin: "0 6px"}}>
+                      |
+                    </span>,
+                  ]
+                : [p],
+            );
+          })()}
         />
-        <Field label="Autor grabación" value={audio.colector} />
         <Field
-          colSpan={2}
           label=""
-          value={[audio.localidad, audio.provincia, audio.pais].filter(Boolean).join(", ") || null}
-        />
-        <Field
-          colSpan={2}
-          label=""
-          value={
-            coords || audio.elevacion != null ? (
+          value={(() => {
+            const fechaHora =
+              [formatFechaEs(audio.fecha), audio.hora].filter(Boolean).join(" ") || null;
+            if (!fechaHora && !audio.colector) return null;
+
+            return (
               <>
-                {coords}
-                {coords && audio.elevacion != null && (
+                {fechaHora}
+                {fechaHora && audio.colector && (
                   <span style={{color: "#f07304", margin: "0 6px"}}>|</span>
                 )}
-                {audio.elevacion != null && `${String(audio.elevacion)} m`}
+                {audio.colector && (
+                  <>
+                    <span className="text-[9px] text-gray-500">grabado por:</span>{" "}
+                    {audio.colector}
+                  </>
+                )}
               </>
-            ) : null
-          }
-        />
-        <Field
-          label="Temp. aire"
-          value={audio.temp_aire != null ? `${String(audio.temp_aire)} °C` : null}
-        />
-        <Field
-          label="Temp. agua"
-          value={audio.temp_agua != null ? `${String(audio.temp_agua)} °C` : null}
-        />
-        <Field
-          label="Humedad"
-          value={audio.humedad != null ? `${String(audio.humedad)}%` : null}
+            );
+          })()}
         />
       </div>
 

@@ -654,6 +654,7 @@ export default function AudiotecaPage() {
                             <audio
                               controls
                               className="block h-10 w-full min-w-0"
+                              controlsList="nodownload noplaybackrate noremoteplayback"
                               preload="none"
                               src={especie.canto_url}
                               onPlay={pauseOtherAudios}
