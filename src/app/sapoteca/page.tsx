@@ -9,6 +9,8 @@ import Pagination from "@/components/pagination";
 import SapotecaContentLayout from "@/components/sapoteca-content-layout";
 import SapotecaHistogramaChart from "@/components/sapoteca-histograma-chart";
 import type { FiltrosSapoteca } from "./get-publicaciones-paginadas";
+import Link from "next/link";
+import {ArrowLeft} from "lucide-react";
 
 interface SearchParams {
   [key: string]: string | undefined;
@@ -19,6 +21,8 @@ interface SearchParams {
   tipos?: string;
   indexada?: string;
   formatoImpreso?: string;
+  publicacion_id?: string;
+  back?: string;
 }
 
 interface PageProps {
@@ -47,6 +51,9 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
         : params.formatoImpreso === "false"
           ? false
           : undefined,
+    publicacionId: params.publicacion_id
+      ? Number.parseInt(params.publicacion_id, 10)
+      : undefined,
   };
 
   // Obtener datos en paralelo
@@ -65,8 +72,27 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
     .filter((s) => s.tipo === "CIENTIFICA" || s.tipo === "TESIS")
     .flatMap((s) => s.items.map((i) => i.id));
 
+  // Validar URL de back (solo permitir rutas internas)
+  const backUrl =
+    params.back && params.back.startsWith("/") && !params.back.startsWith("//")
+      ? params.back
+      : null;
+
   return (
     <main className="container mx-auto px-4 py-8">
+      {/* Botón de regreso si viene de otra vista */}
+      {backUrl && (
+        <div className="mb-4">
+          <Link
+            className="inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors hover:text-gray-900"
+            href={backUrl}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Link>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6 text-center">
         <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
@@ -137,7 +163,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
             className="block h-full"
             href={
               estadisticas.publicacionCientificaMasReciente.enlace ||
-              `/bibliography/${String(estadisticas.publicacionCientificaMasReciente.idPublicacion)}`
+              `/sapoteca?publicacion_id=${String(estadisticas.publicacionCientificaMasReciente.idPublicacion)}`
             }
             rel={estadisticas.publicacionCientificaMasReciente.enlace ? "noopener noreferrer" : undefined}
             target={estadisticas.publicacionCientificaMasReciente.enlace ? "_blank" : undefined}

@@ -124,7 +124,19 @@ export default function AudioCardWithSpectrogram({
           <span className="text-[11px] text-gray-600">· {labelMuseo}</span>
         )}
         {audio.cita_corta ? (
-          <span className="text-sm text-gray-500">· {audio.cita_corta}</span>
+          audio.publicacion_id ? (
+            <span className="text-sm text-gray-500">
+              ·{" "}
+              <Link
+                className="hover:text-primary text-[#4ba24b] underline"
+                href={`/sapoteca?titulo=${encodeURIComponent(audio.publicacion_titulo ?? audio.cita_corta)}&back=${encodeURIComponent(`/sapopedia/species/${speciesUrlId}/audios`)}`}
+              >
+                {audio.cita_corta}
+              </Link>
+            </span>
+          ) : (
+            <span className="text-sm text-gray-500">· {audio.cita_corta}</span>
+          )
         ) : (
           <span className="text-sm text-gray-500">· no publicado</span>
         )}
@@ -156,21 +168,21 @@ export default function AudioCardWithSpectrogram({
             if (audio.temp_aire != null)
               parts.push(
                 <span key="aire">
-                  <span className="text-[10px] text-gray-500">aire</span>{" "}
+                  <span className="text-xs text-gray-500">aire</span>{" "}
                   {String(audio.temp_aire)} °C
                 </span>,
               );
             if (audio.temp_agua != null)
               parts.push(
                 <span key="agua">
-                  <span className="text-[10px] text-gray-500">agua</span>{" "}
+                  <span className="text-xs text-gray-500">agua</span>{" "}
                   {String(audio.temp_agua)} °C
                 </span>,
               );
             if (audio.humedad != null)
               parts.push(
                 <span key="hum">
-                  <span className="text-[10px] text-gray-500">humedad</span>{" "}
+                  <span className="text-xs text-gray-500">humedad</span>{" "}
                   {String(audio.humedad)}%
                 </span>,
               );
@@ -189,7 +201,7 @@ export default function AudioCardWithSpectrogram({
             if (audio.colector)
               parts.push(
                 <span key="colector">
-                  <span className="text-[10px] text-gray-500">grabado por</span>{" "}
+                  <span className="text-xs text-gray-500">grabado por</span>{" "}
                   {audio.colector}
                 </span>,
               );

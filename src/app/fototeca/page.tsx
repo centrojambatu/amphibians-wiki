@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Image as ImageIcon, RotateCcw, Search, X, Check, ExternalLink} from "lucide-react";
+import {Image as ImageIcon, RotateCcw, Search, X, Check} from "lucide-react";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
@@ -492,9 +492,6 @@ function CitationLink({label, url}: {label: string; url: string}) {
       href={url}
       rel="noopener noreferrer"
       style={{
-        display: "inline-flex",
-        alignItems: "baseline",
-        gap: 6,
         fontSize: 20,
         fontWeight: 600,
         textDecoration: "none",
@@ -503,7 +500,6 @@ function CitationLink({label, url}: {label: string; url: string}) {
       target="_blank"
     >
       {label}
-      <ExternalLink size={18} style={{transform: "translateY(3px)"}} />
     </a>
   );
 }

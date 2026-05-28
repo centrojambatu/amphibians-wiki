@@ -7,5 +7,5 @@ export function getBibliographyUrl(
   _titulo: string | null,
   idPublicacion: number,
 ): string {
-  return `/bibliography/${idPublicacion}`;
+  return `/sapoteca?publicacion_id=${idPublicacion}`;
 }

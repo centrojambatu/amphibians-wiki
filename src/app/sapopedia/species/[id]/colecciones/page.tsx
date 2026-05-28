@@ -168,7 +168,7 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
                         {coleccion.publicacion_id != null ? (
                           <a
                             className="hover:underline"
-                            href={`/bibliography/${String(coleccion.publicacion_id)}`}
+                            href={`/sapoteca?publicacion_id=${String(coleccion.publicacion_id)}`}
                             style={{color: "#f07304"}}
                           >
                             {coleccion.cita_corta}

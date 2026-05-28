@@ -4,6 +4,8 @@ export interface SpeciesAudioItem {
   gui_aud: string | null;
   enlace: string | null;
   cita_corta: string | null;
+  publicacion_id: number | null;
+  publicacion_titulo: string | null;
   fecha: string | null;
   hora: string | null;
   colector: string | null;

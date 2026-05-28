@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Volume2, RotateCcw, Search, X, Check} from "lucide-react";
+import {Volume2, RotateCcw, Search, X, Check, Plus} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
@@ -649,21 +649,28 @@ export default function AudiotecaPage() {
                         className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
                         style={{borderColor: "#dddddd"}}
                       >
-                        <div className="overflow-hidden px-2 pt-3 pb-2">
+                        <div className="flex items-center gap-2 overflow-hidden px-2 pt-3 pb-2">
                           {especie.canto_url ? (
                             <audio
                               controls
-                              className="block h-10 w-full min-w-0"
+                              className="block h-10 min-w-0 flex-1"
                               controlsList="nodownload noplaybackrate noremoteplayback"
                               preload="none"
                               src={especie.canto_url}
                               onPlay={pauseOtherAudios}
                             />
                           ) : (
-                            <div className="flex h-10 w-full items-center justify-center rounded bg-gray-50 text-gray-300">
+                            <div className="flex h-10 flex-1 items-center justify-center rounded bg-gray-50 text-gray-300">
                               <Volume2 className="h-4 w-4" />
                             </div>
                           )}
+                          <Link
+                            aria-label="Ver cantos"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-300 text-gray-600 no-underline transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                            href={href}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Link>
                         </div>
                         <Link
                           className="flex flex-1 flex-wrap items-baseline justify-center gap-x-2 px-2 py-2 text-center no-underline hover:bg-gray-50"

@@ -99,6 +99,7 @@ async function getPublicacionesDesdeTabla(
     .eq("anfibios_ecuador", true);
 
   if (filtros?.titulo) q = q.ilike("titulo", `%${filtros.titulo}%`);
+  if (filtros?.publicacionId !== undefined) q = q.eq("id_publicacion", filtros.publicacionId);
   if (filtros?.indexada !== undefined) {
     if (filtros.indexada) q = q.eq("indexada", true);
     else q = q.or("indexada.eq.false,indexada.is.null");
@@ -187,6 +188,8 @@ export interface FiltrosSapoteca {
   indexada?: boolean;
   /** true = impreso, false = web (campo publicacion.formato_impreso) */
   formatoImpreso?: boolean;
+  /** Filtrar por id_publicacion específico */
+  publicacionId?: number;
 }
 
 export interface PublicacionesPaginadas {

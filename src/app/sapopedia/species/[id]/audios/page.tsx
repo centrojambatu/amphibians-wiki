@@ -41,7 +41,7 @@ async function getCantosByTaxon(taxonId: number): Promise<SpeciesAudioItem[]> {
        coleccion_id, coleccion_externa_id,
        coleccion:coleccion_id(catalogo_museo, numero_museo),
        coleccion_externa:coleccion_externa_id(catalogo_museo, numero_museo),
-       publicacion:publicacion_id(cita_corta)`,
+       publicacion:publicacion_id(id_publicacion, cita_corta, titulo)`,
     )
     .or(orParts.join(","))
     .eq("publicar", true)
@@ -62,6 +62,8 @@ async function getCantosByTaxon(taxonId: number): Promise<SpeciesAudioItem[]> {
       gui_aud: c.gui_aud,
       enlace: c.enlace,
       cita_corta: c.publicacion?.cita_corta ?? null,
+      publicacion_id: c.publicacion?.id_publicacion ?? null,
+      publicacion_titulo: c.publicacion?.titulo ?? null,
       fecha: c.fecha,
       hora: c.hora,
       colector: c.colector,

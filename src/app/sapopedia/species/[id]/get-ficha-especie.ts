@@ -104,10 +104,12 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
     supabaseClient
       .from("ficha_especie")
-      .select("*, fotografia_destacada:fotografia_destacada_id(enlace, autor)")
+      .select(
+        "*, fotografia_destacada:fotografia!ficha_especie_fotografia_destacada_id_fkey(enlace, autor)",
+      )
       .eq("id_ficha_especie", idFichaEspecieVista)
       .eq("taxon_id", taxonId)
-      .single(),
+      .maybeSingle(),
     supabaseClient
       .from("taxon_catalogo_awe")
       .select("*, catalogo_awe(*, tipo_catalogo_awe(*))")
@@ -136,7 +138,14 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   // Manejar errores
   if (errorFichaEspecie) {
-    console.error("Error ficha_especie:", errorFichaEspecie);
+    console.error("Error ficha_especie:", {
+      message: (errorFichaEspecie as any).message,
+      code: (errorFichaEspecie as any).code,
+      details: (errorFichaEspecie as any).details,
+      hint: (errorFichaEspecie as any).hint,
+      idFichaEspecieVista,
+      taxonId,
+    });
   }
   if (taxon_catalogo_aweError) {
     console.error("Error taxon_catalogo_awe:", taxon_catalogo_aweError);

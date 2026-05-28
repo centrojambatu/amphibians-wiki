@@ -124,36 +124,55 @@ export async function GET() {
     }
   }
 
-  // Card 4: video destacado editorial (más reciente por id de ficha)
+  // Card 4: video destacado (columna video.destacado = true)
   let videoDestacado: VideoCard | null = null;
   {
-    const {data: ficha} = await supabase
-      .from("ficha_especie")
-      .select("video_destacado_id")
-      .not("video_destacado_id", "is", null)
-      .order("id_ficha_especie", {ascending: false})
+    const {data} = await supabase
+      .from("video")
+      .select("id_video, enlace, thumbnail, autor, nombre, taxon_id")
+      .eq("publicar", true)
+      .eq("destacado", true)
+      .order("id_video", {ascending: false})
       .limit(1)
       .maybeSingle();
 
-    if (ficha?.video_destacado_id) {
-      const {data} = await supabase
-        .from("video")
-        .select("id_video, enlace, thumbnail, autor, nombre, taxon_id")
-        .eq("id_video", ficha.video_destacado_id)
-        .maybeSingle();
+    if (data) {
+      const especie = await resolverEspecie(supabase, data.taxon_id);
 
-      if (data) {
-        const especie = await resolverEspecie(supabase, data.taxon_id);
+      videoDestacado = {
+        enlace: data.enlace,
+        thumbnail: data.thumbnail ?? null,
+        autor: data.autor ?? null,
+        nombre: data.nombre ?? null,
+        nombre_cientifico: especie.nombre_cientifico,
+        fotografia_url: especie.fotografia_url,
+      };
+    }
+  }
 
-        videoDestacado = {
-          enlace: data.enlace,
-          thumbnail: data.thumbnail ?? null,
-          autor: data.autor ?? null,
-          nombre: data.nombre ?? null,
-          nombre_cientifico: especie.nombre_cientifico,
-          fotografia_url: especie.fotografia_url,
-        };
-      }
+  // Card 4b: video premiado (columna video.premiado = true)
+  let videoPremiado: VideoCard | null = null;
+  {
+    const {data} = await supabase
+      .from("video")
+      .select("id_video, enlace, thumbnail, autor, nombre, taxon_id")
+      .eq("publicar", true)
+      .eq("premiado", true)
+      .order("id_video", {ascending: false})
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      const especie = await resolverEspecie(supabase, data.taxon_id);
+
+      videoPremiado = {
+        enlace: data.enlace,
+        thumbnail: data.thumbnail ?? null,
+        autor: data.autor ?? null,
+        nombre: data.nombre ?? null,
+        nombre_cientifico: especie.nombre_cientifico,
+        fotografia_url: especie.fotografia_url,
+      };
     }
   }
 
@@ -206,6 +225,7 @@ export async function GET() {
     primer_video: primerVideo,
     video_destacado_reciente: videoDestacadoReciente,
     video_destacado: videoDestacado,
+    video_premiado: videoPremiado,
     video_posiblemente_extinta: videoExtinta,
   });
 }
