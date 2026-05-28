@@ -107,7 +107,7 @@ export default function SpeciesAudiosClient({
         {audios.length === 0 ? (
           <p className="text-sm text-gray-500">No hay audios publicados.</p>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-[28px]">
             {audios.map((audio) => (
               <AudioCardWithSpectrogram
                 key={audio.id}

@@ -66,12 +66,12 @@ function Field({
   return (
     <div className={`flex min-w-0 flex-col leading-tight ${spanClass}`}>
       {label && (
-        <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+        <span className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
           {label}
         </span>
       )}
       <span
-        className="text-xs text-gray-800"
+        className="text-[13px] text-gray-800"
         style={{overflowWrap: "anywhere", wordBreak: "break-word"}}
       >
         {value}
@@ -91,7 +91,7 @@ export default function AudioCardWithSpectrogram({
   const labelMuseo =
     audio.catalogo_museo && audio.numero_museo
       ? `${audio.catalogo_museo} ${audio.numero_museo}`
-      : audio.catalogo_museo || audio.numero_museo || "Sin catálogo";
+      : audio.catalogo_museo || audio.numero_museo || "Sin espécimen testigo";
 
   const coords =
     audio.latitud != null && audio.longitud != null
@@ -156,22 +156,41 @@ export default function AudioCardWithSpectrogram({
             if (audio.temp_aire != null)
               parts.push(
                 <span key="aire">
-                  <span className="text-[9px] text-gray-500">aire</span>{" "}
+                  <span className="text-[10px] text-gray-500">aire</span>{" "}
                   {String(audio.temp_aire)} °C
                 </span>,
               );
             if (audio.temp_agua != null)
               parts.push(
                 <span key="agua">
-                  <span className="text-[9px] text-gray-500">agua</span>{" "}
+                  <span className="text-[10px] text-gray-500">agua</span>{" "}
                   {String(audio.temp_agua)} °C
                 </span>,
               );
             if (audio.humedad != null)
               parts.push(
                 <span key="hum">
-                  <span className="text-[9px] text-gray-500">humedad</span>{" "}
+                  <span className="text-[10px] text-gray-500">humedad</span>{" "}
                   {String(audio.humedad)}%
+                </span>,
+              );
+            const fechaFmt = formatFechaEs(audio.fecha);
+            if (fechaFmt || audio.hora) {
+              parts.push(
+                <span key="fecha">
+                  {fechaFmt}
+                  {fechaFmt && audio.hora && (
+                    <span style={{color: "#f07304", margin: "0 6px"}}>|</span>
+                  )}
+                  {audio.hora}
+                </span>,
+              );
+            }
+            if (audio.colector)
+              parts.push(
+                <span key="colector">
+                  <span className="text-[10px] text-gray-500">grabado por</span>{" "}
+                  {audio.colector}
                 </span>,
               );
 
@@ -186,29 +205,6 @@ export default function AudioCardWithSpectrogram({
                     </span>,
                   ]
                 : [p],
-            );
-          })()}
-        />
-        <Field
-          label=""
-          value={(() => {
-            const fechaHora =
-              [formatFechaEs(audio.fecha), audio.hora].filter(Boolean).join(" ") || null;
-            if (!fechaHora && !audio.colector) return null;
-
-            return (
-              <>
-                {fechaHora}
-                {fechaHora && audio.colector && (
-                  <span style={{color: "#f07304", margin: "0 6px"}}>|</span>
-                )}
-                {audio.colector && (
-                  <>
-                    <span className="text-[9px] text-gray-500">grabado por:</span>{" "}
-                    {audio.colector}
-                  </>
-                )}
-              </>
             );
           })()}
         />
