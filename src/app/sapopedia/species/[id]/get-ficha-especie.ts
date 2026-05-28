@@ -148,7 +148,13 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     console.error("Error publicaciones:", errorPublicaciones);
   }
   if (errorTaxones) {
-    console.error("Error taxones:", errorTaxones);
+    console.error("Error taxones:", {
+      message: (errorTaxones as any).message,
+      code: (errorTaxones as any).code,
+      details: (errorTaxones as any).details,
+      hint: (errorTaxones as any).hint,
+      taxonId,
+    });
   }
   if (errorLineage) {
     console.error("Error lineage:", errorLineage);

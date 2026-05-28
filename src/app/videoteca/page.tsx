@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Video as VideoIcon, RotateCcw, Search, X, Check, ExternalLink, Youtube} from "lucide-react";
+import {Video as VideoIcon, RotateCcw, Search, X, Check, Youtube} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
@@ -640,7 +640,6 @@ export default function VideotecaPage() {
                         >
                           <Youtube className="h-3.5 w-3.5" />
                           YouTube
-                          <ExternalLink className="h-3 w-3" />
                         </a>
                       </div>
                     );

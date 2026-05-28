@@ -35,7 +35,7 @@ async function getCantosByTaxon(taxonId: number): Promise<SpeciesAudioItem[]> {
   const {data, error} = await supabase
     .from("canto")
     .select(
-      `id_canto, nombre, enlace, fecha, hora, colector, localidad, provincia, estado, pais,
+      `id_canto, nombre, gui_aud, enlace, fecha, hora, colector, localidad, provincia, estado, pais,
        latitud, longitud, elevacion, temp_aire, temp_agua, humedad, nubosidad,
        observacion, especies_fondo, serie_campo,
        coleccion_id, coleccion_externa_id,
@@ -59,6 +59,7 @@ async function getCantosByTaxon(taxonId: number): Promise<SpeciesAudioItem[]> {
     const item: SpeciesAudioItem = {
       id: String(c.id_canto),
       nombre: c.nombre,
+      gui_aud: c.gui_aud,
       enlace: c.enlace,
       cita_corta: c.publicacion?.cita_corta ?? null,
       fecha: c.fecha,

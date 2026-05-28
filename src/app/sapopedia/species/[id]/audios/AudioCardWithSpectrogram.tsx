@@ -66,7 +66,11 @@ function Field({
 
   return (
     <div className={`flex min-w-0 flex-col leading-tight ${spanClass}`}>
-      <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">{label}</span>
+      {label && (
+        <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+          {label}
+        </span>
+      )}
       <span
         className="text-xs text-gray-800"
         style={{overflowWrap: "anywhere", wordBreak: "break-word"}}
@@ -98,40 +102,53 @@ export default function AudioCardWithSpectrogram({
   return (
     <div className="rounded-md border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        {audio.gui_aud && (
+          <span className="text-base font-semibold text-gray-700">{audio.gui_aud}</span>
+        )}
         {audio.fuente === "coleccion" && audio.coleccion_id ? (
           <Link
-            className="hover:text-primary text-xs font-semibold text-[#4ba24b] underline"
+            className="hover:text-primary text-[11px] font-medium text-[#4ba24b] underline"
             href={`/sapopedia/species/${speciesUrlId}/colecciones/${audio.coleccion_id}`}
           >
-            {labelMuseo}
+            · {labelMuseo}
           </Link>
         ) : audio.fuente === "coleccion_externa" && audio.catalogo_museo && audio.numero_museo ? (
-          <GbifLink
-            catalogoMuseo={audio.catalogo_museo}
-            label={labelMuseo}
-            numeroMuseo={audio.numero_museo}
-          />
+          <span className="text-[11px] text-gray-600">
+            ·{" "}
+            <GbifLink
+              catalogoMuseo={audio.catalogo_museo}
+              label={labelMuseo}
+              numeroMuseo={audio.numero_museo}
+            />
+          </span>
         ) : (
-          <span className="text-xs font-semibold text-gray-700">{labelMuseo}</span>
+          <span className="text-[11px] text-gray-600">· {labelMuseo}</span>
         )}
-        {audio.nombre && <span className="text-[11px] text-gray-600">· {audio.nombre}</span>}
-        {audio.cita_corta && (
+        {audio.cita_corta ? (
           <span className="text-[11px] text-gray-500 italic">· {audio.cita_corta}</span>
+        ) : (
+          <span className="text-sm text-gray-500">· no publicado</span>
         )}
       </div>
 
       <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-4 md:grid-cols-6">
-        <Field label="Fecha" value={formatFechaEs(audio.fecha)} />
-        <Field label="Hora" value={audio.hora} />
+        <Field
+          label=""
+          value={
+            formatFechaEs(audio.fecha) || audio.hora
+              ? [formatFechaEs(audio.fecha), audio.hora].filter(Boolean).join(" · ")
+              : null
+          }
+        />
         <Field label="Autor grabación" value={audio.colector} />
         <Field
           colSpan={2}
-          label="Localidad"
+          label=""
           value={[audio.localidad, audio.provincia, audio.pais].filter(Boolean).join(", ") || null}
         />
         <Field
           colSpan={2}
-          label="Coordenadas"
+          label=""
           value={
             coords || audio.elevacion != null ? (
               <>

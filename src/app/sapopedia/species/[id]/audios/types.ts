@@ -1,6 +1,7 @@
 export interface SpeciesAudioItem {
   id: string;
   nombre: string | null;
+  gui_aud: string | null;
   enlace: string | null;
   cita_corta: string | null;
   fecha: string | null;
