@@ -50,13 +50,29 @@ function formatFechaEs(fecha: string | null | undefined): string | null {
   return `${day} ${month} ${year}`;
 }
 
-function Field({label, value}: {label: string; value: React.ReactNode}) {
+function Field({
+  label,
+  value,
+  colSpan = 1,
+}: {
+  label: string;
+  value: React.ReactNode;
+  colSpan?: 1 | 2 | 3;
+}) {
   if (value == null || value === "") return null;
 
+  const spanClass =
+    colSpan === 3 ? "col-span-3" : colSpan === 2 ? "col-span-2" : "";
+
   return (
-    <div className="flex flex-col leading-tight">
+    <div className={`flex min-w-0 flex-col leading-tight ${spanClass}`}>
       <span className="text-[9px] font-medium tracking-wide text-gray-500 uppercase">{label}</span>
-      <span className="truncate text-xs text-gray-800">{value}</span>
+      <span
+        className="text-xs text-gray-800"
+        style={{overflowWrap: "anywhere", wordBreak: "break-word"}}
+      >
+        {value}
+      </span>
     </div>
   );
 }
@@ -109,13 +125,24 @@ export default function AudioCardWithSpectrogram({
         <Field label="Hora" value={audio.hora} />
         <Field label="Autor grabación" value={audio.colector} />
         <Field
+          colSpan={2}
           label="Localidad"
           value={[audio.localidad, audio.provincia, audio.pais].filter(Boolean).join(", ") || null}
         />
-        <Field label="Coordenadas" value={coords} />
         <Field
-          label="Altitud"
-          value={audio.elevacion != null ? `${String(audio.elevacion)} m` : null}
+          colSpan={2}
+          label="Coordenadas"
+          value={
+            coords || audio.elevacion != null ? (
+              <>
+                {coords}
+                {coords && audio.elevacion != null && (
+                  <span style={{color: "#f07304", margin: "0 6px"}}>|</span>
+                )}
+                {audio.elevacion != null && `${String(audio.elevacion)} m`}
+              </>
+            ) : null
+          }
         />
         <Field
           label="Temp. aire"

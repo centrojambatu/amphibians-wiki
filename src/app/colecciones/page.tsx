@@ -24,6 +24,7 @@ import {
 import ColeccionCard, {type ColeccionCardData} from "@/components/ColeccionCard";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import YearRangeFilter from "@/components/YearRangeFilter";
+import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -692,11 +693,11 @@ export default function ColeccionesPage() {
                       }}
                     />
 
-                    {/* Elevación */}
+                    {/* Altitud */}
                     <div className="space-y-2 pt-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-gray-700">
-                          Elevación (msnm)
+                          Altitud (msnm)
                         </span>
                         {elevActive && (
                           <button
@@ -708,6 +709,12 @@ export default function ColeccionesPage() {
                           </button>
                         )}
                       </div>
+                      <div className="flex items-center justify-between text-xs text-gray-600">
+                        <span>
+                          {elevRange ? elevRange[0] : elevMin}m
+                        </span>
+                        <span>{elevRange ? elevRange[1] : elevMax}m</span>
+                      </div>
                       <Slider
                         className="w-full"
                         max={elevMax}
@@ -716,14 +723,12 @@ export default function ColeccionesPage() {
                         value={elevRange ?? [elevMin, elevMax]}
                         onValueChange={(v) => setElevRange([v[0] ?? elevMin, v[1] ?? elevMax])}
                       />
-                      <div className="text-muted-foreground flex items-center justify-between text-xs">
-                        <span>{elevMin}</span>
-                        <span className="text-foreground font-semibold">
-                          {elevRange ? elevRange[0] : elevMin} —{" "}
-                          {elevRange ? elevRange[1] : elevMax}
-                        </span>
-                        <span>{elevMax}</span>
-                      </div>
+                      <ClimaticFloorChartFilter
+                        altitudinalRange={{
+                          min: elevRange ? elevRange[0] : elevMin,
+                          max: elevRange ? elevRange[1] : elevMax,
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
