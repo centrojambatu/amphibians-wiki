@@ -541,7 +541,7 @@ export default function VideotecaPage() {
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div
-            className="flex flex-col justify-start rounded-md border p-2"
+            className="flex flex-col justify-center rounded-md border p-2"
             style={{borderColor: "#dddddd"}}
           >
             <a
