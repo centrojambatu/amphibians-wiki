@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Video as VideoIcon, RotateCcw, Search, X, Check, Youtube} from "lucide-react";
+import {Video as VideoIcon, RotateCcw, Search, X, Check} from "lucide-react";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
@@ -540,6 +540,42 @@ export default function VideotecaPage() {
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div
+            className="flex flex-col justify-start rounded-md border p-2"
+            style={{borderColor: "#dddddd"}}
+          >
+            <a
+              className="hover:text-gray-900"
+              href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios"
+              rel="noopener noreferrer"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+              target="_blank"
+            >
+              Películas
+            </a>
+            <a
+              className="hover:text-gray-900"
+              href="https://www.youtube.com/@ArcaDeLosSapos"
+              rel="noopener noreferrer"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+              target="_blank"
+            >
+              YouTube
+            </a>
+          </div>
+
           <button
             className="cursor-pointer text-left focus:outline-none"
             type="button"
@@ -594,32 +630,6 @@ export default function VideotecaPage() {
             posterSrc={stats?.video_destacado?.thumbnail ?? stats?.video_destacado?.fotografia_url}
             videoSrc={stats?.video_destacado?.enlace}
           />
-
-          <div
-            className="flex flex-col items-center justify-center gap-3 rounded-md border bg-white p-5 text-center"
-            style={{
-              borderColor: "#dddddd",
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-            }}
-          >
-            <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios"
-              rel="noopener noreferrer"
-              style={{fontSize: "18px", fontWeight: "600"}}
-              target="_blank"
-            >
-              Películas
-            </a>
-            <a
-              href="https://www.youtube.com/@ArcaDeLosSapos"
-              rel="noopener noreferrer"
-              style={{fontSize: "18px", fontWeight: "600"}}
-              target="_blank"
-            >
-              YouTube
-            </a>
-          </div>
         </div>
 
         <section className="mb-12">
@@ -758,7 +768,7 @@ export default function VideotecaPage() {
                           )}
                         </div>
                         <Link
-                          className="flex flex-1 flex-wrap items-baseline justify-center gap-x-2 border-t border-gray-100 px-2 py-3 text-center no-underline hover:bg-gray-50"
+                          className="flex flex-1 flex-wrap items-baseline justify-start gap-x-2 px-2 pt-3 pb-1 text-left no-underline hover:bg-gray-50"
                           href={href}
                         >
                           <span className="text-sm font-semibold italic" style={{color: "#666666"}}>
@@ -775,15 +785,25 @@ export default function VideotecaPage() {
                             </>
                           )}
                         </Link>
-                        <a
-                          className="flex items-center justify-center gap-1 border-t border-gray-100 px-2 py-2 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
-                          href={youtubeUrl}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          <Youtube className="h-3.5 w-3.5" />
-                          YouTube
-                        </a>
+                        <div className="flex items-center justify-start gap-2 px-2 pt-1 pb-3">
+                          <a
+                            className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
+                            href={googleVideosUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            Google Videos
+                          </a>
+                          <span aria-hidden className="h-3 w-px bg-gray-300" />
+                          <a
+                            className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
+                            href={youtubeUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            YouTube
+                          </a>
+                        </div>
                       </div>
                     );
                   })}

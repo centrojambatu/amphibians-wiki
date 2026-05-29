@@ -33,7 +33,7 @@ async function getVideosByTaxon(taxonId: number): Promise<SpeciesVideoItem[]> {
   const {data, error} = await supabase
     .from("video")
     .select(
-      `id_video, nombre, enlace, thumbnail, descripcion, autor, numero_museo,
+      `id_video, nombre, enlace, thumbnail, descripcion, autor,
        coleccion_id, coleccion_externa_id,
        coleccion:coleccion_id(catalogo_museo, numero_museo),
        coleccion_externa:coleccion_externa_id(catalogo_museo, numero_museo)`,
@@ -58,7 +58,6 @@ async function getVideosByTaxon(taxonId: number): Promise<SpeciesVideoItem[]> {
       thumbnail: v.thumbnail,
       descripcion: v.descripcion,
       autor: v.autor,
-      numero_museo: v.numero_museo,
       fuente: fromColeccion ? "coleccion" : fromExterna ? "coleccion_externa" : "taxon",
       coleccion_id: v.coleccion_id,
       coleccion_externa_id: v.coleccion_externa_id,

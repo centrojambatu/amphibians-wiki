@@ -5,7 +5,6 @@ export interface SpeciesVideoItem {
   thumbnail: string | null;
   descripcion: string | null;
   autor: string | null;
-  numero_museo: string | null;
   fuente: "coleccion" | "coleccion_externa" | "taxon";
   coleccion_id: number | null;
   coleccion_externa_id: number | null;
