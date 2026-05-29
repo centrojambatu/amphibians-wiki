@@ -407,6 +407,8 @@ interface FotoCard {
   autor: string | null;
   fecha?: string | null;
   nombre_cientifico?: string | null;
+  enlace_externo?: string | null;
+  descripcion?: string | null;
 }
 
 interface EstadisticasFototeca {
@@ -415,6 +417,7 @@ interface EstadisticasFototeca {
   foto_destacada_reciente: FotoCard | null;
   foto_destacada: FotoCard | null;
   foto_posiblemente_extinta: FotoCard | null;
+  fotografo_destacado: FotoCard | null;
 }
 
 function StatCard({
@@ -434,7 +437,7 @@ function StatCard({
 }) {
   return (
     <div
-      className="group flex flex-col overflow-hidden rounded-md border text-center transition-shadow hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-md border text-center transition-shadow hover:shadow-md"
       style={{borderColor: "#dddddd"}}
     >
       <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
@@ -548,6 +551,8 @@ export default function FototecaPage() {
   const [anioDesde, setAnioDesde] = useState<string>("");
   const [anioHasta, setAnioHasta] = useState<string>("");
   const [ilustracionesAbiertas, setIlustracionesAbiertas] = useState(false);
+  const [fotoPremiadaAbierta, setFotoPremiadaAbierta] = useState(false);
+  const [primeraFotoAbierta, setPrimeraFotoAbierta] = useState(false);
 
   const search = searchInput.trim();
   const localidadesKey = localidadesFilter.join("||");
@@ -668,8 +673,42 @@ export default function FototecaPage() {
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+          <div
+            className="flex flex-col items-start justify-center gap-3 rounded-md border bg-white p-5 text-left"
+            style={{
+              borderColor: "#dddddd",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+            }}
+          >
+            <a
+              href="https://www.morphosource.org/catalog/media?utf8=%E2%9C%93&search_field=all_fields&q=Centro+Jambatu"
+              rel="noopener noreferrer"
+              style={{fontSize: "18px", fontWeight: "600"}}
+              target="_blank"
+            >
+              Morphosource
+            </a>
+            <a
+              href="https://www.instagram.com/morphoamphibia"
+              rel="noopener noreferrer"
+              style={{fontSize: "18px", fontWeight: "600"}}
+              target="_blank"
+            >
+              Morphoamphibia
+            </a>
+            <a
+              href="https://www.inaturalist.org/projects/anfibios-de-ecuador"
+              rel="noopener noreferrer"
+              style={{fontSize: "18px", fontWeight: "600"}}
+              target="_blank"
+            >
+              iNaturalist
+            </a>
+          </div>
+
           <button
-            className="cursor-pointer text-left focus:outline-none"
+            className="h-full cursor-pointer text-left focus:outline-none"
             type="button"
             onClick={() => setIlustracionesAbiertas(true)}
           >
@@ -680,19 +719,28 @@ export default function FototecaPage() {
             />
           </button>
 
-          <StatCard
-            caption={
-              <>
-                {stats?.primera_foto?.nombre_cientifico && (
-                  <span className="block italic">{stats.primera_foto.nombre_cientifico}</span>
-                )}
-                {formatFechaEs(stats?.primera_foto?.fecha)}
-              </>
-            }
-            imageAlt={stats?.primera_foto?.nombre_cientifico || "Primera foto"}
-            imageSrc={stats?.primera_foto?.enlace}
-            label="1ra foto anfibio ecuatoriano"
-          />
+          <button
+            className="h-full cursor-pointer text-left focus:outline-none"
+            disabled={!stats?.primera_foto?.enlace}
+            type="button"
+            onClick={() => {
+              if (stats?.primera_foto?.enlace) setPrimeraFotoAbierta(true);
+            }}
+          >
+            <StatCard
+              caption={
+                <>
+                  {stats?.primera_foto?.nombre_cientifico && (
+                    <span className="block italic">{stats.primera_foto.nombre_cientifico}</span>
+                  )}
+                  {formatFechaEs(stats?.primera_foto?.fecha)}
+                </>
+              }
+              imageAlt={stats?.primera_foto?.nombre_cientifico || "Primera foto"}
+              imageSrc={stats?.primera_foto?.enlace}
+              label="1ra foto anfibio ecuatoriano"
+            />
+          </button>
 
           <StatCard
             italicCaption
@@ -712,67 +760,44 @@ export default function FototecaPage() {
             label="Foto posiblemente extinta"
           />
 
-          <StatCard
-            caption={stats?.foto_destacada?.autor ?? null}
-            imageAlt={stats?.foto_destacada?.nombre_cientifico || "Foto premiada"}
-            imageSrc={stats?.foto_destacada?.enlace}
-            label="Foto premiada"
-          />
-
-          <div
-            className="flex flex-col overflow-hidden rounded-md border bg-white"
-            style={{borderColor: "#dddddd"}}
-          >
-            <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
-              <img
-                alt="Morphosource - Centro Jambatu"
-                className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out hover:grayscale-0"
-                loading="lazy"
-                src="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/SaveClip.App_489808512_18158380441359098_7903590254125353955_n.jpg"
-              />
-            </div>
-            <div className="flex flex-1 items-center justify-center p-2">
-              <a
-                href="https://www.morphosource.org/catalog/media?utf8=%E2%9C%93&search_field=all_fields&q=Centro+Jambatu"
-                rel="noopener noreferrer"
-                style={{
-                  fontFamily:
-                    '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                  fontSize: "18px",
-                  fontWeight: "600",
-                }}
-                target="_blank"
-              >
-                Morphosource
-              </a>
-            </div>
-          </div>
-
-          <div
-            className="flex flex-col items-center justify-center gap-3 rounded-md border bg-white p-5 text-center"
-            style={{
-              borderColor: "#dddddd",
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+          <button
+            className="h-full cursor-pointer text-left focus:outline-none"
+            disabled={!stats?.foto_destacada?.enlace}
+            type="button"
+            onClick={() => {
+              if (stats?.foto_destacada?.enlace) setFotoPremiadaAbierta(true);
             }}
           >
+            <StatCard
+              caption={stats?.foto_destacada?.autor ?? null}
+              imageAlt={stats?.foto_destacada?.nombre_cientifico || "Foto premiada"}
+              imageSrc={stats?.foto_destacada?.enlace}
+              label="Foto premiada"
+            />
+          </button>
+
+          {stats?.fotografo_destacado?.enlace_externo ? (
             <a
-              href="https://www.inaturalist.org/projects/anfibios-de-ecuador"
+              className="block h-full no-underline"
+              href={stats.fotografo_destacado.enlace_externo}
               rel="noopener noreferrer"
-              style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"
             >
-              iNaturalist
+              <StatCard
+                caption={stats?.fotografo_destacado?.autor ?? null}
+                imageAlt="Fotógrafo destacado"
+                imageSrc={stats?.fotografo_destacado?.enlace}
+                label="Fotógrafo destacado"
+              />
             </a>
-            <a
-              href="https://www.instagram.com/morphoamphibia"
-              rel="noopener noreferrer"
-              style={{fontSize: "18px", fontWeight: "600"}}
-              target="_blank"
-            >
-              Morphoamphibia
-            </a>
-          </div>
+          ) : (
+            <StatCard
+              caption={stats?.fotografo_destacado?.autor ?? null}
+              imageAlt="Fotógrafo destacado"
+              imageSrc={stats?.fotografo_destacado?.enlace}
+              label="Fotógrafo destacado"
+            />
+          )}
         </div>
 
         {/* Histograma de fotografías por autor */}
@@ -998,6 +1023,141 @@ export default function FototecaPage() {
         open={ilustracionesAbiertas}
         plugins={[Captions, Fullscreen, Zoom]}
         slides={ILUSTRACIONES_ANFIBIOS}
+        zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
+      />
+
+      <Lightbox
+        captions={{descriptionTextAlign: "center", descriptionMaxLines: 6}}
+        close={() => setFotoPremiadaAbierta(false)}
+        controller={{closeOnBackdropClick: true}}
+        open={fotoPremiadaAbierta}
+        plugins={[Captions, Fullscreen, Zoom]}
+        slides={
+          stats?.foto_destacada?.enlace
+            ? [
+                {
+                  src: stats.foto_destacada.enlace,
+                  alt: stats.foto_destacada.nombre_cientifico || "Foto premiada",
+                  title: (
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: 4,
+                        fontSize: 20,
+                        paddingLeft: 56,
+                      }}
+                    >
+                      <span>Foto premiada</span>
+                      {stats.foto_destacada.nombre_cientifico && (
+                        <span style={{fontStyle: "italic"}}>
+                          {stats.foto_destacada.nombre_cientifico}
+                        </span>
+                      )}
+                      {stats.foto_destacada.autor && (
+                        <span style={{fontSize: 16, fontWeight: 400}}>
+                          {stats.foto_destacada.autor}
+                        </span>
+                      )}
+                      {formatFechaEs(stats.foto_destacada.fecha) && (
+                        <span style={{fontSize: 16, fontWeight: 400}}>
+                          {formatFechaEs(stats.foto_destacada.fecha)}
+                        </span>
+                      )}
+                    </span>
+                  ),
+                  description: stats.foto_destacada.descripcion ? (
+                    <span
+                      style={{
+                        display: "block",
+                        paddingBottom: 24,
+                        paddingTop: 8,
+                        paddingLeft: 56,
+                        paddingRight: 56,
+                      }}
+                    >
+                      {stats.foto_destacada.descripcion}
+                    </span>
+                  ) : undefined,
+                },
+              ]
+            : []
+        }
+        zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
+      />
+
+      <Lightbox
+        captions={{descriptionTextAlign: "center", descriptionMaxLines: 6}}
+        close={() => setPrimeraFotoAbierta(false)}
+        controller={{closeOnBackdropClick: true}}
+        open={primeraFotoAbierta}
+        plugins={[Captions, Fullscreen, Zoom]}
+        slides={
+          stats?.primera_foto?.enlace
+            ? [
+                {
+                  src: stats.primera_foto.enlace,
+                  alt: stats.primera_foto.nombre_cientifico || "1ra foto anfibio ecuatoriano",
+                  title: (
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: 4,
+                        fontSize: 20,
+                        paddingLeft: 56,
+                      }}
+                    >
+                      <span>1ra foto anfibio ecuatoriano</span>
+                      {stats.primera_foto.nombre_cientifico && (
+                        <span style={{fontStyle: "italic"}}>
+                          {stats.primera_foto.nombre_cientifico}
+                        </span>
+                      )}
+                      {stats.primera_foto.autor && (
+                        <span style={{fontSize: 16, fontWeight: 400}}>
+                          {stats.primera_foto.autor}
+                        </span>
+                      )}
+                      {formatFechaEs(stats.primera_foto.fecha) && (
+                        <span style={{fontSize: 16, fontWeight: 400}}>
+                          {formatFechaEs(stats.primera_foto.fecha)}
+                        </span>
+                      )}
+                    </span>
+                  ),
+                  description: stats.primera_foto.descripcion ? (
+                    <span
+                      style={{
+                        display: "block",
+                        paddingBottom: 24,
+                        paddingTop: 8,
+                        paddingLeft: 56,
+                        paddingRight: 56,
+                      }}
+                    >
+                      {(() => {
+                        const desc = stats.primera_foto.descripcion;
+                        const idx = desc.indexOf(".");
+
+                        if (idx === -1) return desc;
+
+                        return (
+                          <>
+                            {desc.slice(0, idx + 1)}
+                            <br />
+                            {desc.slice(idx + 1).trimStart()}
+                          </>
+                        );
+                      })()}
+                    </span>
+                  ) : undefined,
+                },
+              ]
+            : []
+        }
         zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
       />
     </div>

@@ -72,8 +72,8 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">
+      <div className="mb-8">
+        <h1 className="mb-4 text-4xl font-bold text-gray-900">
           Nombres estándar <span style={{ color: "#f07304", fontWeight: 400, letterSpacing: "-0.1em" }}>|</span> <span className="text-2xl" style={{ color: "#a3ac9e" }}>12 idiomas</span>
         </h1>
       </div>

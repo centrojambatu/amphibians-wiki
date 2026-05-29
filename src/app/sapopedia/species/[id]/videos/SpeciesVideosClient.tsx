@@ -1,11 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import {ArrowLeft, ExternalLink, Eye} from "lucide-react";
+import {ArrowLeft} from "lucide-react";
 
 import {useGbifOccurrence} from "@/lib/gbif";
 
 import {SpeciesVideoItem} from "./types";
+
+function formatFechaEs(fecha: string | null | undefined): string | null {
+  if (!fecha) return null;
+  const d = new Date(fecha);
+
+  if (Number.isNaN(d.getTime())) return null;
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = d.toLocaleDateString("es-ES", {month: "long", timeZone: "UTC"});
+  const monthCap = month.charAt(0).toUpperCase() + month.slice(1);
+  const year = String(d.getUTCFullYear());
+
+  return `${day} ${monthCap} ${year}`;
+}
 
 interface SpeciesVideosClientProps {
   nombreCientifico: string;
@@ -22,26 +35,29 @@ interface SpeciesVideosClientProps {
   speciesUrlId: string;
 }
 
-function GbifLink({
+function CatalogoGbif({
   catalogoMuseo,
   numeroMuseo,
+  label,
 }: {
   catalogoMuseo: string;
   numeroMuseo: string;
+  label: string;
 }) {
   const {data: gbifUrl} = useGbifOccurrence(catalogoMuseo, numeroMuseo);
 
-  if (!gbifUrl) return null;
+  if (!gbifUrl) {
+    return <span className="text-xs font-semibold text-gray-700">{label}</span>;
+  }
 
   return (
     <a
-      className="hover:text-primary inline-flex items-center gap-1 text-xs font-semibold text-[#4ba24b] underline"
+      className="hover:text-primary text-xs font-semibold text-[#4ba24b] underline"
       href={gbifUrl}
       rel="noopener noreferrer"
       target="_blank"
     >
-      Ver en GBIF
-      <ExternalLink className="h-3 w-3" />
+      {label}
     </a>
   );
 }
@@ -81,7 +97,7 @@ function VideoCard({
         <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           {labelMuseo && video.fuente === "coleccion" && video.coleccion_id ? (
             <Link
-              className="hover:text-primary inline-flex items-center gap-1 text-xs font-semibold text-[#4ba24b] underline"
+              className="hover:text-primary text-xs font-semibold text-[#4ba24b] underline"
               href={`/sapopedia/species/${speciesUrlId}/colecciones/${String(video.coleccion_id)}`}
             >
               {labelMuseo}
@@ -90,25 +106,24 @@ function VideoCard({
             video.fuente === "coleccion_externa" &&
             video.catalogo_museo &&
             video.museo_numero ? (
-            <span className="text-xs font-semibold text-gray-700">
-              {labelMuseo}
-              <span className="ml-2">
-                <GbifLink
-                  catalogoMuseo={video.catalogo_museo}
-                  numeroMuseo={video.museo_numero}
-                />
-              </span>
-            </span>
+            <CatalogoGbif
+              catalogoMuseo={video.catalogo_museo}
+              label={labelMuseo}
+              numeroMuseo={video.museo_numero}
+            />
           ) : null}
         </div>
-        {video.nombre && (
-          <h3 className="line-clamp-2 text-sm font-medium text-gray-900">{video.nombre}</h3>
-        )}
-        {video.autor && (
-          <p className="mt-0.5 text-[11px] text-gray-500">Autor: {video.autor}</p>
-        )}
         {video.descripcion && (
           <p className="mt-1 line-clamp-2 text-xs text-gray-700">{video.descripcion}</p>
+        )}
+        {(video.autor || formatFechaEs(video.fecha)) && (
+          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[11px] text-gray-500">
+            {video.autor && <span>{video.autor}</span>}
+            {video.autor && formatFechaEs(video.fecha) && (
+              <span style={{color: "#f07304"}}>|</span>
+            )}
+            {formatFechaEs(video.fecha) && <span>{formatFechaEs(video.fecha)}</span>}
+          </p>
         )}
       </div>
     </div>

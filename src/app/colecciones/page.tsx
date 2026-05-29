@@ -563,8 +563,7 @@ export default function ColeccionesPage() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-gray-900">Colecciones</h1>
-          <p className="mt-2 text-gray-600">Listado de registros de la colección biológica</p>
+          <h1 className="text-4xl font-bold text-gray-900">Colecciones Centro Jambatu</h1>
         </div>
 
         {/* Stats */}
@@ -682,10 +681,10 @@ export default function ColeccionesPage() {
                     </div>
 
                     <YearRangeFilter
-                      yearMin={stats?.anio_min ?? 1970}
-                      yearMax={stats?.anio_max ?? new Date().getFullYear()}
                       desde={anioDesde}
                       hasta={anioHasta}
+                      yearMax={stats?.anio_max ?? new Date().getFullYear()}
+                      yearMin={stats?.anio_min ?? 1970}
                       onChange={(d, h) => {
                         setAnioDesde(d);
                         setAnioHasta(h);
@@ -696,9 +695,7 @@ export default function ColeccionesPage() {
                     {/* Altitud */}
                     <div className="space-y-2 pt-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-700">
-                          Altitud (msnm)
-                        </span>
+                        <span className="text-xs font-semibold text-gray-700">Altitud (msnm)</span>
                         {elevActive && (
                           <button
                             className="text-[10px] text-gray-400 hover:text-gray-600"
@@ -710,9 +707,7 @@ export default function ColeccionesPage() {
                         )}
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-600">
-                        <span>
-                          {elevRange ? elevRange[0] : elevMin}m
-                        </span>
+                        <span>{elevRange ? elevRange[0] : elevMin}m</span>
                         <span>{elevRange ? elevRange[1] : elevMax}m</span>
                       </div>
                       <Slider
@@ -766,9 +761,7 @@ export default function ColeccionesPage() {
                         ? `/sapopedia/species/${encodeURIComponent(slug)}/colecciones/${c.id_coleccion}?from=colecciones`
                         : undefined;
 
-                      return (
-                        <ColeccionCard key={c.id_coleccion} showEspecie coleccion={c} href={href} />
-                      );
+                      return <ColeccionCard key={c.id_coleccion} coleccion={c} href={href} />;
                     })}
                   </div>
 

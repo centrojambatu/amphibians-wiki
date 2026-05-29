@@ -52,7 +52,7 @@ export default async function BibliographyIndexPage({
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Bibliografía</h1>
+          <h1 className="mb-2 text-4xl font-bold text-gray-900">Bibliografía</h1>
           <p className="text-muted-foreground">
             Catálogo completo de publicaciones relacionadas con anfibios de
             Ecuador

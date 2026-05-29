@@ -7,9 +7,12 @@ interface FotoCard {
   autor: string | null;
   fecha?: string | null;
   nombre_cientifico?: string | null;
+  enlace_externo?: string | null;
+  descripcion?: string | null;
 }
 
 const CATALOGO_POSIBLEMENTE_EXTINTA = 175;
+const CATALOGO_FOTOGRAFO = 631;
 
 async function resolverNombreCientifico(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -39,7 +42,7 @@ export async function GET() {
   {
     const {data} = await supabase
       .from("fotografia")
-      .select("id_fotografia, enlace, autor, fecha, taxon_id")
+      .select("id_fotografia, enlace, autor, fecha, taxon_id, descripción")
       .not("fecha", "is", null)
       .order("fecha", {ascending: true})
       .limit(1)
@@ -51,6 +54,7 @@ export async function GET() {
         autor: data.autor ?? null,
         fecha: data.fecha,
         nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
+        descripcion: (data as any).descripción ?? null,
       };
     }
   }
@@ -91,7 +95,7 @@ export async function GET() {
   {
     const {data} = await supabase
       .from("fotografia")
-      .select("id_fotografia, enlace, autor, taxon_id")
+      .select("id_fotografia, enlace, autor, taxon_id, descripción, fecha")
       .eq("destacada", true)
       .order("id_fotografia", {ascending: false})
       .limit(1)
@@ -101,7 +105,9 @@ export async function GET() {
       fotoDestacada = {
         enlace: data.enlace,
         autor: data.autor ?? null,
+        fecha: data.fecha,
         nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
+        descripcion: (data as any).descripción ?? null,
       };
     }
   }
@@ -145,11 +151,34 @@ export async function GET() {
     }
   }
 
+  // Card: fotógrafo destacado (catalogo_awe_id = 631)
+  let fotografoDestacado: FotoCard | null = null;
+  {
+    const {data} = await supabase
+      .from("fotografia")
+      .select("id_fotografia, enlace, autor, taxon_id, enlace_externo")
+      .eq("catalogo_awe_id", CATALOGO_FOTOGRAFO)
+      .eq("publicar", true)
+      .order("id_fotografia", {ascending: false})
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      fotografoDestacado = {
+        enlace: data.enlace,
+        autor: data.autor ?? null,
+        nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
+        enlace_externo: data.enlace_externo ?? null,
+      };
+    }
+  }
+
   return NextResponse.json({
     total_fotos: totalFotos ?? 0,
     primera_foto: primeraFoto,
     foto_destacada_reciente: fotoDestacadaReciente,
     foto_destacada: fotoDestacada,
     foto_posiblemente_extinta: fotoExtinta,
+    fotografo_destacado: fotografoDestacado,
   });
 }

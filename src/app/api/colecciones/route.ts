@@ -95,6 +95,8 @@ export async function GET(request: Request) {
         `id_coleccion, taxon_id, sc, gui, numero_museo, catalogo_museo,
          estadio, numero_individuos, sexo, estado,
          fecha_col, colectores, localidad, latitud, longitud, elevacion, personal_id, provincia_id,
+         sangre, piel_exudado, piel_liofilizado, tejido_higado, tejido_musculo,
+         esqueleto_transparentacion, esperma, heces, genbank,
          geopolitica!coleccion_provincia_id_fkey(nombre),
          personal!coleccion_personal_id_fkey(nombre, siglas),
          taxon!coleccion_taxon_id_fkey(taxon)`,
@@ -194,7 +196,33 @@ export async function GET(request: Request) {
       return NextResponse.json({error: "Error al obtener colecciones"}, {status: 500});
     }
 
-    // 4) Lookup de nombre_cientifico por taxon_id usando vw_lista_spp
+    // 4) Lookup de multimedia (video/foto/canto) para los colecciones devueltos
+    const coleccionIds = Array.from(
+      new Set((data || []).map((r: any) => r.id_coleccion).filter((v: any) => v != null)),
+    ) as number[];
+    const multimediaSet = new Set<number>();
+    if (coleccionIds.length > 0) {
+      const [{data: vids}, {data: fotos}, {data: cantos}] = await Promise.all([
+        supabase.from("video").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase
+          .from("fotografia")
+          .select("coleccion_id")
+          .in("coleccion_id", coleccionIds)
+          .limit(100000),
+        supabase.from("canto").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      ]);
+      (vids || []).forEach((v: any) => {
+        if (v.coleccion_id != null) multimediaSet.add(v.coleccion_id as number);
+      });
+      (fotos || []).forEach((f: any) => {
+        if (f.coleccion_id != null) multimediaSet.add(f.coleccion_id as number);
+      });
+      (cantos || []).forEach((c: any) => {
+        if (c.coleccion_id != null) multimediaSet.add(c.coleccion_id as number);
+      });
+    }
+
+    // 5) Lookup de nombre_cientifico por taxon_id usando vw_lista_spp
     const taxonIds = Array.from(
       new Set((data || []).map((r: any) => r.taxon_id).filter((t: any) => t != null)),
     ) as number[];
@@ -217,6 +245,16 @@ export async function GET(request: Request) {
 
     const colecciones = (data || []).map((c: any) => {
       const speciesInfo = nombreCientificoMap.get(c.taxon_id);
+      const tieneMuestras = Boolean(
+        c.sangre ||
+          c.piel_exudado ||
+          c.piel_liofilizado ||
+          c.tejido_higado ||
+          c.tejido_musculo ||
+          c.esqueleto_transparentacion ||
+          c.esperma ||
+          c.heces,
+      );
       return {
         fuente: "coleccion" as const,
         id_coleccion: c.id_coleccion,
@@ -241,6 +279,9 @@ export async function GET(request: Request) {
         nombre_cientifico:
           speciesInfo?.nombre_cientifico ?? c.taxon?.taxon ?? null,
         nombre_comun: speciesInfo?.nombre_comun ?? null,
+        tiene_muestras: tieneMuestras,
+        tiene_multimedia: multimediaSet.has(c.id_coleccion),
+        tiene_adn: Boolean(c.genbank),
       };
     });
 

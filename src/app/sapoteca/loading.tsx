@@ -1,8 +1,8 @@
 export default function SapotecaLoading() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="mb-6 text-center">
-        <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
+      <div className="mb-6">
+        <h1 className="mb-2 text-4xl font-bold text-gray-900">Biblioteca</h1>
       </div>
 
       {/* Skeleton de estadísticas */}

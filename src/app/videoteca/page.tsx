@@ -541,35 +541,25 @@ export default function VideotecaPage() {
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div
-            className="flex flex-col justify-center rounded-md border p-2"
-            style={{borderColor: "#dddddd"}}
+            className="flex flex-col items-start justify-center gap-3 rounded-md border bg-white p-5 text-left"
+            style={{
+              borderColor: "#dddddd",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+            }}
           >
             <a
-              className="hover:text-gray-900"
               href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios"
               rel="noopener noreferrer"
-              style={{
-                color: "#666666",
-                fontSize: "13px",
-                fontFamily:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                fontWeight: "600",
-              }}
+              style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"
             >
               Películas
             </a>
             <a
-              className="hover:text-gray-900"
               href="https://www.youtube.com/@ArcaDeLosSapos"
               rel="noopener noreferrer"
-              style={{
-                color: "#666666",
-                fontSize: "13px",
-                fontFamily:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                fontWeight: "600",
-              }}
+              style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"
             >
               YouTube

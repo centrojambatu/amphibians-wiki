@@ -10,8 +10,8 @@ export default async function ListaRojaPage() {
   return (
     <main className="container mx-auto px-4 py-2">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Lista Roja</h1>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">Lista Roja</h1>
       </div>
 
       {/* Contenido interactivo (con panel de filtros, sin precipitación ni temperatura) */}

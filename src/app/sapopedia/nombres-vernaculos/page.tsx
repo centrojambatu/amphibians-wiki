@@ -41,8 +41,8 @@ export default async function NombresVernaculosPage({ searchParams }: NombresVer
   return (
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-primary mb-4 text-4xl font-bold">Nombres indígenas</h1>
+      <div className="mb-8">
+        <h1 className="mb-4 text-4xl font-bold text-gray-900">Nombres indígenas</h1>
         <div className="mx-auto mt-6 flex flex-nowrap justify-center gap-2 overflow-x-auto sm:gap-4">
           <Card className="min-w-0 flex-1 flex-shrink-0 transition-shadow hover:shadow-md">
             <CardContent>

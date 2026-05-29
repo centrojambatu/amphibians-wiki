@@ -94,8 +94,8 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
       )}
 
       {/* Header */}
-      <div className="mb-6 text-center">
-        <h1 className="mb-2 text-4xl font-bold">Biblioteca</h1>
+      <div className="mb-6">
+        <h1 className="mb-2 text-4xl font-bold text-gray-900">Biblioteca</h1>
       </div>
 
       {/* Cards de estadísticas */}

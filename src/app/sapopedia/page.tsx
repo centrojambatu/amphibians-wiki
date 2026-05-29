@@ -30,10 +30,8 @@ export default async function SapopediaPage() {
     <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
       {/* Prefetch de datos de Mapoteca en background */}
       <MapotecaPrefetch />
-      <div className="mb-6 text-center sm:mb-8">
-        <h1 className="text-primary mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl lg:text-4xl">
-          Anfibios Ecuador
-        </h1>
+      <div className="mb-6">
+        <h1 className="text-4xl font-bold text-gray-900">Anfibios Ecuador</h1>
       </div>
 
       {/* Cards de resumen */}
@@ -112,7 +110,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/bioprospeccion/"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad-molecular/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",

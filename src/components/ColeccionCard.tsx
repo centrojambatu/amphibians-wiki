@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {ExternalLink} from "lucide-react";
+import {Check, ExternalLink} from "lucide-react";
 
 import {Card, CardContent} from "@/components/ui/card";
 
@@ -28,19 +28,20 @@ export interface ColeccionCardData {
   cita_corta?: string | null;
   nombre_cientifico?: string | null;
   nombre_comun?: string | null;
+  tiene_muestras?: boolean;
+  tiene_multimedia?: boolean;
+  tiene_adn?: boolean;
 }
 
 interface ColeccionCardProps {
   coleccion: ColeccionCardData;
   href?: string;
-  showEspecie?: boolean;
   showChevron?: boolean;
 }
 
 export default function ColeccionCard({
   coleccion,
   href,
-  showEspecie = false,
   showChevron = true,
 }: ColeccionCardProps) {
   const isExterna = coleccion.fuente === "coleccion_externa";
@@ -64,11 +65,6 @@ export default function ColeccionCard({
     .filter(Boolean)
     .join(", ");
 
-  const coordenadas =
-    coleccion.latitud != null && coleccion.longitud != null
-      ? `${coleccion.latitud}, ${coleccion.longitud}`
-      : null;
-
   const colectorLabel =
     coleccion.colectores ||
     [
@@ -79,108 +75,83 @@ export default function ColeccionCard({
       .join(" ") ||
     null;
 
-  const metaParts = [
-    coleccion.estadio,
-    coleccion.numero_individuos != null
-      ? `${String(coleccion.numero_individuos)} indiv.`
-      : null,
-    coleccion.sexo,
-    coleccion.estado,
-  ].filter(Boolean) as string[];
+  const fields: {key: string; node: React.ReactNode}[] = [];
+
+  if (catalogoLabel) {
+    fields.push({
+      key: "catalogo",
+      node: <span className="font-semibold text-gray-900">{catalogoLabel}</span>,
+    });
+  }
+  if (coleccion.nombre_cientifico) {
+    fields.push({
+      key: "nombre_cientifico",
+      node: <span className="italic text-gray-800">{coleccion.nombre_cientifico}</span>,
+    });
+  }
+  if (localidad) {
+    fields.push({key: "localidad", node: <span>{localidad}</span>});
+  }
+  if (fecha) {
+    fields.push({key: "fecha", node: <span>{fecha}</span>});
+  }
+  if (colectorLabel) {
+    fields.push({key: "colector", node: <span>{colectorLabel}</span>});
+  }
+  const checkIcon = (
+    <Check className="h-3.5 w-3.5" strokeWidth={3} style={{color: "#2d6e2d"}} />
+  );
+
+  if (coleccion.tiene_muestras) {
+    fields.push({
+      key: "muestras",
+      node: (
+        <span className="inline-flex items-center gap-1">
+          Muestras biológicas {checkIcon}
+        </span>
+      ),
+    });
+  }
+  if (coleccion.tiene_multimedia) {
+    fields.push({
+      key: "multimedia",
+      node: (
+        <span className="inline-flex items-center gap-1">
+          Multimedia {checkIcon}
+        </span>
+      ),
+    });
+  }
+  if (coleccion.tiene_adn) {
+    fields.push({
+      key: "adn",
+      node: (
+        <span className="inline-flex items-center gap-1">
+          GenBank {checkIcon}
+        </span>
+      ),
+    });
+  }
 
   const cardInner = (
     <Card className="hover:bg-muted/30 w-full cursor-pointer gap-0 border py-0 transition-colors">
-      <CardContent className="flex w-full flex-col gap-0.5 px-3 py-2">
-        {/* Fila 0: fecha arriba */}
-        {fecha && (
-          <p className="text-[11px] font-semibold whitespace-nowrap text-gray-600">
-            {fecha}
-          </p>
-        )}
-
-        {/* Especie (solo en listados globales) */}
-        {showEspecie && coleccion.nombre_cientifico && (
-          <p className="text-[13px] leading-tight italic text-gray-800">
-            {coleccion.nombre_cientifico}
-            {coleccion.nombre_comun && (
-              <span className="ml-2 text-[11px] not-italic text-gray-500">
-                {coleccion.nombre_comun}
-              </span>
-            )}
-          </p>
-        )}
-
-        {/* Fila 1: catálogo + N° Campo + GUI · chevron */}
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          {catalogoLabel && (
-            <p className="text-[13px] font-bold leading-tight">{catalogoLabel}</p>
-          )}
-          {coleccion.sc && (
-            <p className="text-[11px] leading-tight text-gray-500">
-              N° Campo: <span className="font-medium text-gray-700">{coleccion.sc}</span>
-            </p>
-          )}
-          {coleccion.gui && (
-            <p className="text-[11px] leading-tight text-gray-500">
-              GUI:{" "}
-              <span className="font-mono font-medium text-gray-700">{coleccion.gui}</span>
-            </p>
-          )}
-          {showChevron && (
-            <span className="ml-auto text-gray-400">
-              {isExterna ? <ExternalLink className="h-3.5 w-3.5" /> : "›"}
+      <CardContent className="flex w-full items-baseline gap-x-2 px-3 py-2 text-[12px] text-gray-700">
+        <div className="flex flex-1 flex-wrap items-baseline gap-x-2 gap-y-1 leading-snug">
+          {fields.map((f, i) => (
+            <span key={f.key} className="inline-flex items-baseline gap-x-2">
+              {i > 0 && (
+                <span className="font-semibold" style={{color: "#f07304"}}>
+                  |
+                </span>
+              )}
+              {f.node}
             </span>
-          )}
+          ))}
         </div>
-
-        {/* Fila 1b: cita_corta enlace a biblioteca */}
-        {coleccion.cita_corta && (
-          <p className="text-[11px] italic text-gray-500">
-            {coleccion.publicacion_id != null ? (
-              <a
-                className="hover:underline"
-                href={`/sapoteca?publicacion_id=${String(coleccion.publicacion_id)}`}
-                style={{color: "#f07304"}}
-              >
-                {coleccion.cita_corta}
-              </a>
-            ) : (
-              coleccion.cita_corta
-            )}
-          </p>
-        )}
-
-        {/* Fila 2: localidad · coordenadas | altitud */}
-        {(localidad || coordenadas || coleccion.altitud != null) && (
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px] leading-snug text-gray-700">
-            {localidad && <span>{localidad}</span>}
-            {(coordenadas || coleccion.altitud != null) && (
-              <span className="font-mono text-[10px] text-gray-400">
-                {coordenadas}
-                {coordenadas && coleccion.altitud != null && (
-                  <span className="mx-1.5 font-semibold" style={{color: "#f07304"}}>
-                    |
-                  </span>
-                )}
-                {coleccion.altitud != null && `${coleccion.altitud} msnm`}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Fila 3: colectores · estadio · n. indiv · sexo · estado */}
-        {(colectorLabel || metaParts.length > 0) && (
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[11px] text-gray-500">
-            {colectorLabel && (
-              <span>
-                <span className="text-gray-400">Colector:</span>{" "}
-                <span className="text-gray-700">{colectorLabel}</span>
-              </span>
-            )}
-            {metaParts.length > 0 && (
-              <span className="text-gray-500">{metaParts.join(" · ")}</span>
-            )}
-          </div>
+        {showChevron && (
+          <span className="text-gray-400">
+            {isExterna ? <ExternalLink className="h-3.5 w-3.5" /> : "›"}
+          </span>
         )}
       </CardContent>
     </Card>

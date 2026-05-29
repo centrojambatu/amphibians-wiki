@@ -11,7 +11,7 @@ export default async function EditorCitasPage() {
   if (especies.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
+        <div>
           <h1 className="text-4xl font-bold text-gray-900">Editor de Citas</h1>
           <p className="mt-4 text-gray-600">
             No hay especies disponibles para editar.

@@ -299,6 +299,7 @@ function StatCard({
           <audio
             controls
             className="block h-10 w-full min-w-0"
+            controlsList="nodownload noplaybackrate noremoteplayback"
             preload="none"
             src={audioSrc}
             onPlay={pauseOtherAudios}
@@ -451,6 +452,32 @@ export default function AudiotecaPage() {
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+          <div
+            className="flex flex-col items-start justify-center gap-3 rounded-md border bg-white p-5 text-left"
+            style={{
+              borderColor: "#dddddd",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+            }}
+          >
+            <a
+              href="https://deepskyblue-beaver-511675.hostingersite.com/vocalizaciones"
+              rel="noopener noreferrer"
+              style={{fontSize: "18px", fontWeight: "600"}}
+              target="_blank"
+            >
+              Vocalizaciones
+            </a>
+            <a
+              href="https://www.fonozoo.com/eng/registrospublicados.php"
+              rel="noopener noreferrer"
+              style={{fontSize: "18px", fontWeight: "600"}}
+              target="_blank"
+            >
+              FonoZoo
+            </a>
+          </div>
+
           <StatCard
             headerContent={
               <span className="text-3xl font-bold" style={{color: "#f07304"}}>
@@ -503,22 +530,6 @@ export default function AudiotecaPage() {
             caption={stats?.canto_posiblemente_extinta?.nombre_cientifico ?? null}
             label="Canto especie posiblemente extinta"
           />
-
-          <a
-            className="flex flex-col items-center justify-center rounded-md border bg-white p-2 text-center transition-shadow hover:shadow-md"
-            href="https://www.fonozoo.com/eng/registrospublicados.php"
-            rel="noopener noreferrer"
-            style={{
-              borderColor: "#dddddd",
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-              fontSize: "20px",
-              fontWeight: "600",
-            }}
-            target="_blank"
-          >
-            FonoZoo
-          </a>
         </div>
 
         {/* Histograma de cantos por colector */}
