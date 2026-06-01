@@ -25,6 +25,21 @@ import ColeccionCard, {type ColeccionCardData} from "@/components/ColeccionCard"
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import YearRangeFilter from "@/components/YearRangeFilter";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
+import RegistrosPorAnioChart from "@/components/RegistrosPorAnioChart";
+
+const MUESTRA_FIELDS = [
+  {key: "piel_exudado", label: "Piel exudado"},
+  {key: "piel_liofilizado", label: "Piel liofilizado"},
+  {key: "tejido_higado", label: "Tejido hígado"},
+  {key: "tejido_musculo", label: "Tejido músculo"},
+  {key: "esqueleto_transparentacion", label: "Ejemplar diafanizado"},
+  {key: "microfotografia", label: "Microfotografía computarizada"},
+  {key: "esperma", label: "Esperma"},
+  {key: "heces", label: "Heces"},
+  {key: "sangre", label: "Sangre"},
+] as const;
+
+type MuestraKey = (typeof MUESTRA_FIELDS)[number]["key"];
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -171,7 +186,7 @@ function EspecieSelect({
             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               className="w-full pl-10 text-sm"
-              placeholder="Especie (nombre científico o común)"
+              placeholder="Nombre científico o común"
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -400,7 +415,6 @@ export default function ColeccionesPage() {
   const [especieFilter, setEspecieFilter] = useState<string | null>(null);
   const [estadiosFilter, setEstadiosFilter] = useState<string[]>([]);
   const [sexosFilter, setSexosFilter] = useState<string[]>([]);
-  const [estadosFilter, setEstadosFilter] = useState<string[]>([]);
   const [colectoresFilter, setColectoresFilter] = useState<string[]>([]);
   const [localidadesFilter, setLocalidadesFilter] = useState<string[]>([]);
   const [catalogosFilter, setCatalogosFilter] = useState<string[]>([]);
@@ -409,6 +423,7 @@ export default function ColeccionesPage() {
   const [anioDesde, setAnioDesde] = useState("");
   const [anioHasta, setAnioHasta] = useState("");
   const [elevRange, setElevRange] = useState<[number, number] | null>(null);
+  const [tiposMuestraFilter, setTiposMuestraFilter] = useState<MuestraKey[]>([]);
   const [pagina, setPagina] = useState(1);
 
   const debouncedSc = useDebounce(scInput, 300);
@@ -444,7 +459,6 @@ export default function ColeccionesPage() {
     especieFilter,
     estadiosFilter,
     sexosFilter,
-    estadosFilter,
     colectoresFilter,
     localidadesFilter,
     catalogosFilter,
@@ -453,6 +467,7 @@ export default function ColeccionesPage() {
     anioDesde,
     anioHasta,
     elevRange,
+    tiposMuestraFilter,
   ]);
 
   const hasFilters =
@@ -461,7 +476,6 @@ export default function ColeccionesPage() {
     !!especieFilter ||
     estadiosFilter.length > 0 ||
     sexosFilter.length > 0 ||
-    estadosFilter.length > 0 ||
     colectoresFilter.length > 0 ||
     localidadesFilter.length > 0 ||
     catalogosFilter.length > 0 ||
@@ -469,7 +483,8 @@ export default function ColeccionesPage() {
     anioEspecifico.length > 0 ||
     anioDesde.length > 0 ||
     anioHasta.length > 0 ||
-    elevActive;
+    elevActive ||
+    tiposMuestraFilter.length > 0;
 
   const clearFilters = () => {
     setFamiliasFilter([]);
@@ -477,7 +492,6 @@ export default function ColeccionesPage() {
     setEspecieFilter(null);
     setEstadiosFilter([]);
     setSexosFilter([]);
-    setEstadosFilter([]);
     setColectoresFilter([]);
     setLocalidadesFilter([]);
     setCatalogosFilter([]);
@@ -486,6 +500,7 @@ export default function ColeccionesPage() {
     setAnioDesde("");
     setAnioHasta("");
     if (elevRangeData) setElevRange([elevRangeData.min, elevRangeData.max]);
+    setTiposMuestraFilter([]);
   };
 
   const queryParams = useMemo(() => {
@@ -496,7 +511,6 @@ export default function ColeccionesPage() {
     if (especieFilter) p.set("especies", especieFilter);
     if (estadiosFilter.length) p.set("estadios", estadiosFilter.join("||"));
     if (sexosFilter.length) p.set("sexos", sexosFilter.join("||"));
-    if (estadosFilter.length) p.set("estados", estadosFilter.join("||"));
     if (colectoresFilter.length) p.set("colectores", colectoresFilter.join("||"));
     if (localidadesFilter.length) p.set("localidades", localidadesFilter.join("||"));
     if (catalogosFilter.length) p.set("catalogos", catalogosFilter.join("||"));
@@ -508,6 +522,7 @@ export default function ColeccionesPage() {
       p.set("elev_min", String(elevRange[0]));
       p.set("elev_max", String(elevRange[1]));
     }
+    if (tiposMuestraFilter.length > 0) p.set("tipos_muestra", tiposMuestraFilter.join("||"));
     p.set("pagina", String(pagina));
 
     return p.toString();
@@ -517,7 +532,6 @@ export default function ColeccionesPage() {
     especieFilter,
     estadiosFilter,
     sexosFilter,
-    estadosFilter,
     colectoresFilter,
     localidadesFilter,
     catalogosFilter,
@@ -527,6 +541,7 @@ export default function ColeccionesPage() {
     anioHasta,
     elevActive,
     elevRange,
+    tiposMuestraFilter,
     pagina,
   ]);
 
@@ -587,6 +602,10 @@ export default function ColeccionesPage() {
           />
         </div>
 
+        <div className="mb-8">
+          <RegistrosPorAnioChart />
+        </div>
+
         <section className="mb-12">
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
             <aside className="lg:w-80 lg:flex-shrink-0">
@@ -636,12 +655,51 @@ export default function ColeccionesPage() {
                       selected={sexosFilter}
                       onChange={setSexosFilter}
                     />
-                    <AccordionButtonFilter
-                      apiPath="/api/colecciones/estados"
-                      label="Estado"
-                      selected={estadosFilter}
-                      onChange={setEstadosFilter}
-                    />
+                    <AccordionItem value="tipoMuestra">
+                      <AccordionTrigger className="!items-start">
+                        <div className="flex flex-col items-start">
+                          <span className="font-semibold">Tipo de muestra</span>
+                          {tiposMuestraFilter.length > 0 && (
+                            <span className="mt-1 text-xs font-normal text-gray-500">
+                              {tiposMuestraFilter
+                                .map((k) => MUESTRA_FIELDS.find((f) => f.key === k)?.label)
+                                .filter(Boolean)
+                                .join(", ")}
+                            </span>
+                          )}
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-col gap-2">
+                          {MUESTRA_FIELDS.map((f) => {
+                            const active = tiposMuestraFilter.includes(f.key);
+
+                            return (
+                              <Button
+                                key={f.key}
+                                aria-pressed={active}
+                                className="h-auto min-h-[32px] w-full justify-start rounded-md px-2 py-1 text-left text-sm break-words whitespace-normal"
+                                size="sm"
+                                style={{
+                                  borderColor: active ? undefined : "#e8e8e8",
+                                  color: active ? undefined : "#2d2d2d",
+                                }}
+                                variant={active ? "default" : "outline"}
+                                onClick={() => {
+                                  setTiposMuestraFilter((prev) =>
+                                    prev.includes(f.key)
+                                      ? prev.filter((k) => k !== f.key)
+                                      : [...prev, f.key],
+                                  );
+                                }}
+                              >
+                                {f.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
 
                   <div className="space-y-3 px-6 py-4">

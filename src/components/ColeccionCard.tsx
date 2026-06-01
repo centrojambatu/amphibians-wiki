@@ -92,6 +92,12 @@ export default function ColeccionCard({
   if (localidad) {
     fields.push({key: "localidad", node: <span>{localidad}</span>});
   }
+  if (coleccion.altitud != null) {
+    fields.push({
+      key: "altitud",
+      node: <span>{`${coleccion.altitud} m`}</span>,
+    });
+  }
   if (fecha) {
     fields.push({key: "fecha", node: <span>{fecha}</span>});
   }

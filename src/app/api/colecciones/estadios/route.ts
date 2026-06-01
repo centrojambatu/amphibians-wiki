@@ -19,9 +19,29 @@ export async function GET(request: Request) {
     const {data, error} = await query;
     if (error) throw error;
 
-    const estadios = Array.from(
+    const ORDEN_ESTADIOS = [
+      "Adulto",
+      "Subadulto",
+      "Metamorfo",
+      "Renacuajo",
+      "Puesta",
+      "Huevo",
+    ];
+
+    const unicos = Array.from(
       new Set((data || []).map((r: any) => r.estadio as string).filter(Boolean)),
-    ).sort((a, b) => a.localeCompare(b));
+    );
+
+    const estadios = unicos.sort((a, b) => {
+      const ia = ORDEN_ESTADIOS.indexOf(a);
+      const ib = ORDEN_ESTADIOS.indexOf(b);
+
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+
+      return a.localeCompare(b);
+    });
 
     return NextResponse.json(estadios, {
       headers: {"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600"},

@@ -36,7 +36,20 @@ export async function GET(request: Request) {
   const anioHasta = parseNumber(searchParams.get("anio_hasta"));
   const elevMin = parseNumber(searchParams.get("elev_min"));
   const elevMax = parseNumber(searchParams.get("elev_max"));
+  const tiposMuestra = parseList(searchParams.get("tipos_muestra"));
   const pagina = Math.max(1, parseNumber(searchParams.get("pagina")) || 1);
+
+  const TIPO_MUESTRA_VALIDOS = new Set([
+    "sangre",
+    "piel_exudado",
+    "piel_liofilizado",
+    "tejido_higado",
+    "tejido_musculo",
+    "esqueleto_transparentacion",
+    "esperma",
+    "heces",
+    "microfotografia",
+  ]);
 
   const supabase = createServiceClient();
 
@@ -182,6 +195,14 @@ export async function GET(request: Request) {
 
     if (elevMin != null) query = query.gte("elevacion", elevMin);
     if (elevMax != null) query = query.lte("elevacion", elevMax);
+
+    if (tiposMuestra.length > 0) {
+      for (const t of tiposMuestra) {
+        if (TIPO_MUESTRA_VALIDOS.has(t)) {
+          query = query.eq(t, true);
+        }
+      }
+    }
 
     const from = (pagina - 1) * ITEMS_POR_PAGINA;
     const to = from + ITEMS_POR_PAGINA - 1;

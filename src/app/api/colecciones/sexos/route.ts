@@ -17,7 +17,12 @@ export async function GET() {
 
     const sexos = Array.from(
       new Set((data || []).map((r: any) => r.sexo as string).filter(Boolean)),
-    ).sort((a, b) => a.localeCompare(b));
+    ).sort((a, b) => {
+      if (a === "Indeterminado") return 1;
+      if (b === "Indeterminado") return -1;
+
+      return a.localeCompare(b);
+    });
 
     return NextResponse.json(sexos, {
       headers: {"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600"},
