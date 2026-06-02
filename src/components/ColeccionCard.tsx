@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {Check, ExternalLink} from "lucide-react";
+import {MoveRight, Check, ExternalLink} from "lucide-react";
 
 import {Card, CardContent} from "@/components/ui/card";
 
@@ -31,6 +31,15 @@ export interface ColeccionCardData {
   tiene_muestras?: boolean;
   tiene_multimedia?: boolean;
   tiene_adn?: boolean;
+  sangre?: boolean;
+  piel_exudado?: boolean;
+  piel_liofilizado?: boolean;
+  tejido_higado?: boolean;
+  tejido_musculo?: boolean;
+  esqueleto_transparentacion?: boolean;
+  esperma?: boolean;
+  heces?: boolean;
+  microfotografia?: boolean;
 }
 
 interface ColeccionCardProps {
@@ -108,7 +117,44 @@ export default function ColeccionCard({
     <Check className="h-3.5 w-3.5" strokeWidth={3} style={{color: "#2d6e2d"}} />
   );
 
-  if (coleccion.tiene_muestras) {
+  const muestraTipos: {key: string; label: React.ReactNode; flag: boolean | undefined}[] = [
+    {key: "tejido_higado", label: "Tejido hígado", flag: coleccion.tejido_higado},
+    {key: "tejido_musculo", label: "Tejido músculo", flag: coleccion.tejido_musculo},
+    {
+      key: "piel_exudado",
+      label: (
+        <>
+          Piel <span style={{color: "#9ca3af"}}>|</span> exudado
+        </>
+      ),
+      flag: coleccion.piel_exudado,
+    },
+    {
+      key: "piel_liofilizado",
+      label: (
+        <>
+          Piel <span style={{color: "#9ca3af"}}>|</span> liofilizado
+        </>
+      ),
+      flag: coleccion.piel_liofilizado,
+    },
+    {key: "sangre", label: "Sangre", flag: coleccion.sangre},
+  ];
+  const muestraTiposDefinidos = muestraTipos.some((m) => m.flag !== undefined);
+  const muestraTiposActivos = muestraTipos.filter((m) => m.flag === true);
+
+  if (muestraTiposDefinidos) {
+    muestraTiposActivos.forEach((m) => {
+      fields.push({
+        key: `muestra-${m.key}`,
+        node: (
+          <span className="inline-flex items-center gap-1">
+            {m.label} {checkIcon}
+          </span>
+        ),
+      });
+    });
+  } else if (coleccion.tiene_muestras) {
     fields.push({
       key: "muestras",
       node: (
@@ -156,7 +202,11 @@ export default function ColeccionCard({
         </div>
         {showChevron && (
           <span className="text-gray-400">
-            {isExterna ? <ExternalLink className="h-3.5 w-3.5" /> : "›"}
+            {isExterna ? (
+              <ExternalLink className="h-3.5 w-3.5" />
+            ) : (
+              <MoveRight className="h-3.5 w-3.5" />
+            )}
           </span>
         )}
       </CardContent>

@@ -1,7 +1,9 @@
 "use client";
 
+import type {ColeccionMuestra} from "./get-coleccion-muestras";
+
 import Link from "next/link";
-import {ArrowLeft, Check, RotateCcw} from "lucide-react";
+import {MoveLeft, RotateCcw} from "lucide-react";
 import {useMemo, useState} from "react";
 
 import {
@@ -11,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {Button} from "@/components/ui/button";
+import ColeccionCard from "@/components/ColeccionCard";
 
 import {MUESTRA_FIELDS, type MuestraField} from "../get-moleculoteca-taxa";
 
@@ -33,8 +36,6 @@ function MuestraLabel({label}: {label: string}) {
     </>
   );
 }
-
-import type {ColeccionMuestra} from "./get-coleccion-muestras";
 
 export default function MoleculotecaTaxonClient({
   muestras,
@@ -77,21 +78,17 @@ export default function MoleculotecaTaxonClient({
   return (
     <main className="container mx-auto px-4 py-6">
       <Link
-        className="hover:text-primary mb-4 inline-flex items-center gap-2 text-sm text-gray-600 no-underline"
+        aria-label="Volver"
+        className="text-muted-foreground mb-4 inline-flex items-center hover:no-underline"
         href="/moleculoteca"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Volver
+        <MoveLeft className="h-8 w-8" />
       </Link>
 
       <h1 className="mb-1 text-2xl font-bold text-gray-900">
         Muestras biológicas de <span className="italic">{nombreCientifico}</span>
       </h1>
-      <p className="text-muted-foreground mb-6 text-sm">
-        {muestras.length} registros con muestras
-      </p>
-
-      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="flex flex-col gap-4 pt-6 lg:flex-row lg:gap-6">
         <aside className="lg:w-80 lg:flex-shrink-0">
           <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
             <div className="flex flex-shrink-0 justify-end px-6 pt-6 pb-2">
@@ -167,71 +164,12 @@ export default function MoleculotecaTaxonClient({
             {filtradas.length} {filtradas.length === 1 ? "registro" : "registros"}
           </div>
 
-          <div className="max-h-[75vh] overflow-auto rounded-lg border border-gray-200 bg-white">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 z-10 bg-gray-50 text-left text-[10px] font-semibold tracking-wide text-gray-500 shadow-sm">
-            <tr>
-              <th className="bg-gray-50 px-3 py-2">Catálogo</th>
-              <th className="bg-gray-50 px-3 py-2">Fecha</th>
-              <th className="bg-gray-50 px-3 py-2">Localidad</th>
-              <th className="bg-gray-50 px-3 py-2">Estadio / Sexo</th>
-              {MUESTRA_FIELDS.map((f) => (
-                <th key={f.key} className="bg-gray-50 px-2 py-2 text-center">
-                  <MuestraLabel label={f.label} />
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtradas.map((m, i) => {
-              const cat =
-                m.catalogo_museo && m.numero_museo
-                  ? `${m.catalogo_museo} ${m.numero_museo}`
-                  : m.numero_museo || m.num_colector || `#${String(m.id_coleccion)}`;
+          <div className="flex flex-col gap-1.5">
+            {filtradas.map((m) => {
               const href = `/sapopedia/species/${encodeURIComponent(speciesSlug)}/colecciones/${String(m.id_coleccion)}`;
-              const cellCls = "px-3 py-2 text-gray-700 group-hover:bg-blue-50/40";
 
-              return (
-                <tr
-                  key={m.id_coleccion}
-                  className={`group cursor-pointer transition-colors ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
-                  onClick={() => {
-                    window.location.href = href;
-                  }}
-                >
-                  <td className={`px-3 py-2 font-medium text-gray-900 group-hover:bg-blue-50/40`}>
-                    <Link
-                      className="hover:text-primary text-[#4ba24b] underline"
-                      href={href}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {cat}
-                    </Link>
-                  </td>
-                  <td className={cellCls}>{m.fecha_col || "—"}</td>
-                  <td className={cellCls}>
-                    <div className="line-clamp-1">{m.localidad || "—"}</div>
-                    {m.provincia && <div className="text-[10px] text-gray-500">{m.provincia}</div>}
-                  </td>
-                  <td className={cellCls}>
-                    {[m.estadio, m.sexo].filter(Boolean).join(" · ") || "—"}
-                  </td>
-                  {MUESTRA_FIELDS.map((f) => (
-                    <td key={f.key} className="px-2 py-2 text-center group-hover:bg-blue-50/40">
-                      {m[f.key] && (
-                        <Check
-                          className="inline-block h-3.5 w-3.5"
-                          strokeWidth={3}
-                          style={{color: "#2d6e2d"}}
-                        />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              );
+              return <ColeccionCard key={m.id_coleccion} coleccion={m} href={href} />;
             })}
-          </tbody>
-        </table>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import {Check, RotateCcw} from "lucide-react";
+import {MoveRight, Check, RotateCcw} from "lucide-react";
 import Link from "next/link";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useEffect, useMemo, useState} from "react";
@@ -288,10 +288,10 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <div className="overflow-hidden rounded-lg border border-gray-200">
             {/* Header sticky */}
             <div
-              className="sticky top-0 z-10 hidden items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] font-semibold tracking-wide text-gray-500 shadow-sm lg:flex"
+              className="sticky top-0 z-10 hidden items-center gap-2 border-b border-gray-200 bg-white px-3 py-1.5 text-[10px] font-semibold tracking-wide text-gray-500 lg:flex"
             >
               <div className="min-w-0 flex-1 lg:max-w-xs">Especie</div>
               <div className="flex-1">
@@ -309,6 +309,7 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
               <div className="shrink-0 text-center" style={{width: "72px"}}>
                 Secuencias
               </div>
+              <div className="shrink-0" style={{width: "20px"}} />
             </div>
 
             {filtrados.map((t) => (
@@ -386,6 +387,15 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
                     </a>
                   )}
                 </div>
+
+                <Link
+                  aria-label="Ver detalle"
+                  className="flex shrink-0 items-center justify-center text-gray-400 no-underline hover:text-gray-600"
+                  href={`/moleculoteca/${String(t.taxon_id)}`}
+                  style={{width: "20px"}}
+                >
+                  <MoveRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             ))}
           </div>

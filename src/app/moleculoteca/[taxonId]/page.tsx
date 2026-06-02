@@ -17,7 +17,7 @@ export default async function MoleculotecaTaxonPage({params}: PageProps) {
 
   if (muestras.length === 0) notFound();
 
-  const nombreCientifico = muestras[0]?.taxon_nombre || "Especie";
+  const nombreCientifico = muestras[0]?.nombre_cientifico || "Especie";
 
   return <MoleculotecaTaxonClient muestras={muestras} nombreCientifico={nombreCientifico} />;
 }

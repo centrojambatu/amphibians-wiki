@@ -98,7 +98,7 @@ export default async function MoleculotecaPage({searchParams}: PageProps) {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://www.ncbi.nlm.nih.gov/search/all/?term=amphibian%20ecuador"
+            href="https://www.ncbi.nlm.nih.gov/nuccore/?term=amphibia+ecuador"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -109,7 +109,37 @@ export default async function MoleculotecaPage({searchParams}: PageProps) {
             }}
             target="_blank"
           >
-            GenBank
+            GenBank ADN <span style={{color: "#f07304"}}>|</span> ARN
+          </a>
+          <a
+            className="hover:text-gray-900"
+            href="https://www.ncbi.nlm.nih.gov/protein/?term=amphibia%20ecuador"
+            rel="noopener noreferrer"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "600",
+            }}
+            target="_blank"
+          >
+            GenBank proteínas
+          </a>
+          <a
+            className="hover:text-gray-900"
+            href="https://www.ncbi.nlm.nih.gov/bioproject/?term=amphibia%20ecuador"
+            rel="noopener noreferrer"
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: "600",
+            }}
+            target="_blank"
+          >
+            GenBank bioproyectos
           </a>
         </div>
         {counts.map((c) => (
