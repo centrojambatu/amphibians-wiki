@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ArrowLeft, Eye} from "lucide-react";
+import {MoveLeft, Eye} from "lucide-react";
 
 import AudioCardWithSpectrogram from "./AudioCardWithSpectrogram";
 import {SpeciesAudioItem} from "./types";
@@ -42,23 +42,13 @@ export default function SpeciesAudiosClient({
         <div className="mb-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {fromAudioteca ? (
-                <Link
-                  className="audioteca-back-link hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={audiotecaUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver
-                </Link>
-              ) : (
-                <Link
-                  className="audioteca-back-link hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={especieUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver a la ficha de la especie
-                </Link>
-              )}
+              <Link
+                aria-label="Volver"
+                className="audioteca-back-link text-muted-foreground inline-flex items-center hover:no-underline"
+                href={fromAudioteca ? audiotecaUrl : especieUrl}
+              >
+                <MoveLeft className="h-8 w-8" strokeWidth={1} />
+              </Link>
             </div>
           </div>
           <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">

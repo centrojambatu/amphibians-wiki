@@ -1,6 +1,6 @@
 import {notFound} from "next/navigation";
 import Link from "next/link";
-import {ExternalLink} from "lucide-react";
+import {ExternalLink, MoveLeft} from "lucide-react";
 
 import {Card, CardContent} from "@/components/ui/card";
 import Pagination from "@/components/pagination";
@@ -57,10 +57,11 @@ export default async function ColeccionesPage({params, searchParams}: PageProps)
       {/* Header */}
       <div className="mb-8">
         <Link
-          className="text-muted-foreground mb-4 inline-block text-sm hover:no-underline"
+          aria-label="Volver"
+          className="text-muted-foreground mb-4 inline-flex items-center hover:no-underline"
           href={`/sapopedia/species/${encodeURIComponent(id)}`}
         >
-          ← Volver a la ficha de la especie
+          <MoveLeft className="h-8 w-8" strokeWidth={1} />
         </Link>
         <h1 className="mb-1 text-4xl font-bold">Colecciones</h1>
         {nombreCientifico && (

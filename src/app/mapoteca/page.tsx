@@ -5,7 +5,7 @@ import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {useQuery} from "@tanstack/react-query";
-import {Search, X, Mountain, Check, RotateCcw} from "lucide-react";
+import {Search, X, Mountain, Check, MoveLeft, RotateCcw} from "lucide-react";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -639,12 +639,11 @@ function MapotecaContent({
       {especieFromUrl && (
         <div className="container mx-auto px-4 pb-2">
           <Link
-            className="inline-flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-80"
+            aria-label="Volver"
+            className="text-muted-foreground inline-flex items-center hover:no-underline"
             href={`/sapopedia/species/${speciesSlug}`}
-            style={{color: "#16a34a", fontSize: "14px"}}
           >
-            <span>←</span>
-            <span>Volver a la ficha de la especie</span>
+            <MoveLeft className="h-8 w-8" strokeWidth={1} />
           </Link>
         </div>
       )}

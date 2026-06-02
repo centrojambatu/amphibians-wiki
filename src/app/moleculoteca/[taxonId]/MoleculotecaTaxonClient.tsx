@@ -82,7 +82,7 @@ export default function MoleculotecaTaxonClient({
         className="text-muted-foreground mb-4 inline-flex items-center hover:no-underline"
         href="/moleculoteca"
       >
-        <MoveLeft className="h-8 w-8" />
+        <MoveLeft className="h-8 w-8" strokeWidth={1} />
       </Link>
 
       <h1 className="mb-1 text-2xl font-bold text-gray-900">
@@ -166,7 +166,7 @@ export default function MoleculotecaTaxonClient({
 
           <div className="flex flex-col gap-1.5">
             {filtradas.map((m) => {
-              const href = `/sapopedia/species/${encodeURIComponent(speciesSlug)}/colecciones/${String(m.id_coleccion)}`;
+              const href = `/sapopedia/species/${encodeURIComponent(speciesSlug)}/colecciones/${String(m.id_coleccion)}?from=moleculoteca&taxonId=${String(m.taxon_id)}`;
 
               return <ColeccionCard key={m.id_coleccion} coleccion={m} href={href} />;
             })}

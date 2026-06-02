@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {useSearchParams} from "next/navigation";
-import {ArrowLeft, ChevronDown} from "lucide-react";
+import {MoveLeft, ChevronDown} from "lucide-react";
 import {ColumnsPhotoAlbum, type Photo} from "react-photo-album";
 import "react-photo-album/columns.css";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
@@ -207,6 +207,13 @@ export default function ColeccionDetailClient({
   const c = coleccion;
   const searchParams = useSearchParams();
   const cameFromColecciones = searchParams?.get("from") === "colecciones";
+  const cameFromMoleculoteca = searchParams?.get("from") === "moleculoteca";
+  const moleculotecaTaxonId = searchParams?.get("taxonId");
+  const backHref = cameFromMoleculoteca && moleculotecaTaxonId
+    ? `/moleculoteca/${moleculotecaTaxonId}`
+    : cameFromColecciones
+      ? "/colecciones"
+      : coleccionesUrl;
 
   const catalogoLabel = (() => {
     const acronimo = c.catalogo_museo?.includes(" - ")
@@ -310,11 +317,11 @@ export default function ColeccionDetailClient({
 
       {/* Back link al origen */}
       <Link
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
-        href={cameFromColecciones ? "/colecciones" : coleccionesUrl}
+        aria-label="Volver"
+        className="text-muted-foreground inline-flex items-center hover:no-underline"
+        href={backHref}
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        {cameFromColecciones ? "Volver a colecciones" : "Volver a colecciones de la especie"}
+        <MoveLeft className="h-8 w-8" strokeWidth={1} />
       </Link>
 
       {/* Breadcrumb */}

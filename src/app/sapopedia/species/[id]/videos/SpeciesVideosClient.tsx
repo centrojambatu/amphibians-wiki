@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ArrowLeft} from "lucide-react";
+import {MoveLeft} from "lucide-react";
 
 import {useGbifOccurrence} from "@/lib/gbif";
 
@@ -150,23 +150,13 @@ export default function SpeciesVideosClient({
         <div className="mb-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {fromVideoteca ? (
-                <Link
-                  className="hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={videotecaUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver
-                </Link>
-              ) : (
-                <Link
-                  className="hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={especieUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver a la ficha de la especie
-                </Link>
-              )}
+              <Link
+                aria-label="Volver"
+                className="text-muted-foreground inline-flex items-center hover:no-underline"
+                href={fromVideoteca ? videotecaUrl : especieUrl}
+              >
+                <MoveLeft className="h-8 w-8" strokeWidth={1} />
+              </Link>
             </div>
           </div>
           <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">

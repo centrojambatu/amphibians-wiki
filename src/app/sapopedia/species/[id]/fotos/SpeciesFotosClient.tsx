@@ -1,6 +1,6 @@
 "use client";
 
-import {ArrowLeft} from "lucide-react";
+import {MoveLeft} from "lucide-react";
 import Link from "next/link";
 import {useEffect, useMemo, useState} from "react";
 import {ColumnsPhotoAlbum, type Photo} from "react-photo-album";
@@ -203,23 +203,13 @@ export default function SpeciesFotosClient({
         <div className="mb-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {fromFototeca ? (
-                <Link
-                  className="hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={fototecaUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver
-                </Link>
-              ) : (
-                <Link
-                  className="hover:text-primary inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors"
-                  href={especieUrl}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver a la ficha de la especie
-                </Link>
-              )}
+              <Link
+                aria-label="Volver"
+                className="text-muted-foreground inline-flex items-center hover:no-underline"
+                href={fromFototeca ? fototecaUrl : especieUrl}
+              >
+                <MoveLeft className="h-8 w-8" strokeWidth={1} />
+              </Link>
             </div>
           </div>
           <h1 className="flex flex-wrap items-baseline gap-x-3 text-3xl font-bold text-gray-900">

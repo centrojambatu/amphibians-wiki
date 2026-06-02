@@ -6,7 +6,7 @@ import SapotecaContentLayout from "@/components/sapoteca-content-layout";
 import SapotecaHistogramaChart from "@/components/sapoteca-histograma-chart";
 import SapotecaPublicacionesList from "@/components/sapoteca-publicaciones-list";
 import Link from "next/link";
-import {ArrowLeft} from "lucide-react";
+import {MoveLeft} from "lucide-react";
 
 interface SearchParams {
   [key: string]: string | undefined;
@@ -52,11 +52,11 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
       {backUrl && (
         <div className="mb-4">
           <Link
-            className="inline-flex items-center gap-2 text-sm text-gray-600 no-underline transition-colors hover:text-gray-900"
+            aria-label="Volver"
+            className="text-muted-foreground inline-flex items-center hover:no-underline"
             href={backUrl}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Volver
+            <MoveLeft className="h-8 w-8" strokeWidth={1} />
           </Link>
         </div>
       )}
