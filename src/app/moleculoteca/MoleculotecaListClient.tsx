@@ -1,6 +1,6 @@
 "use client";
 
-import {ExternalLink, RotateCcw} from "lucide-react";
+import {Check, RotateCcw} from "lucide-react";
 import Link from "next/link";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useEffect, useMemo, useState} from "react";
@@ -16,6 +16,26 @@ import {Button} from "@/components/ui/button";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 import {MUESTRA_FIELDS, type MuestraField, type MuestrasTaxon} from "./get-moleculoteca-taxa";
+
+function MuestraLabel({label}: {label: string}) {
+  const idx = label.indexOf(" ");
+
+  if (idx === -1) return <>{label}</>;
+  const first = label.slice(0, idx);
+  const rest = label.slice(idx + 1);
+
+  if (first !== "Piel") return <>{label}</>;
+
+  return (
+    <>
+      {first}
+      <span className="mx-0.5" style={{color: "#f07304"}}>
+        |
+      </span>
+      {rest}
+    </>
+  );
+}
 
 function AccordionButtonFilter({
   label,
@@ -243,7 +263,7 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
                           variant={active ? "default" : "outline"}
                           onClick={() => toggle(f.key)}
                         >
-                          {f.label}
+                          <MuestraLabel label={f.label} />
                         </Button>
                       );
                     })}
@@ -268,86 +288,102 @@ export default function MoleculotecaListClient({taxa}: {taxa: MuestrasTaxon[]}) 
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+            {/* Header sticky */}
+            <div
+              className="sticky top-0 z-10 hidden items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] font-semibold tracking-wide text-gray-500 shadow-sm lg:flex"
+            >
+              <div className="min-w-0 flex-1 lg:max-w-xs">Especie</div>
+              <div className="flex-1">
+                <div
+                  className="grid gap-0.5"
+                  style={{gridTemplateColumns: `repeat(${String(MUESTRA_FIELDS.length)}, minmax(0, 1fr))`}}
+                >
+                  {MUESTRA_FIELDS.map((f) => (
+                    <div key={f.key} className="text-center break-words whitespace-normal leading-tight">
+                      <MuestraLabel label={f.label} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="shrink-0 text-center" style={{width: "72px"}}>
+                Secuencias
+              </div>
+            </div>
+
             {filtrados.map((t) => (
               <div
                 key={t.taxon_id}
-                className="bg-card hover:border-primary group flex flex-col gap-3 rounded-lg border px-4 py-2.5 transition-colors lg:flex-row lg:items-center"
+                className="hover:bg-muted/30 group flex flex-col gap-2 border-b border-gray-100 px-3 py-1.5 transition-colors last:border-b-0 lg:flex-row lg:items-center"
               >
                 <Link
                   className="block min-w-0 flex-1 no-underline lg:max-w-xs"
                   href={`/moleculoteca/${String(t.taxon_id)}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <p className="group-hover:text-primary truncate text-sm font-semibold italic text-gray-900">
+                  <p className="truncate leading-tight">
+                    <span
+                      className="text-xs font-semibold italic"
+                      style={{color: "#666666"}}
+                    >
                       {t.nombre_cientifico}
-                    </p>
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
-                      <span className="font-mono text-[11px] font-semibold text-gray-800">
-                        {t.total_registros}
-                      </span>
-                      {t.total_registros === 1 ? "registro" : "registros"}
                     </span>
-                  </div>
-                  {t.nombre_comun && (
-                    <p className="truncate text-[11px] text-gray-600">{t.nombre_comun}</p>
-                  )}
-                  {(t.orden || t.familia || t.genero) && (
-                    <p className="mt-0.5 truncate text-[10px] text-gray-400">
-                      {[t.orden, t.familia, t.genero].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
+                    {t.nombre_comun && (
+                      <>
+                        <span className="mx-1.5 text-[11px]" style={{color: "#f07304"}}>
+                          |
+                        </span>
+                        <span className="text-[11px]" style={{color: "#888888"}}>
+                          {t.nombre_comun}
+                        </span>
+                      </>
+                    )}
+                  </p>
                 </Link>
 
                 <Link
                   className="block flex-1 no-underline"
                   href={`/moleculoteca/${String(t.taxon_id)}`}
                 >
-                  <div className="grid grid-cols-4 gap-1 sm:grid-cols-8">
+                  <div
+                    className="grid gap-0.5"
+                    style={{gridTemplateColumns: `repeat(${String(MUESTRA_FIELDS.length)}, minmax(0, 1fr))`}}
+                  >
                     {MUESTRA_FIELDS.map((field) => {
-                      const value = (t as any)[field.count] as number;
+                      const value = (t as Record<string, unknown>)[field.count] as number;
                       const active = value > 0;
 
                       return (
                         <div
                           key={field.key}
-                          className={`flex min-w-0 flex-col items-center justify-center rounded px-1 py-1 text-[10px] leading-tight ${
-                            active ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-400"
-                          }`}
-                          title={field.label}
+                          className="flex min-w-0 items-center justify-center"
+                          title={`${field.label}: ${String(value)}`}
                         >
-                          <span className="w-full text-center text-[9px] leading-tight break-words whitespace-normal uppercase">
-                            {field.label}
-                          </span>
-                          <span className="mt-0.5 font-mono text-xs font-bold">{value}</span>
+                          {active ? (
+                            <Check
+                              className="h-3.5 w-3.5"
+                              strokeWidth={3}
+                              style={{color: "#2d6e2d"}}
+                            />
+                          ) : null}
                         </div>
                       );
                     })}
                   </div>
                 </Link>
 
-                <div className="flex shrink-0 flex-col items-stretch gap-1 text-[11px] text-gray-500">
+                <div
+                  className="flex shrink-0 flex-col items-stretch text-[10px] text-gray-500"
+                  style={{width: "72px"}}
+                >
                   {t.nombre_cientifico && (
-                    <>
-                      <a
-                        className="inline-flex items-center justify-between gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
-                        href={`https://www.morphosource.org/catalog/media?q=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        MorphoSource
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                      <a
-                        className="inline-flex items-center justify-between gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
-                        href={`https://www.ncbi.nlm.nih.gov/search/all/?term=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        GenBank
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </>
+                    <a
+                      className="inline-flex items-center justify-center rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
+                      href={`https://www.ncbi.nlm.nih.gov/search/all/?term=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      GenBank
+                    </a>
                   )}
                 </div>
               </div>

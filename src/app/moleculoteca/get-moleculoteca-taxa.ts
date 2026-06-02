@@ -19,18 +19,11 @@ export interface MuestrasTaxon {
 }
 
 export const MUESTRA_FIELDS = [
-  {key: "sangre", label: "Sangre", count: "count_sangre"},
-  {key: "piel_exudado", label: "Piel exudado", count: "count_piel_exudado"},
-  {key: "piel_liofilizado", label: "Piel liofilizado", count: "count_piel_liofilizado"},
   {key: "tejido_higado", label: "Tejido hígado", count: "count_tejido_higado"},
   {key: "tejido_musculo", label: "Tejido músculo", count: "count_tejido_musculo"},
-  {
-    key: "esqueleto_transparentacion",
-    label: "Esqueleto",
-    count: "count_esqueleto_transparentacion",
-  },
-  {key: "esperma", label: "Esperma", count: "count_esperma"},
-  {key: "heces", label: "Heces", count: "count_heces"},
+  {key: "piel_exudado", label: "Piel exudado", count: "count_piel_exudado"},
+  {key: "piel_liofilizado", label: "Piel liofilizado", count: "count_piel_liofilizado"},
+  {key: "sangre", label: "Sangre", count: "count_sangre"},
 ] as const;
 
 export type MuestraField = (typeof MUESTRA_FIELDS)[number]["key"];

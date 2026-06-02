@@ -27,13 +27,33 @@ import YearRangeFilter from "@/components/YearRangeFilter";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
 import RegistrosPorAnioChart from "@/components/RegistrosPorAnioChart";
 
+function MuestraLabel({label}: {label: string}) {
+  const idx = label.indexOf(" ");
+
+  if (idx === -1) return <>{label}</>;
+  const first = label.slice(0, idx);
+  const rest = label.slice(idx + 1);
+
+  if (first !== "Piel") return <>{label}</>;
+
+  return (
+    <>
+      {first}
+      <span className="mx-0.5" style={{color: "#f07304"}}>
+        |
+      </span>
+      {rest}
+    </>
+  );
+}
+
 const MUESTRA_FIELDS = [
   {key: "piel_exudado", label: "Piel exudado"},
   {key: "piel_liofilizado", label: "Piel liofilizado"},
   {key: "tejido_higado", label: "Tejido hígado"},
   {key: "tejido_musculo", label: "Tejido músculo"},
   {key: "esqueleto_transparentacion", label: "Ejemplar diafanizado"},
-  {key: "microfotografia", label: "Microfotografía computarizada"},
+  {key: "microfotografia", label: "MicrofotografíaCT"},
   {key: "esperma", label: "Esperma"},
   {key: "heces", label: "Heces"},
   {key: "sangre", label: "Sangre"},
@@ -367,6 +387,11 @@ interface ColeccionesResponse {
 interface EstadisticasColecciones {
   total_registros: number;
   total_especies: number;
+  total_especies_con_tejido: number;
+  total_especies_con_piel: number;
+  total_especies_con_diafanizado: number;
+  total_especies_con_esperma: number;
+  total_especies_con_microfotografia: number;
   total_colectores: number;
   total_localidades: number;
   anio_min: number | null;
@@ -377,22 +402,31 @@ function StatCard({
   label,
   value,
   highlight = false,
+  valueSuffix,
 }: {
-  label: string;
+  label: React.ReactNode;
   value: string | number | null;
   highlight?: boolean;
+  valueSuffix?: string;
 }) {
   return (
     <div
       className="flex flex-col items-center justify-center rounded-md border p-2"
       style={{borderColor: "#dddddd"}}
     >
-      <span
-        className="text-3xl font-bold sm:text-4xl"
-        style={{color: highlight ? "#f07304" : "#000000"}}
-      >
-        {value ?? "—"}
-      </span>
+      <div className="flex items-baseline gap-1">
+        <span
+          className="text-3xl font-bold sm:text-4xl"
+          style={{color: highlight ? "#f07304" : "#000000"}}
+        >
+          {value ?? "—"}
+        </span>
+        {valueSuffix && (
+          <span className="text-xs font-semibold" style={{color: "#666666"}}>
+            {valueSuffix}
+          </span>
+        )}
+      </div>
       <h4
         className="mt-1 text-center"
         style={{
@@ -587,23 +621,76 @@ export default function ColeccionesPage() {
         </div>
 
         {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9">
+          <div
+            className="flex flex-col justify-center rounded-md border p-2"
+            style={{borderColor: "#dddddd"}}
+          >
+            <a
+              className="hover:text-gray-900"
+              href="https://www.gbif.org/occurrence/search?offset=400&q=amphibia%20ecuador&taxon_key=131"
+              rel="noopener noreferrer"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+              target="_blank"
+            >
+              GBIF
+            </a>
+            <a
+              className="hover:text-gray-900"
+              href="https://www.vertnet.org/occurrence/search?taxonKey=131&country=EC"
+              rel="noopener noreferrer"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+              target="_blank"
+            >
+              VertNet
+            </a>
+          </div>
           <StatCard
             highlight
             label="Registros"
-            value={stats?.total_registros?.toLocaleString() ?? null}
+            value={(stats?.total_registros ?? 0).toLocaleString()}
           />
-          <StatCard label="Especies" value={stats?.total_especies?.toLocaleString() ?? null} />
-          <StatCard label="Colectores" value={stats?.total_colectores?.toLocaleString() ?? null} />
+          <StatCard label="Especies" value={(stats?.total_especies ?? 0).toLocaleString()} />
           <StatCard
             label="Localidades"
-            value={stats?.total_localidades?.toLocaleString() ?? null}
+            value={(stats?.total_localidades ?? 0).toLocaleString()}
           />
           <StatCard
-            label="Rango temporal"
-            value={
-              stats?.anio_min && stats?.anio_max ? `${stats.anio_min}–${stats.anio_max}` : null
-            }
+            label="Tejido"
+            value={(stats?.total_especies_con_tejido ?? 0).toLocaleString()}
+            valueSuffix="especies"
+          />
+          <StatCard
+            label="Extracto piel"
+            value={(stats?.total_especies_con_piel ?? 0).toLocaleString()}
+            valueSuffix="especies"
+          />
+          <StatCard
+            label="Ejemplar diafanizado"
+            value={(stats?.total_especies_con_diafanizado ?? 0).toLocaleString()}
+            valueSuffix="especies"
+          />
+          <StatCard
+            label="MicroCT"
+            value={(stats?.total_especies_con_microfotografia ?? 0).toLocaleString()}
+            valueSuffix="especies"
+          />
+          <StatCard
+            label="Esperma"
+            value={(stats?.total_especies_con_esperma ?? 0).toLocaleString()}
+            valueSuffix="especies"
           />
         </div>
 
@@ -698,7 +785,7 @@ export default function ColeccionesPage() {
                                   );
                                 }}
                               >
-                                {f.label}
+                                <MuestraLabel label={f.label} />
                               </Button>
                             );
                           })}

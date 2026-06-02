@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ArrowLeft, RotateCcw} from "lucide-react";
+import {ArrowLeft, Check, RotateCcw} from "lucide-react";
 import {useMemo, useState} from "react";
 
 import {
@@ -13,6 +13,26 @@ import {
 import {Button} from "@/components/ui/button";
 
 import {MUESTRA_FIELDS, type MuestraField} from "../get-moleculoteca-taxa";
+
+function MuestraLabel({label}: {label: string}) {
+  const idx = label.indexOf(" ");
+
+  if (idx === -1) return <>{label}</>;
+  const first = label.slice(0, idx);
+  const rest = label.slice(idx + 1);
+
+  if (first !== "Piel") return <>{label}</>;
+
+  return (
+    <>
+      {first}
+      <span className="mx-0.5" style={{color: "#f07304"}}>
+        |
+      </span>
+      {rest}
+    </>
+  );
+}
 
 import type {ColeccionMuestra} from "./get-coleccion-muestras";
 
@@ -127,7 +147,9 @@ export default function MoleculotecaTaxonClient({
                             variant={active ? "default" : "outline"}
                             onClick={() => toggle(f.key)}
                           >
-                            <span className="truncate">{f.label}</span>
+                            <span className="truncate">
+                              <MuestraLabel label={f.label} />
+                            </span>
                             <span className="ml-2 font-mono text-xs opacity-70">{count}</span>
                           </Button>
                         );
@@ -145,17 +167,17 @@ export default function MoleculotecaTaxonClient({
             {filtradas.length} {filtradas.length === 1 ? "registro" : "registros"}
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+          <div className="max-h-[75vh] overflow-auto rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-xs">
-          <thead className="bg-gray-50 text-left text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-left text-[10px] font-semibold tracking-wide text-gray-500 shadow-sm">
             <tr>
-              <th className="px-3 py-2">Catálogo</th>
-              <th className="px-3 py-2">Fecha</th>
-              <th className="px-3 py-2">Localidad</th>
-              <th className="px-3 py-2">Estadio / Sexo</th>
+              <th className="bg-gray-50 px-3 py-2">Catálogo</th>
+              <th className="bg-gray-50 px-3 py-2">Fecha</th>
+              <th className="bg-gray-50 px-3 py-2">Localidad</th>
+              <th className="bg-gray-50 px-3 py-2">Estadio / Sexo</th>
               {MUESTRA_FIELDS.map((f) => (
-                <th key={f.key} className="px-2 py-2 text-center">
-                  {f.label}
+                <th key={f.key} className="bg-gray-50 px-2 py-2 text-center">
+                  <MuestraLabel label={f.label} />
                 </th>
               ))}
             </tr>
@@ -196,12 +218,12 @@ export default function MoleculotecaTaxonClient({
                   </td>
                   {MUESTRA_FIELDS.map((f) => (
                     <td key={f.key} className="px-2 py-2 text-center group-hover:bg-blue-50/40">
-                      {m[f.key] ? (
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-[10px] font-bold text-green-700">
-                          ✓
-                        </span>
-                      ) : (
-                        <span className="text-gray-300">·</span>
+                      {m[f.key] && (
+                        <Check
+                          className="inline-block h-3.5 w-3.5"
+                          strokeWidth={3}
+                          style={{color: "#2d6e2d"}}
+                        />
                       )}
                     </td>
                   ))}
