@@ -16,7 +16,7 @@ function parseNumber(raw: string | null): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-const ITEMS_POR_PAGINA = 40;
+const ITEMS_POR_PAGINA = 100;
 
 export async function GET(request: Request) {
   const {searchParams} = new URL(request.url);

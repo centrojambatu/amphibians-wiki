@@ -1,8 +1,8 @@
 "use client";
 
 import {useEffect, useMemo, useState} from "react";
-import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {ChevronLeft, ChevronRight, Check, RotateCcw, Search, X} from "lucide-react";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {Check, RotateCcw, Search, X} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -424,7 +424,7 @@ export default function ColeccionesPage() {
   const [anioHasta, setAnioHasta] = useState("");
   const [elevRange, setElevRange] = useState<[number, number] | null>(null);
   const [tiposMuestraFilter, setTiposMuestraFilter] = useState<MuestraKey[]>([]);
-  const [pagina, setPagina] = useState(1);
+  const [verTodoLoading, setVerTodoLoading] = useState(false);
 
   const debouncedSc = useDebounce(scInput, 300);
 
@@ -449,26 +449,6 @@ export default function ColeccionesPage() {
   const elevMin = elevRangeData?.min ?? 0;
   const elevMax = elevRangeData?.max ?? 6000;
   const elevActive = elevRange !== null && (elevRange[0] !== elevMin || elevRange[1] !== elevMax);
-
-  // Resetear página al cambiar filtros
-  useEffect(() => {
-    setPagina(1);
-  }, [
-    familiasFilter,
-    generosFilter,
-    especieFilter,
-    estadiosFilter,
-    sexosFilter,
-    colectoresFilter,
-    localidadesFilter,
-    catalogosFilter,
-    debouncedSc,
-    anioEspecifico,
-    anioDesde,
-    anioHasta,
-    elevRange,
-    tiposMuestraFilter,
-  ]);
 
   const hasFilters =
     familiasFilter.length > 0 ||
@@ -523,7 +503,6 @@ export default function ColeccionesPage() {
       p.set("elev_max", String(elevRange[1]));
     }
     if (tiposMuestraFilter.length > 0) p.set("tipos_muestra", tiposMuestraFilter.join("||"));
-    p.set("pagina", String(pagina));
 
     return p.toString();
   }, [
@@ -542,20 +521,44 @@ export default function ColeccionesPage() {
     elevActive,
     elevRange,
     tiposMuestraFilter,
-    pagina,
   ]);
 
-  const {data, isLoading, isFetching} = useQuery<ColeccionesResponse>({
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery<ColeccionesResponse>({
     queryKey: ["colecciones", queryParams],
-    queryFn: async () => {
-      const res = await fetch(`/api/colecciones?${queryParams}`);
+    initialPageParam: 1,
+    queryFn: async ({pageParam}) => {
+      const params = new URLSearchParams(queryParams);
+
+      params.set("pagina", String(pageParam));
+      const res = await fetch(`/api/colecciones?${params.toString()}`);
 
       if (!res.ok) throw new Error("Error al cargar colecciones");
 
       return res.json();
     },
-    placeholderData: keepPreviousData,
+    getNextPageParam: (lastPage) =>
+      lastPage.paginaActual < lastPage.totalPaginas ? lastPage.paginaActual + 1 : undefined,
   });
+
+  const handleVerTodo = async () => {
+    setVerTodoLoading(true);
+    try {
+      let res = await fetchNextPage();
+
+      while (res.hasNextPage) {
+        res = await fetchNextPage();
+      }
+    } finally {
+      setVerTodoLoading(false);
+    }
+  };
 
   const {data: stats} = useQuery<EstadisticasColecciones>({
     queryKey: ["colecciones", "estadisticas"],
@@ -568,9 +571,11 @@ export default function ColeccionesPage() {
     },
   });
 
-  const colecciones = data?.colecciones ?? [];
-  const total = data?.total ?? 0;
-  const totalPaginas = data?.totalPaginas ?? 1;
+  const colecciones = useMemo<ColeccionCardData[]>(
+    () => data?.pages.flatMap((p) => p.colecciones) ?? [],
+    [data],
+  );
+  const total = data?.pages[0]?.total ?? 0;
 
   const buildSlug = (nombre: string | null) => (nombre ? nombre.replace(/\s+/g, "-") : "");
 
@@ -789,19 +794,6 @@ export default function ColeccionesPage() {
             </aside>
 
             <div className="min-w-0 flex-1">
-              <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
-                <span>
-                  {`${total.toLocaleString()} ${total === 1 ? "registro" : "registros"}`}
-                  {totalPaginas > 1 && ` · Página ${pagina} de ${totalPaginas}`}
-                </span>
-                {isFetching && (
-                  <span
-                    aria-label="Actualizando"
-                    className="border-muted-foreground/30 border-t-muted-foreground inline-block h-3 w-3 animate-spin rounded-full border-2"
-                  />
-                )}
-              </div>
-
               {isLoading && colecciones.length === 0 ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
                   <p className="text-gray-600">Cargando colecciones...</p>
@@ -810,44 +802,52 @@ export default function ColeccionesPage() {
                 <>
                   <div
                     className={`mb-6 flex flex-col gap-1.5 transition-opacity duration-200 ${
-                      isFetching ? "opacity-60" : "opacity-100"
+                      isFetching && !isFetchingNextPage && !verTodoLoading
+                        ? "opacity-60"
+                        : "opacity-100"
                     }`}
                   >
                     {colecciones.map((c) => {
                       const slug = buildSlug(c.nombre_cientifico ?? null);
                       const href = slug
-                        ? `/sapopedia/species/${encodeURIComponent(slug)}/colecciones/${c.id_coleccion}?from=colecciones`
+                        ? `/sapopedia/species/${encodeURIComponent(slug)}/colecciones/${String(c.id_coleccion)}?from=colecciones`
                         : undefined;
 
                       return <ColeccionCard key={c.id_coleccion} coleccion={c} href={href} />;
                     })}
                   </div>
 
-                  {totalPaginas > 1 && (
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        disabled={pagina <= 1}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        Anterior
-                      </Button>
-                      <span className="text-sm text-gray-600">
-                        {pagina} / {totalPaginas}
-                      </span>
-                      <Button
-                        disabled={pagina >= totalPaginas}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                      >
-                        Siguiente
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                  <div className="mt-6 flex items-center justify-center gap-4">
+                    <p className="text-xs text-gray-400">
+                      {`Mostrando 1 - ${colecciones.length.toLocaleString()} de ${total.toLocaleString()} ${
+                        total === 1 ? "registro" : "registros"
+                      }`}
+                    </p>
+                    {hasNextPage && (
+                      <>
+                        <button
+                          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+                          disabled={isFetchingNextPage || verTodoLoading}
+                          type="button"
+                          onClick={() => {
+                            void fetchNextPage();
+                          }}
+                        >
+                          {isFetchingNextPage ? "Cargando..." : "Cargar más"}
+                        </button>
+                        <button
+                          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+                          disabled={isFetchingNextPage || verTodoLoading}
+                          type="button"
+                          onClick={() => {
+                            void handleVerTodo();
+                          }}
+                        >
+                          {verTodoLoading ? "Cargando todo..." : "Ver todo"}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </>
               ) : hasFilters ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">

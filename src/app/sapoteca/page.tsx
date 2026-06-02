@@ -1,14 +1,10 @@
-import getPublicacionesPaginadas, {
-  getAñosPublicaciones,
-} from "./get-publicaciones-paginadas";
+import {getAñosPublicaciones} from "./get-publicaciones-paginadas";
 import getTiposPublicacion from "./get-tipos-publicacion";
 import getEstadisticasSapoteca from "./get-estadisticas-sapoteca";
 import getHistogramaPublicaciones from "./get-histograma-publicaciones";
-import ReferenciaCard from "@/components/referencia-card";
-import Pagination from "@/components/pagination";
 import SapotecaContentLayout from "@/components/sapoteca-content-layout";
 import SapotecaHistogramaChart from "@/components/sapoteca-histograma-chart";
-import type { FiltrosSapoteca } from "./get-publicaciones-paginadas";
+import SapotecaPublicacionesList from "@/components/sapoteca-publicaciones-list";
 import Link from "next/link";
 import {ArrowLeft} from "lucide-react";
 
@@ -31,42 +27,14 @@ interface PageProps {
 
 export default async function SapotecaPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const pagina = params.pagina ? Number.parseInt(params.pagina, 10) : 1;
-  const itemsPorPagina = 20;
 
-  // Construir filtros desde searchParams
-  const filtros: FiltrosSapoteca = {
-    titulo: params.titulo || undefined,
-    años: params.años
-      ? params.años.split(",").map(Number).filter((n) => !isNaN(n))
-      : undefined,
-    autor: params.autor || undefined,
-    tiposPublicacion: params.tipos
-      ? params.tipos.split(",").map(Number).filter((n) => !isNaN(n))
-      : undefined,
-    indexada: params.indexada === "true" ? true : params.indexada === "false" ? false : undefined,
-    formatoImpreso:
-      params.formatoImpreso === "true"
-        ? true
-        : params.formatoImpreso === "false"
-          ? false
-          : undefined,
-    publicacionId: params.publicacion_id
-      ? Number.parseInt(params.publicacion_id, 10)
-      : undefined,
-  };
-
-  // Obtener datos en paralelo
-  const [publicacionesData, años, tiposPublicacion, estadisticas, histogramaData] =
-    await Promise.all([
-      getPublicacionesPaginadas(pagina, itemsPorPagina, filtros),
-      getAñosPublicaciones(),
-      getTiposPublicacion(),
-      getEstadisticasSapoteca(),
-      getHistogramaPublicaciones(),
-    ]);
-
-  const { publicaciones, total, totalPaginas } = publicacionesData;
+  // Obtener datos en paralelo (lista de publicaciones se carga client-side via /api/sapoteca)
+  const [años, tiposPublicacion, estadisticas, histogramaData] = await Promise.all([
+    getAñosPublicaciones(),
+    getTiposPublicacion(),
+    getEstadisticasSapoteca(),
+    getHistogramaPublicaciones(),
+  ]);
 
   const idsTiposCientificas = tiposPublicacion.secciones
     .filter((s) => s.tipo === "CIENTIFICA" || s.tipo === "TESIS")
@@ -203,46 +171,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
 
         {/* Layout con panel de filtros y contenido */}
         <SapotecaContentLayout tiposPublicacion={tiposPublicacion} años={años}>
-          {/* Información de resultados */}
-          <div className="mb-6 text-sm text-muted-foreground">
-            Mostrando {publicaciones.length} de {total} referencias
-            {totalPaginas > 1 && (
-              <>
-                {" "}
-                (Página {pagina} de {totalPaginas})
-              </>
-            )}
-          </div>
-
-          {/* Lista de referencias */}
-          {publicaciones.length > 0 ? (
-            <div className="mb-8 space-y-4">
-              {publicaciones.map((publicacion) => (
-                <ReferenciaCard
-                  key={publicacion.id_publicacion}
-                  publicacion={publicacion}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="mb-8 rounded-lg border bg-card p-8 text-center">
-              <p className="text-muted-foreground">
-                No se encontraron referencias disponibles.
-              </p>
-            </div>
-          )}
-
-          {/* Paginación */}
-          {totalPaginas > 1 && (
-            <div className="mt-8">
-              <Pagination
-                paginaActual={pagina}
-                totalPaginas={totalPaginas}
-                baseUrl="/sapoteca"
-                searchParams={params}
-              />
-            </div>
-          )}
+          <SapotecaPublicacionesList />
         </SapotecaContentLayout>
     </main>
   );
