@@ -85,8 +85,8 @@ export default function MoleculotecaTaxonClient({
         <MoveLeft className="h-8 w-8" strokeWidth={1} />
       </Link>
 
-      <h1 className="mb-1 text-2xl font-bold text-gray-900">
-        Muestras biológicas de <span className="italic">{nombreCientifico}</span>
+      <h1 className="mb-1 text-2xl font-bold" style={{color: "#666666"}}>
+        Muestras biológicas <span className="italic" style={{color: "#2d6e2d"}}>{nombreCientifico}</span>
       </h1>
       <div className="flex flex-col gap-4 pt-6 lg:flex-row lg:gap-6">
         <aside className="lg:w-80 lg:flex-shrink-0">
