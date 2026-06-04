@@ -31,14 +31,10 @@ export default async function SpeciesPage({ params }: PageProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Contenido de la especie */}
-      <main className="min-h-screen">
-        <div className="mx-auto max-w-7xl px-0 sm:px-0 lg:px-0">
-          <div className="flex flex-col">
-            {/* Ficha técnica científica con layout fijo + scroll */}
-            <div className="overflow-hidden">
-              <CardSpecies fichaEspecie={fichaEspecie} />
-            </div>
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex flex-col">
+          <div className="overflow-hidden">
+            <CardSpecies fichaEspecie={fichaEspecie} />
           </div>
         </div>
       </main>

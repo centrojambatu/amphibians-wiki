@@ -40,6 +40,7 @@ export default function ColeccionMiniMap({ latitud, longitud, localidad, provinc
   return (
     <div className="relative h-full w-full overflow-hidden">
       <MapContainer
+        key={`${String(latitud)}-${String(longitud)}`}
         center={[latitud, longitud]}
         zoom={7}
         style={{ height: "100%", width: "100%" }}
