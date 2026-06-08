@@ -54,7 +54,7 @@ export async function GET() {
 
     // Set de taxon_ids por muestra (cruzando tablas reales)
     const fetchTaxonesPorMuestra = async (
-      tabla: "tejido" | "sangre" | "esperma" | "heces" | "extracto_piel",
+      tabla: "tejido" | "esperma" | "heces" | "extracto_piel",
     ): Promise<Set<number>> => {
       const taxones = new Set<number>();
       const PAGE = 1000;

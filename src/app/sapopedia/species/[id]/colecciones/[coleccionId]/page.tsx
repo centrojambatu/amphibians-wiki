@@ -5,7 +5,6 @@ import getColeccionById from "./get-coleccion-by-id";
 import {
   getCantosByColeccion,
   getTejidosByColeccion,
-  getSangresByColeccion,
   getEspermasByColeccion,
   getHecesByColeccion,
   getExtractosPielByColeccion,
@@ -49,7 +48,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     coleccion,
     cantos,
     tejidos,
-    sangres,
     espermas,
     heces,
     extractosPiel,
@@ -64,7 +62,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getColeccionById(coleccionIdNum),
     getCantosByColeccion(coleccionIdNum),
     getTejidosByColeccion(coleccionIdNum),
-    getSangresByColeccion(coleccionIdNum),
     getEspermasByColeccion(coleccionIdNum),
     getHecesByColeccion(coleccionIdNum),
     getExtractosPielByColeccion(coleccionIdNum),
@@ -138,7 +135,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       orden={orden}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
-      sangres={sangres}
       tejidos={tejidos}
       videos={videos}
     />

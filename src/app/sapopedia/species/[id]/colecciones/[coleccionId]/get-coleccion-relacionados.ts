@@ -68,13 +68,6 @@ interface MuestraBase {
   updated_at: string | null;
 }
 
-export interface Sangre extends MuestraBase {
-  id_sangre: number;
-  codsangre: string | null;
-  tipo_sangre_id: number | null;
-  catalogo_awe: {nombre: string} | null;
-}
-
 export interface Esperma extends MuestraBase {
   id_esperma: number;
   codesperma: string | null;
@@ -436,7 +429,7 @@ export async function getVideosByColeccion(coleccionId: number): Promise<VideoCo
  * Helper genérico: obtiene todas las muestras de una tabla relacionada con la colección,
  * paginando para superar el límite de 1000 de Supabase.
  */
-type MuestraTabla = "sangre" | "esperma" | "heces" | "extracto_piel";
+type MuestraTabla = "esperma" | "heces" | "extracto_piel";
 
 async function fetchMuestrasByColeccion<T>(
   tabla: MuestraTabla,
@@ -471,10 +464,6 @@ async function fetchMuestrasByColeccion<T>(
   }
 
   return all;
-}
-
-export async function getSangresByColeccion(coleccionId: number): Promise<Sangre[]> {
-  return fetchMuestrasByColeccion<Sangre>("sangre", "id_sangre", "tipo_sangre_id", coleccionId);
 }
 
 export async function getEspermasByColeccion(coleccionId: number): Promise<Esperma[]> {

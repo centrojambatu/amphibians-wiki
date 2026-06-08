@@ -16,6 +16,7 @@ export interface ColeccionMuestra extends ColeccionCardData {
 const CATALOGO_TEJIDO_HIGADO = 597;
 const CATALOGO_TEJIDO_MUSCULO = 596;
 const CATALOGO_TEJIDO_MUSCULO_E_HIGADO = 609;
+const CATALOGO_TEJIDO_SANGRE = 645;
 const CATALOGO_PIEL_LIOFILIZADO = 641;
 const CATALOGO_PIEL_EXUDADO = 642;
 const TEJIDO_HIGADO_IDS = new Set([CATALOGO_TEJIDO_HIGADO, CATALOGO_TEJIDO_MUSCULO_E_HIGADO]);
@@ -58,8 +59,7 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
   };
 
   if (coleccionIds.length > 0) {
-    const [sang, esp, hec, tej, ep] = await Promise.all([
-      supabase.from("sangre").select("coleccion_id").in("coleccion_id", coleccionIds),
+    const [esp, hec, tej, ep] = await Promise.all([
       supabase.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds),
       supabase.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds),
       supabase
@@ -72,13 +72,13 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
         .in("coleccion_id", coleccionIds),
     ]);
 
-    (sang.data || []).forEach((r: any) => presencia.sangre.add(r.coleccion_id));
     (esp.data || []).forEach((r: any) => presencia.esperma.add(r.coleccion_id));
     (hec.data || []).forEach((r: any) => presencia.heces.add(r.coleccion_id));
     (tej.data || []).forEach((r: any) => {
       presencia.tejAny.add(r.coleccion_id);
       if (TEJIDO_HIGADO_IDS.has(r.tipo_tejido_id)) presencia.tejHigado.add(r.coleccion_id);
       if (TEJIDO_MUSCULO_IDS.has(r.tipo_tejido_id)) presencia.tejMusculo.add(r.coleccion_id);
+      if (r.tipo_tejido_id === CATALOGO_TEJIDO_SANGRE) presencia.sangre.add(r.coleccion_id);
     });
     (ep.data || []).forEach((r: any) => {
       if (r.tipo_extracto_piel_id === CATALOGO_PIEL_LIOFILIZADO)

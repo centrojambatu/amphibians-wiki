@@ -40,7 +40,6 @@ import {
 import type {
   Canto,
   Tejido,
-  Sangre,
   Esperma,
   Heces,
   ExtractoPiel,
@@ -57,7 +56,6 @@ interface ColeccionDetailClientProps {
   coleccion: any;
   cantos: Canto[];
   tejidos: Tejido[];
-  sangres: Sangre[];
   espermas: Esperma[];
   heces: Heces[];
   extractosPiel: ExtractoPiel[];
@@ -203,7 +201,6 @@ export default function ColeccionDetailClient({
   coleccion,
   cantos,
   tejidos,
-  sangres,
   espermas,
   heces,
   extractosPiel,
@@ -641,12 +638,6 @@ export default function ColeccionDetailClient({
                 ))}
               </p>
             )}
-            {c.observacion && (
-              <p className="mt-1 inline-flex items-baseline gap-x-1 text-[13px] text-gray-800">
-                <span className="text-xs text-gray-500">Observación</span>
-                <span>{c.observacion}</span>
-              </p>
-            )}
           </div>
         );
       })()}
@@ -821,14 +812,27 @@ export default function ColeccionDetailClient({
             map.set(k, (map.get(k) ?? 0) + 1);
           });
 
+          const PRIORIDAD = ["Músculo e hígado"];
+
           return Array.from(map.entries())
             .map(([nombre, n]) => ({nombre, n}))
-            .sort((a, b) => b.n - a.n);
+            .sort((a, b) => {
+              const ap = PRIORIDAD.indexOf(a.nombre);
+              const bp = PRIORIDAD.indexOf(b.nombre);
+
+              if (ap !== -1 || bp !== -1) {
+                if (ap === -1) return 1;
+                if (bp === -1) return -1;
+
+                return ap - bp;
+              }
+
+              return b.n - a.n;
+            });
         };
 
         const muestras: {label: string; total: number; subtipos: {nombre: string; n: number}[]}[] = [
           {label: "Tejido", total: tejidos.length, subtipos: groupBySubtipo(tejidos)},
-          {label: "Sangre", total: sangres.length, subtipos: groupBySubtipo(sangres)},
           {label: "Esperma", total: espermas.length, subtipos: groupBySubtipo(espermas)},
           {label: "Heces", total: heces.length, subtipos: groupBySubtipo(heces)},
           {
@@ -840,11 +844,6 @@ export default function ColeccionDetailClient({
 
         return (
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-200 bg-gray-50 px-4 py-1.5">
-              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
-                Muestras biológicas
-              </h3>
-            </div>
             <div className="px-4 py-3">
               <ul className="flex flex-col gap-2">
                 {muestras.map((m) => {
@@ -853,33 +852,30 @@ export default function ColeccionDetailClient({
                   return (
                     <li
                       key={m.label}
-                      className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]"
+                      className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[13px]"
                     >
                       <span
-                        className={`inline-flex items-center gap-x-1.5 ${
+                        className={`text-xs font-semibold tracking-wide ${
                           tieneMuestras ? "text-gray-900" : "text-gray-300"
                         }`}
                       >
-                        <span className="text-xs font-semibold uppercase tracking-wide">
-                          {m.label}
-                        </span>
-                        {tieneMuestras && (
-                          <>
-                            <Check
-                              className="h-4 w-4"
-                              strokeWidth={2.5}
-                              style={{color: "#2d6e2d"}}
-                            />
-                            <span className="text-[11px] font-medium text-gray-500">
-                              ({m.total})
-                            </span>
-                          </>
-                        )}
+                        {m.label}
                       </span>
-                      {tieneMuestras && m.subtipos.length > 0 && (
-                        <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[12px] text-gray-700">
+                      {tieneMuestras && (
+                        <>
+                          <Check
+                            className="h-4 w-4"
+                            strokeWidth={2.5}
+                            style={{color: "#2d6e2d"}}
+                          />
+                          <span className="text-[11px] font-medium text-gray-500">
+                            ({m.total})
+                          </span>
                           {m.subtipos.map((s, i) => (
-                            <span key={s.nombre} className="inline-flex items-baseline gap-x-1.5">
+                            <span
+                              key={s.nombre}
+                              className="inline-flex items-baseline gap-x-1.5 text-[12px] text-gray-700"
+                            >
                               {i > 0 && <span style={{color: "#f07304"}}>|</span>}
                               <span>
                                 {s.nombre}{" "}
@@ -887,7 +883,7 @@ export default function ColeccionDetailClient({
                               </span>
                             </span>
                           ))}
-                        </span>
+                        </>
                       )}
                     </li>
                   );

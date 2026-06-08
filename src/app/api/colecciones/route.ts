@@ -42,6 +42,7 @@ export async function GET(request: Request) {
   // IDs en catalogo_awe que identifican subtipos específicos
   const CATALOGO_TEJIDO_HIGADO = 597;
   const CATALOGO_TEJIDO_MUSCULO = 596;
+  const CATALOGO_TEJIDO_SANGRE = 645;
   const CATALOGO_PIEL_LIOFILIZADO = 641;
   const CATALOGO_PIEL_EXUDADO = 642;
 
@@ -103,7 +104,7 @@ export async function GET(request: Request) {
 
     if (tiposMuestra.length > 0) {
       const fetchColeccionIds = async (
-        tabla: "tejido" | "sangre" | "esperma" | "heces" | "extracto_piel",
+        tabla: "tejido" | "esperma" | "heces" | "extracto_piel",
         tipoColumn?: string,
         tipoValor?: number,
       ): Promise<Set<number>> => {
@@ -127,7 +128,7 @@ export async function GET(request: Request) {
 
         switch (t) {
           case "sangre":
-            sets.push(await fetchColeccionIds("sangre"));
+            sets.push(await fetchColeccionIds("tejido", "tipo_tejido_id", CATALOGO_TEJIDO_SANGRE));
             break;
           case "esperma":
             sets.push(await fetchColeccionIds("esperma"));
@@ -309,7 +310,6 @@ export async function GET(request: Request) {
         {data: fotos},
         {data: cantos},
         {data: tejs},
-        {data: sangs},
         {data: esps},
         {data: hecs},
         {data: epls},
@@ -322,7 +322,6 @@ export async function GET(request: Request) {
           .limit(100000),
         supabase.from("canto").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
         supabase.from("tejido").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
-        supabase.from("sangre").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
         supabase.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
         supabase.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
         supabase
@@ -340,7 +339,7 @@ export async function GET(request: Request) {
       (cantos || []).forEach((c: any) => {
         if (c.coleccion_id != null) multimediaSet.add(c.coleccion_id as number);
       });
-      [tejs, sangs, esps, hecs, epls].forEach((arr) => {
+      [tejs, esps, hecs, epls].forEach((arr) => {
         (arr || []).forEach((r: any) => {
           if (r.coleccion_id != null) muestrasSet.add(r.coleccion_id as number);
         });
