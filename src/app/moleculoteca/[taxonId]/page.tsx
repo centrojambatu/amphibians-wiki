@@ -1,6 +1,5 @@
 import {notFound} from "next/navigation";
 
-import {getColeccionMuestras} from "./get-coleccion-muestras";
 import MoleculotecaTaxonClient from "./MoleculotecaTaxonClient";
 
 interface PageProps {
@@ -13,11 +12,5 @@ export default async function MoleculotecaTaxonPage({params}: PageProps) {
 
   if (isNaN(taxonIdNum)) notFound();
 
-  const muestras = await getColeccionMuestras(taxonIdNum);
-
-  if (muestras.length === 0) notFound();
-
-  const nombreCientifico = muestras[0]?.nombre_cientifico || "Especie";
-
-  return <MoleculotecaTaxonClient muestras={muestras} nombreCientifico={nombreCientifico} />;
+  return <MoleculotecaTaxonClient taxonId={taxonIdNum} />;
 }

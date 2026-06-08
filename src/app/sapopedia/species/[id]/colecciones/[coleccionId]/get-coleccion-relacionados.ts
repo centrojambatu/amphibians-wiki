@@ -52,6 +52,50 @@ export interface Tejido {
   updated_at: string | null;
 }
 
+interface MuestraBase {
+  coleccion_id: number;
+  permisocontrato_id: number | null;
+  preservacion: string | null;
+  fecha: string | null;
+  ubicacion: string | null;
+  piso: string | null;
+  rack: string | null;
+  caja: string | null;
+  coordenada: string | null;
+  estatus: string | null;
+  observacion: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface Sangre extends MuestraBase {
+  id_sangre: number;
+  codsangre: string | null;
+  tipo_sangre_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
+export interface Esperma extends MuestraBase {
+  id_esperma: number;
+  codesperma: string | null;
+  tipo_esperma_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
+export interface Heces extends MuestraBase {
+  id_heces: number;
+  codheces: string | null;
+  tipo_heces_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
+export interface ExtractoPiel extends MuestraBase {
+  id_extracto_piel: number;
+  codextracto_piel: string | null;
+  tipo_extracto_piel_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
 export interface Identificacion {
   id_identificacion: number;
   coleccion_id: number;
@@ -386,6 +430,68 @@ export async function getVideosByColeccion(coleccionId: number): Promise<VideoCo
   }
 
   return (data || []) as unknown as VideoColeccion[];
+}
+
+/**
+ * Helper genérico: obtiene todas las muestras de una tabla relacionada con la colección,
+ * paginando para superar el límite de 1000 de Supabase.
+ */
+type MuestraTabla = "sangre" | "esperma" | "heces" | "extracto_piel";
+
+async function fetchMuestrasByColeccion<T>(
+  tabla: MuestraTabla,
+  pkColumn: string,
+  tipoColumn: string,
+  coleccionId: number,
+): Promise<T[]> {
+  const supabaseClient = createServiceClient();
+  const PAGE_SIZE = 1000;
+  let all: T[] = [];
+  let offset = 0;
+
+  while (true) {
+    const {data, error} = await supabaseClient
+      .from(tabla)
+      .select(`*, catalogo_awe:${tipoColumn}(nombre)`)
+      .eq("coleccion_id", coleccionId)
+      .order("fecha", {ascending: false, nullsFirst: false})
+      .order(pkColumn, {ascending: true})
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error(`Error al obtener ${tabla}:`, error);
+      break;
+    }
+
+    if (!data || data.length === 0) break;
+
+    all = all.concat(data as unknown as T[]);
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+
+  return all;
+}
+
+export async function getSangresByColeccion(coleccionId: number): Promise<Sangre[]> {
+  return fetchMuestrasByColeccion<Sangre>("sangre", "id_sangre", "tipo_sangre_id", coleccionId);
+}
+
+export async function getEspermasByColeccion(coleccionId: number): Promise<Esperma[]> {
+  return fetchMuestrasByColeccion<Esperma>("esperma", "id_esperma", "tipo_esperma_id", coleccionId);
+}
+
+export async function getHecesByColeccion(coleccionId: number): Promise<Heces[]> {
+  return fetchMuestrasByColeccion<Heces>("heces", "id_heces", "tipo_heces_id", coleccionId);
+}
+
+export async function getExtractosPielByColeccion(coleccionId: number): Promise<ExtractoPiel[]> {
+  return fetchMuestrasByColeccion<ExtractoPiel>(
+    "extracto_piel",
+    "id_extracto_piel",
+    "tipo_extracto_piel_id",
+    coleccionId,
+  );
 }
 
 /**

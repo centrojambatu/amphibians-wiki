@@ -39,17 +39,14 @@ export async function GET(request: Request) {
   const tiposMuestra = parseList(searchParams.get("tipos_muestra"));
   const pagina = Math.max(1, parseNumber(searchParams.get("pagina")) || 1);
 
-  const TIPO_MUESTRA_VALIDOS = new Set([
-    "sangre",
-    "piel_exudado",
-    "piel_liofilizado",
-    "tejido_higado",
-    "tejido_musculo",
-    "esqueleto_transparentacion",
-    "esperma",
-    "heces",
-    "microfotografia",
-  ]);
+  // IDs en catalogo_awe que identifican subtipos específicos
+  const CATALOGO_TEJIDO_HIGADO = 597;
+  const CATALOGO_TEJIDO_MUSCULO = 596;
+  const CATALOGO_PIEL_LIOFILIZADO = 641;
+  const CATALOGO_PIEL_EXUDADO = 642;
+
+  // Columnas booleanas reales en coleccion
+  const TIPO_MUESTRA_COLUMNAS_BOOL = new Set(["esqueleto_transparentacion", "microfotografia"]);
 
   const supabase = createServiceClient();
 
@@ -101,21 +98,102 @@ export async function GET(request: Request) {
       personalIdsFiltrados = (pers || []).map((p: any) => p.id_personal as number);
     }
 
-    // 3) Construir query principal
+    // 3) Resolver coleccion_ids por filtro de tipos_muestra (intersección)
+    let coleccionIdsPorMuestra: number[] | null = null;
+
+    if (tiposMuestra.length > 0) {
+      const fetchColeccionIds = async (
+        tabla: "tejido" | "sangre" | "esperma" | "heces" | "extracto_piel",
+        tipoColumn?: string,
+        tipoValor?: number,
+      ): Promise<Set<number>> => {
+        let q = supabase.from(tabla).select("coleccion_id").limit(1000000);
+
+        if (tipoColumn && tipoValor != null) q = q.eq(tipoColumn, tipoValor);
+        const {data, error} = await q;
+
+        if (error) {
+          console.error(`Error filtrando ${tabla}:`, error);
+          return new Set();
+        }
+
+        return new Set((data || []).map((r: any) => r.coleccion_id as number));
+      };
+
+      const sets: Set<number>[] = [];
+
+      for (const t of tiposMuestra) {
+        if (TIPO_MUESTRA_COLUMNAS_BOOL.has(t)) continue;
+
+        switch (t) {
+          case "sangre":
+            sets.push(await fetchColeccionIds("sangre"));
+            break;
+          case "esperma":
+            sets.push(await fetchColeccionIds("esperma"));
+            break;
+          case "heces":
+            sets.push(await fetchColeccionIds("heces"));
+            break;
+          case "tejido_higado":
+            sets.push(await fetchColeccionIds("tejido", "tipo_tejido_id", CATALOGO_TEJIDO_HIGADO));
+            break;
+          case "tejido_musculo":
+            sets.push(await fetchColeccionIds("tejido", "tipo_tejido_id", CATALOGO_TEJIDO_MUSCULO));
+            break;
+          case "piel_liofilizado":
+            sets.push(
+              await fetchColeccionIds(
+                "extracto_piel",
+                "tipo_extracto_piel_id",
+                CATALOGO_PIEL_LIOFILIZADO,
+              ),
+            );
+            break;
+          case "piel_exudado":
+            sets.push(
+              await fetchColeccionIds(
+                "extracto_piel",
+                "tipo_extracto_piel_id",
+                CATALOGO_PIEL_EXUDADO,
+              ),
+            );
+            break;
+        }
+      }
+
+      if (sets.length > 0) {
+        coleccionIdsPorMuestra = Array.from(
+          sets.reduce((acc, s) => new Set([...acc].filter((x) => s.has(x)))),
+        );
+
+        if (coleccionIdsPorMuestra.length === 0) {
+          return NextResponse.json({
+            colecciones: [],
+            total: 0,
+            totalPaginas: 0,
+            paginaActual: 1,
+          });
+        }
+      }
+    }
+
+    // 4) Construir query principal
     let query = supabase
       .from("coleccion")
       .select(
         `id_coleccion, taxon_id, sc, gui, numero_museo, catalogo_museo,
          estadio, numero_individuos, sexo, estado,
          fecha_col, colectores, localidad, latitud, longitud, elevacion, personal_id, provincia_id,
-         sangre, piel_exudado, piel_liofilizado, tejido_higado, tejido_musculo,
-         esqueleto_transparentacion, esperma, heces, genbank,
+         esqueleto_transparentacion, microfotografia, genbank,
          geopolitica!coleccion_provincia_id_fkey(nombre),
          personal!coleccion_personal_id_fkey(nombre, siglas),
          taxon!coleccion_taxon_id_fkey(taxon)`,
         {count: "exact"},
       )
       .eq("publicar", true);
+
+    if (coleccionIdsPorMuestra) query = query.in("id_coleccion", coleccionIdsPorMuestra);
 
     if (taxonIdsFiltrados) query = query.in("taxon_id", taxonIdsFiltrados);
     if (estadios.length > 0) query = query.in("estadio", estadios);
@@ -196,9 +274,10 @@ export async function GET(request: Request) {
     if (elevMin != null) query = query.gte("elevacion", elevMin);
     if (elevMax != null) query = query.lte("elevacion", elevMax);
 
+    // Columnas booleanas reales en coleccion (no requieren preflight)
     if (tiposMuestra.length > 0) {
       for (const t of tiposMuestra) {
-        if (TIPO_MUESTRA_VALIDOS.has(t)) {
+        if (TIPO_MUESTRA_COLUMNAS_BOOL.has(t)) {
           query = query.eq(t, true);
         }
       }
@@ -217,13 +296,24 @@ export async function GET(request: Request) {
       return NextResponse.json({error: "Error al obtener colecciones"}, {status: 500});
     }
 
-    // 4) Lookup de multimedia (video/foto/canto) para los colecciones devueltos
+    // 4) Lookup de multimedia (video/foto/canto) y muestras biológicas para los colecciones devueltos
     const coleccionIds = Array.from(
       new Set((data || []).map((r: any) => r.id_coleccion).filter((v: any) => v != null)),
     ) as number[];
     const multimediaSet = new Set<number>();
+    const muestrasSet = new Set<number>();
+
     if (coleccionIds.length > 0) {
-      const [{data: vids}, {data: fotos}, {data: cantos}] = await Promise.all([
+      const [
+        {data: vids},
+        {data: fotos},
+        {data: cantos},
+        {data: tejs},
+        {data: sangs},
+        {data: esps},
+        {data: hecs},
+        {data: epls},
+      ] = await Promise.all([
         supabase.from("video").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
         supabase
           .from("fotografia")
@@ -231,6 +321,15 @@ export async function GET(request: Request) {
           .in("coleccion_id", coleccionIds)
           .limit(100000),
         supabase.from("canto").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase.from("tejido").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase.from("sangre").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+        supabase
+          .from("extracto_piel")
+          .select("coleccion_id")
+          .in("coleccion_id", coleccionIds)
+          .limit(100000),
       ]);
       (vids || []).forEach((v: any) => {
         if (v.coleccion_id != null) multimediaSet.add(v.coleccion_id as number);
@@ -240,6 +339,11 @@ export async function GET(request: Request) {
       });
       (cantos || []).forEach((c: any) => {
         if (c.coleccion_id != null) multimediaSet.add(c.coleccion_id as number);
+      });
+      [tejs, sangs, esps, hecs, epls].forEach((arr) => {
+        (arr || []).forEach((r: any) => {
+          if (r.coleccion_id != null) muestrasSet.add(r.coleccion_id as number);
+        });
       });
     }
 
@@ -266,16 +370,9 @@ export async function GET(request: Request) {
 
     const colecciones = (data || []).map((c: any) => {
       const speciesInfo = nombreCientificoMap.get(c.taxon_id);
-      const tieneMuestras = Boolean(
-        c.sangre ||
-          c.piel_exudado ||
-          c.piel_liofilizado ||
-          c.tejido_higado ||
-          c.tejido_musculo ||
-          c.esqueleto_transparentacion ||
-          c.esperma ||
-          c.heces,
-      );
+      const tieneMuestras =
+        muestrasSet.has(c.id_coleccion) ||
+        Boolean(c.esqueleto_transparentacion || c.microfotografia);
       return {
         fuente: "coleccion" as const,
         id_coleccion: c.id_coleccion,

@@ -5,6 +5,10 @@ import getColeccionById from "./get-coleccion-by-id";
 import {
   getCantosByColeccion,
   getTejidosByColeccion,
+  getSangresByColeccion,
+  getEspermasByColeccion,
+  getHecesByColeccion,
+  getExtractosPielByColeccion,
   getPrestamosColeccion,
   getPrestamosTejidoByColeccion,
   getColeccionPersonal,
@@ -45,6 +49,10 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     coleccion,
     cantos,
     tejidos,
+    sangres,
+    espermas,
+    heces,
+    extractosPiel,
     prestamosColeccion,
     prestamosTejido,
     coleccionPersonal,
@@ -56,6 +64,10 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getColeccionById(coleccionIdNum),
     getCantosByColeccion(coleccionIdNum),
     getTejidosByColeccion(coleccionIdNum),
+    getSangresByColeccion(coleccionIdNum),
+    getEspermasByColeccion(coleccionIdNum),
+    getHecesByColeccion(coleccionIdNum),
+    getExtractosPielByColeccion(coleccionIdNum),
     getPrestamosColeccion(coleccionIdNum),
     getPrestamosTejidoByColeccion(coleccionIdNum),
     getColeccionPersonal(coleccionIdNum),
@@ -113,9 +125,12 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       coleccionPersonal={coleccionPersonal}
       coleccionesUrl={coleccionesUrl}
       cuerposAgua={cuerposAgua}
+      espermas={espermas}
       especieUrl={especieUrl}
+      extractosPiel={extractosPiel}
       familia={familia}
       genero={genero}
+      heces={heces}
       identificaciones={identificaciones}
       fotografias={fotografias}
       nombreCientifico={nombreCientifico}
@@ -123,6 +138,7 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       orden={orden}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
+      sangres={sangres}
       tejidos={tejidos}
       videos={videos}
     />

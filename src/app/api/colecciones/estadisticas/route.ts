@@ -3,18 +3,14 @@ import {NextResponse} from "next/server";
 import {createServiceClient} from "@/utils/supabase/server";
 
 interface RegistroBase {
+  id_coleccion: number;
   taxon_id: number | null;
   colectores: string | null;
   personal_id: number | null;
   provincia_id: number | null;
   localidad: string | null;
   fecha_col: string | null;
-  tejido_higado: boolean | null;
-  tejido_musculo: boolean | null;
-  piel_exudado: boolean | null;
-  piel_liofilizado: boolean | null;
   esqueleto_transparentacion: boolean | null;
-  esperma: boolean | null;
   microfotografia: boolean | null;
 }
 
@@ -35,7 +31,7 @@ export async function GET() {
       const {data, error} = await supabase
         .from("coleccion")
         .select(
-          "taxon_id, colectores, personal_id, provincia_id, localidad, fecha_col, tejido_higado, tejido_musculo, piel_exudado, piel_liofilizado, esqueleto_transparentacion, esperma, microfotografia",
+          "id_coleccion, taxon_id, colectores, personal_id, provincia_id, localidad, fecha_col, esqueleto_transparentacion, microfotografia",
         )
         .eq("publicar", true)
         .range(offset, offset + PAGE_SIZE - 1);
@@ -47,11 +43,54 @@ export async function GET() {
       offset += PAGE_SIZE;
     }
 
+    // Mapa coleccion_id → taxon_id para cruzar contra las tablas de muestras
+    const taxonByColeccion = new Map<number, number>();
+
+    allRows.forEach((r) => {
+      if (r.id_coleccion != null && r.taxon_id != null) {
+        taxonByColeccion.set(r.id_coleccion, r.taxon_id);
+      }
+    });
+
+    // Set de taxon_ids por muestra (cruzando tablas reales)
+    const fetchTaxonesPorMuestra = async (
+      tabla: "tejido" | "sangre" | "esperma" | "heces" | "extracto_piel",
+    ): Promise<Set<number>> => {
+      const taxones = new Set<number>();
+      const PAGE = 1000;
+      let off = 0;
+
+      while (true) {
+        const {data, error} = await supabase
+          .from(tabla)
+          .select("coleccion_id")
+          .range(off, off + PAGE - 1);
+
+        if (error) {
+          console.error(`Error leyendo ${tabla}:`, error);
+          break;
+        }
+        if (!data || data.length === 0) break;
+        (data as {coleccion_id: number}[]).forEach((r) => {
+          const t = taxonByColeccion.get(r.coleccion_id);
+
+          if (t != null) taxones.add(t);
+        });
+        if (data.length < PAGE) break;
+        off += PAGE;
+      }
+
+      return taxones;
+    };
+
+    const [taxonConTejidoSet, taxonConPielSet, taxonConEspermaSet] = await Promise.all([
+      fetchTaxonesPorMuestra("tejido"),
+      fetchTaxonesPorMuestra("extracto_piel"),
+      fetchTaxonesPorMuestra("esperma"),
+    ]);
+
     const taxonSet = new Set<number>();
-    const taxonConTejidoSet = new Set<number>();
-    const taxonConPielSet = new Set<number>();
     const taxonConDiafanizadoSet = new Set<number>();
-    const taxonConEspermaSet = new Set<number>();
     const taxonConMicrofotografiaSet = new Set<number>();
     const colectorSet = new Set<string>();
     const personalIds = new Set<number>();
@@ -63,17 +102,8 @@ export async function GET() {
     allRows.forEach((r) => {
       if (r.taxon_id != null) {
         taxonSet.add(r.taxon_id);
-        if (r.tejido_higado === true || r.tejido_musculo === true) {
-          taxonConTejidoSet.add(r.taxon_id);
-        }
-        if (r.piel_exudado === true || r.piel_liofilizado === true) {
-          taxonConPielSet.add(r.taxon_id);
-        }
         if (r.esqueleto_transparentacion === true) {
           taxonConDiafanizadoSet.add(r.taxon_id);
-        }
-        if (r.esperma === true) {
-          taxonConEspermaSet.add(r.taxon_id);
         }
         if (r.microfotografia === true) {
           taxonConMicrofotografiaSet.add(r.taxon_id);

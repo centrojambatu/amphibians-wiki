@@ -5,6 +5,7 @@ import type {ColeccionMuestra} from "./get-coleccion-muestras";
 import Link from "next/link";
 import {MoveLeft, RotateCcw} from "lucide-react";
 import {useMemo, useState} from "react";
+import {useInfiniteQuery} from "@tanstack/react-query";
 
 import {
   Accordion,
@@ -16,6 +17,15 @@ import {Button} from "@/components/ui/button";
 import ColeccionCard from "@/components/ColeccionCard";
 
 import {MUESTRA_FIELDS, type MuestraField} from "../get-moleculoteca-taxa";
+
+interface MuestrasResponse {
+  muestras: ColeccionMuestra[];
+  counts: Record<MuestraField, number>;
+  nombreCientifico: string;
+  total: number;
+  totalPaginas: number;
+  paginaActual: number;
+}
 
 function MuestraLabel({label}: {label: string}) {
   const idx = label.indexOf(" ");
@@ -37,30 +47,56 @@ function MuestraLabel({label}: {label: string}) {
   );
 }
 
-export default function MoleculotecaTaxonClient({
-  muestras,
-  nombreCientifico,
-}: {
-  muestras: ColeccionMuestra[];
-  nombreCientifico: string;
-}) {
-  const [activos, setActivos] = useState<Set<MuestraField>>(new Set());
+export default function MoleculotecaTaxonClient({taxonId}: {taxonId: number}) {
+  const [activos, setActivos] = useState<Set<MuestraField>>(() => new Set());
+  const [verTodoLoading, setVerTodoLoading] = useState(false);
 
-  const counts = useMemo(() => {
-    const c = {} as Record<MuestraField, number>;
+  const queryParams = useMemo(() => {
+    const p = new URLSearchParams();
 
-    MUESTRA_FIELDS.forEach((f) => {
-      c[f.key] = muestras.filter((m) => m[f.key]).length;
+    if (activos.size) p.set("tipos_muestra", Array.from(activos).join("||"));
+
+    return p.toString();
+  }, [activos]);
+
+  const {data, isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage} =
+    useInfiniteQuery<MuestrasResponse>({
+      queryKey: ["moleculoteca-taxon", taxonId, queryParams],
+      initialPageParam: 1,
+      queryFn: async ({pageParam}) => {
+        const params = new URLSearchParams(queryParams);
+
+        params.set("pagina", String(pageParam));
+        const res = await fetch(`/api/moleculoteca/${String(taxonId)}?${params.toString()}`);
+
+        if (!res.ok) throw new Error("Error al cargar muestras");
+
+        return res.json();
+      },
+      getNextPageParam: (lastPage) =>
+        lastPage.paginaActual < lastPage.totalPaginas ? lastPage.paginaActual + 1 : undefined,
     });
 
-    return c;
-  }, [muestras]);
+  const muestras = useMemo<ColeccionMuestra[]>(
+    () => data?.pages.flatMap((p) => p.muestras) ?? [],
+    [data],
+  );
+  const total = data?.pages[0]?.total ?? 0;
+  const counts = data?.pages[0]?.counts;
+  const nombreCientifico = data?.pages[0]?.nombreCientifico ?? "Especie";
 
-  const filtradas = useMemo(() => {
-    if (activos.size === 0) return muestras;
+  const handleVerTodo = async () => {
+    setVerTodoLoading(true);
+    try {
+      let res = await fetchNextPage();
 
-    return muestras.filter((m) => Array.from(activos).every((k) => m[k]));
-  }, [muestras, activos]);
+      while (res.hasNextPage) {
+        res = await fetchNextPage();
+      }
+    } finally {
+      setVerTodoLoading(false);
+    }
+  };
 
   const toggle = (key: MuestraField) => {
     setActivos((prev) => {
@@ -86,8 +122,12 @@ export default function MoleculotecaTaxonClient({
       </Link>
 
       <h1 className="mb-1 text-2xl font-bold" style={{color: "#666666"}}>
-        Muestras biológicas <span className="italic" style={{color: "#2d6e2d"}}>{nombreCientifico}</span>
+        Muestras biológicas{" "}
+        <span className="italic" style={{color: "#2d6e2d"}}>
+          {nombreCientifico}
+        </span>
       </h1>
+
       <div className="flex flex-col gap-4 pt-6 lg:flex-row lg:gap-6">
         <aside className="lg:w-80 lg:flex-shrink-0">
           <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -127,7 +167,7 @@ export default function MoleculotecaTaxonClient({
                     <div className="flex flex-col gap-2">
                       {MUESTRA_FIELDS.map((f) => {
                         const active = activos.has(f.key);
-                        const count = counts[f.key];
+                        const count = counts?.[f.key] ?? 0;
                         const disabled = count === 0;
 
                         return (
@@ -160,17 +200,67 @@ export default function MoleculotecaTaxonClient({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <div className="text-muted-foreground mb-3 text-xs">
-            {filtradas.length} {filtradas.length === 1 ? "registro" : "registros"}
-          </div>
+          {isLoading && muestras.length === 0 ? (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-gray-600">Cargando muestras...</p>
+            </div>
+          ) : muestras.length > 0 ? (
+            <>
+              <div
+                className={`flex flex-col gap-1.5 transition-opacity duration-200 ${
+                  isFetching && !isFetchingNextPage && !verTodoLoading
+                    ? "opacity-60"
+                    : "opacity-100"
+                }`}
+              >
+                {muestras.map((m) => {
+                  const href = `/sapopedia/species/${encodeURIComponent(speciesSlug)}/colecciones/${String(m.id_coleccion)}?from=moleculoteca&taxonId=${String(m.taxon_id)}`;
 
-          <div className="flex flex-col gap-1.5">
-            {filtradas.map((m) => {
-              const href = `/sapopedia/species/${encodeURIComponent(speciesSlug)}/colecciones/${String(m.id_coleccion)}?from=moleculoteca&taxonId=${String(m.taxon_id)}`;
+                  return <ColeccionCard key={m.id_coleccion} coleccion={m} href={href} />;
+                })}
+              </div>
 
-              return <ColeccionCard key={m.id_coleccion} coleccion={m} href={href} />;
-            })}
-          </div>
+              <div className="mt-6 flex items-center justify-center gap-4">
+                <p className="text-xs text-gray-400">
+                  {`Mostrando 1 - ${muestras.length.toLocaleString()} de ${total.toLocaleString()} ${
+                    total === 1 ? "registro" : "registros"
+                  }`}
+                </p>
+                {hasNextPage && (
+                  <>
+                    <button
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+                      disabled={isFetchingNextPage || verTodoLoading}
+                      type="button"
+                      onClick={() => {
+                        void fetchNextPage();
+                      }}
+                    >
+                      {isFetchingNextPage ? "Cargando..." : "Cargar más"}
+                    </button>
+                    <button
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+                      disabled={isFetchingNextPage || verTodoLoading}
+                      type="button"
+                      onClick={() => {
+                        void handleVerTodo();
+                      }}
+                    >
+                      {verTodoLoading ? "Cargando todo..." : "Ver todo"}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          ) : activos.size > 0 ? (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-gray-600">No hay registros con esos filtros.</p>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-gray-600">No hay muestras para esta especie.</p>
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -6640,6 +6640,322 @@ export type Database = {
           },
         ]
       }
+      sangre: {
+        Row: {
+          caja: string | null
+          codsangre: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_sangre: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_sangre_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codsangre?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_sangre?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_sangre_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codsangre?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_sangre?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_sangre_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sangre_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "sangre_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "sangre_tipo_sangre_id_fkey"
+            columns: ["tipo_sangre_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      esperma: {
+        Row: {
+          caja: string | null
+          codesperma: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_esperma: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_esperma_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codesperma?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_esperma?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_esperma_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codesperma?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_esperma?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_esperma_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esperma_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "esperma_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "esperma_tipo_esperma_id_fkey"
+            columns: ["tipo_esperma_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      heces: {
+        Row: {
+          caja: string | null
+          codheces: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_heces: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_heces_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codheces?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_heces?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_heces_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codheces?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_heces?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_heces_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heces_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "heces_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "heces_tipo_heces_id_fkey"
+            columns: ["tipo_heces_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      extracto_piel: {
+        Row: {
+          caja: string | null
+          codextracto_piel: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_extracto_piel: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_extracto_piel_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codextracto_piel?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_extracto_piel?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_extracto_piel_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codextracto_piel?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_extracto_piel?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_extracto_piel_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extracto_piel_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "extracto_piel_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "extracto_piel_tipo_extracto_piel_id_fkey"
+            columns: ["tipo_extracto_piel_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       tejido: {
         Row: {
           caja: string | null

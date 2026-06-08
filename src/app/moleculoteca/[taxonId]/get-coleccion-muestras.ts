@@ -13,6 +13,14 @@ export interface ColeccionMuestra extends ColeccionCardData {
   heces: boolean;
 }
 
+const CATALOGO_TEJIDO_HIGADO = 597;
+const CATALOGO_TEJIDO_MUSCULO = 596;
+const CATALOGO_TEJIDO_MUSCULO_E_HIGADO = 609;
+const CATALOGO_PIEL_LIOFILIZADO = 641;
+const CATALOGO_PIEL_EXUDADO = 642;
+const TEJIDO_HIGADO_IDS = new Set([CATALOGO_TEJIDO_HIGADO, CATALOGO_TEJIDO_MUSCULO_E_HIGADO]);
+const TEJIDO_MUSCULO_IDS = new Set([CATALOGO_TEJIDO_MUSCULO, CATALOGO_TEJIDO_MUSCULO_E_HIGADO]);
+
 export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMuestra[]> {
   const supabase = createServiceClient();
 
@@ -21,17 +29,13 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
     .select(
       `id_coleccion, taxon_id, sc, gui, numero_museo, catalogo_museo, fecha_col, colectores,
        localidad, latitud, longitud, elevacion, estadio, numero_individuos, sexo, estado, genbank,
-       sangre, piel_exudado, piel_liofilizado, tejido_higado, tejido_musculo,
-       esqueleto_transparentacion, esperma, heces,
+       esqueleto_transparentacion,
        geopolitica!coleccion_provincia_id_fkey(nombre),
        personal!coleccion_personal_id_fkey(nombre, siglas),
        taxon!coleccion_taxon_id_fkey(taxon, taxonPadre:taxon_id(taxon))`,
     )
     .eq("taxon_id", taxonId)
     .eq("publicar", true)
-    .or(
-      "sangre.eq.true,piel_exudado.eq.true,piel_liofilizado.eq.true,tejido_higado.eq.true,tejido_musculo.eq.true,esqueleto_transparentacion.eq.true,esperma.eq.true,heces.eq.true",
-    )
     .order("fecha_col", {ascending: false, nullsFirst: false});
 
   if (error) {
@@ -40,9 +44,68 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
     return [];
   }
 
+  // Lookup paralelo de presencia de muestras en las tablas reales
+  const coleccionIds = (data || []).map((c: any) => c.id_coleccion as number);
+  const presencia = {
+    sangre: new Set<number>(),
+    esperma: new Set<number>(),
+    heces: new Set<number>(),
+    tejAny: new Set<number>(),
+    tejHigado: new Set<number>(),
+    tejMusculo: new Set<number>(),
+    pielLiof: new Set<number>(),
+    pielExud: new Set<number>(),
+  };
+
+  if (coleccionIds.length > 0) {
+    const [sang, esp, hec, tej, ep] = await Promise.all([
+      supabase.from("sangre").select("coleccion_id").in("coleccion_id", coleccionIds),
+      supabase.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds),
+      supabase.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds),
+      supabase
+        .from("tejido")
+        .select("coleccion_id, tipo_tejido_id")
+        .in("coleccion_id", coleccionIds),
+      supabase
+        .from("extracto_piel")
+        .select("coleccion_id, tipo_extracto_piel_id")
+        .in("coleccion_id", coleccionIds),
+    ]);
+
+    (sang.data || []).forEach((r: any) => presencia.sangre.add(r.coleccion_id));
+    (esp.data || []).forEach((r: any) => presencia.esperma.add(r.coleccion_id));
+    (hec.data || []).forEach((r: any) => presencia.heces.add(r.coleccion_id));
+    (tej.data || []).forEach((r: any) => {
+      presencia.tejAny.add(r.coleccion_id);
+      if (TEJIDO_HIGADO_IDS.has(r.tipo_tejido_id)) presencia.tejHigado.add(r.coleccion_id);
+      if (TEJIDO_MUSCULO_IDS.has(r.tipo_tejido_id)) presencia.tejMusculo.add(r.coleccion_id);
+    });
+    (ep.data || []).forEach((r: any) => {
+      if (r.tipo_extracto_piel_id === CATALOGO_PIEL_LIOFILIZADO)
+        presencia.pielLiof.add(r.coleccion_id);
+      if (r.tipo_extracto_piel_id === CATALOGO_PIEL_EXUDADO)
+        presencia.pielExud.add(r.coleccion_id);
+    });
+  }
+
+  // Filtrar solo colecciones que tengan al menos una muestra (cualquier tejido cuenta)
+  const filtrado = (data || []).filter((c: any) => {
+    const id = c.id_coleccion as number;
+
+    return (
+      presencia.sangre.has(id) ||
+      presencia.esperma.has(id) ||
+      presencia.heces.has(id) ||
+      presencia.tejAny.has(id) ||
+      presencia.pielLiof.has(id) ||
+      presencia.pielExud.has(id) ||
+      c.esqueleto_transparentacion === true
+    );
+  });
+
   const especiesTaxonIds = Array.from(
     new Set(
-      (data || [])
+      filtrado
         .map((c: any) => c.taxon_id as number | null)
         .filter((v): v is number => v != null),
     ),
@@ -67,22 +130,22 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
     });
   }
 
-  return (data || []).map((c: any) => {
+  return filtrado.map((c: any) => {
+    const id = c.id_coleccion as number;
     const especie = c.taxon?.taxon as string | undefined;
     const genero = c.taxon?.taxonPadre?.taxon as string | undefined;
-    const nombreFromTaxon =
-      [genero, especie].filter(Boolean).join(" ") || null;
+    const nombreFromTaxon = [genero, especie].filter(Boolean).join(" ") || null;
     const speciesInfo = nombreCientificoMap.get(c.taxon_id);
-    const tieneMuestras = Boolean(
-      c.sangre ||
-        c.piel_exudado ||
-        c.piel_liofilizado ||
-        c.tejido_higado ||
-        c.tejido_musculo ||
-        c.esqueleto_transparentacion ||
-        c.esperma ||
-        c.heces,
-    );
+    const flags = {
+      sangre: presencia.sangre.has(id),
+      piel_exudado: presencia.pielExud.has(id),
+      piel_liofilizado: presencia.pielLiof.has(id),
+      tejido_higado: presencia.tejHigado.has(id),
+      tejido_musculo: presencia.tejMusculo.has(id),
+      esqueleto_transparentacion: c.esqueleto_transparentacion === true,
+      esperma: presencia.esperma.has(id),
+      heces: presencia.heces.has(id),
+    };
 
     return {
       fuente: "coleccion" as const,
@@ -107,17 +170,10 @@ export async function getColeccionMuestras(taxonId: number): Promise<ColeccionMu
       estado: c.estado,
       nombre_cientifico: speciesInfo?.nombre_cientifico ?? nombreFromTaxon,
       nombre_comun: speciesInfo?.nombre_comun ?? null,
-      tiene_muestras: tieneMuestras,
+      tiene_muestras: true,
       tiene_multimedia: false,
       tiene_adn: Boolean(c.genbank),
-      sangre: !!c.sangre,
-      piel_exudado: !!c.piel_exudado,
-      piel_liofilizado: !!c.piel_liofilizado,
-      tejido_higado: !!c.tejido_higado,
-      tejido_musculo: !!c.tejido_musculo,
-      esqueleto_transparentacion: !!c.esqueleto_transparentacion,
-      esperma: !!c.esperma,
-      heces: !!c.heces,
+      ...flags,
     };
   });
 }

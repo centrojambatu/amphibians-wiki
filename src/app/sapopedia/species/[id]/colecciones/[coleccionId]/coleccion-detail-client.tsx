@@ -40,6 +40,10 @@ import {
 import type {
   Canto,
   Tejido,
+  Sangre,
+  Esperma,
+  Heces,
+  ExtractoPiel,
   PrestamoColeccion,
   PrestamoTejido,
   ColeccionPersonal,
@@ -53,6 +57,10 @@ interface ColeccionDetailClientProps {
   coleccion: any;
   cantos: Canto[];
   tejidos: Tejido[];
+  sangres: Sangre[];
+  espermas: Esperma[];
+  heces: Heces[];
+  extractosPiel: ExtractoPiel[];
   prestamosColeccion: PrestamoColeccion[];
   prestamosTejido: PrestamoTejido[];
   coleccionPersonal: ColeccionPersonal[];
@@ -195,6 +203,10 @@ export default function ColeccionDetailClient({
   coleccion,
   cantos,
   tejidos,
+  sangres,
+  espermas,
+  heces,
+  extractosPiel,
   prestamosColeccion,
   prestamosTejido,
   coleccionPersonal,
@@ -797,68 +809,91 @@ export default function ColeccionDetailClient({
           </div>
         );
 
-        const muestrasFields: {key: string; label: React.ReactNode}[] = [
-          {key: "tejido_higado", label: "Tejido hígado"},
-          {key: "tejido_musculo", label: "Tejido músculo"},
+        // Agrupa muestras por nombre de subtipo (catalogo_awe.nombre) → conteo
+        const groupBySubtipo = (
+          items: {catalogo_awe: {nombre: string} | null}[],
+        ): {nombre: string; n: number}[] => {
+          const map = new Map<string, number>();
+
+          items.forEach((it) => {
+            const k = it.catalogo_awe?.nombre ?? "Sin tipo";
+
+            map.set(k, (map.get(k) ?? 0) + 1);
+          });
+
+          return Array.from(map.entries())
+            .map(([nombre, n]) => ({nombre, n}))
+            .sort((a, b) => b.n - a.n);
+        };
+
+        const muestras: {label: string; total: number; subtipos: {nombre: string; n: number}[]}[] = [
+          {label: "Tejido", total: tejidos.length, subtipos: groupBySubtipo(tejidos)},
+          {label: "Sangre", total: sangres.length, subtipos: groupBySubtipo(sangres)},
+          {label: "Esperma", total: espermas.length, subtipos: groupBySubtipo(espermas)},
+          {label: "Heces", total: heces.length, subtipos: groupBySubtipo(heces)},
           {
-            key: "piel_exudado",
-            label: (
-              <>
-                Piel <span style={{color: "#9ca3af"}}>|</span> exudado
-              </>
-            ),
+            label: "Extracto piel",
+            total: extractosPiel.length,
+            subtipos: groupBySubtipo(extractosPiel),
           },
-          {
-            key: "piel_liofilizado",
-            label: (
-              <>
-                Piel <span style={{color: "#9ca3af"}}>|</span> liofilizado
-              </>
-            ),
-          },
-          {key: "sangre", label: "Sangre"},
         ];
-
-        // Catálogo CJ: acrónimo + número de museo (ej. "CJ TEST-CJ-001")
-        const acronimoCJ = c.catalogo_museo?.includes(" - ")
-          ? c.catalogo_museo.split(" - ").pop()
-          : c.catalogo_museo;
-        const catalogoCJ = [acronimoCJ, c.numero_museo].filter(Boolean).join(" ") || null;
-
-        // Coordenadas: usa el campo texto si existe, sino concatena lat/lon
-        const coordenadas =
-          c.coordenadas ||
-          (c.latitud != null && c.longitud != null
-            ? `${String(c.latitud)}, ${String(c.longitud)}`
-            : null);
 
         return (
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-            {/* Muestras biológicas — todas en una línea */}
-            <div className="border-t border-gray-100 px-4 py-3">
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-gray-800">
-                {muestrasFields.map((m, i) => (
-                  <span key={m.key} className="inline-flex items-center gap-x-2">
-                    {i > 0 && (
-                      <span style={{color: "#f07304"}}>|</span>
-                    )}
-                    <span className="inline-flex items-center gap-x-1.5">
-                      <span className="text-xs font-semibold text-gray-500">
-                        {m.label}
-                      </span>
-                      {Boolean(c[m.key]) && (
-                        <Check
-                          className="h-4 w-4"
-                          strokeWidth={2.5}
-                          style={{color: "#2d6e2d"}}
-                        />
-                      )}
-                    </span>
-                  </span>
-                ))}
-              </p>
+            <div className="border-b border-gray-200 bg-gray-50 px-4 py-1.5">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                Muestras biológicas
+              </h3>
             </div>
+            <div className="px-4 py-3">
+              <ul className="flex flex-col gap-2">
+                {muestras.map((m) => {
+                  const tieneMuestras = m.total > 0;
 
+                  return (
+                    <li
+                      key={m.label}
+                      className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]"
+                    >
+                      <span
+                        className={`inline-flex items-center gap-x-1.5 ${
+                          tieneMuestras ? "text-gray-900" : "text-gray-300"
+                        }`}
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-wide">
+                          {m.label}
+                        </span>
+                        {tieneMuestras && (
+                          <>
+                            <Check
+                              className="h-4 w-4"
+                              strokeWidth={2.5}
+                              style={{color: "#2d6e2d"}}
+                            />
+                            <span className="text-[11px] font-medium text-gray-500">
+                              ({m.total})
+                            </span>
+                          </>
+                        )}
+                      </span>
+                      {tieneMuestras && m.subtipos.length > 0 && (
+                        <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[12px] text-gray-700">
+                          {m.subtipos.map((s, i) => (
+                            <span key={s.nombre} className="inline-flex items-baseline gap-x-1.5">
+                              {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+                              <span>
+                                {s.nombre}{" "}
+                                <span className="text-[11px] text-gray-500">({s.n})</span>
+                              </span>
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
         );
       })()}
