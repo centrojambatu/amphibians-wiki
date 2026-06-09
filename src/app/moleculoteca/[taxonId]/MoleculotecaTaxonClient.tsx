@@ -122,7 +122,7 @@ export default function MoleculotecaTaxonClient({taxonId}: {taxonId: number}) {
       </Link>
 
       <h1 className="mb-1 text-2xl font-bold" style={{color: "#666666"}}>
-        Muestras biológicas{" "}
+        Muestras{" "}
         <span className="italic" style={{color: "#2d6e2d"}}>
           {nombreCientifico}
         </span>

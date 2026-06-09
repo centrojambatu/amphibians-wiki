@@ -9,7 +9,7 @@ export async function GET() {
     const {data, error} = await (supabase as any)
       .from("vw_moleculoteca_taxon")
       .select(
-        "count_tejido_higado, count_tejido_musculo, count_piel_exudado, count_piel_liofilizado, count_sangre, count_esperma, count_heces, count_esqueleto_transparentacion",
+        "count_tejido_higado, count_tejido_musculo, count_piel_exudado, count_piel_liofilizado, count_sangre, count_esperma, count_heces, count_otros, count_esqueleto_transparentacion",
       );
 
     if (error) throw error;
@@ -29,6 +29,7 @@ export async function GET() {
           sangre: countSpeciesWith("count_sangre"),
           esperma: countSpeciesWith("count_esperma"),
           heces: countSpeciesWith("count_heces"),
+          otros: countSpeciesWith("count_otros"),
           esqueleto_transparentacion: countSpeciesWith("count_esqueleto_transparentacion"),
         },
       },

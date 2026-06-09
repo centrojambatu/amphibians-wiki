@@ -71,33 +71,65 @@ export async function GET(
       tejAny: new Set<number>(),
       tejHigado: new Set<number>(),
       tejMusculo: new Set<number>(),
+      tejOtros: new Set<number>(),
       pielLiof: new Set<number>(),
       pielExud: new Set<number>(),
     };
+    const TEJIDO_EXCLUIDOS_OTROS = new Set([596, 597, 609, 645]);
 
     if (coleccionIds.length > 0) {
+      const CHUNK = 200;
+
+      const fetchAll = async <T,>(
+        tabla: "esperma" | "heces" | "tejido" | "extracto_piel",
+        columns: string,
+      ): Promise<T[]> => {
+        const all: T[] = [];
+
+        for (let i = 0; i < coleccionIds.length; i += CHUNK) {
+          const chunk = coleccionIds.slice(i, i + CHUNK);
+          const {data: rows, error: err} = await supabase
+            .from(tabla)
+            .select(columns)
+            .in("coleccion_id", chunk)
+            .limit(1000000);
+
+          if (err) {
+            console.error(`Error leyendo ${tabla}:`, err);
+            continue;
+          }
+          all.push(...((rows || []) as unknown as T[]));
+        }
+
+        return all;
+      };
+
       const [esp, hec, tej, ep] = await Promise.all([
-        supabase.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds),
-        supabase.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds),
-        supabase
-          .from("tejido")
-          .select("coleccion_id, tipo_tejido_id")
-          .in("coleccion_id", coleccionIds),
-        supabase
-          .from("extracto_piel")
-          .select("coleccion_id, tipo_extracto_piel_id")
-          .in("coleccion_id", coleccionIds),
+        fetchAll<{coleccion_id: number}>("esperma", "coleccion_id"),
+        fetchAll<{coleccion_id: number}>("heces", "coleccion_id"),
+        fetchAll<{coleccion_id: number; tipo_tejido_id: number | null}>(
+          "tejido",
+          "coleccion_id, tipo_tejido_id",
+        ),
+        fetchAll<{coleccion_id: number; tipo_extracto_piel_id: number | null}>(
+          "extracto_piel",
+          "coleccion_id, tipo_extracto_piel_id",
+        ),
       ]);
 
-      (esp.data || []).forEach((r: any) => presencia.esperma.add(r.coleccion_id));
-      (hec.data || []).forEach((r: any) => presencia.heces.add(r.coleccion_id));
-      (tej.data || []).forEach((r: any) => {
+      esp.forEach((r) => presencia.esperma.add(r.coleccion_id));
+      hec.forEach((r) => presencia.heces.add(r.coleccion_id));
+      tej.forEach((r) => {
         presencia.tejAny.add(r.coleccion_id);
-        if (TEJIDO_HIGADO_IDS.has(r.tipo_tejido_id)) presencia.tejHigado.add(r.coleccion_id);
-        if (TEJIDO_MUSCULO_IDS.has(r.tipo_tejido_id)) presencia.tejMusculo.add(r.coleccion_id);
+        if (r.tipo_tejido_id != null && TEJIDO_HIGADO_IDS.has(r.tipo_tejido_id))
+          presencia.tejHigado.add(r.coleccion_id);
+        if (r.tipo_tejido_id != null && TEJIDO_MUSCULO_IDS.has(r.tipo_tejido_id))
+          presencia.tejMusculo.add(r.coleccion_id);
         if (r.tipo_tejido_id === CATALOGO_TEJIDO_SANGRE) presencia.sangre.add(r.coleccion_id);
+        if (r.tipo_tejido_id == null || !TEJIDO_EXCLUIDOS_OTROS.has(r.tipo_tejido_id))
+          presencia.tejOtros.add(r.coleccion_id);
       });
-      (ep.data || []).forEach((r: any) => {
+      ep.forEach((r) => {
         if (r.tipo_extracto_piel_id === CATALOGO_PIEL_LIOFILIZADO)
           presencia.pielLiof.add(r.coleccion_id);
         if (r.tipo_extracto_piel_id === CATALOGO_PIEL_EXUDADO)
@@ -158,6 +190,7 @@ export async function GET(
       heces: countWith(presencia.heces),
       tejido_higado: countWith(presencia.tejHigado),
       tejido_musculo: countWith(presencia.tejMusculo),
+      otros: countWith(presencia.tejOtros),
       piel_liofilizado: countWith(presencia.pielLiof),
       piel_exudado: countWith(presencia.pielExud),
       esqueleto_transparentacion: (data || []).filter(
@@ -197,6 +230,7 @@ export async function GET(
         piel_liofilizado: presencia.pielLiof.has(id),
         tejido_higado: presencia.tejHigado.has(id),
         tejido_musculo: presencia.tejMusculo.has(id),
+        otros: presencia.tejOtros.has(id),
         esqueleto_transparentacion: c.esqueleto_transparentacion === true,
         esperma: presencia.esperma.has(id),
         heces: presencia.heces.has(id),

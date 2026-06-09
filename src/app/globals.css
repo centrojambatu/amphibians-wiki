@@ -127,6 +127,18 @@ a.citation-link:active {
   color: #80ff80 !important;
 }
 
+/* Excepción para flecha "Ver detalle" en moleculoteca - mantenerla gris */
+a.moleculoteca-detail-arrow,
+a.moleculoteca-detail-arrow:link,
+a.moleculoteca-detail-arrow:visited {
+  color: #9ca3af !important;
+}
+
+a.moleculoteca-detail-arrow:hover,
+a.moleculoteca-detail-arrow:active {
+  color: #4b5563 !important;
+}
+
 /* Excepción para botones de videoteca - mantener color gris y sin subrayado */
 a.videoteca-play-button,
 a.videoteca-play-button:link,

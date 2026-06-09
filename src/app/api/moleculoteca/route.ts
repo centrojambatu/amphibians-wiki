@@ -27,6 +27,7 @@ const COUNT_KEY_BY_MUESTRA: Record<string, string> = {
   sangre: "count_sangre",
   esperma: "count_esperma",
   heces: "count_heces",
+  otros: "count_otros",
   esqueleto_transparentacion: "count_esqueleto_transparentacion",
 };
 

@@ -813,7 +813,7 @@ export default function ColeccionDetailClient({
           const map = new Map<string, number>();
 
           items.forEach((it) => {
-            const k = it.catalogo_awe?.nombre ?? "Sin tipo";
+            const k = it.catalogo_awe?.nombre ?? "Otros";
 
             map.set(k, (map.get(k) ?? 0) + 1);
           });

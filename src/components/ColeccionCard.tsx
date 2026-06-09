@@ -40,6 +40,7 @@ export interface ColeccionCardData {
   esperma?: boolean;
   heces?: boolean;
   microfotografia?: boolean;
+  otros?: boolean;
 }
 
 interface ColeccionCardProps {
@@ -48,11 +49,7 @@ interface ColeccionCardProps {
   showChevron?: boolean;
 }
 
-export default function ColeccionCard({
-  coleccion,
-  href,
-  showChevron = true,
-}: ColeccionCardProps) {
+export default function ColeccionCard({coleccion, href, showChevron = true}: ColeccionCardProps) {
   const isExterna = coleccion.fuente === "coleccion_externa";
 
   const fecha = coleccion.fecha_coleccion
@@ -60,6 +57,7 @@ export default function ColeccionCard({
         const d = new Date(coleccion.fecha_coleccion);
         const day = String(d.getDate()).padStart(2, "0");
         const month = d.toLocaleDateString("es-ES", {month: "long"});
+
         return `${day} ${month} ${d.getFullYear()}`;
       })()
     : null;
@@ -70,16 +68,11 @@ export default function ColeccionCard({
   const numeroDisplay = coleccion.num_museo || coleccion.sc || null;
   const catalogoLabel = [acronimo, numeroDisplay].filter(Boolean).join(" ");
 
-  const localidad = [coleccion.detalle_localidad, coleccion.provincia]
-    .filter(Boolean)
-    .join(", ");
+  const localidad = [coleccion.detalle_localidad, coleccion.provincia].filter(Boolean).join(", ");
 
   const colectorLabel =
     coleccion.colectores ||
-    [
-      coleccion.personal_nombre,
-      coleccion.personal_siglas && `(${coleccion.personal_siglas})`,
-    ]
+    [coleccion.personal_nombre, coleccion.personal_siglas && `(${coleccion.personal_siglas})`]
       .filter(Boolean)
       .join(" ") ||
     null;
@@ -95,7 +88,7 @@ export default function ColeccionCard({
   if (coleccion.nombre_cientifico) {
     fields.push({
       key: "nombre_cientifico",
-      node: <span className="italic text-gray-800">{coleccion.nombre_cientifico}</span>,
+      node: <span className="text-gray-800 italic">{coleccion.nombre_cientifico}</span>,
     });
   }
   if (localidad) {
@@ -113,9 +106,7 @@ export default function ColeccionCard({
   if (colectorLabel) {
     fields.push({key: "colector", node: <span>{colectorLabel}</span>});
   }
-  const checkIcon = (
-    <Check className="h-3.5 w-3.5" strokeWidth={3} style={{color: "#2d6e2d"}} />
-  );
+  const checkIcon = <Check className="h-3.5 w-3.5" strokeWidth={3} style={{color: "#2d6e2d"}} />;
 
   const muestraTipos: {key: string; label: React.ReactNode; flag: boolean | undefined}[] = [
     {key: "tejido_higado", label: "Tejido hígado", flag: coleccion.tejido_higado},
@@ -139,6 +130,9 @@ export default function ColeccionCard({
       flag: coleccion.piel_liofilizado,
     },
     {key: "sangre", label: "Sangre", flag: coleccion.sangre},
+    {key: "esperma", label: "Esperma", flag: coleccion.esperma},
+    {key: "heces", label: "Heces", flag: coleccion.heces},
+    {key: "otros", label: "Otros", flag: coleccion.otros},
   ];
   const muestraTiposDefinidos = muestraTipos.some((m) => m.flag !== undefined);
   const muestraTiposActivos = muestraTipos.filter((m) => m.flag === true);
@@ -157,31 +151,19 @@ export default function ColeccionCard({
   } else if (coleccion.tiene_muestras) {
     fields.push({
       key: "muestras",
-      node: (
-        <span className="inline-flex items-center gap-1">
-          Muestras biológicas {checkIcon}
-        </span>
-      ),
+      node: <span className="inline-flex items-center gap-1">Muestras biológicas {checkIcon}</span>,
     });
   }
   if (coleccion.tiene_multimedia) {
     fields.push({
       key: "multimedia",
-      node: (
-        <span className="inline-flex items-center gap-1">
-          Multimedia {checkIcon}
-        </span>
-      ),
+      node: <span className="inline-flex items-center gap-1">Multimedia {checkIcon}</span>,
     });
   }
   if (coleccion.tiene_adn) {
     fields.push({
       key: "adn",
-      node: (
-        <span className="inline-flex items-center gap-1">
-          GenBank {checkIcon}
-        </span>
-      ),
+      node: <span className="inline-flex items-center gap-1">GenBank {checkIcon}</span>,
     });
   }
 

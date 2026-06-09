@@ -160,6 +160,29 @@ export async function GET(request: Request) {
               ),
             );
             break;
+          case "otros": {
+            // Tejidos cuyo subtipo NO es Hígado/Músculo/Músculo e hígado/Sangre (incluyendo NULL)
+            const {data, error} = await supabase
+              .from("tejido")
+              .select("coleccion_id, tipo_tejido_id")
+              .limit(1000000);
+
+            if (error) {
+              console.error("Error filtrando tejido (otros):", error);
+              sets.push(new Set<number>());
+            } else {
+              const excluidos = new Set([597, 609, 596, 645]);
+              const ids = new Set<number>();
+
+              (data || []).forEach((r: any) => {
+                if (r.tipo_tejido_id == null || !excluidos.has(r.tipo_tejido_id)) {
+                  ids.add(r.coleccion_id as number);
+                }
+              });
+              sets.push(ids);
+            }
+            break;
+          }
         }
       }
 

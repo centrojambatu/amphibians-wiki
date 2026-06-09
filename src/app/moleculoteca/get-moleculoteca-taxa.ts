@@ -8,9 +8,11 @@ export interface MuestrasTaxon {
   count_piel_liofilizado: number;
   count_tejido_higado: number;
   count_tejido_musculo: number;
+  count_otros: number;
   count_esqueleto_transparentacion: number;
   count_esperma: number;
   count_heces: number;
+  count_genbank: number;
   nombre_cientifico: string | null;
   nombre_comun: string | null;
   orden: string | null;
@@ -24,6 +26,7 @@ export const MUESTRA_FIELDS = [
   {key: "piel_exudado", label: "Piel exudado", count: "count_piel_exudado"},
   {key: "piel_liofilizado", label: "Piel liofilizado", count: "count_piel_liofilizado"},
   {key: "sangre", label: "Sangre", count: "count_sangre"},
+  {key: "otros", label: "Otros", count: "count_otros"},
 ] as const;
 
 export type MuestraField = (typeof MUESTRA_FIELDS)[number]["key"];

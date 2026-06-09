@@ -57,6 +57,7 @@ const MUESTRA_FIELDS = [
   {key: "esperma", label: "Esperma"},
   {key: "heces", label: "Heces"},
   {key: "sangre", label: "Sangre"},
+  {key: "otros", label: "Otros"},
 ] as const;
 
 type MuestraKey = (typeof MUESTRA_FIELDS)[number]["key"];

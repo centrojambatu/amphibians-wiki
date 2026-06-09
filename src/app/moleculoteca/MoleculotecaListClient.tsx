@@ -12,6 +12,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {Button} from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 import {MUESTRA_FIELDS, type MuestraField, type MuestrasTaxon} from "./get-moleculoteca-taxa";
@@ -392,8 +398,30 @@ export default function MoleculotecaListClient() {
 
         <div className="min-w-0 flex-1">
           {isLoading && taxa.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-              <p className="text-gray-600">Cargando moleculoteca...</p>
+            <div className="overflow-hidden rounded-lg border border-gray-200">
+              {Array.from({length: 12}).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 border-b border-gray-100 px-3 py-1.5 last:border-b-0"
+                >
+                  <div className="min-w-0 flex-1 lg:max-w-xs">
+                    <div
+                      className="h-3.5 animate-pulse rounded bg-gray-100"
+                      style={{width: `${String(60 + ((i * 17) % 35))}%`}}
+                    />
+                  </div>
+                  <div className="flex flex-1 justify-around">
+                    {Array.from({length: 6}).map((__, j) => (
+                      <div
+                        key={j}
+                        className="h-3.5 w-3.5 animate-pulse rounded-sm bg-gray-100"
+                      />
+                    ))}
+                  </div>
+                  <div className="shrink-0" style={{width: "72px"}} />
+                  <div className="shrink-0" style={{width: "20px"}} />
+                </div>
+              ))}
             </div>
           ) : taxa.length > 0 ? (
             <>
@@ -421,8 +449,11 @@ export default function MoleculotecaListClient() {
                       ))}
                     </div>
                   </div>
-                  <div className="shrink-0 text-center" style={{width: "72px"}}>
-                    Secuencias
+                  <div
+                    className="shrink-0 text-center break-words whitespace-normal leading-tight"
+                    style={{width: "72px"}}
+                  >
+                    Secuencias Genbank
                   </div>
                   <div className="shrink-0" style={{width: "20px"}} />
                 </div>
@@ -468,44 +499,64 @@ export default function MoleculotecaListClient() {
                           const value = (t as Record<string, unknown>)[field.count] as number;
                           const active = value > 0;
 
+                          if (!active) {
+                            return (
+                              <div
+                                key={field.key}
+                                className="flex min-w-0 items-center justify-center"
+                              />
+                            );
+                          }
+
                           return (
-                            <div
-                              key={field.key}
-                              className="flex min-w-0 items-center justify-center"
-                              title={`${field.label}: ${String(value)}`}
-                            >
-                              {active ? (
-                                <Check
-                                  className="h-3.5 w-3.5"
-                                  strokeWidth={3}
-                                  style={{color: "#2d6e2d"}}
-                                />
-                              ) : null}
-                            </div>
+                            <TooltipProvider key={field.key} delayDuration={100}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex min-w-0 cursor-default items-center justify-center">
+                                    <Check
+                                      className="h-3.5 w-3.5"
+                                      strokeWidth={3}
+                                      style={{color: "#2d6e2d"}}
+                                    />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-[10px]">
+                                  {field.label}: {value}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           );
                         })}
                       </div>
                     </Link>
 
-                    <div
-                      className="flex shrink-0 flex-col items-stretch text-[10px] text-gray-500"
-                      style={{width: "72px"}}
-                    >
-                      {t.nombre_cientifico && (
-                        <a
-                          className="inline-flex items-center justify-center rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 no-underline transition-colors hover:bg-gray-50 hover:text-gray-900"
-                          href={`https://www.ncbi.nlm.nih.gov/search/all/?term=${(t.nombre_cientifico || "").split(/\s+/).map(encodeURIComponent).join("+")}`}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          GenBank
-                        </a>
-                      )}
-                    </div>
+                    {t.count_genbank > 0 ? (
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="flex shrink-0 cursor-default items-center justify-center"
+                              style={{width: "72px"}}
+                            >
+                              <Check
+                                className="h-3.5 w-3.5"
+                                strokeWidth={3}
+                                style={{color: "#2d6e2d"}}
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-[10px]">
+                            Secuencias GenBank: {t.count_genbank}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <div className="shrink-0" style={{width: "72px"}} />
+                    )}
 
                     <Link
                       aria-label="Ver detalle"
-                      className="flex shrink-0 items-center justify-center text-gray-400 no-underline hover:text-gray-600"
+                      className="moleculoteca-detail-arrow flex shrink-0 items-center justify-center no-underline"
                       href={`/moleculoteca/${String(t.taxon_id)}`}
                       style={{width: "20px"}}
                     >
