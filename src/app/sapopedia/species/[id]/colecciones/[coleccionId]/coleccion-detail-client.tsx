@@ -935,94 +935,7 @@ export default function ColeccionDetailClient({
       })()}
 
 
-      {/* ═══ CARRUSEL DE VIDEOS ═══ */}
-      {videos.length > 0 && (
-        <div>
-          <div ref={videosCarouselRef} className="flex gap-3 overflow-x-auto scroll-smooth">
-            {videos.map((video) => {
-              const fechaFmt = video.fecha ? formatDate(video.fecha) : null;
-
-              return (
-                <div
-                  key={video.id_video}
-                  className="flex w-80 flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm"
-                >
-                  {video.enlace ? (
-                    <video
-                      controls
-                      className="aspect-video w-full bg-black"
-                      poster={video.thumbnail || undefined}
-                      preload="metadata"
-                      src={video.enlace}
-                      onPlay={(e) => {
-                        const current = e.currentTarget;
-
-                        document
-                          .querySelectorAll<HTMLMediaElement>("audio, video")
-                          .forEach((m) => {
-                            if (m !== current && !m.paused) m.pause();
-                          });
-                      }}
-                    >
-                      <track kind="captions" />
-                      Tu navegador no soporta video.
-                    </video>
-                  ) : (
-                    <div className="flex aspect-video w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
-                      Sin enlace de video
-                    </div>
-                  )}
-                  <div className="p-3">
-                    {video.nombre && (
-                      <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <span className="text-xs font-semibold text-gray-800">
-                          {video.nombre}
-                        </span>
-                      </div>
-                    )}
-                    {video.descripcion && (
-                      <p className="mt-1 line-clamp-2 text-xs text-gray-700">
-                        {video.descripcion}
-                      </p>
-                    )}
-                    {(video.autor || fechaFmt) && (
-                      <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[11px] text-gray-500">
-                        {video.autor && <span>{video.autor}</span>}
-                        {video.autor && fechaFmt && (
-                          <span style={{color: "#f07304"}}>|</span>
-                        )}
-                        {fechaFmt && <span>{fechaFmt}</span>}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-2 flex items-center justify-end gap-1">
-            <button
-              aria-label="Anterior"
-              className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
-              disabled={!videosCarouselCanLeft}
-              type="button"
-              onClick={() => scrollVideosCarousel("left")}
-            >
-              <MoveLeft className="h-6 w-6" strokeWidth={1.5} />
-            </button>
-            <button
-              aria-label="Siguiente"
-              className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
-              disabled={!videosCarouselCanRight}
-              type="button"
-              onClick={() => scrollVideosCarousel("right")}
-            >
-              <MoveRight className="h-6 w-6" strokeWidth={1.5} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ═══ CANTOS — lista scrollable, al final de la ficha ═══ */}
+      {/* ═══ CANTOS — lista scrollable ═══ */}
       {cantos.length > 0 && (
         <div className="max-h-[480px] overflow-y-auto pr-1">
           <div className="flex flex-col gap-3">
@@ -1131,6 +1044,93 @@ export default function ColeccionDetailClient({
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ CARRUSEL DE VIDEOS — al final, abajo de los audios ═══ */}
+      {videos.length > 0 && (
+        <div>
+          <div ref={videosCarouselRef} className="flex gap-3 overflow-x-auto scroll-smooth">
+            {videos.map((video) => {
+              const fechaFmt = video.fecha ? formatDate(video.fecha) : null;
+
+              return (
+                <div
+                  key={video.id_video}
+                  className="flex w-80 flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm"
+                >
+                  {video.enlace ? (
+                    <video
+                      controls
+                      className="aspect-video w-full bg-black"
+                      poster={video.thumbnail || undefined}
+                      preload="metadata"
+                      src={video.enlace}
+                      onPlay={(e) => {
+                        const current = e.currentTarget;
+
+                        document
+                          .querySelectorAll<HTMLMediaElement>("audio, video")
+                          .forEach((m) => {
+                            if (m !== current && !m.paused) m.pause();
+                          });
+                      }}
+                    >
+                      <track kind="captions" />
+                      Tu navegador no soporta video.
+                    </video>
+                  ) : (
+                    <div className="flex aspect-video w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
+                      Sin enlace de video
+                    </div>
+                  )}
+                  <div className="p-3">
+                    {video.nombre && (
+                      <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="text-xs font-semibold text-gray-800">
+                          {video.nombre}
+                        </span>
+                      </div>
+                    )}
+                    {video.descripcion && (
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-700">
+                        {video.descripcion}
+                      </p>
+                    )}
+                    {(video.autor || fechaFmt) && (
+                      <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[11px] text-gray-500">
+                        {video.autor && <span>{video.autor}</span>}
+                        {video.autor && fechaFmt && (
+                          <span style={{color: "#f07304"}}>|</span>
+                        )}
+                        {fechaFmt && <span>{fechaFmt}</span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex items-center justify-end gap-1">
+            <button
+              aria-label="Anterior"
+              className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+              disabled={!videosCarouselCanLeft}
+              type="button"
+              onClick={() => scrollVideosCarousel("left")}
+            >
+              <MoveLeft className="h-6 w-6" strokeWidth={1.5} />
+            </button>
+            <button
+              aria-label="Siguiente"
+              className="flex h-8 w-8 items-center justify-center text-gray-700 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+              disabled={!videosCarouselCanRight}
+              type="button"
+              onClick={() => scrollVideosCarousel("right")}
+            >
+              <MoveRight className="h-6 w-6" strokeWidth={1.5} />
+            </button>
           </div>
         </div>
       )}
