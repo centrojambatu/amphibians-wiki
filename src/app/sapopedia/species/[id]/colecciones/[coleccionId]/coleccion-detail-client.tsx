@@ -1058,28 +1058,24 @@ export default function ColeccionDetailClient({
               return (
                 <div
                   key={video.id_video}
-                  className="flex w-80 flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm"
+                  className="group flex w-80 flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm"
                 >
                   {video.enlace ? (
-                    <video
-                      controls
-                      className="aspect-video w-full bg-black"
-                      poster={video.thumbnail || undefined}
-                      preload="metadata"
-                      src={video.enlace}
-                      onPlay={(e) => {
-                        const current = e.currentTarget;
+                    <div className="aspect-video w-full bg-black">
+                      <VideoPreview
+                        poster={video.thumbnail}
+                        src={video.enlace}
+                        onPlay={(e) => {
+                          const current = e.currentTarget;
 
-                        document
-                          .querySelectorAll<HTMLMediaElement>("audio, video")
-                          .forEach((m) => {
-                            if (m !== current && !m.paused) m.pause();
-                          });
-                      }}
-                    >
-                      <track kind="captions" />
-                      Tu navegador no soporta video.
-                    </video>
+                          document
+                            .querySelectorAll<HTMLMediaElement>("audio, video")
+                            .forEach((m) => {
+                              if (m !== current && !m.paused) m.pause();
+                            });
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div className="flex aspect-video w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
                       Sin enlace de video
