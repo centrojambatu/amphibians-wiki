@@ -8,6 +8,8 @@ import {
   getEspermasByColeccion,
   getHecesByColeccion,
   getExtractosPielByColeccion,
+  getSwabsByColeccion,
+  getSecuenciasByColeccion,
   getPrestamosColeccion,
   getPrestamosTejidoByColeccion,
   getColeccionPersonal,
@@ -51,6 +53,8 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     espermas,
     heces,
     extractosPiel,
+    swabs,
+    secuencias,
     prestamosColeccion,
     prestamosTejido,
     coleccionPersonal,
@@ -65,6 +69,8 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getEspermasByColeccion(coleccionIdNum),
     getHecesByColeccion(coleccionIdNum),
     getExtractosPielByColeccion(coleccionIdNum),
+    getSwabsByColeccion(coleccionIdNum),
+    getSecuenciasByColeccion(coleccionIdNum),
     getPrestamosColeccion(coleccionIdNum),
     getPrestamosTejidoByColeccion(coleccionIdNum),
     getColeccionPersonal(coleccionIdNum),
@@ -135,6 +141,8 @@ export default async function ColeccionDetailPage({params}: PageProps) {
       orden={orden}
       prestamosColeccion={prestamosColeccion}
       prestamosTejido={prestamosTejido}
+      secuencias={secuencias}
+      swabs={swabs}
       tejidos={tejidos}
       videos={videos}
     />

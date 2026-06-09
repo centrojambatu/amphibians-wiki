@@ -43,6 +43,8 @@ import type {
   Esperma,
   Heces,
   ExtractoPiel,
+  Swab,
+  Secuencia,
   PrestamoColeccion,
   PrestamoTejido,
   ColeccionPersonal,
@@ -59,6 +61,8 @@ interface ColeccionDetailClientProps {
   espermas: Esperma[];
   heces: Heces[];
   extractosPiel: ExtractoPiel[];
+  swabs: Swab[];
+  secuencias: Secuencia[];
   prestamosColeccion: PrestamoColeccion[];
   prestamosTejido: PrestamoTejido[];
   coleccionPersonal: ColeccionPersonal[];
@@ -204,6 +208,8 @@ export default function ColeccionDetailClient({
   espermas,
   heces,
   extractosPiel,
+  swabs,
+  secuencias,
   prestamosColeccion,
   prestamosTejido,
   coleccionPersonal,
@@ -833,6 +839,15 @@ export default function ColeccionDetailClient({
           "Heces",
           "Sangre",
           "Esperma",
+          "Quítrido",
+          "Microbiota",
+          "Control",
+          "Bd",
+          "ADN",
+          "ARN",
+          "Proteína",
+          "Ejemplar diafanizado",
+          "MicrofotografíaCT",
           "Cola de renacuajo",
           "Otros",
         ];
@@ -842,16 +857,38 @@ export default function ColeccionDetailClient({
           ...(espermas.length > 0 ? [{nombre: "Esperma", n: espermas.length}] : []),
           ...(heces.length > 0 ? [{nombre: "Heces", n: heces.length}] : []),
           ...groupBySubtipo(extractosPiel),
+          ...groupBySubtipo(swabs),
+          ...groupBySubtipo(secuencias),
+          ...(c.esqueleto_transparentacion === true
+            ? [{nombre: "Ejemplar diafanizado", n: 1}]
+            : []),
+          ...(c.microfotografia === true ? [{nombre: "MicrofotografíaCT", n: 1}] : []),
         ];
 
-        const enOrden = ORDEN_SUBTIPOS.map((nombre) => todos.find((s) => s.nombre === nombre))
+        const enOrden = ORDEN_SUBTIPOS.filter((n) => n !== "Otros")
+          .map((nombre) => todos.find((s) => s.nombre === nombre))
           .filter((s): s is {nombre: string; n: number} => s != null);
-        const fueraDeOrden = todos.filter((s) => !ORDEN_SUBTIPOS.includes(s.nombre));
-        const subtiposCombinados = [...enOrden, ...fueraDeOrden];
+        const fueraDeOrden = todos.filter(
+          (s) => !ORDEN_SUBTIPOS.includes(s.nombre) && s.nombre !== "Otros",
+        );
+        const otros = todos.find((s) => s.nombre === "Otros");
+        const subtiposCombinados = [
+          ...enOrden,
+          ...fueraDeOrden,
+          ...(otros ? [otros] : []),
+        ];
         const muestras: {label: string; total: number; subtipos: {nombre: string; n: number}[]}[] = [
           {
             label: "Muestras biológicas",
-            total: tejidos.length + espermas.length + heces.length + extractosPiel.length,
+            total:
+              tejidos.length +
+              espermas.length +
+              heces.length +
+              extractosPiel.length +
+              swabs.length +
+              secuencias.length +
+              (c.esqueleto_transparentacion === true ? 1 : 0) +
+              (c.microfotografia === true ? 1 : 0),
             subtipos: subtiposCombinados,
           },
         ];

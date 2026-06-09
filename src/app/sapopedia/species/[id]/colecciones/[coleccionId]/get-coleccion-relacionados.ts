@@ -85,6 +85,23 @@ export interface ExtractoPiel extends MuestraBase {
   catalogo_awe: {nombre: string} | null;
 }
 
+export interface Swab extends MuestraBase {
+  id_swab: number;
+  codswab: string | null;
+  jaula: string | null;
+  preservante: string | null;
+  caja: string | null;
+  tipo_swab_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
+export interface Secuencia extends MuestraBase {
+  id_secuencia: number;
+  codsecuencia: string | null;
+  tipo_secuencia_id: number | null;
+  catalogo_awe: {nombre: string} | null;
+}
+
 export interface Identificacion {
   id_identificacion: number;
   coleccion_id: number;
@@ -425,7 +442,7 @@ export async function getVideosByColeccion(coleccionId: number): Promise<VideoCo
  * Helper genérico: obtiene todas las muestras de una tabla relacionada con la colección,
  * paginando para superar el límite de 1000 de Supabase.
  */
-type MuestraTabla = "esperma" | "heces" | "extracto_piel";
+type MuestraTabla = "esperma" | "heces" | "extracto_piel" | "swabs" | "secuencia";
 
 async function fetchMuestrasByColeccion<T>(
   tabla: MuestraTabla,
@@ -477,6 +494,19 @@ export async function getExtractosPielByColeccion(coleccionId: number): Promise<
     "id_extracto_piel",
     coleccionId,
     "tipo_extracto_piel_id",
+  );
+}
+
+export async function getSwabsByColeccion(coleccionId: number): Promise<Swab[]> {
+  return fetchMuestrasByColeccion<Swab>("swabs", "id_swab", coleccionId, "tipo_swab_id");
+}
+
+export async function getSecuenciasByColeccion(coleccionId: number): Promise<Secuencia[]> {
+  return fetchMuestrasByColeccion<Secuencia>(
+    "secuencia",
+    "id_secuencia",
+    coleccionId,
+    "tipo_secuencia_id",
   );
 }
 

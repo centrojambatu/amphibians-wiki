@@ -6857,6 +6857,158 @@ export type Database = {
           },
         ]
       }
+      secuencia: {
+        Row: {
+          caja: string | null
+          codsecuencia: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_secuencia: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_secuencia_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codsecuencia?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_secuencia?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_secuencia_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codsecuencia?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_secuencia?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_secuencia_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secuencia_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "secuencia_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "secuencia_tipo_secuencia_id_fkey"
+            columns: ["tipo_secuencia_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
+      swabs: {
+        Row: {
+          caja: string | null
+          codswab: string | null
+          coleccion_id: number
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_swab: number
+          jaula: string | null
+          observacion: string | null
+          permisocontrato_id: number | null
+          preservante: string | null
+          tipo_swab_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codswab?: string | null
+          coleccion_id: number
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_swab?: number
+          jaula?: string | null
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          preservante?: string | null
+          tipo_swab_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codswab?: string | null
+          coleccion_id?: number
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_swab?: number
+          jaula?: string | null
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          preservante?: string | null
+          tipo_swab_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swabs_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "swabs_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "swabs_tipo_swab_id_fkey"
+            columns: ["tipo_swab_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       tejido: {
         Row: {
           caja: string | null
