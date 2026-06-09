@@ -191,13 +191,22 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
     );
   }
 
+  const grayFilterStyle = {
+    filter: isPlaying ? "grayscale(0)" : "grayscale(1)",
+    transition: "filter 700ms ease-in-out",
+  } as const;
+
   return (
     <div className="space-y-2">
       <div>
         <p className="mb-1 text-sm font-medium tracking-wide text-gray-600">
           Oscilograma
         </p>
-        <div ref={waveformContainerRef} className="overflow-hidden rounded-md bg-black" />
+        <div
+          ref={waveformContainerRef}
+          className="overflow-hidden rounded-md bg-black"
+          style={grayFilterStyle}
+        />
       </div>
       <div>
         <p className="mb-1 text-sm font-medium tracking-wide text-gray-600">
@@ -205,7 +214,7 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
         </p>
         <div
           className="relative overflow-hidden rounded-md bg-black"
-          style={{minHeight: height}}
+          style={{minHeight: height, ...grayFilterStyle}}
         >
           <div ref={spectrogramContainerRef} />
           <div
