@@ -800,7 +800,7 @@ export default function ColeccionDetailClient({
           </div>
         );
 
-        // Agrupa muestras por nombre de subtipo (catalogo_awe.nombre) → conteo
+        // Agrupa por catalogo_awe.nombre → conteo
         const groupBySubtipo = (
           items: {catalogo_awe: {nombre: string} | null}[],
         ): {nombre: string; n: number}[] => {
@@ -812,33 +812,47 @@ export default function ColeccionDetailClient({
             map.set(k, (map.get(k) ?? 0) + 1);
           });
 
-          const PRIORIDAD = ["Músculo e hígado"];
-
-          return Array.from(map.entries())
-            .map(([nombre, n]) => ({nombre, n}))
-            .sort((a, b) => {
-              const ap = PRIORIDAD.indexOf(a.nombre);
-              const bp = PRIORIDAD.indexOf(b.nombre);
-
-              if (ap !== -1 || bp !== -1) {
-                if (ap === -1) return 1;
-                if (bp === -1) return -1;
-
-                return ap - bp;
-              }
-
-              return b.n - a.n;
-            });
+          return Array.from(map.entries()).map(([nombre, n]) => ({nombre, n}));
         };
 
+        const ORDEN_SUBTIPOS = [
+          "Músculo e hígado",
+          "Músculo",
+          "Hígado",
+          "Piel",
+          "Piel exudado",
+          "Piel liofilizado",
+          "Intestino",
+          "Estómago",
+          "Riñón",
+          "Corazón",
+          "Ojo",
+          "Cerebro",
+          "Pata",
+          "Dedo",
+          "Heces",
+          "Sangre",
+          "Esperma",
+          "Cola de renacuajo",
+          "Otros",
+        ];
+
+        const todos = [
+          ...groupBySubtipo(tejidos),
+          ...(espermas.length > 0 ? [{nombre: "Esperma", n: espermas.length}] : []),
+          ...(heces.length > 0 ? [{nombre: "Heces", n: heces.length}] : []),
+          ...groupBySubtipo(extractosPiel),
+        ];
+
+        const enOrden = ORDEN_SUBTIPOS.map((nombre) => todos.find((s) => s.nombre === nombre))
+          .filter((s): s is {nombre: string; n: number} => s != null);
+        const fueraDeOrden = todos.filter((s) => !ORDEN_SUBTIPOS.includes(s.nombre));
+        const subtiposCombinados = [...enOrden, ...fueraDeOrden];
         const muestras: {label: string; total: number; subtipos: {nombre: string; n: number}[]}[] = [
-          {label: "Tejido", total: tejidos.length, subtipos: groupBySubtipo(tejidos)},
-          {label: "Esperma", total: espermas.length, subtipos: groupBySubtipo(espermas)},
-          {label: "Heces", total: heces.length, subtipos: groupBySubtipo(heces)},
           {
-            label: "Extracto piel",
-            total: extractosPiel.length,
-            subtipos: groupBySubtipo(extractosPiel),
+            label: "Muestras biológicas",
+            total: tejidos.length + espermas.length + heces.length + extractosPiel.length,
+            subtipos: subtiposCombinados,
           },
         ];
 
@@ -863,24 +877,13 @@ export default function ColeccionDetailClient({
                       </span>
                       {tieneMuestras && (
                         <>
-                          <Check
-                            className="h-4 w-4"
-                            strokeWidth={2.5}
-                            style={{color: "#2d6e2d"}}
-                          />
-                          <span className="text-[11px] font-medium text-gray-500">
-                            ({m.total})
-                          </span>
                           {m.subtipos.map((s, i) => (
                             <span
                               key={s.nombre}
                               className="inline-flex items-baseline gap-x-1.5 text-[12px] text-gray-700"
                             >
                               {i > 0 && <span style={{color: "#f07304"}}>|</span>}
-                              <span>
-                                {s.nombre}{" "}
-                                <span className="text-[11px] text-gray-500">({s.n})</span>
-                              </span>
+                              <span>{s.nombre}</span>
                             </span>
                           ))}
                         </>

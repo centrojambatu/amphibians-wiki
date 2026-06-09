@@ -71,15 +71,11 @@ interface MuestraBase {
 export interface Esperma extends MuestraBase {
   id_esperma: number;
   codesperma: string | null;
-  tipo_esperma_id: number | null;
-  catalogo_awe: {nombre: string} | null;
 }
 
 export interface Heces extends MuestraBase {
   id_heces: number;
   codheces: string | null;
-  tipo_heces_id: number | null;
-  catalogo_awe: {nombre: string} | null;
 }
 
 export interface ExtractoPiel extends MuestraBase {
@@ -434,18 +430,19 @@ type MuestraTabla = "esperma" | "heces" | "extracto_piel";
 async function fetchMuestrasByColeccion<T>(
   tabla: MuestraTabla,
   pkColumn: string,
-  tipoColumn: string,
   coleccionId: number,
+  tipoColumn?: string,
 ): Promise<T[]> {
   const supabaseClient = createServiceClient();
   const PAGE_SIZE = 1000;
+  const selectExpr = tipoColumn ? `*, catalogo_awe:${tipoColumn}(nombre)` : "*";
   let all: T[] = [];
   let offset = 0;
 
   while (true) {
     const {data, error} = await supabaseClient
       .from(tabla)
-      .select(`*, catalogo_awe:${tipoColumn}(nombre)`)
+      .select(selectExpr)
       .eq("coleccion_id", coleccionId)
       .order("fecha", {ascending: false, nullsFirst: false})
       .order(pkColumn, {ascending: true})
@@ -467,19 +464,19 @@ async function fetchMuestrasByColeccion<T>(
 }
 
 export async function getEspermasByColeccion(coleccionId: number): Promise<Esperma[]> {
-  return fetchMuestrasByColeccion<Esperma>("esperma", "id_esperma", "tipo_esperma_id", coleccionId);
+  return fetchMuestrasByColeccion<Esperma>("esperma", "id_esperma", coleccionId);
 }
 
 export async function getHecesByColeccion(coleccionId: number): Promise<Heces[]> {
-  return fetchMuestrasByColeccion<Heces>("heces", "id_heces", "tipo_heces_id", coleccionId);
+  return fetchMuestrasByColeccion<Heces>("heces", "id_heces", coleccionId);
 }
 
 export async function getExtractosPielByColeccion(coleccionId: number): Promise<ExtractoPiel[]> {
   return fetchMuestrasByColeccion<ExtractoPiel>(
     "extracto_piel",
     "id_extracto_piel",
-    "tipo_extracto_piel_id",
     coleccionId,
+    "tipo_extracto_piel_id",
   );
 }
 

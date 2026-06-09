@@ -6655,7 +6655,6 @@ export type Database = {
           piso: string | null
           preservacion: string | null
           rack: string | null
-          tipo_esperma_id: number | null
           ubicacion: string | null
           updated_at: string | null
         }
@@ -6673,7 +6672,6 @@ export type Database = {
           piso?: string | null
           preservacion?: string | null
           rack?: string | null
-          tipo_esperma_id?: number | null
           ubicacion?: string | null
           updated_at?: string | null
         }
@@ -6691,7 +6689,6 @@ export type Database = {
           piso?: string | null
           preservacion?: string | null
           rack?: string | null
-          tipo_esperma_id?: number | null
           ubicacion?: string | null
           updated_at?: string | null
         }
@@ -6710,13 +6707,6 @@ export type Database = {
             referencedRelation: "permisocontrato"
             referencedColumns: ["id_permisocontrato"]
           },
-          {
-            foreignKeyName: "esperma_tipo_esperma_id_fkey"
-            columns: ["tipo_esperma_id"]
-            isOneToOne: false
-            referencedRelation: "catalogo_awe"
-            referencedColumns: ["id_catalogo_awe"]
-          },
         ]
       }
       heces: {
@@ -6734,7 +6724,6 @@ export type Database = {
           piso: string | null
           preservacion: string | null
           rack: string | null
-          tipo_heces_id: number | null
           ubicacion: string | null
           updated_at: string | null
         }
@@ -6752,7 +6741,6 @@ export type Database = {
           piso?: string | null
           preservacion?: string | null
           rack?: string | null
-          tipo_heces_id?: number | null
           ubicacion?: string | null
           updated_at?: string | null
         }
@@ -6770,7 +6758,6 @@ export type Database = {
           piso?: string | null
           preservacion?: string | null
           rack?: string | null
-          tipo_heces_id?: number | null
           ubicacion?: string | null
           updated_at?: string | null
         }
@@ -6788,13 +6775,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "permisocontrato"
             referencedColumns: ["id_permisocontrato"]
-          },
-          {
-            foreignKeyName: "heces_tipo_heces_id_fkey"
-            columns: ["tipo_heces_id"]
-            isOneToOne: false
-            referencedRelation: "catalogo_awe"
-            referencedColumns: ["id_catalogo_awe"]
           },
         ]
       }
