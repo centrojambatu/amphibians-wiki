@@ -938,76 +938,92 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </CardContent>
               </Card>
             )}
-            {/* Etimología */}
-            <Card className="">
-              <CardHeader>
-                <CardTitle className="text-base">Etimología</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.etimologia ? (
-                  <div
-                    suppressHydrationWarning dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.etimologia),
-                    }}
-                    className="text-muted-foreground text-sm"
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
-            {/* Nombres Comunes */}
-            {fichaEspecie.nombresComunes && (() => {
+            {/* Nombres (etimología, estándar y vernáculos) */}
+            {(() => {
               const nc = fichaEspecie.nombresComunes;
-              const idiomas: {key: string; label: string; flag: string}[] = [
-                {key: "nombre_comun_espanol", label: "Español", flag: "🇪🇸"},
-                {key: "nombre_comun_ingles", label: "Inglés", flag: "🇬🇧"},
-                {key: "nombre_comun_aleman", label: "Alemán", flag: "🇩🇪"},
-                {key: "nombre_comun_frances", label: "Francés", flag: "🇫🇷"},
-                {key: "nombre_comun_portugues", label: "Portugués", flag: "🇧🇷"},
-                {key: "nombre_comun_italiano", label: "Italiano", flag: "🇮🇹"},
-                {key: "nombre_comun_holandes", label: "Holandés", flag: "🇳🇱"},
-                {key: "nombre_comun_chino", label: "Chino", flag: "🇨🇳"},
-                {key: "nombre_comun_japones", label: "Japonés", flag: "🇯🇵"},
-                {key: "nombre_comun_ruso", label: "Ruso", flag: "🇷🇺"},
-                {key: "nombre_comun_arabe", label: "Árabe", flag: "🇸🇦"},
-                {key: "nombre_comun_hindu", label: "Hindi", flag: "🇮🇳"},
+              const idiomas: {key: string; label: string}[] = [
+                {key: "nombre_comun_espanol", label: "Español"},
+                {key: "nombre_comun_ingles", label: "Inglés"},
+                {key: "nombre_comun_aleman", label: "Alemán"},
+                {key: "nombre_comun_frances", label: "Francés"},
+                {key: "nombre_comun_portugues", label: "Portugués"},
+                {key: "nombre_comun_italiano", label: "Italiano"},
+                {key: "nombre_comun_holandes", label: "Holandés"},
+                {key: "nombre_comun_chino", label: "Chino"},
+                {key: "nombre_comun_japones", label: "Japonés"},
+                {key: "nombre_comun_ruso", label: "Ruso"},
+                {key: "nombre_comun_arabe", label: "Árabe"},
+                {key: "nombre_comun_hindu", label: "Hindi"},
               ];
-              const conNombre = idiomas.filter((i) => nc[i.key]);
-              if (conNombre.length === 0) return null;
+              const conNombre = nc ? idiomas.filter((i) => nc[i.key]) : [];
+              const hasEtimologia = Boolean(fichaEspecie.etimologia);
+              const hasNombresEstandar = conNombre.length > 0;
+              const hasOtrosNombres =
+                Array.isArray(fichaEspecie.otrosNombres) &&
+                fichaEspecie.otrosNombres.length > 0;
+
+              if (!hasEtimologia && !hasNombresEstandar && !hasOtrosNombres) {
+                return null;
+              }
+
+              const sectionDivider = "mt-4 border-t border-gray-100 pt-3";
 
               return (
                 <Card className="">
-                  <CardHeader>
-                    <CardTitle className="text-base">Nombres estándar</CardTitle>
-                  </CardHeader>
                   <CardContent>
-                    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
-                      {conNombre.map((idioma, i) => (
-                        <span
-                          key={idioma.key}
-                          className="inline-flex items-baseline gap-x-2"
-                        >
-                          {i > 0 && <span style={{color: "#f07304"}}>|</span>}
-                          <span className="inline-flex items-baseline gap-x-1">
-                            <span className="text-xs text-gray-500">{idioma.label}</span>
-                            <span className="font-medium text-gray-900">{nc[idioma.key]}</span>
-                          </span>
-                        </span>
-                      ))}
-                    </p>
+                    {hasEtimologia && (
+                      <div>
+                        <p className="mb-2 text-base font-semibold text-gray-900">
+                          Etimología
+                        </p>
+                        <div
+                          suppressHydrationWarning
+                          dangerouslySetInnerHTML={{
+                            __html: procesarHTML(fichaEspecie.etimologia),
+                          }}
+                          className="text-muted-foreground text-sm"
+                        />
+                      </div>
+                    )}
 
-                    <div className="mt-4 border-t border-gray-100 pt-3">
-                      <p className="mb-2 text-[11px] font-semibold tracking-widest text-gray-500 uppercase">
-                        Otros nombres
-                      </p>
-                      {Array.isArray(fichaEspecie.otrosNombres) &&
-                      fichaEspecie.otrosNombres.length > 0 ? (
+                    {hasNombresEstandar && (
+                      <div className={hasEtimologia ? sectionDivider : ""}>
+                        <p className="mb-2 text-base font-semibold text-gray-900">
+                          Nombres estándar
+                        </p>
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                          {conNombre.map((idioma, i) => (
+                            <span
+                              key={idioma.key}
+                              className="inline-flex items-baseline gap-x-2"
+                            >
+                              {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+                              <span className="inline-flex items-baseline gap-x-1">
+                                <span className="text-xs text-gray-500">{idioma.label}</span>
+                                <span className="font-medium text-gray-900">
+                                  {nc[idioma.key]}
+                                </span>
+                              </span>
+                            </span>
+                          ))}
+                        </p>
+                      </div>
+                    )}
+
+                    {hasOtrosNombres && (
+                      <div
+                        className={
+                          hasEtimologia || hasNombresEstandar ? sectionDivider : ""
+                        }
+                      >
+                        <p className="mb-2 text-base font-semibold text-gray-900">
+                          Otros nombres
+                        </p>
                         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
                           {fichaEspecie.otrosNombres.map((on: any, i: number) => {
                             const idioma: string | undefined = on.idioma?.nombre;
                             const etnia: string | undefined = on.etnia?.nombre;
-                            const meta = [idioma, etnia].filter(Boolean).join(" · ");
+                            const label = etnia || idioma;
                             const pub = Array.isArray(on.publicacion)
                               ? on.publicacion[0]
                               : on.publicacion;
@@ -1021,34 +1037,31 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                               >
                                 {i > 0 && <span style={{color: "#f07304"}}>|</span>}
                                 <span className="inline-flex items-baseline gap-x-1">
-                                  {meta && (
-                                    <span className="text-xs text-gray-500">{meta}</span>
+                                  {label && (
+                                    <span className="text-xs text-gray-500">{label}</span>
                                   )}
                                   <span className="font-medium text-gray-900">{on.nombre}</span>
-                                  {citaCorta && (
-                                    publicacionId != null ? (
+                                  {citaCorta &&
+                                    (publicacionId != null ? (
                                       <Link
-                                        className="text-[11px] italic hover:underline"
+                                        className="text-[11px] hover:underline"
                                         href={`/sapoteca?publicacion_id=${String(publicacionId)}`}
                                         style={{color: "#f07304"}}
                                       >
                                         · {citaCorta}
                                       </Link>
                                     ) : (
-                                      <span className="text-[11px] italic text-gray-500">
+                                      <span className="text-[11px] text-gray-500">
                                         · {citaCorta}
                                       </span>
-                                    )
-                                  )}
+                                    ))}
                                 </span>
                               </span>
                             );
                           })}
                         </p>
-                      ) : (
-                        <p className="text-muted-foreground text-sm italic">No disponible</p>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
