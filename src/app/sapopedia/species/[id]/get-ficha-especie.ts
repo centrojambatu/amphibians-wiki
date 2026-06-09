@@ -98,6 +98,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     {data: lineage, error: errorLineage},
     colecciones,
     {data: nombresComunes, error: errorNombresComunes},
+    {data: otrosNombres, error: errorOtrosNombres},
     {count: countColeccionesExternas},
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
@@ -129,6 +130,11 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("nombre_comun_espanol, nombre_comun_ingles, nombre_comun_aleman, nombre_comun_frances, nombre_comun_portugues, nombre_comun_chino, nombre_comun_italiano, nombre_comun_hindu, nombre_comun_arabe, nombre_comun_ruso, nombre_comun_japones, nombre_comun_holandes")
       .eq("id_taxon", taxonId)
       .single(),
+    supabaseClient
+      .from("nombre_comun")
+      .select("nombre, idioma:catalogo_awe!nombre_comun_catalogo_awe_idioma_id_fkey(nombre), etnia:catalogo_awe!nombre_comun_catalogo_awe_etnia_id_fkey(nombre), publicacion:publicacion_id(id_publicacion, cita_corta)")
+      .eq("taxon_id", taxonId)
+      .eq("principal", false),
     supabaseClient
       .from("coleccion_externa")
       .select("id", {count: "exact", head: true})
@@ -474,6 +480,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     colecciones: Array.isArray(colecciones) ? colecciones : [],
     totalColeccionesExternas: countColeccionesExternas ?? 0,
     nombresComunes: nombresComunes ?? null,
+    otrosNombres: Array.isArray(otrosNombres) ? otrosNombres : [],
   };
 
   return result;

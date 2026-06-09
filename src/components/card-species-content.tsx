@@ -1,9 +1,15 @@
 "use client";
 
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
 import Link from "next/link";
 import {Camera, Download, MapPin, Video, Volume2} from "lucide-react";
 import jsPDF from "jspdf";
+import Lightbox, {type Slide} from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 
 import {
   processHTMLLinks,
@@ -95,6 +101,35 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     () => fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones || [],
     [fichaEspecie.publicacionesOrdenadas, fichaEspecie.publicaciones],
   );
+
+  // Lightbox para la foto destacada de la especie
+  const [fotoDestacadaOpen, setFotoDestacadaOpen] = useState(false);
+  const nombreCientificoMain = useMemo(() => {
+    const t = (fichaEspecie as any).taxones?.[0];
+
+    if (!t) return null;
+    const padre = t.taxonPadre?.taxon as string | undefined;
+    const propio = t.taxon as string | undefined;
+
+    return [padre, propio].filter(Boolean).join(" ").trim() || null;
+  }, [fichaEspecie]);
+  const fotoDestacadaSlides: Slide[] = useMemo(() => {
+    if (!fichaEspecie.fotografia_url) return [];
+    const autor = (fichaEspecie as any).autor_foto as string | null | undefined;
+
+    return [
+      {
+        src: fichaEspecie.fotografia_url,
+        alt: nombreCientificoMain || "",
+        title: nombreCientificoMain ? (
+          <span style={{paddingLeft: 56, display: "inline-block"}}>
+            <i style={{fontStyle: "italic"}}>{nombreCientificoMain}</i>
+          </span>
+        ) : undefined,
+        description: autor ? <span style={{display: "block"}}>{autor}</span> : undefined,
+      } as Slide,
+    ];
+  }, [fichaEspecie, nombreCientificoMain]);
 
   // Función helper para procesar HTML de forma consistente
   const procesarHTML = useMemo(
@@ -837,21 +872,20 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             {/* Secciones de contenido */}
             {/* Fotografía de la especie */}
             {fichaEspecie.fotografia_url && (
-              <Card className="h-[500px]">
-                <CardHeader className="py-3">
-                  <CardTitle className="text-base">Fotografía</CardTitle>
-                </CardHeader>
-                <CardContent className="h-[calc(100%-60px)] p-2">
-                  <div
-                    className="group flex h-full w-full items-center justify-center overflow-hidden"
-                    style={{backgroundColor: "#ffffff"}}
+              <Card className="overflow-hidden py-0">
+                <CardContent className="p-0">
+                  <button
+                    aria-label="Ver foto en grande"
+                    className="group relative block aspect-[3/2] w-full cursor-zoom-in overflow-hidden bg-white"
+                    type="button"
+                    onClick={() => setFotoDestacadaOpen(true)}
                   >
                     <img
-                      alt="Fotografía de la especie"
-                      className="max-h-full max-w-full cursor-pointer object-contain grayscale transition-all duration-[800ms] ease-in-out hover:grayscale-0"
+                      alt=""
+                      className="h-full w-full object-cover grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
                       src={fichaEspecie.fotografia_url}
                     />
-                  </div>
+                  </button>
                 </CardContent>
               </Card>
             )}
@@ -871,18 +905,39 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 ) : (
                   <p className="text-muted-foreground text-sm italic">No disponible</p>
                 )}
-                {fichaEspecie.sinonimia && (
-                  <div className="mt-4">
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.sinonimia),
-                      }}
-                      className="text-muted-foreground text-xs"
-                    />
-                  </div>
-                )}
               </CardContent>
             </Card>
+            {/* Material tipo (sinonimia) */}
+            {fichaEspecie.sinonimia && (
+              <Card className="">
+                <CardHeader>
+                  <CardTitle className="flex items-baseline gap-2 text-base">
+                    <span>Material tipo</span>
+                    {fichaEspecie.asw && (
+                      <>
+                        <span style={{color: "#f07304"}}>|</span>
+                        <a
+                          className="text-base font-medium hover:underline"
+                          href={fichaEspecie.asw}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          Sinonimia
+                        </a>
+                      </>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.sinonimia),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
+                </CardContent>
+              </Card>
+            )}
             {/* Etimología */}
             <Card className="">
               <CardHeader>
@@ -906,17 +961,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               const nc = fichaEspecie.nombresComunes;
               const idiomas: {key: string; label: string; flag: string}[] = [
                 {key: "nombre_comun_espanol", label: "Español", flag: "🇪🇸"},
-                {key: "nombre_comun_ingles", label: "English", flag: "🇬🇧"},
-                {key: "nombre_comun_aleman", label: "Deutsch", flag: "🇩🇪"},
-                {key: "nombre_comun_frances", label: "Français", flag: "🇫🇷"},
-                {key: "nombre_comun_portugues", label: "Português", flag: "🇧🇷"},
+                {key: "nombre_comun_ingles", label: "Inglés", flag: "🇬🇧"},
+                {key: "nombre_comun_aleman", label: "Alemán", flag: "🇩🇪"},
+                {key: "nombre_comun_frances", label: "Francés", flag: "🇫🇷"},
+                {key: "nombre_comun_portugues", label: "Portugués", flag: "🇧🇷"},
                 {key: "nombre_comun_italiano", label: "Italiano", flag: "🇮🇹"},
-                {key: "nombre_comun_holandes", label: "Nederlands", flag: "🇳🇱"},
-                {key: "nombre_comun_chino", label: "中文", flag: "🇨🇳"},
-                {key: "nombre_comun_japones", label: "日本語", flag: "🇯🇵"},
-                {key: "nombre_comun_ruso", label: "Русский", flag: "🇷🇺"},
-                {key: "nombre_comun_arabe", label: "العربية", flag: "🇸🇦"},
-                {key: "nombre_comun_hindu", label: "हिन्दी", flag: "🇮🇳"},
+                {key: "nombre_comun_holandes", label: "Holandés", flag: "🇳🇱"},
+                {key: "nombre_comun_chino", label: "Chino", flag: "🇨🇳"},
+                {key: "nombre_comun_japones", label: "Japonés", flag: "🇯🇵"},
+                {key: "nombre_comun_ruso", label: "Ruso", flag: "🇷🇺"},
+                {key: "nombre_comun_arabe", label: "Árabe", flag: "🇸🇦"},
+                {key: "nombre_comun_hindu", label: "Hindi", flag: "🇮🇳"},
               ];
               const conNombre = idiomas.filter((i) => nc[i.key]);
               if (conNombre.length === 0) return null;
@@ -924,19 +979,75 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               return (
                 <Card className="">
                   <CardHeader>
-                    <CardTitle className="text-base">Nombres Comunes</CardTitle>
+                    <CardTitle className="text-base">Nombres estándar</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {conNombre.map((idioma) => (
-                        <div key={idioma.key} className="flex items-center gap-2 rounded-md border border-gray-100 px-3 py-2">
-                          <span className="text-lg">{idioma.flag}</span>
-                          <div className="min-w-0">
-                            <p className="text-xs text-gray-500">{idioma.label}</p>
-                            <p className="truncate text-sm font-medium text-gray-900">{nc[idioma.key]}</p>
-                          </div>
-                        </div>
+                    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                      {conNombre.map((idioma, i) => (
+                        <span
+                          key={idioma.key}
+                          className="inline-flex items-baseline gap-x-2"
+                        >
+                          {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+                          <span className="inline-flex items-baseline gap-x-1">
+                            <span className="text-xs text-gray-500">{idioma.label}</span>
+                            <span className="font-medium text-gray-900">{nc[idioma.key]}</span>
+                          </span>
+                        </span>
                       ))}
+                    </p>
+
+                    <div className="mt-4 border-t border-gray-100 pt-3">
+                      <p className="mb-2 text-[11px] font-semibold tracking-widest text-gray-500 uppercase">
+                        Otros nombres
+                      </p>
+                      {Array.isArray(fichaEspecie.otrosNombres) &&
+                      fichaEspecie.otrosNombres.length > 0 ? (
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                          {fichaEspecie.otrosNombres.map((on: any, i: number) => {
+                            const idioma: string | undefined = on.idioma?.nombre;
+                            const etnia: string | undefined = on.etnia?.nombre;
+                            const meta = [idioma, etnia].filter(Boolean).join(" · ");
+                            const pub = Array.isArray(on.publicacion)
+                              ? on.publicacion[0]
+                              : on.publicacion;
+                            const citaCorta: string | undefined = pub?.cita_corta;
+                            const publicacionId: number | undefined = pub?.id_publicacion;
+
+                            return (
+                              <span
+                                key={`${String(on.nombre)}-${String(i)}`}
+                                className="inline-flex items-baseline gap-x-2"
+                              >
+                                {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+                                <span className="inline-flex items-baseline gap-x-1">
+                                  {meta && (
+                                    <span className="text-xs text-gray-500">{meta}</span>
+                                  )}
+                                  <span className="font-medium text-gray-900">{on.nombre}</span>
+                                  {citaCorta && (
+                                    publicacionId != null ? (
+                                      <Link
+                                        className="text-[11px] italic hover:underline"
+                                        href={`/sapoteca?publicacion_id=${String(publicacionId)}`}
+                                        style={{color: "#f07304"}}
+                                      >
+                                        · {citaCorta}
+                                      </Link>
+                                    ) : (
+                                      <span className="text-[11px] italic text-gray-500">
+                                        · {citaCorta}
+                                      </span>
+                                    )
+                                  )}
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground text-sm italic">No disponible</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -2426,6 +2537,16 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           </Card>
         </div>
       </div>
+
+      <Lightbox
+        captions={{descriptionTextAlign: "center", descriptionMaxLines: 4}}
+        close={() => setFotoDestacadaOpen(false)}
+        controller={{closeOnBackdropClick: true}}
+        open={fotoDestacadaOpen}
+        plugins={[Captions, Fullscreen, Zoom]}
+        slides={fotoDestacadaSlides}
+        zoom={{maxZoomPixelRatio: 4, scrollToZoom: true}}
+      />
     </CardContent>
   );
 };

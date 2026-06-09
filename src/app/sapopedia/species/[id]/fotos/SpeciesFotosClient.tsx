@@ -151,7 +151,7 @@ export default function SpeciesFotosClient({
     () =>
       allItems.map((foto) => ({
         src: foto.enlace || "",
-        alt: nombreCientifico || foto.nombre || "Fotografía",
+        alt: nombreCientifico || foto.nombre || "",
         title: (
           <span style={{paddingLeft: 56, display: "inline-block"}}>
             <i style={{fontStyle: "italic"}}>{nombreCientifico}</i>
@@ -266,7 +266,7 @@ export default function SpeciesFotosClient({
                 src: f.enlace || "",
                 width: d?.w ?? 1200,
                 height: d?.h ?? 1200,
-                alt: f.nombre || "Fotografía",
+                alt: f.nombre || "",
                 item: f,
               };
             });
