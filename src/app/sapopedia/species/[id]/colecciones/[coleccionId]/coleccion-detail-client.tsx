@@ -879,7 +879,7 @@ export default function ColeccionDetailClient({
         ];
         const muestras: {label: string; total: number; subtipos: {nombre: string; n: number}[]}[] = [
           {
-            label: "Muestras biológicas",
+            label: "Muestras",
             total:
               tejidos.length +
               espermas.length +
