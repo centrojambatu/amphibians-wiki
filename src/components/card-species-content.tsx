@@ -1045,7 +1045,18 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                     (publicacionId != null ? (
                                       <Link
                                         className="text-[11px] hover:underline"
-                                        href={`/sapoteca?publicacion_id=${String(publicacionId)}`}
+                                        href={(() => {
+                                          const titulo = (pub?.titulo as string) || citaCorta;
+                                          const back = nombreCientificoMain
+                                            ? `/sapopedia/species/${encodeURIComponent(
+                                                nombreCientificoMain.replace(/\s+/g, "-"),
+                                              )}`
+                                            : null;
+
+                                          return `/sapoteca?titulo=${encodeURIComponent(titulo)}${
+                                            back ? `&back=${encodeURIComponent(back)}` : ""
+                                          }`;
+                                        })()}
                                         style={{color: "#f07304"}}
                                       >
                                         · {citaCorta}

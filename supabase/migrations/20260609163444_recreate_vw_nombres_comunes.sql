@@ -8,7 +8,7 @@ CREATE OR REPLACE VIEW public.vw_nombres_comunes AS
 SELECT
   vfc.id_ficha_especie,
   vfc.especie_taxon_id AS id_taxon,
-  vfc.especie,
+  vfc.especie::character varying(100) AS especie,
   vfc.nombre_cientifico,
   MAX(CASE WHEN nc.catalogo_awe_idioma_id = 1 THEN nc.nombre END) AS nombre_comun_espanol,
   MAX(CASE WHEN nc.catalogo_awe_idioma_id = 8 THEN nc.nombre END) AS nombre_comun_ingles,
