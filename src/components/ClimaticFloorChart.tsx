@@ -4,6 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {RANGE_DASH} from "@/lib/format-range";
 
 interface ClimaticFloorChartProps {
   readonly altitudinalRange: {
@@ -310,7 +311,7 @@ export default function ClimaticFloorChart({
                 width: `${widthPercentage}%`,
                 borderRight: isLast ? "none" : "1px solid white",
               }}
-              title={`${floor.name} (${floor.min}-${floor.max}m) - ${floor.region}`}
+              title={`${floor.name} (${floor.min}${RANGE_DASH}${floor.max} m) - ${floor.region}`}
             />
           );
         })}

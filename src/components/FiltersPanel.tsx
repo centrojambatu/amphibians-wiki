@@ -23,6 +23,7 @@ import {
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 import {FilterCatalogs} from "@/app/sapopedia/get-filter-catalogs";
+import {RANGE_DASH} from "@/lib/format-range";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
 
 export interface FiltersState {
@@ -509,7 +510,7 @@ export default function FiltersPanel({
                     {(filters.rangoAltitudinal.min !== 0 ||
                       filters.rangoAltitudinal.max !== 4800) && (
                       <span className="text-xs font-normal text-gray-500">
-                        {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                        {filters.rangoAltitudinal.min}m{RANGE_DASH}{filters.rangoAltitudinal.max}m
                       </span>
                     )}
                     {filters.distribucion.length > 0 && (
@@ -606,7 +607,7 @@ export default function FiltersPanel({
                   {(filters.areaDistribucion.min !== 1 ||
                     filters.areaDistribucion.max !== 100000) && (
                     <span className="mt-1 text-xs font-normal text-gray-500">
-                      {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                      {filters.areaDistribucion.min} km²{RANGE_DASH}{filters.areaDistribucion.max} km²
                     </span>
                   )}
                 </div>
@@ -945,7 +946,7 @@ export default function FiltersPanel({
                   {(filters.rangoAltitudinal.min !== 0 ||
                     filters.rangoAltitudinal.max !== 4800) && (
                     <span className="text-xs font-normal text-gray-500">
-                      {filters.rangoAltitudinal.min}m - {filters.rangoAltitudinal.max}m
+                      {filters.rangoAltitudinal.min}m{RANGE_DASH}{filters.rangoAltitudinal.max}m
                     </span>
                   )}
                   {filters.distribucion.length > 0 && (
@@ -1048,7 +1049,7 @@ export default function FiltersPanel({
                 {(filters.areaDistribucion.min !== 1 ||
                   filters.areaDistribucion.max !== 100000) && (
                   <span className="mt-1 text-xs font-normal text-gray-500">
-                    {filters.areaDistribucion.min} km² - {filters.areaDistribucion.max} km²
+                    {filters.areaDistribucion.min} km²{RANGE_DASH}{filters.areaDistribucion.max} km²
                   </span>
                 )}
               </div>
@@ -1212,7 +1213,7 @@ export default function FiltersPanel({
                     </span>
                     {(filters.pluviocidad.min !== 640 || filters.pluviocidad.max !== 4000) && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {filters.pluviocidad.min} - {filters.pluviocidad.max} mm/año
+                        {filters.pluviocidad.min}{RANGE_DASH}{filters.pluviocidad.max} mm/año
                       </span>
                     )}
                   </div>
@@ -1247,7 +1248,7 @@ export default function FiltersPanel({
                     </span>
                     {(filters.temperatura.min !== 5 || filters.temperatura.max !== 25) && (
                       <span className="mt-1 text-xs font-normal text-gray-500">
-                        {filters.temperatura.min} - {filters.temperatura.max} °C
+                        {filters.temperatura.min}{RANGE_DASH}{filters.temperatura.max} °C
                       </span>
                     )}
                   </div>

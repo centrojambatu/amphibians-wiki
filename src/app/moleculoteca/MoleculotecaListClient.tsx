@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {Button} from "@/components/ui/button";
+import {RANGE_DASH} from "@/lib/format-range";
 import {
   Tooltip,
   TooltipContent,
@@ -568,7 +569,7 @@ export default function MoleculotecaListClient() {
 
               <div className="mt-6 flex items-center justify-center gap-4">
                 <p className="text-xs text-gray-400">
-                  {`Mostrando 1 - ${taxa.length.toLocaleString()} de ${total.toLocaleString()} ${
+                  {`Mostrando 1${RANGE_DASH}${taxa.length.toLocaleString()} de ${total.toLocaleString()} ${
                     total === 1 ? "especie" : "especies"
                   }`}
                 </p>

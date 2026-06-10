@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {RANGE_DASH} from "@/lib/format-range";
 import {Button} from "@/components/ui/button";
 import ColeccionCard from "@/components/ColeccionCard";
 
@@ -222,7 +223,7 @@ export default function MoleculotecaTaxonClient({taxonId}: {taxonId: number}) {
 
               <div className="mt-6 flex items-center justify-center gap-4">
                 <p className="text-xs text-gray-400">
-                  {`Mostrando 1 - ${muestras.length.toLocaleString()} de ${total.toLocaleString()} ${
+                  {`Mostrando 1${RANGE_DASH}${muestras.length.toLocaleString()} de ${total.toLocaleString()} ${
                     total === 1 ? "registro" : "registros"
                   }`}
                 </p>

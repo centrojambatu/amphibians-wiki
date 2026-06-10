@@ -6,6 +6,7 @@ import {useState, useEffect, useTransition} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Search, CornerDownLeft, RotateCcw} from "lucide-react";
 
+import {RANGE_DASH} from "@/lib/format-range";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Slider} from "@/components/ui/slider";
@@ -372,7 +373,7 @@ export default function SapotecaFiltersPanel({
                     <span className="text-muted-foreground">Año(s):</span>{" "}
                     {filtros.años.length <= 3
                       ? filtros.años.join(", ")
-                      : `${String(filtros.años[0])} - ${String(filtros.años[filtros.años.length - 1])}`}
+                      : `${String(filtros.años[0])}${RANGE_DASH}${String(filtros.años[filtros.años.length - 1])}`}
                   </li>
                 )}
                 {filtros.autor && (

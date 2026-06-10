@@ -5,6 +5,7 @@ import {useSearchParams} from "next/navigation";
 import {useInfiniteQuery} from "@tanstack/react-query";
 
 import ReferenciaCard from "@/components/referencia-card";
+import {RANGE_DASH} from "@/lib/format-range";
 import type {
   PublicacionSapoteca,
   PublicacionesPaginadas,
@@ -106,7 +107,7 @@ export default function SapotecaPublicacionesList() {
 
       <div className="mt-6 flex items-center justify-center gap-4">
         <p className="text-xs text-gray-400">
-          {`Mostrando 1 - ${publicaciones.length.toLocaleString()} de ${total.toLocaleString()} ${
+          {`Mostrando 1${RANGE_DASH}${publicaciones.length.toLocaleString()} de ${total.toLocaleString()} ${
             total === 1 ? "referencia" : "referencias"
           }`}
         </p>

@@ -22,6 +22,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import ColeccionCard, {type ColeccionCardData} from "@/components/ColeccionCard";
+import {RANGE_DASH} from "@/lib/format-range";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import YearRangeFilter from "@/components/YearRangeFilter";
 import ClimaticFloorChartFilter from "@/components/ClimaticFloorChartFilter";
@@ -907,7 +908,7 @@ export default function ColeccionesPage() {
 
                   <div className="mt-6 flex items-center justify-center gap-4">
                     <p className="text-xs text-gray-400">
-                      {`Mostrando 1 - ${colecciones.length.toLocaleString()} de ${total.toLocaleString()} ${
+                      {`Mostrando 1${RANGE_DASH}${colecciones.length.toLocaleString()} de ${total.toLocaleString()} ${
                         total === 1 ? "registro" : "registros"
                       }`}
                     </p>

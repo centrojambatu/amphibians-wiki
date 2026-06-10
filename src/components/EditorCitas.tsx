@@ -8,6 +8,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 
 import {Button} from "@/components/ui/button";
+import {formatNumericRange} from "@/lib/format-range";
 import {Input} from "@/components/ui/input";
 import {
   Dialog,
@@ -381,10 +382,11 @@ export default function EditorCitas({
         valor: null,
       };
 
-      const minStr = valores.min !== null ? String(valores.min) : "No definido";
-      const maxStr = valores.max !== null ? String(valores.max) : "No definido";
+      const rango =
+        formatNumericRange(valores.min, valores.max) ??
+        `Mínimo: ${valores.min !== null ? String(valores.min) : "No definido"} | Máximo: ${valores.max !== null ? String(valores.max) : "No definido"}`;
 
-      setVistaPrevia(`Mínimo: ${minStr} | Máximo: ${maxStr}`);
+      setVistaPrevia(rango);
       setMostrarVistaPrevia(true);
 
       return;
