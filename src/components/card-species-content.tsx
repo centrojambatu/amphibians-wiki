@@ -457,9 +457,15 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         {title: "Etimología", content: fichaEspecie.etimologia},
         {title: "Taxonomía", content: fichaEspecie.taxonomia},
         {title: "Identificación", content: fichaEspecie.identificacion},
-        {title: "Descripción", content: fichaEspecie.descripcion},
-        {title: "Diagnosis", content: fichaEspecie.diagnosis},
-        {title: "Morfometría", content: fichaEspecie.morfometria},
+        {
+          title: "Morfometría",
+          content: [
+            fichaEspecie.svl_macho && `Longitud rostro-cloacal ♂: ${fichaEspecie.svl_macho}`,
+            fichaEspecie.svl_hembra && `Longitud rostro-cloacal ♀: ${fichaEspecie.svl_hembra}`,
+          ]
+            .filter(Boolean)
+            .join("<br />"),
+        },
         {title: "Color en Vida", content: fichaEspecie.color_en_vida},
         {title: "Color en Preservación", content: fichaEspecie.color_en_preservacion},
         {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
@@ -1020,7 +1026,19 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           Otros nombres
                         </p>
                         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
-                          {fichaEspecie.otrosNombres.map((on: any, i: number) => {
+                          {[...fichaEspecie.otrosNombres]
+                            .sort((a: any, b: any) => {
+                              const getAno = (x: any): number => {
+                                const p = Array.isArray(x.publicacion)
+                                  ? x.publicacion[0]
+                                  : x.publicacion;
+
+                                return Number(p?.numero_publicacion_ano) || -Infinity;
+                              };
+
+                              return getAno(b) - getAno(a);
+                            })
+                            .map((on: any, i: number) => {
                             const idioma: string | undefined = on.idioma?.nombre;
                             const etnia: string | undefined = on.etnia?.nombre;
                             const label = etnia || idioma;
@@ -1079,86 +1097,57 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             })()}
             {/* {Identificacion} */}
             <Card className="">
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="text-base">Identificación</CardTitle>
               </CardHeader>
               <CardContent>
                 {/* Identificación */}
                 {fichaEspecie.identificacion && (
-                  <div className="mt-4">
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.identificacion),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
-                  </div>
+                  <div
+                    suppressHydrationWarning dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.identificacion),
+                    }}
+                    className="text-muted-foreground text-sm"
+                  />
                 )}
 
-                {/* Longitud rostro-cloacal dentro de identificación */}
+                {/* Morfometría — Longitud rostro-cloacal ♂ / ♀ */}
                 {(fichaEspecie.svl_macho || fichaEspecie.svl_hembra) && (
-                  <div className="mt-3 space-y-1.5">
-                    {fichaEspecie.svl_macho && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-xs font-medium">
-                          Longitud rostro-cloacal ♂:
-                        </span>
-                        <span className="text-muted-foreground text-xs">
-                          {fichaEspecie.svl_macho}
-                        </span>
-                      </div>
-                    )}
-                    {fichaEspecie.svl_hembra && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-xs font-medium">
-                          Longitud rostro-cloacal ♀:
-                        </span>
-                        <span className="text-muted-foreground text-xs">
-                          {fichaEspecie.svl_hembra}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Morfometría */}
-                {fichaEspecie.morfometria && (
                   <div className="mt-4">
                     <h4 className="mb-2 text-sm font-semibold">Morfometría</h4>
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.morfometria),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
+                    <div className="space-y-1.5">
+                      {fichaEspecie.svl_macho && (
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-muted-foreground text-xs font-medium">
+                            Longitud rostro-cloacal ♂:
+                          </span>
+                          <span
+                            suppressHydrationWarning
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.svl_macho),
+                            }}
+                            className="text-muted-foreground text-xs"
+                          />
+                        </div>
+                      )}
+                      {fichaEspecie.svl_hembra && (
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-muted-foreground text-xs font-medium">
+                            Longitud rostro-cloacal ♀:
+                          </span>
+                          <span
+                            suppressHydrationWarning
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.svl_hembra),
+                            }}
+                            className="text-muted-foreground text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Diagnosis */}
-                {fichaEspecie.diagnosis && (
-                  <div className="mt-4">
-                    <h4 className="mb-2 text-sm font-semibold">Diagnosis</h4>
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.diagnosis),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
-                  </div>
-                )}
-
-                {/* Descripción */}
-                {fichaEspecie.descripcion && (
-                  <div className="mt-4">
-                    <h4 className="mb-2 text-sm font-semibold">Descripción</h4>
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.descripcion),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
-                  </div>
-                )}
 
                 {/* Color en vida */}
                 {fichaEspecie.color_en_vida && (

@@ -132,7 +132,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .single(),
     supabaseClient
       .from("nombre_comun")
-      .select("nombre, idioma:catalogo_awe!nombre_comun_catalogo_awe_idioma_id_fkey(nombre), etnia:catalogo_awe!nombre_comun_catalogo_awe_etnia_id_fkey(nombre), publicacion:publicacion_id(id_publicacion, cita_corta, titulo)")
+      .select("nombre, idioma:catalogo_awe!nombre_comun_catalogo_awe_idioma_id_fkey(nombre), etnia:catalogo_awe!nombre_comun_catalogo_awe_etnia_id_fkey(nombre), publicacion:publicacion_id(id_publicacion, cita_corta, titulo, numero_publicacion_ano)")
       .eq("taxon_id", taxonId)
       .eq("principal", false),
     supabaseClient

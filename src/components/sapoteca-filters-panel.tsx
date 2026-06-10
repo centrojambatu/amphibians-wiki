@@ -171,6 +171,21 @@ export default function SapotecaFiltersPanel({
 
     const params = new URLSearchParams();
 
+    // Preservar params externos (no manejados por este panel): publicacion_id, back, etc.
+    const PARAMS_PROPIOS = new Set([
+      "titulo",
+      "años",
+      "autor",
+      "tipos",
+      "indexada",
+      "formatoImpreso",
+      "pagina",
+    ]);
+
+    searchParams.forEach((value, key) => {
+      if (!PARAMS_PROPIOS.has(key)) params.set(key, value);
+    });
+
     if (filtros.titulo) params.set("titulo", filtros.titulo);
     if (filtros.años && filtros.años.length > 0) params.set("años", filtros.años.join(","));
     if (filtros.autor) params.set("autor", filtros.autor);
