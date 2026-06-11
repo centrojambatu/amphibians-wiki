@@ -1688,9 +1688,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                   </div>
 
-                  {/* 5. CITES */}
+                  {/* 5. CITES y Manejo ex situ */}
                   <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>CITES</h4>
                     {(() => {
                       const cites =
                         fichaEspecie.taxon_catalogo_awe_results?.filter(
@@ -1698,7 +1697,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
                         ) || [];
 
-                      // Eliminar duplicados
                       const uniqueMap = new Map();
 
                       cites.forEach((categoria: any) => {
@@ -1709,44 +1707,48 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         }
                       });
                       const citesUnicos = Array.from(uniqueMap.values());
+                      const citesValor =
+                        citesUnicos.length > 0
+                          ? citesUnicos.map((c) => c.catalogo_awe.nombre).join(", ")
+                          : "No disponible";
 
-                      return citesUnicos.length > 0 ? (
-                        <div className="space-y-1">
-                          {citesUnicos.map((categoria: any) => (
-                            <div
-                              key={categoria.id_taxon_catalogo_awe}
-                              className="text-muted-foreground text-sm"
-                            >
-                              {categoria.catalogo_awe.nombre}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      const manejoExSituValor =
+                        fichaEspecie.anfibio_conservacion === true ? (
+                          <a
+                            className="inline-flex items-center !no-underline hover:!no-underline"
+                            href={RANARIUM_URL}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <Check className="h-4 w-4" strokeWidth={3} style={{color: "#2d6e2d"}} />
+                          </a>
+                        ) : (
+                          "NO"
+                        );
+
+                      return (
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-gray-800">
+                          <span className="inline-flex items-baseline gap-x-2">
+                            <span className="inline-flex items-baseline gap-x-1">
+                              <span className="text-base font-semibold text-gray-900">CITES</span>
+                              <span className="text-muted-foreground">{citesValor}</span>
+                            </span>
+                          </span>
+                          <span className="inline-flex items-baseline gap-x-2">
+                            <span style={{color: "#f07304"}}>|</span>
+                            <span className="inline-flex items-baseline gap-x-1">
+                              <span className="text-base font-semibold text-gray-900">
+                                Manejo <span className="italic">ex situ</span>
+                              </span>
+                              <span className="text-muted-foreground">{manejoExSituValor}</span>
+                            </span>
+                          </span>
+                        </p>
                       );
                     })()}
                   </div>
 
-                  {/* 6. Manejo exsitu */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>
-                      Manejo <span className="italic">exsitu</span>
-                    </h4>
-                    {fichaEspecie.anfibio_conservacion === true ? (
-                      <a
-                        className="inline-flex items-center gap-1 !no-underline hover:!no-underline"
-                        href={RANARIUM_URL}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        <Check className="h-4 w-4" strokeWidth={3} style={{color: "#2d6e2d"}} />
-                      </a>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">NO</p>
-                    )}
-                  </div>
-
-                  {/* 7. Áreas protegidas estado | SNAP */}
+                  {/* 6. Áreas protegidas estado | SNAP */}
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>
                       Áreas protegidas estado{" "}
@@ -1791,7 +1793,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 8. Bosques protectores */}
+                  {/* 7. Bosques protectores */}
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>Bosques protectores</h4>
                     {(() => {
@@ -1822,7 +1824,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 9. Áreas protegidas privadas */}
+                  {/* 8. Áreas protegidas privadas */}
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>Áreas protegidas privadas</h4>
                     {(() => {
@@ -1864,7 +1866,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 10. Reservas de la biósfera */}
+                  {/* 9. Reservas de la biósfera */}
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>Reservas de la biósfera</h4>
                     {(() => {
