@@ -25,7 +25,7 @@ export const processHTMLLinks = (html: string | undefined): string => {
     } else if (!/rel=["'][^"']*noopener/.test(attributes)) {
       // Si tiene rel pero no tiene noopener, agregarlo
       newAttributes = newAttributes.replaceAll(
-        /rel=["']([^"']*)["']/,
+        /rel=["']([^"']*)["']/g,
         'rel="$1 noopener noreferrer"',
       );
     }
@@ -38,7 +38,7 @@ export const processHTMLLinks = (html: string | undefined): string => {
       const hasClass = /class=["']/.test(attributes);
       if (hasClass) {
         newAttributes = newAttributes.replaceAll(
-          /class=["']([^"']*)["']/,
+          /class=["']([^"']*)["']/g,
           'class="$1 processed-link"',
         );
       } else {
@@ -50,18 +50,35 @@ export const processHTMLLinks = (html: string | undefined): string => {
   });
 };
 
+const escapeAttr = (s: string): string =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const stripHtmlTags = (html: string): string =>
+  html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+
 /**
- * Procesa el texto para convertir {{id_publicacion}} a citas completas
- * En el renderizado, usa cita_corta (como se especificó)
- * @param texto - El texto que puede contener referencias {{id_publicacion}}
- * @param publicaciones - Array de publicaciones con publicacion.id_publicacion
- * @returns El texto con las referencias convertidas a cita_corta
+ * Procesa el texto para convertir {{id_publicacion}} a citas clicables.
+ * Cada referencia se envuelve en un `<span class="inline-citation">` con
+ * la cita_corta como texto visible y un popup hijo (CSS `:focus`) con la
+ * cita_larga. Al hacer click la cita se enfoca y aparece el tooltip; al
+ * hacer click fuera se pierde el foco y el tooltip se oculta.
  */
 export const processCitationReferences = (
   texto: string | null | undefined,
   publicaciones:
     | Array<{
-        publicacion?: { id_publicacion?: number; cita_corta?: string | null };
+        publicacion?: {
+          id_publicacion?: number;
+          cita_corta?: string | null;
+          cita_larga?: string | null;
+          cita?: string | null;
+          titulo?: string | null;
+        };
       }>
     | null
     | undefined,
@@ -84,8 +101,18 @@ export const processCitationReferences = (
     )?.publicacion;
 
     if (publicacion?.cita_corta) {
-      // Reemplazar {{id_publicacion}} con la cita_corta
-      textoProcesado = textoProcesado.replace(match, publicacion.cita_corta);
+      const tooltipRaw =
+        publicacion.cita_larga ||
+        publicacion.cita ||
+        [publicacion.cita_corta, publicacion.titulo].filter(Boolean).join(". ");
+      const tooltipTexto = escapeAttr(stripHtmlTags(tooltipRaw));
+      const reemplazo =
+        `<span class="inline-citation" role="button" tabindex="0" aria-label="Ver publicación: ${tooltipTexto}">` +
+        `${publicacion.cita_corta}` +
+        `<span class="inline-citation-popup" role="tooltip">${tooltipTexto}</span>` +
+        `</span>`;
+
+      textoProcesado = textoProcesado.replace(match, reemplazo);
     }
   });
 
@@ -118,7 +145,7 @@ export const processHTMLLinksNoUnderline = (html: string | undefined): string =>
     } else if (!/rel=["'][^"']*noopener/.test(attributes)) {
       // Si tiene rel pero no tiene noopener, agregarlo
       newAttributes = newAttributes.replaceAll(
-        /rel=["']([^"']*)["']/,
+        /rel=["']([^"']*)["']/g,
         'rel="$1 noopener noreferrer"',
       );
     }
@@ -139,7 +166,7 @@ export const processHTMLLinksNoUnderline = (html: string | undefined): string =>
           existingClass += " processed-link-no-underline";
         }
         newAttributes = newAttributes.replaceAll(
-          /class=["'][^"']*["']/,
+          /class=["'][^"']*["']/g,
           `class="${existingClass}"`,
         );
       } else {

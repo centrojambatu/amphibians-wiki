@@ -5,6 +5,11 @@ import Link from "next/link";
 
 import {processHTMLLinks, processHTMLLinksNoUnderline, processCitationReferences} from "@/lib/process-html-links";
 import {getBibliographyUrl} from "@/lib/get-bibliography-url";
+import {
+  buildCitaLargaDesdePublicacion,
+  ordenarPublicacionesAlfabeticamente,
+  resaltarTituloEnCita,
+} from "@/lib/format-cita-publicacion";
 
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 
@@ -30,6 +35,12 @@ export const CardGeneroContent = ({fichaGenero}: CardGeneroContentProps) => {
   const publicaciones = useMemo(
     () => fichaGenero.publicacionesOrdenadas || fichaGenero.publicaciones || [],
     [fichaGenero.publicacionesOrdenadas, fichaGenero.publicaciones],
+  );
+
+  // Literatura citada ordenada alfabéticamente por autor (cita)
+  const publicacionesOrdenadas = useMemo<any[]>(
+    () => ordenarPublicacionesAlfabeticamente(fichaGenero.publicaciones || []),
+    [fichaGenero.publicaciones],
   );
 
   // Función helper para procesar HTML de forma consistente
@@ -163,69 +174,22 @@ export const CardGeneroContent = ({fichaGenero}: CardGeneroContentProps) => {
               </CardContent>
             </Card>
 
-            {/* Literatura Citada */}
+            {/* Literatura citada */}
             <Card className="">
               <CardHeader>
-                <CardTitle className="text-base">Literatura Citada</CardTitle>
+                <CardTitle className="text-base">Literatura citada</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaGenero.publicaciones && fichaGenero.publicaciones.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
-                    {fichaGenero.publicaciones.map((pub: any) => {
-                      // Construir cita_larga desde cita_corta y otros campos de la tabla publicacion
-                      let citaLarga = pub.publicacion?.cita_larga || null;
+                {publicacionesOrdenadas.length > 0 ? (
+                  <div className="space-y-3">
+                    {publicacionesOrdenadas.map((pub: any) => {
+                      const citaParaMostrar = buildCitaLargaDesdePublicacion(pub);
+                      const citaResaltada = resaltarTituloEnCita(
+                        citaParaMostrar,
+                        pub.publicacion?.titulo,
+                        pub.publicacion?.tipo,
+                      );
 
-                      // Si no hay cita_larga, construirla desde cita_corta y otros campos
-                      if (!citaLarga && pub.publicacion?.cita_corta) {
-                        const partes: string[] = [];
-
-                        // Empezar con cita_corta
-                        partes.push(pub.publicacion.cita_corta);
-
-                        // Agregar información adicional si está disponible y no está ya en cita_corta
-                        if (
-                          pub.publicacion.titulo &&
-                          !pub.publicacion.cita_corta.includes(pub.publicacion.titulo)
-                        ) {
-                          partes.push(pub.publicacion.titulo);
-                        }
-
-                        if (pub.publicacion.editorial) {
-                          partes.push(pub.publicacion.editorial);
-                        }
-
-                        if (pub.publicacion.volumen) {
-                          partes.push(`Vol. ${pub.publicacion.volumen}`);
-                        }
-
-                        if (pub.publicacion.numero) {
-                          partes.push(`No. ${pub.publicacion.numero}`);
-                        }
-
-                        if (pub.publicacion.pagina) {
-                          partes.push(`pp. ${pub.publicacion.pagina}`);
-                        }
-
-                        if (pub.publicacion.numero_publicacion_ano) {
-                          // Solo agregar año si no está ya en cita_corta
-                          const añoStr = String(pub.publicacion.numero_publicacion_ano);
-
-                          if (!pub.publicacion.cita_corta.includes(añoStr)) {
-                            partes.push(`(${añoStr})`);
-                          }
-                        }
-
-                        citaLarga = partes.join(", ");
-                      }
-
-                      // Si aún no hay cita_larga, usar cita o cita_corta
-                      const citaParaMostrar =
-                        citaLarga ||
-                        pub.publicacion?.cita ||
-                        pub.publicacion?.cita_corta ||
-                        "Cita no disponible";
-
-                      // Generar URL de la bibliografía
                       const año =
                         pub.publicacion?.numero_publicacion_ano ||
                         (pub.publicacion?.fecha
@@ -241,22 +205,14 @@ export const CardGeneroContent = ({fichaGenero}: CardGeneroContentProps) => {
                       return (
                         <Link
                           key={pub.id_taxon_publicacion}
-                          className="literature-link hover:bg-muted flex flex-col gap-2 rounded-md p-3 transition-colors"
+                          className="literature-link block px-1 py-1 transition-colors"
                           href={bibliographyUrl}
                         >
-                          {pub.publicacion?.titulo && (
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
-                              }}
-                              className="hover:text-primary text-sm font-medium"
-                            />
-                          )}
-                          <div
+                          <p
                             dangerouslySetInnerHTML={{
-                              __html: processHTMLLinksNoUnderline(citaParaMostrar),
+                              __html: processHTMLLinksNoUnderline(citaResaltada),
                             }}
-                            className="text-muted-foreground text-xs"
+                            className="text-sm leading-relaxed text-gray-700"
                           />
                         </Link>
                       );

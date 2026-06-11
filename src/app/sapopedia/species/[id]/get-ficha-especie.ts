@@ -132,7 +132,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .single(),
     supabaseClient
       .from("nombre_comun")
-      .select("nombre, idioma:catalogo_awe!nombre_comun_catalogo_awe_idioma_id_fkey(nombre), etnia:catalogo_awe!nombre_comun_catalogo_awe_etnia_id_fkey(nombre), publicacion:publicacion_id(id_publicacion, cita_corta, titulo, numero_publicacion_ano)")
+      .select("nombre, idioma:catalogo_awe!nombre_comun_catalogo_awe_idioma_id_fkey(nombre), etnia:catalogo_awe!nombre_comun_catalogo_awe_etnia_id_fkey(nombre), publicacion:publicacion_id(id_publicacion, cita_corta, cita_larga, cita, titulo, titulo_secundario, editorial, volumen, numero, pagina, fecha, numero_publicacion_ano)")
       .eq("taxon_id", taxonId)
       .eq("principal", false),
     supabaseClient
@@ -388,6 +388,16 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   // Si no hay referencias, no mostrar ninguna publicación
   const publicacionesParaMostrar = publicacionesReferenciadas;
 
+  const getAnoPublicacion = (pub: any) =>
+    pub.publicacion?.numero_publicacion_ano ||
+    (pub.publicacion?.fecha
+      ? new Date(pub.publicacion.fecha as string | number | Date).getFullYear()
+      : 0);
+
+  const referenciasClave = publicacionesOrdenadas
+    .filter((pub: any) => pub.referencia_clave === true)
+    .sort((a: any, b: any) => getAnoPublicacion(a) - getAnoPublicacion(b));
+
   // Mapear datos de la vista y ficha_especie al formato esperado por card-species-content.tsx
   // Usar valores explícitos para evitar undefined
   const result = {
@@ -476,6 +486,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       : [],
     geoPolitica: Array.isArray(geoPolitica) ? geoPolitica : [],
     publicaciones: publicacionesParaMostrar,
+    referenciasClave,
     publicacionesOrdenadas: todasLasPublicaciones, // Todas las publicaciones (incluyendo adicionales) para procesar citas
     taxones: taxonesArray,
     listaRojaIUCN: listaRojaIUCN ?? null,

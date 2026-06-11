@@ -17,6 +17,11 @@ import {
   processHTMLLinksNoUnderline,
   processCitationReferences,
 } from "@/lib/process-html-links";
+import {
+  buildCitaLargaDesdePublicacion,
+  ordenarPublicacionesAlfabeticamente,
+  resaltarTituloEnCita,
+} from "@/lib/format-cita-publicacion";
 
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
@@ -132,6 +137,91 @@ const groupGeoPoliticalData = (geoPolitica: any[]) => {
   return grouped;
 };
 
+const buildReferenciaClaveText = (pub: any) => {
+  const citaCorta = pub.publicacion?.cita_corta || pub.publicacion?.cita || "Cita no disponible";
+  const tema = pub.tema?.trim();
+
+  return tema ? `${citaCorta} (${tema})` : citaCorta;
+};
+
+const ReferenciasClaveList = ({
+  publicaciones,
+  processHTMLLinksNoUnderline,
+}: {
+  publicaciones: any[];
+  processHTMLLinksNoUnderline: (html: string) => string;
+}) => (
+  <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-gray-800">
+    {publicaciones.map((pub: any, i) => {
+      const tooltipTexto = buildCitaLargaDesdePublicacion(pub);
+
+      return (
+        <span key={pub.id_taxon_publicacion} className="inline-flex items-baseline gap-x-2">
+          {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+          <span
+            aria-label={`Ver publicación: ${tooltipTexto}`}
+            className="inline-citation text-muted-foreground"
+            role="button"
+            tabIndex={0}
+          >
+            <span
+              dangerouslySetInnerHTML={{
+                __html: processHTMLLinksNoUnderline(buildReferenciaClaveText(pub)),
+              }}
+              suppressHydrationWarning
+            />
+            <span className="inline-citation-popup" role="tooltip">
+              {tooltipTexto}
+            </span>
+          </span>
+        </span>
+      );
+    })}
+  </p>
+);
+
+const PublicacionesList = ({
+  publicaciones,
+  processHTMLLinksNoUnderline,
+}: {
+  publicaciones: any[];
+  processHTMLLinksNoUnderline: (html: string) => string;
+}) => (
+  <div className="space-y-3">
+    {publicaciones.map((pub: any, i: number) => {
+      const citaParaMostrar = buildCitaLargaDesdePublicacion(pub);
+      const citaResaltada = resaltarTituloEnCita(
+        citaParaMostrar,
+        pub.publicacion?.titulo,
+        pub.publicacion?.tipo,
+      );
+      const idPub = pub.publicacion?.id_publicacion as number | undefined;
+      const idTxnPub = pub.id_taxon_publicacion as number | string | undefined;
+      let key: string;
+
+      if (typeof idPub === "number") {
+        key = "pub-" + String(idPub);
+      } else if (idTxnPub != null) {
+        key = "txn-" + String(idTxnPub);
+      } else {
+        key = "idx-" + String(i);
+      }
+
+      return (
+        <div key={key} className="px-1 py-1">
+          <p
+            dangerouslySetInnerHTML={{
+              __html: processHTMLLinksNoUnderline(citaResaltada),
+            }}
+            suppressHydrationWarning
+            className="text-sm leading-relaxed text-gray-700"
+          />
+        </div>
+      );
+    })}
+  </div>
+);
+
 interface CardSpeciesContentProps {
   fichaEspecie: any;
 }
@@ -155,6 +245,42 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     () => fichaEspecie.publicacionesOrdenadas || fichaEspecie.publicaciones || [],
     [fichaEspecie.publicacionesOrdenadas, fichaEspecie.publicaciones],
   );
+
+  // Literatura citada = publicaciones referenciadas + referencias clave + publicaciones
+  // citadas en otros nombres (dedup por id_publicacion), ordenado alfabéticamente.
+  const publicacionesLiteraturaCitada = useMemo(() => {
+    const base: any[] = fichaEspecie.publicaciones || [];
+    const refsClave: any[] = fichaEspecie.referenciasClave || [];
+    const otrosNombres: any[] = Array.isArray(fichaEspecie.otrosNombres)
+      ? fichaEspecie.otrosNombres
+      : [];
+
+    // Normalizar las publicaciones de otros nombres al shape { publicacion: {...} }
+    const refsOtrosNombres: any[] = otrosNombres
+      .map((on: any) => {
+        const pub = Array.isArray(on.publicacion) ? on.publicacion[0] : on.publicacion;
+
+        return pub?.id_publicacion ? {publicacion: pub} : null;
+      })
+      .filter(Boolean);
+
+    const idsVistos = new Set<number>();
+    const merged: any[] = [];
+
+    for (const pub of [...base, ...refsClave, ...refsOtrosNombres]) {
+      const id = pub?.publicacion?.id_publicacion;
+
+      if (id == null) {
+        merged.push(pub);
+        continue;
+      }
+      if (idsVistos.has(id)) continue;
+      idsVistos.add(id);
+      merged.push(pub);
+    }
+
+    return ordenarPublicacionesAlfabeticamente(merged);
+  }, [fichaEspecie.publicaciones, fichaEspecie.referenciasClave, fichaEspecie.otrosNombres]);
 
   const showRenacuajos = useMemo(
     () => shouldShowRenacuajos(fichaEspecie.lineage),
@@ -923,10 +1049,27 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         addText(fechaActualizacion, 10, false, 1.2);
       }
 
-      // Agregar Literatura Citada
+      const referenciasClave = fichaEspecie.referenciasClave || [];
+
+      if (referenciasClave.length > 0) {
+        yPosition += 5;
+        addText("Referencias clave", 11, true, 1.2);
+        yPosition += 2;
+
+        const referenciasClaveTexto = referenciasClave
+          .map((pub: any) => (pub.publicacion ? stripHTML(buildReferenciaClaveText(pub)) : ""))
+          .filter(Boolean)
+          .join(" | ");
+
+        if (referenciasClaveTexto) {
+          addText(referenciasClaveTexto, 9, false, 1.2);
+        }
+      }
+
+      // Agregar Literatura citada
       if (publicaciones && publicaciones.length > 0) {
         yPosition += 5;
-        addText("Literatura Citada", 12, true, 1.2);
+        addText("Literatura citada", 11, true, 1.2);
         yPosition += 2;
 
         publicaciones.forEach((pub: any) => {
@@ -1173,6 +1316,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                 : on.publicacion;
                               const citaCorta: string | undefined = pub?.cita_corta;
                               const publicacionId: number | undefined = pub?.id_publicacion;
+                              const tooltipTexto: string =
+                                (pub?.cita_larga as string) ||
+                                (pub?.cita as string) ||
+                                [citaCorta, pub?.titulo].filter(Boolean).join(". ");
 
                               return (
                                 <span
@@ -1187,24 +1334,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                     <span className="font-medium text-gray-900">{on.nombre}</span>
                                     {citaCorta &&
                                       (publicacionId != null ? (
-                                        <Link
-                                          className="text-[11px] hover:underline"
-                                          href={(() => {
-                                            const titulo = (pub?.titulo as string) || citaCorta;
-                                            const back = nombreCientificoMain
-                                              ? `/sapopedia/species/${encodeURIComponent(
-                                                  nombreCientificoMain.replace(/\s+/g, "-"),
-                                                )}`
-                                              : null;
-
-                                            return `/sapoteca?titulo=${encodeURIComponent(titulo)}${
-                                              back ? `&back=${encodeURIComponent(back)}` : ""
-                                            }`;
-                                          })()}
-                                          style={{color: "#f07304"}}
+                                        <span
+                                          aria-label={`Ver publicación: ${tooltipTexto}`}
+                                          className="inline-citation text-[11px]"
+                                          role="button"
+                                          tabIndex={0}
                                         >
                                           · {citaCorta}
-                                        </Link>
+                                          <span className="inline-citation-popup" role="tooltip">
+                                            {tooltipTexto}
+                                          </span>
+                                        </span>
                                       ) : (
                                         <span className="text-[11px] text-gray-500">
                                           · {citaCorta}
@@ -1557,9 +1697,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>Provincias</h4>
                     {(() => {
-                      const provincias = getProvinciasFromGeoPolitica(
-                        fichaEspecie.geoPolitica,
-                      );
+                      const provincias = getProvinciasFromGeoPolitica(fichaEspecie.geoPolitica);
 
                       return provincias.length > 0 ? (
                         <div className="space-y-1">
@@ -1751,8 +1889,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   {/* 6. Áreas protegidas estado | SNAP */}
                   <div className={cardSectionDivider}>
                     <h4 className={cardSubsectionTitle}>
-                      Áreas protegidas estado{" "}
-                      <span className="font-normal text-[#f07304]">|</span> SNAP
+                      Áreas protegidas estado <span className="font-normal text-[#f07304]">|</span>{" "}
+                      SNAP
                     </h4>
                     {(() => {
                       const areasEstado =
@@ -1940,101 +2078,36 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             </Card>
             {/* { Publicaciones } */}
             <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Literatura Citada</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.publicaciones && fichaEspecie.publicaciones.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
-                    {fichaEspecie.publicaciones.map((pub: any) => {
-                      // Construir cita_larga desde cita_corta y otros campos de la tabla publicacion
-                      let citaLarga = pub.publicacion?.cita_larga || null;
+              <CardContent className="pt-4">
+                <div>
+                  <h4 className={cardSubsectionTitle}>Referencias clave</h4>
+                  {fichaEspecie.referenciasClave && fichaEspecie.referenciasClave.length > 0 ? (
+                    <ReferenciasClaveList
+                      processHTMLLinksNoUnderline={processHTMLLinksNoUnderline}
+                      publicaciones={fichaEspecie.referenciasClave}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No disponible</p>
+                  )}
+                </div>
 
-                      // Si no hay cita_larga, construirla desde cita_corta y otros campos
-                      if (!citaLarga && pub.publicacion?.cita_corta) {
-                        const partes: string[] = [];
-
-                        // Empezar con cita_corta
-                        partes.push(pub.publicacion.cita_corta);
-
-                        // Agregar información adicional si está disponible y no está ya en cita_corta
-                        if (
-                          pub.publicacion.titulo &&
-                          !pub.publicacion.cita_corta.includes(pub.publicacion.titulo)
-                        ) {
-                          partes.push(pub.publicacion.titulo);
-                        }
-
-                        if (pub.publicacion.editorial) {
-                          partes.push(pub.publicacion.editorial);
-                        }
-
-                        if (pub.publicacion.volumen) {
-                          partes.push(`Vol. ${pub.publicacion.volumen}`);
-                        }
-
-                        if (pub.publicacion.numero) {
-                          partes.push(`No. ${pub.publicacion.numero}`);
-                        }
-
-                        if (pub.publicacion.pagina) {
-                          partes.push(`pp. ${pub.publicacion.pagina}`);
-                        }
-
-                        if (pub.publicacion.numero_publicacion_ano) {
-                          // Solo agregar año si no está ya en cita_corta
-                          const añoStr = String(pub.publicacion.numero_publicacion_ano);
-
-                          if (!pub.publicacion.cita_corta.includes(añoStr)) {
-                            partes.push(`(${añoStr})`);
-                          }
-                        }
-
-                        citaLarga = partes.join(", ");
-                      }
-
-                      // Si aún no hay cita_larga, usar cita o cita_corta
-                      const citaParaMostrar =
-                        citaLarga ||
-                        pub.publicacion?.cita ||
-                        pub.publicacion?.cita_corta ||
-                        "Cita no disponible";
-
-                      return (
-                        <div
-                          key={pub.id_taxon_publicacion}
-                          className="flex flex-col gap-2 rounded-md p-3"
-                        >
-                          {pub.publicacion?.titulo && (
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: processHTMLLinksNoUnderline(pub.publicacion.titulo),
-                              }}
-                              suppressHydrationWarning
-                              className="text-sm font-medium"
-                            />
-                          )}
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: processHTMLLinksNoUnderline(citaParaMostrar),
-                            }}
-                            suppressHydrationWarning
-                            className="text-muted-foreground text-xs"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No hay publicaciones disponibles</p>
-                )}
+                <div className={cardSectionDivider}>
+                  <h4 className={cardSubsectionTitle}>Literatura citada</h4>
+                  {publicacionesLiteraturaCitada.length > 0 ? (
+                    <PublicacionesList
+                      processHTMLLinksNoUnderline={processHTMLLinksNoUnderline}
+                      publicaciones={publicacionesLiteraturaCitada}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No hay publicaciones disponibles
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
             <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Historial de la ficha</CardTitle>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <>
                   {/* Historial */}
                   <div>
@@ -2055,9 +2128,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   </div>
 
                   {/* Agradecimiento */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Agradecimiento</h4>
-                    {fichaEspecie.agradecimiento ? (
+                  {fichaEspecie.agradecimiento && (
+                    <div className={cardSectionDivider}>
+                      <h4 className={cardSubsectionTitle}>Agradecimiento</h4>
                       <div
                         dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.agradecimiento),
@@ -2065,45 +2138,103 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         suppressHydrationWarning
                         className="text-muted-foreground text-sm"
                       />
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </>
               </CardContent>
             </Card>
-            <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Fecha Actualizacion</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.fecha_actualizacion ? (
-                  <span className="text-muted-foreground text-sm">
-                    {fichaEspecie.fecha_actualizacion}
-                  </span>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
+            {/* Fecha de actualización + cita sugerida del sitio */}
+            {(() => {
+              const meses = [
+                "Enero",
+                "Febrero",
+                "Marzo",
+                "Abril",
+                "Mayo",
+                "Junio",
+                "Julio",
+                "Agosto",
+                "Septiembre",
+                "Octubre",
+                "Noviembre",
+                "Diciembre",
+              ];
+              const hoy = new Date();
+              const today =
+                String(hoy.getDate()) +
+                " " +
+                meses[hoy.getMonth()] +
+                " " +
+                String(hoy.getFullYear());
+
+              const fechaStr = String(fichaEspecie.fecha_actualizacion || "");
+              let anoActualizacion = String(hoy.getFullYear());
+              let fechaActualizacionFormateada = "No disponible";
+              const fechaParsed = fechaStr ? new Date(fechaStr) : null;
+
+              if (fechaParsed && !Number.isNaN(fechaParsed.getTime())) {
+                const dia = String(fechaParsed.getDate()).padStart(2, "0");
+
+                fechaActualizacionFormateada =
+                  dia +
+                  " " +
+                  meses[fechaParsed.getMonth()] +
+                  " " +
+                  String(fechaParsed.getFullYear());
+                anoActualizacion = String(fechaParsed.getFullYear());
+              } else {
+                const yearMatch = /\b(19|20)\d{2}\b/.exec(fechaStr);
+
+                if (yearMatch) {
+                  anoActualizacion = yearMatch[0];
+                  fechaActualizacionFormateada = fechaStr;
+                }
+              }
+
+              return (
+                <Card className="gap-0">
+                  <CardContent className="space-y-3 py-3">
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="text-base font-semibold">Actualización</span>
+                      <span className="text-muted-foreground text-sm">
+                        {fechaActualizacionFormateada}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Coloma, L. A. {anoActualizacion}. Anfibios Ecuador: Referencia en línea.
+                      Version 1.0. ({today}) Base de datos electrónica en{" "}
+                      <a
+                        className="processed-link"
+                        href="https://deepskyblue-beaver-511675.hostingersite.com"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        https://deepskyblue-beaver-511675.hostingersite.com
+                      </a>
+                      . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
         </div>
 
         {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 py-4 pr-8 pl-4" style={{width: "20%", maxHeight: "100vh"}}>
+        <div className="sticky top-0 py-2 pr-2 pl-2" style={{width: "12%", maxHeight: "100vh"}}>
           {/* Botón de descarga */}
-          <div className="mb-4">
+          <div className="mb-2">
             <Button
-              className="flex w-full items-center justify-center gap-2"
+              className="flex h-7 w-full items-center justify-center gap-1 px-2 text-[11px]"
               variant="outline"
               onClick={handleDownloadPDF}
             >
-              <Download className="h-4 w-4" />
-              Descargar ficha
+              <Download className="h-3 w-3" />
+              Ficha Pdf
             </Button>
           </div>
           <Card className="h-fit">
-            <CardContent className="space-y-2 p-4">
+            <CardContent className="space-y-1.5 p-2">
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-1 gap-2">

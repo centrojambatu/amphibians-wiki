@@ -6407,25 +6407,31 @@ export type Database = {
           id_taxon_publicacion: number
           principal: boolean
           publicacion_id: number
+          referencia_clave: boolean | null
           svl_hembra: boolean
           svl_macho: boolean
           taxon_id: number
+          tema: string | null
         }
         Insert: {
           id_taxon_publicacion?: number
           principal?: boolean
           publicacion_id: number
+          referencia_clave?: boolean | null
           svl_hembra?: boolean
           svl_macho?: boolean
           taxon_id: number
+          tema?: string | null
         }
         Update: {
           id_taxon_publicacion?: number
           principal?: boolean
           publicacion_id?: number
+          referencia_clave?: boolean | null
           svl_hembra?: boolean
           svl_macho?: boolean
           taxon_id?: number
+          tema?: string | null
         }
         Relationships: [
           {

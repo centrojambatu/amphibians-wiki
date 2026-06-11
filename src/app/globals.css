@@ -279,13 +279,61 @@ a.sapoteca-link:active,
   text-decoration: none !important;
 }
 
-/* Enlaces de Literatura Citada - sin subrayado en hover */
+/* Enlaces de Literatura citada - sin subrayado en hover */
 a.literature-link,
 a.literature-link:link,
 a.literature-link:visited,
 a.literature-link:hover,
 a.literature-link:active {
   text-decoration: none !important;
+}
+
+/* Citas en línea ({{id_publicacion}} → cita_corta clicable con popup) */
+.inline-citation {
+  position: relative;
+  display: inline;
+  color: #006d1b;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  outline: none;
+}
+
+.inline-citation:hover,
+.inline-citation:focus,
+.inline-citation:focus-visible {
+  color: #f07304;
+  text-decoration: none;
+}
+
+.inline-citation-popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  margin-top: 6px;
+  width: max-content;
+  max-width: 360px;
+  padding: 6px 12px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #9ca3af;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.45;
+  white-space: normal;
+  text-align: left;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.inline-citation:focus > .inline-citation-popup,
+.inline-citation:focus-within > .inline-citation-popup {
+  display: block;
 }
 
 /* Enlaces del listado de colecciones - sin subrayado en hover */
