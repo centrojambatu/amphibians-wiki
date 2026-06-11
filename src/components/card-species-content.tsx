@@ -1,6 +1,7 @@
 "use client";
 
 import {useMemo, useState} from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {Camera, Check, Download, MapPin, Video, Volume2} from "lucide-react";
 import jsPDF from "jspdf";
@@ -16,6 +17,7 @@ import {
   processHTMLLinks,
   processHTMLLinksNoUnderline,
   processCitationReferences,
+  processCitationReferencesPlain,
 } from "@/lib/process-html-links";
 import {
   buildCitaLargaDesdePublicacion,
@@ -29,6 +31,19 @@ import {Separator} from "./ui/separator";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
 import RedListStatus from "./RedListStatus";
+
+// Mapa de la Mapoteca cargado dinámicamente (depende de Leaflet, requiere window)
+const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center rounded-lg bg-gray-100">
+      <div className="text-center">
+        <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
+        <p className="text-muted-foreground text-sm">Cargando mapa...</p>
+      </div>
+    </div>
+  ),
+});
 
 // Función helper para detectar si es PE
 const isPE = (sigla: string | null | undefined) => {
@@ -452,11 +467,13 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         });
       };
 
-      // Función para procesar citas {{id}} en el texto
+      // Función para procesar citas {{id}} en el texto.
+      // Usa la versión plana (sin HTML/popup) para evitar duplicar la
+      // cita_larga cuando luego se aplica stripHTML antes de pintar en el PDF.
       const procesarCitas = (texto: string | null | undefined): string => {
         if (!texto) return "";
 
-        return processCitationReferences(texto, publicaciones);
+        return processCitationReferencesPlain(texto, publicaciones);
       };
 
       // Función para agregar una sección con título
@@ -1690,6 +1707,14 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       </div>
                     ) : (
                       <p className="text-muted-foreground mb-4 px-6 text-sm">No disponible</p>
+                    )}
+                    {/* Mapa con colecciones internas y externas filtradas por taxon */}
+                    {nombreCientificoMain && (
+                      <div className="mt-4 mb-4 px-6">
+                        <div className="relative h-[640px] w-full overflow-hidden rounded-md border border-gray-200">
+                          <MapotecaMap especieFilter={[nombreCientificoMain]} mapType="provinces" />
+                        </div>
+                      </div>
                     )}
                   </div>
 

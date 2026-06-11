@@ -62,6 +62,41 @@ const stripHtmlTags = (html: string): string =>
   html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 
 /**
+ * Versión plana de `processCitationReferences`: reemplaza `{{id_publicacion}}`
+ * directamente con `cita_corta` (sin HTML, sin popup). Usar en contextos donde
+ * el resultado pasa por `stripHTML` (p. ej. generación de PDF), porque el HTML
+ * con popup duplicaría texto al extraer plain text.
+ */
+export const processCitationReferencesPlain = (
+  texto: string | null | undefined,
+  publicaciones:
+    | Array<{
+        publicacion?: {id_publicacion?: number; cita_corta?: string | null};
+      }>
+    | null
+    | undefined,
+): string => {
+  if (!texto) return "";
+  if (!publicaciones || publicaciones.length === 0) return texto;
+
+  let textoProcesado = texto;
+  const citasEncontradas = texto.match(/\{\{(\d+)\}\}/g) || [];
+
+  citasEncontradas.forEach((match) => {
+    const idPublicacion = Number.parseInt(match.replaceAll(/\{\{|\}\}/g, ""), 10);
+    const publicacion = publicaciones.find(
+      (pub) => pub.publicacion?.id_publicacion === idPublicacion,
+    )?.publicacion;
+
+    if (publicacion?.cita_corta) {
+      textoProcesado = textoProcesado.replace(match, publicacion.cita_corta);
+    }
+  });
+
+  return textoProcesado;
+};
+
+/**
  * Procesa el texto para convertir {{id_publicacion}} a citas clicables.
  * Cada referencia se envuelve en un `<span class="inline-citation">` con
  * la cita_corta como texto visible y un popup hijo (CSS `:focus`) con la
