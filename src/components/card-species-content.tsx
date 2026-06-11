@@ -2,7 +2,7 @@
 
 import {useMemo, useState} from "react";
 import Link from "next/link";
-import {Camera, Download, MapPin, Video, Volume2} from "lucide-react";
+import {Camera, Check, Download, MapPin, Video, Volume2} from "lucide-react";
 import jsPDF from "jspdf";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -37,6 +37,7 @@ const FAMILIAS_SIN_RENACUAJOS = new Set(["craugastoridae", "eleutherodactylidae"
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
+const RANARIUM_URL = "https://deepskyblue-beaver-511675.hostingersite.com/portfolio/saparium/";
 
 const getProvinciasFromGeoPolitica = (
   geoPolitica: {rank_nombre?: string; nombre?: string}[] | undefined,
@@ -844,7 +845,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
       if (listaRojaSigla) {
         yPosition += 3;
-        addText("Lista Roja IUCN", 11, true, 1.2);
+        addText("Lista Roja Ecuador", 11, true, 1.2);
         yPosition += 1;
         addText(`Estado: ${listaRojaSigla}`, 10, false, 1.2);
         if (listaRojaNombre) {
@@ -1220,6 +1221,25 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </Card>
               );
             })()}
+            {/* Taxonomía */}
+            <Card className="gap-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Taxonomía y relaciones filogenéticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fichaEspecie.taxonomia ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.taxonomia),
+                    }}
+                    suppressHydrationWarning
+                    className="text-muted-foreground text-sm"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No disponible</p>
+                )}
+              </CardContent>
+            </Card>
             {/* {Identificacion} */}
             <Card className="gap-0">
               <CardHeader className="pb-2">
@@ -1420,21 +1440,32 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             <Card className="">
               <CardContent>
                 <>
-                  {/* 0. Distribución Global */}
-                  <div>
-                    <h4 className={cardSubsectionTitle}>Distribución global</h4>
-                    {fichaEspecie.distribucion_global ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.distribucion_global),
-                        }}
-                        suppressHydrationWarning
-                        className="text-muted-foreground text-sm"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
+                  {/* 0. Endemismo */}
+                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                    <span className={cardSubsectionTitle}>Endemismo</span>
+                    <span style={{color: "#f07304"}}>|</span>
+                    <span className="text-muted-foreground">
+                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : "No endémica"}
+                    </span>
+                  </p>
+
+                  {/* 0b. Distribución Global — oculto si es endémica */}
+                  {!fichaEspecie.taxones?.[0]?.endemica && (
+                    <div className={cardSectionDivider}>
+                      <h4 className={cardSubsectionTitle}>Distribución global</h4>
+                      {fichaEspecie.distribucion_global ? (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: procesarHTML(fichaEspecie.distribucion_global),
+                          }}
+                          suppressHydrationWarning
+                          className="text-muted-foreground text-sm"
+                        />
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* 1. Distribución Altitudinal */}
                   <div className={`${cardSectionDivider} -mx-6`}>
@@ -1577,7 +1608,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                   {/* 8. Sectores Biogeográficos */}
                   <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Sectores Biogeográficos</h4>
+                    <h4 className={cardSubsectionTitle}>Sectores biogeográficos</h4>
                     {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
                       <div className="space-y-1">
                         {fichaEspecie.dataRegionBio.map((region: any, index: number) => (
@@ -1596,21 +1627,153 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       <p className="text-muted-foreground text-sm">No disponible</p>
                     )}
                   </div>
+                </>
+              </CardContent>
+            </Card>
+            {/* Conservación */}
+            <Card className="gap-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Conservación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <>
+                  {/* 1. Lista Roja Global */}
+                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                    <span className={cardSubsectionTitle}>Lista Roja Global</span>
+                    <span style={{color: "#f07304"}}>|</span>
+                    {fichaEspecie.listaRojaGlobal?.catalogo_awe?.nombre ? (
+                      <span className="text-muted-foreground">
+                        {fichaEspecie.listaRojaGlobal.catalogo_awe.nombre}
+                        {fichaEspecie.listaRojaGlobal.catalogo_awe.sigla && (
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({fichaEspecie.listaRojaGlobal.catalogo_awe.sigla})
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">No disponible</span>
+                    )}
+                  </p>
 
-                  {/* 9. Reservas de la Biosfera */}
+                  {/* 2. Lista Roja Ecuador */}
+                  <p className="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm">
+                    <span className={cardSubsectionTitle}>Lista Roja Ecuador</span>
+                    <span style={{color: "#f07304"}}>|</span>
+                    {fichaEspecie.listaRojaIUCN?.catalogo_awe?.nombre ? (
+                      <span className="text-muted-foreground">
+                        {fichaEspecie.listaRojaIUCN.catalogo_awe.nombre}
+                        {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla && (
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({fichaEspecie.listaRojaIUCN.catalogo_awe.sigla})
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">No disponible</span>
+                    )}
+                  </p>
+
+                  {/* 4. Comentario Estatus Poblacional */}
+                  <div>
+                    {fichaEspecie.comentario_estatus_poblacional ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
+                        }}
+                        suppressHydrationWarning
+                        className="text-muted-foreground text-sm"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+
+                  {/* 5. CITES */}
                   <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Reservas de la Biosfera</h4>
+                    <h4 className={cardSubsectionTitle}>CITES</h4>
                     {(() => {
-                      const reservasBiosfera =
+                      const cites =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
+                        ) || [];
+
+                      // Eliminar duplicados
+                      const uniqueMap = new Map();
+
+                      cites.forEach((categoria: any) => {
+                        const key = categoria.catalogo_awe_id;
+
+                        if (!uniqueMap.has(key)) {
+                          uniqueMap.set(key, categoria);
+                        }
+                      });
+                      const citesUnicos = Array.from(uniqueMap.values());
+
+                      return citesUnicos.length > 0 ? (
+                        <div className="space-y-1">
+                          {citesUnicos.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="text-muted-foreground text-sm"
+                            >
+                              {categoria.catalogo_awe.nombre}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 6. Manejo exsitu */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>
+                      Manejo <span className="italic">exsitu</span>
+                    </h4>
+                    {fichaEspecie.anfibio_conservacion === true ? (
+                      <a
+                        className="inline-flex items-center gap-1 !no-underline hover:!no-underline"
+                        href={RANARIUM_URL}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <Check className="h-4 w-4" strokeWidth={3} style={{color: "#2d6e2d"}} />
+                      </a>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">NO</p>
+                    )}
+                  </div>
+
+                  {/* 7. Áreas protegidas estado | SNAP */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>
+                      Áreas protegidas estado{" "}
+                      <span className="font-normal text-[#f07304]">|</span> SNAP
+                    </h4>
+                    {(() => {
+                      const areasEstado =
                         fichaEspecie.taxon_catalogo_awe_results?.filter(
                           (categoria: any) =>
                             categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                            "Reservas de la Biósfera",
+                            "Áreas protegidas del Estado",
                         ) || [];
 
-                      return reservasBiosfera.length > 0 ? (
+                      const uniqueMap = new Map();
+
+                      areasEstado.forEach((categoria: any) => {
+                        const key = categoria.catalogo_awe_id;
+
+                        if (!uniqueMap.has(key)) {
+                          uniqueMap.set(key, categoria);
+                        }
+                      });
+                      const areasEstadoUnicas = Array.from(uniqueMap.values());
+
+                      return areasEstadoUnicas.length > 0 ? (
                         <div className="space-y-1">
-                          {reservasBiosfera.map((categoria: any) => (
+                          {areasEstadoUnicas.map((categoria: any) => (
                             <div
                               key={categoria.id_taxon_catalogo_awe}
                               className="flex items-start gap-2"
@@ -1628,9 +1791,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 10. Bosques Protegidos */}
+                  {/* 8. Bosques protectores */}
                   <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Bosques Protegidos</h4>
+                    <h4 className={cardSubsectionTitle}>Bosques protectores</h4>
                     {(() => {
                       const bosquesProtegidos =
                         fichaEspecie.taxon_catalogo_awe_results?.filter(
@@ -1659,209 +1822,31 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* 11. Áreas Protegidas */}
+                  {/* 9. Áreas protegidas privadas */}
                   <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Áreas Protegidas</h4>
+                    <h4 className={cardSubsectionTitle}>Áreas protegidas privadas</h4>
                     {(() => {
-                      const areasProtegidas =
+                      const areasPrivadas =
                         fichaEspecie.taxon_catalogo_awe_results?.filter(
                           (categoria: any) =>
-                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                              "Áreas protegidas Privadas" ||
-                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                              "Áreas protegidas del Estado",
-                        ) || [];
-
-                      // Eliminar duplicados basándose en catalogo_awe_id
-                      const uniqueMap = new Map();
-
-                      areasProtegidas.forEach((categoria: any) => {
-                        const key = categoria.catalogo_awe_id;
-
-                        if (!uniqueMap.has(key)) {
-                          uniqueMap.set(key, categoria);
-                        }
-                      });
-                      const areasProtegidasUnicas = Array.from(uniqueMap.values());
-
-                      if (areasProtegidasUnicas.length > 0) {
-                        const areasEstado = areasProtegidasUnicas.filter(
-                          (categoria) =>
-                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                            "Áreas protegidas del Estado",
-                        );
-                        const areasPrivadas = areasProtegidasUnicas.filter(
-                          (categoria) =>
                             categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
                             "Áreas protegidas Privadas",
-                        );
-
-                        return (
-                          <div className="space-y-3">
-                            {/* Áreas protegidas del Estado */}
-                            {areasEstado.length > 0 ? (
-                              <div className="ml-4">
-                                <h4 className={cardSubsectionTitle}>Áreas protegidas del Estado</h4>
-                                <div className="space-y-1">
-                                  {areasEstado.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null}
-
-                            {/* Áreas protegidas Privadas */}
-                            {areasPrivadas.length > 0 ? (
-                              <div className="ml-4">
-                                <h4 className={cardSubsectionTitle}>Áreas protegidas Privadas</h4>
-                                <div className="space-y-1">
-                                  {areasPrivadas.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      }
-
-                      return <p className="text-muted-foreground text-sm">No disponible</p>;
-                    })()}
-                  </div>
-                </>
-              </CardContent>
-            </Card>
-            {/* Conservación */}
-            <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Conservación</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <>
-                  {/* 1. Lista Roja UICN */}
-                  <div>
-                    <h4 className={cardSubsectionTitle}>Lista Roja UICN</h4>
-                    {fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla ? (
-                      (() => {
-                        const sigla = fichaEspecie.listaRojaIUCN.catalogo_awe.sigla;
-
-                        // Verificar si es PE
-                        if (isPE(sigla)) {
-                          return (
-                            <div
-                              className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
-                              style={{
-                                backgroundColor: "#b71c1c",
-                                color: "#ffffff",
-                                borderRadius: "100% 0% 100% 100%",
-                                minWidth: "32px",
-                                minHeight: "32px",
-                                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                              }}
-                            >
-                              PE
-                            </div>
-                          );
-                        }
-
-                        // Normalizar el valor: trim y uppercase
-                        const valorNormalizado = sigla.toUpperCase().trim();
-                        const valoresValidos = ["LC", "NT", "VU", "EN", "CR", "EW", "EX", "DD"];
-
-                        if (valoresValidos.includes(valorNormalizado)) {
-                          return (
-                            <RedListStatus
-                              status={
-                                valorNormalizado as
-                                  | "LC"
-                                  | "NT"
-                                  | "VU"
-                                  | "EN"
-                                  | "CR"
-                                  | "EW"
-                                  | "EX"
-                                  | "DD"
-                              }
-                            />
-                          );
-                        }
-
-                        return (
-                          <div className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold">
-                            {sigla}
-                          </div>
-                        );
-                      })()
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
-
-                  {/* 2. Endemismo */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Endemismo</h4>
-                    <p className="text-muted-foreground text-sm">
-                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : "No endémica"}
-                    </p>
-                  </div>
-
-                  {/* 3. Comentario Estatus Poblacional */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Estatus Poblacional</h4>
-                    {fichaEspecie.comentario_estatus_poblacional ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.comentario_estatus_poblacional),
-                        }}
-                        suppressHydrationWarning
-                        className="text-muted-foreground text-sm"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
-
-                  {/* 4. CITES */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>CITES</h4>
-                    {(() => {
-                      const cites =
-                        fichaEspecie.taxon_catalogo_awe_results?.filter(
-                          (categoria: any) =>
-                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "CITES",
                         ) || [];
 
-                      // Eliminar duplicados
                       const uniqueMap = new Map();
 
-                      cites.forEach((categoria: any) => {
+                      areasPrivadas.forEach((categoria: any) => {
                         const key = categoria.catalogo_awe_id;
 
                         if (!uniqueMap.has(key)) {
                           uniqueMap.set(key, categoria);
                         }
                       });
-                      const citesUnicos = Array.from(uniqueMap.values());
+                      const areasPrivadasUnicas = Array.from(uniqueMap.values());
 
-                      return citesUnicos.length > 0 ? (
+                      return areasPrivadasUnicas.length > 0 ? (
                         <div className="space-y-1">
-                          {citesUnicos.map((categoria: any) => (
+                          {areasPrivadasUnicas.map((categoria: any) => (
                             <div
                               key={categoria.id_taxon_catalogo_awe}
                               className="flex items-start gap-2"
@@ -1879,155 +1864,52 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     })()}
                   </div>
 
-                  {/* Ecosistemas, Reservas de la Biósfera y Bosques Protegidos */}
-                  {(() => {
-                    const ecosistemasYAreas =
-                      fichaEspecie.taxon_catalogo_awe_results?.filter(
-                        (categoria: any) =>
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas" ||
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                            "Reservas de la Biósfera" ||
-                          categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Bosques Protegidos",
-                      ) || [];
+                  {/* 10. Reservas de la biósfera */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>Reservas de la biósfera</h4>
+                    {(() => {
+                      const reservasBiosfera =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
+                            "Reservas de la Biósfera",
+                        ) || [];
 
-                    // Eliminar duplicados basándose en catalogo_awe_id
-                    const uniqueMap = new Map();
-
-                    ecosistemasYAreas.forEach((categoria: any) => {
-                      const key = categoria.catalogo_awe_id;
-
-                      if (!uniqueMap.has(key)) {
-                        uniqueMap.set(key, categoria);
-                      }
-                    });
-                    const ecosistemasYAreasUnicas = Array.from(uniqueMap.values());
-
-                    return ecosistemasYAreasUnicas.length > 0 ? (
-                      <div className={cardSectionDivider}>
-                        <h4 className={cardSubsectionTitle}>Ecosistemas y Áreas de Conservación</h4>
-                        <div className="space-y-3">
-                          {/* Ecosistemas */}
-                          {(() => {
-                            const ecosistemas = ecosistemasYAreasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas",
-                            );
-
-                            return ecosistemas.length > 0 ? (
-                              <div className="mb-4 ml-4">
-                                <h4 className={cardSubsectionTitle}>Ecosistemas</h4>
-                                <div className="space-y-1">
-                                  {ecosistemas.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
-
-                          {/* Reservas de la Biósfera */}
-                          {(() => {
-                            const reservasBiosfera = ecosistemasYAreasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Reservas de la Biósfera",
-                            );
-
-                            return reservasBiosfera.length > 0 ? (
-                              <div className="mb-4 ml-4">
-                                <h4 className={cardSubsectionTitle}>Reservas de la Biósfera</h4>
-                                <div className="space-y-1">
-                                  {reservasBiosfera.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
-
-                          {/* Bosques Protegidos */}
-                          {(() => {
-                            const bosquesProtegidos = ecosistemasYAreasUnicas.filter(
-                              (categoria) =>
-                                categoria.catalogo_awe.tipo_catalogo_awe?.nombre ===
-                                "Bosques Protegidos",
-                            );
-
-                            return bosquesProtegidos.length > 0 ? (
-                              <div className="ml-4">
-                                <h4 className={cardSubsectionTitle}>Bosques Protegidos</h4>
-                                <div className="space-y-1">
-                                  {bosquesProtegidos.map((categoria: any) => (
-                                    <div
-                                      key={categoria.id_taxon_catalogo_awe}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-muted-foreground text-xs">•</span>
-                                      <span className="text-muted-foreground text-xs">
-                                        {categoria.catalogo_awe.nombre}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
+                      return reservasBiosfera.length > 0 ? (
+                        <div className="space-y-1">
+                          {reservasBiosfera.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    ) : null;
-                  })()}
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
                 </>
               </CardContent>
             </Card>
-            {/* Taxonomía */}
+            {/* Información adicional */}
             <Card className="gap-0">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Taxonomía y Relaciones filogenéticas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.taxonomia ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.taxonomia),
-                    }}
-                    suppressHydrationWarning
-                    className="text-muted-foreground text-sm"
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
-            {/* Observaciones */}
-            <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Observaciones</CardTitle>
+                <CardTitle className="text-base">Información adicional</CardTitle>
               </CardHeader>
               <CardContent>
                 <>
-                  {/* Usos */}
+                  {/* Información Adicional */}
                   <div>
-                    <h4 className={cardSubsectionTitle}>Usos</h4>
-                    {fichaEspecie.usos ? (
+                    {fichaEspecie.informacion_adicional ? (
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.usos),
+                          __html: procesarHTML(fichaEspecie.informacion_adicional),
                         }}
                         suppressHydrationWarning
                         className="text-muted-foreground text-sm"
@@ -2037,13 +1919,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                   </div>
 
-                  {/* Información Adicional */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Información Adicional</h4>
-                    {fichaEspecie.informacion_adicional ? (
+                  {/* Usos */}
+                  <div className="mt-3">
+                    {fichaEspecie.usos ? (
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.informacion_adicional),
+                          __html: procesarHTML(fichaEspecie.usos),
                         }}
                         suppressHydrationWarning
                         className="text-muted-foreground text-sm"
@@ -2243,7 +2124,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           fontWeight: "600",
                         }}
                       >
-                        Lista Roja IUCN
+                        Lista Roja Ecuador
                       </h4>
                       {(() => {
                         const sigla = fichaEspecie.listaRojaIUCN.catalogo_awe.sigla;
@@ -2295,6 +2176,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                   | "EW"
                                   | "EX"
                                   | "DD"
+                                  | "NE"
                               }
                             />
                           );

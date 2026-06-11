@@ -209,6 +209,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
   const listaRojaIUCN =
     taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 10) ||
     null;
+  // Buscar listaRojaGlobal (tipo_catalogo_awe_id = 11)
+  const listaRojaGlobal =
+    taxon_catalogo_awe_results?.find((item) => item.catalogo_awe.tipo_catalogo_awe_id === 11) ||
+    null;
 
   // Filtrar solo las distribuciones altitudinales (tipo_catalogo_awe_id = 5)
   // Eliminar duplicados basándose en catalogo_awe_id (combinación única de taxon_id + catalogo_awe_id)
@@ -433,6 +437,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
         fichaEspecie?.observacion_zona_altitudinal) ??
       null,
     comentario_estatus_poblacional: fichaEspecie?.comentario_estatus_poblacional ?? null,
+    anfibio_conservacion: fichaEspecie?.anfibio_conservacion ?? null,
     // Links externos
     wikipedia: fichaEspecie?.wikipedia ?? null,
     aw: fichaEspecie?.aw ?? null,
@@ -474,6 +479,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     publicacionesOrdenadas: todasLasPublicaciones, // Todas las publicaciones (incluyendo adicionales) para procesar citas
     taxones: taxonesArray,
     listaRojaIUCN: listaRojaIUCN ?? null,
+    listaRojaGlobal: listaRojaGlobal ?? null,
     lineage: lineageArray,
     hasOrientalDistribution: hasOrientalDistribution ?? false,
     hasOccidentalDistribution: hasOccidentalDistribution ?? false,

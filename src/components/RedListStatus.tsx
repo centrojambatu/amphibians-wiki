@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface RedListStatusProps {
-  readonly status: "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD";
+  readonly status: "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX" | "DD" | "NE";
   readonly showTooltip?: boolean;
 }
 
@@ -72,6 +72,13 @@ export default function RedListStatus({
           textColor: "#000000",
           fullName: "Datos Insuficientes",
         };
+      case "NE":
+        return {
+          label: "NE",
+          backgroundColor: "#ffffff",
+          textColor: "#000000",
+          fullName: "No Evaluada",
+        };
       default:
         return {
           label: "?",
@@ -95,6 +102,7 @@ export default function RedListStatus({
         height: "36px",
         padding: "4px 9px",
         boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+        border: status === "NE" ? "1px solid #d1d5db" : undefined,
       }}
     >
       {statusInfo.label}

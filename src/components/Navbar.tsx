@@ -20,6 +20,8 @@ interface NavLink {
   submenu?: SubMenuItem[];
 }
 
+const SITE_HOME_URL = "https://deepskyblue-beaver-511675.hostingersite.com/";
+
 const navLinks: NavLink[] = [
   {
     href: "/sapopedia",
@@ -73,7 +75,12 @@ export default function Navbar() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link className="flex items-center gap-2 !no-underline hover:!no-underline" href="/sapopedia" onClick={closeMenu} style={{ textDecoration: "none" }}>
+          <a
+            className="flex items-center gap-2 !no-underline hover:!no-underline"
+            href={SITE_HOME_URL}
+            onClick={closeMenu}
+            style={{textDecoration: "none"}}
+          >
             <Image
               key={logoSrc}
               priority
@@ -83,7 +90,7 @@ export default function Navbar() {
               src={logoSrc}
               width={218}
             />
-          </Link>
+          </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-2 lg:flex xl:gap-4">
