@@ -93,8 +93,8 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
   const nombreComun = fichaEspecie?.taxones?.[0]?.nombre_comun as string | undefined;
 
   return (
-    <CardHeader className="sticky top-0 z-30 text-left">
-      <div className="space-y-4" style={{padding: "20px 30px 30px"}}>
+    <CardHeader className="sticky top-0 z-30 px-0 text-left">
+      <div className="space-y-4 py-5 pr-4 pl-2 sm:pr-6 sm:pl-4">
         {/* Título principal - Jerarquía taxonómica completa + gota de Lista Roja a la derecha */}
         <div className="relative flex flex-wrap items-baseline justify-start gap-2 pr-20">
           {/* Orden - PEQUEÑO con link (rank_id = 4) */}
