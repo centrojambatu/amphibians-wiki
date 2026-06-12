@@ -62,6 +62,21 @@ function parseCatalogString(catalogString: string | null): string[] {
 
 const CHUNK_SIZE = 200;
 
+/** Extrae las propiedades relevantes de un error de Supabase (que tiene props no-enumerables). */
+function describeSupabaseError(err: unknown): Record<string, unknown> {
+  if (err == null || typeof err !== "object") return {value: err};
+  const e = err as Record<string, unknown>;
+
+  return {
+    message: e.message,
+    code: e.code,
+    details: e.details,
+    hint: e.hint,
+    status: e.status,
+    statusCode: e.statusCode,
+  };
+}
+
 /**
  * Ejecuta una query con .in(field, ids) por chunks en paralelo y une resultados.
  * Evita requests muy grandes y planes ineficientes (supabase-postgres-best-practices).
@@ -70,10 +85,14 @@ async function fetchInChunks<T>(
   ids: number[],
   chunkSize: number,
   run: (chunk: number[]) => Promise<{ data: T[] | null; error: unknown }>,
+  label = "chunks",
 ): Promise<{ data: T[]; error: unknown }> {
   if (ids.length === 0) return { data: [], error: null };
   if (ids.length <= chunkSize) {
     const r = await run(ids);
+
+    if (r.error) console.error(`Error en consulta por ${label}:`, describeSupabaseError(r.error));
+
     return { data: r.data ?? [], error: r.error };
   }
   const chunks: number[][] = [];
@@ -82,7 +101,14 @@ async function fetchInChunks<T>(
   }
   const results = await Promise.all(chunks.map((c) => run(c)));
   const firstError = results.find((r) => r.error)?.error ?? null;
-  if (firstError) console.error("Error en consulta por chunks:", firstError);
+
+  if (firstError) {
+    console.error(
+      `Error en consulta por ${label}:`,
+      describeSupabaseError(firstError),
+    );
+  }
+
   return {
     data: results.flatMap((r) => r.data ?? []),
     error: firstError,
@@ -151,50 +177,62 @@ export default async function getAllEspecies(
     fetchInChunks(
       taxonIds,
       CHUNK_SIZE,
-      (chunk) =>
-        Promise.resolve(
-          supabaseClient
-            .from("taxon_catalogo_awe")
-            .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
-            .in("taxon_id", chunk)
-            .in("catalogo_awe.tipo_catalogo_awe_id", [
-              TIPO_ECOSISTEMAS,
-              TIPO_RESERVAS_BIOSFERA,
-              TIPO_BOSQUES_PROTEGIDOS,
-            ]),
-        ).then((r: { data: unknown[] | null; error: unknown }) => r),
+      async (chunk) => {
+        const r = await supabaseClient
+          .from("taxon_catalogo_awe")
+          .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
+          .in("taxon_id", chunk)
+          .in("catalogo_awe.tipo_catalogo_awe_id", [
+            TIPO_ECOSISTEMAS,
+            TIPO_RESERVAS_BIOSFERA,
+            TIPO_BOSQUES_PROTEGIDOS,
+          ]);
+
+        return {data: r.data as unknown[] | null, error: r.error};
+      },
+      "taxon_catalogo_awe",
     ),
     fetchInChunks(
       taxonIds,
       CHUNK_SIZE,
-      (chunk) =>
-        Promise.resolve(
-          supabaseClient
-            .from("taxon_geopolitica")
-            .select(
-              "taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)",
-            )
-            .in("taxon_id", chunk)
-            .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS),
-        ).then((r: { data: unknown[] | null; error: unknown }) => r),
+      async (chunk) => {
+        const r = await supabaseClient
+          .from("taxon_geopolitica")
+          .select("taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)")
+          .in("taxon_id", chunk)
+          .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
+
+        return {data: r.data as unknown[] | null, error: r.error};
+      },
+      "taxon_geopolitica",
     ),
-    fetchInChunks(fichaEspecieIds, CHUNK_SIZE, (chunk) =>
-      Promise.resolve(
-        supabaseClient
+    fetchInChunks(
+      fichaEspecieIds,
+      CHUNK_SIZE,
+      async (chunk) => {
+        const r = await supabaseClient
           .from("ficha_especie")
           .select(
             "id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, fotografia_destacada:fotografia_destacada_id(enlace)",
           )
-          .in("id_ficha_especie", chunk),
-      ).then((r: { data: unknown[] | null; error: unknown }) => r),
+          .in("id_ficha_especie", chunk);
+
+        return {data: r.data as unknown[] | null, error: r.error};
+      },
+      "ficha_especie",
     ),
-    fetchInChunks(taxonIds, CHUNK_SIZE, (chunk) =>
-      Promise.resolve(
-        (supabaseClient as any)
+    fetchInChunks(
+      taxonIds,
+      CHUNK_SIZE,
+      async (chunk) => {
+        const r = await (supabaseClient as any)
           .from("vw_nombres_comunes")
           .select("id_taxon, nombre_comun_ingles")
-          .in("id_taxon", chunk),
-      ).then((r: { data: unknown[] | null; error: unknown }) => r),
+          .in("id_taxon", chunk);
+
+        return {data: r.data as unknown[] | null, error: r.error};
+      },
+      "vw_nombres_comunes",
     ),
   ]);
 

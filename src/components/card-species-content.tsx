@@ -1834,9 +1834,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </CardHeader>
               <CardContent>
                 <>
-                  {/* 1. Lista Roja Global */}
+                  {/* 1. Lista Roja Global UICN */}
                   <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-sm">
-                    <span className={`${cardSubsectionTitle} mb-0`}>Lista Roja Global</span>
+                    <span className={`${cardSubsectionTitle} mb-0`}>Lista Roja Global UICN</span>
                     <span className="inline-flex max-w-full items-baseline gap-x-2">
                       <span style={{color: "#f07304"}}>|</span>
                       {fichaEspecie.listaRojaGlobal?.catalogo_awe?.nombre ? (

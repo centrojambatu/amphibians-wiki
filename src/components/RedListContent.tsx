@@ -39,12 +39,28 @@ export default function RedListContent({
 
   const content = (
     <>
-      <RedListSummaryCards especies={especiesFiltradas} onCategoryClick={handleCategoryClick} />
-      <RedListChartSelector
-        categorias={categorias}
+      {/* Fila superior: Lista Roja externa + especies amenazadas + no amenazadas (fuera del card unificado) */}
+      <RedListSummaryCards
         especies={especiesFiltradas}
+        section="top"
         onCategoryClick={handleCategoryClick}
       />
+
+      {/* Card unificado: las 7 categorías de Lista Roja + histograma de barras */}
+      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-3 sm:mt-8 sm:p-6">
+        <RedListSummaryCards
+          especies={especiesFiltradas}
+          section="categories"
+          onCategoryClick={handleCategoryClick}
+        />
+        <div className="mt-6 sm:mt-8">
+          <RedListChartSelector
+            categorias={categorias}
+            especies={especiesFiltradas}
+            onCategoryClick={handleCategoryClick}
+          />
+        </div>
+      </div>
       <div className="mt-8 mb-8">
         <RedListAccordion
           categorias={categorias}

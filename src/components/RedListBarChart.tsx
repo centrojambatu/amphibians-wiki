@@ -148,7 +148,7 @@ export default function RedListBarChart({
   };
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-3 sm:p-6">
+    <div className="flex h-full flex-col">
       <div className="mb-4 pl-2 sm:pl-6">
         <p className="text-base font-semibold text-gray-800 sm:text-lg">
           {totalEspecies} <span className="text-gray-500">especies</span>

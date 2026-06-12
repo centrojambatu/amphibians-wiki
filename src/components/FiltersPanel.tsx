@@ -575,7 +575,7 @@ export default function FiltersPanel({
                       </label>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                     <div className="flex justify-between text-xs text-gray-600">
                       <span>{filters.rangoAltitudinal.min}m</span>
                       <span>{filters.rangoAltitudinal.max}m</span>
@@ -613,7 +613,7 @@ export default function FiltersPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4">
+                <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>{filters.areaDistribucion.min} km²</span>
                     <span>{filters.areaDistribucion.max} km²</span>
@@ -1013,7 +1013,7 @@ export default function FiltersPanel({
                   </div>
                 </div>
                 {/* Slider de rango altitudinal */}
-                <div className="space-y-2">
+                <div className="space-y-2 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                   <div className="flex justify-between text-xs text-gray-600">
                     <span>{filters.rangoAltitudinal.min}m</span>
                     <span>{filters.rangoAltitudinal.max}m</span>
@@ -1055,7 +1055,7 @@ export default function FiltersPanel({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-4">
+              <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{filters.areaDistribucion.min} km²</span>
                   <span>{filters.areaDistribucion.max} km²</span>
@@ -1219,7 +1219,7 @@ export default function FiltersPanel({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-4">
+                  <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>{filters.pluviocidad.min} mm/año</span>
                       <span>{filters.pluviocidad.max} mm/año</span>
@@ -1254,7 +1254,7 @@ export default function FiltersPanel({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-4">
+                  <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>{filters.temperatura.min} °C</span>
                       <span>{filters.temperatura.max} °C</span>

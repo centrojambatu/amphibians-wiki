@@ -70,7 +70,7 @@ export default function YearRangeFilter({
           <CornerDownLeft aria-hidden className="text-muted-foreground h-4 w-4" />
         </span>
       </div>
-      <div className="space-y-2 pt-2">
+      <div className="space-y-2 pt-2 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
         <Slider
           className="w-full"
           max={yearMax}

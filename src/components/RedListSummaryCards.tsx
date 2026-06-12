@@ -5,9 +5,17 @@ import {SpeciesListItem} from "@/app/sapopedia/get-all-especies";
 interface RedListSummaryCardsProps {
   readonly especies: SpeciesListItem[];
   readonly onCategoryClick?: (categoria: string) => void;
+  /** "top" = solo la fila superior (Lista Roja externa + amenazadas + no amenazadas);
+   *  "categories" = solo la grilla de 7 categorías;
+   *  undefined = ambas (compatibilidad). */
+  readonly section?: "top" | "categories";
 }
 
-export default function RedListSummaryCards({especies, onCategoryClick}: RedListSummaryCardsProps) {
+export default function RedListSummaryCards({
+  especies,
+  onCategoryClick,
+  section,
+}: RedListSummaryCardsProps) {
   // Función helper para detectar si es PE
   const isPE = (sigla: string | null): boolean => {
     if (!sigla) return false;
@@ -124,32 +132,42 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
 
   const labelStyle = { color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" as const };
 
+  const referenceLinkStyle = {
+    fontSize: "15px",
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+    fontWeight: "500" as const,
+  };
+
+  const showTop = section === undefined || section === "top";
+  const showCategories = section === undefined || section === "categories";
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Card de especies amenazadas + no amenazadas + enlaces */}
+      {showTop && (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {/* Card de enlaces externos Lista Roja */}
         <div
-          className="flex flex-col justify-center rounded-md border p-2"
+          className="flex flex-col justify-center gap-1 rounded-md border py-2 pr-2 pl-8"
           style={{ borderColor: "#dddddd" }}
         >
           <a
             className="hover:text-gray-900"
-            style={labelStyle}
             href="https://deepskyblue-beaver-511675.hostingersite.com/lista-roja/"
             rel="noopener noreferrer"
+            style={referenceLinkStyle}
             target="_blank"
           >
             Lista Roja Ecuador
           </a>
           <a
             className="hover:text-gray-900"
-            style={labelStyle}
             href="https://www.iucnredlist.org/"
             rel="noopener noreferrer"
+            style={referenceLinkStyle}
             target="_blank"
           >
-            Lista Roja IUCN
+            Lista Roja Global UICN
           </a>
         </div>
 
@@ -230,8 +248,10 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
           </span>
         </button>
       </div>
+      )}
 
       {/* 7 cards por categoría de lista roja */}
+      {showCategories && (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {categoriasListaRoja.map(({sigla, etiqueta}) => {
           const count = contarPorCategoria(sigla);
@@ -258,6 +278,7 @@ export default function RedListSummaryCards({especies, onCategoryClick}: RedList
           );
         })}
       </div>
+      )}
     </div>
   );
 }

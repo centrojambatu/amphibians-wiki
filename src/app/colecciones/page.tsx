@@ -845,7 +845,7 @@ export default function ColeccionesPage() {
                     />
 
                     {/* Altitud */}
-                    <div className="space-y-2 pt-2">
+                    <div className="space-y-2 pt-2 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-gray-700">Altitud (msnm)</span>
                         {elevActive && (

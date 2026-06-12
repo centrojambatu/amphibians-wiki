@@ -671,7 +671,7 @@ function MapotecaContent({
                     </Button>
                   </div>
 
-                  <div className="space-y-5 px-4">
+                  <div className="space-y-5 px-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
                     <EspecieMultiSelect selected={especieFilter} onChange={setEspecieFilter} />
                     <CatalogoMultiSelect selected={catalogoFilter} onChange={setCatalogoFilter} />
                     <LocalidadMultiSelect
