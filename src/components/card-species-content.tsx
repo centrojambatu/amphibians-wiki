@@ -28,9 +28,25 @@ import {
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Separator} from "./ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
-import RedListStatus from "./RedListStatus";
+
+type MapType = "relief" | "terrain" | "provinces" | "satellite" | "streets";
+
+const MAP_TYPE_OPTIONS: {value: MapType; label: string}[] = [
+  {value: "relief", label: "Relieve"},
+  {value: "terrain", label: "Topográfico"},
+  {value: "provinces", label: "Estándar"},
+  {value: "satellite", label: "Satélite"},
+  {value: "streets", label: "Minimalista"},
+];
 
 // Mapa de la Mapoteca cargado dinámicamente (depende de Leaflet, requiere window)
 const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
@@ -45,15 +61,9 @@ const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
   ),
 });
 
-// Función helper para detectar si es PE
-const isPE = (sigla: string | null | undefined) => {
-  if (!sigla) return false;
-
-  return sigla === "PE" || sigla.includes("PE") || sigla.includes("Posiblemente extinta");
-};
-
 const ORDENES_SIN_RENACUAJOS = new Set(["caudata", "gymnophiona"]);
 const FAMILIAS_SIN_RENACUAJOS = new Set(["craugastoridae", "eleutherodactylidae"]);
+
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
@@ -301,6 +311,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     () => shouldShowRenacuajos(fichaEspecie.lineage),
     [fichaEspecie.lineage],
   );
+
+  // Tipo de mapa seleccionado para el mapa de colecciones
+  const [mapType, setMapType] = useState<MapType>("provinces");
 
   // Lightbox para la foto destacada de la especie
   const [fotoDestacadaOpen, setFotoDestacadaOpen] = useState(false);
@@ -1207,10 +1220,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       __html: procesarHTML(fichaEspecie.descubridor),
                     }}
                     suppressHydrationWarning
-                    className="text-muted-foreground text-sm italic"
+                    className="text-muted-foreground text-sm"
                   />
                 ) : (
-                  <p className="text-muted-foreground text-sm italic">No disponible</p>
+                  <p className="text-muted-foreground text-sm">No disponible</p>
                 )}
               </CardContent>
             </Card>
@@ -1717,9 +1730,23 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                     {/* Mapa con colecciones internas y externas filtradas por taxon */}
                     {nombreCientificoMain && (
-                      <div className="mt-4 mb-4 px-2 sm:px-6">
+                      <div className="mt-4 mb-4 space-y-2 px-2 sm:px-6">
+                        <div className="flex items-center justify-end">
+                          <Select value={mapType} onValueChange={(v) => setMapType(v as MapType)}>
+                            <SelectTrigger className="h-8 w-[140px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="z-[1100]">
+                              {MAP_TYPE_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} className="text-xs" value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <div className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]">
-                          <MapotecaMap especieFilter={[nombreCientificoMain]} mapType="provinces" />
+                          <MapotecaMap especieFilter={[nombreCientificoMain]} mapType={mapType} />
                         </div>
                       </div>
                     )}
@@ -1801,7 +1828,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </CardContent>
             </Card>
             {/* Conservación */}
-            <Card className="gap-0">
+            <Card className="scroll-mt-24 gap-0" id="conservacion">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Conservación</CardTitle>
               </CardHeader>
@@ -2142,44 +2169,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="gap-0">
-              <CardContent className="pt-4">
-                <>
-                  {/* Historial */}
-                  <div>
-                    <h4 className={cardSubsectionTitle}>Historial</h4>
-                    {fichaEspecie.historial ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(
-                            fichaEspecie.historial.replace(/\r\n?|\n/g, "<br />"),
-                          ),
-                        }}
-                        suppressHydrationWarning
-                        className="text-muted-foreground text-sm"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
-
-                  {/* Agradecimiento */}
-                  {fichaEspecie.agradecimiento && (
-                    <div className={cardSectionDivider}>
-                      <h4 className={cardSubsectionTitle}>Agradecimiento</h4>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.agradecimiento),
-                        }}
-                        suppressHydrationWarning
-                        className="text-muted-foreground text-sm"
-                      />
-                    </div>
-                  )}
-                </>
-              </CardContent>
-            </Card>
-            {/* Fecha de actualización + cita sugerida del sitio */}
+            {/* Historial + Agradecimiento + Actualización + cita sugerida del sitio */}
             {(() => {
               const meses = [
                 "Enero",
@@ -2205,52 +2195,77 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
               const fechaStr = String(fichaEspecie.fecha_actualizacion || "");
               let anoActualizacion = String(hoy.getFullYear());
-              let fechaActualizacionFormateada = "No disponible";
               const fechaParsed = fechaStr ? new Date(fechaStr) : null;
 
               if (fechaParsed && !Number.isNaN(fechaParsed.getTime())) {
-                const dia = String(fechaParsed.getDate()).padStart(2, "0");
-
-                fechaActualizacionFormateada =
-                  dia +
-                  " " +
-                  meses[fechaParsed.getMonth()] +
-                  " " +
-                  String(fechaParsed.getFullYear());
                 anoActualizacion = String(fechaParsed.getFullYear());
               } else {
                 const yearMatch = /\b(19|20)\d{2}\b/.exec(fechaStr);
 
                 if (yearMatch) {
                   anoActualizacion = yearMatch[0];
-                  fechaActualizacionFormateada = fechaStr;
                 }
               }
 
               return (
-                <Card className="gap-0">
-                  <CardContent className="space-y-3 py-3">
-                    <div className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="text-base font-semibold">Actualización</span>
-                      <span className="text-muted-foreground text-sm">
-                        {fechaActualizacionFormateada}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Coloma, L. A. {anoActualizacion}. Anfibios Ecuador: Referencia en línea.
-                      Version 1.0. ({today}) Base de datos electrónica en{" "}
-                      <a
-                        className="processed-link"
-                        href="https://deepskyblue-beaver-511675.hostingersite.com"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        https://deepskyblue-beaver-511675.hostingersite.com
-                      </a>
-                      . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
-                    </p>
-                  </CardContent>
-                </Card>
+                <>
+                  <Card className="gap-0">
+                    <CardContent className="pt-4">
+                      <>
+                        {/* Historial cambios */}
+                        <div>
+                          <h4 className={cardSubsectionTitle}>Historial cambios</h4>
+                          {fichaEspecie.historial ? (
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: procesarHTML(
+                                  fichaEspecie.historial.replace(/\r\n?|\n/g, "<br />"),
+                                ),
+                              }}
+                              suppressHydrationWarning
+                              className="text-muted-foreground text-sm"
+                            />
+                          ) : (
+                            <p className="text-muted-foreground text-sm">No disponible</p>
+                          )}
+                        </div>
+
+                        {/* Agradecimiento */}
+                        {fichaEspecie.agradecimiento && (
+                          <div className={cardSectionDivider}>
+                            <h4 className={cardSubsectionTitle}>Agradecimiento</h4>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: procesarHTML(fichaEspecie.agradecimiento),
+                              }}
+                              suppressHydrationWarning
+                              className="text-muted-foreground text-sm"
+                            />
+                          </div>
+                        )}
+                      </>
+                    </CardContent>
+                  </Card>
+
+                  {/* Cita sugerida del sitio */}
+                  <Card className="gap-0">
+                    <CardContent className="py-3">
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        Coloma, L. A. {anoActualizacion}. Anfibios Ecuador: Referencia en línea.
+                        Version 1.0. ({today}) Base de datos electrónica en{" "}
+                        <a
+                          className="processed-link"
+                          href="https://deepskyblue-beaver-511675.hostingersite.com"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          https://deepskyblue-beaver-511675.hostingersite.com
+                        </a>
+                        . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </>
               );
             })()}
           </div>
@@ -2274,107 +2289,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
-                  {/* Lista Roja */}
-                  {fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla && (
-                    <div
-                      className="flex aspect-square flex-col items-center justify-center rounded-md border p-2"
-                      style={{
-                        backgroundColor: "#f9f9f9",
-                        borderColor: "#dddddd",
-                      }}
-                    >
-                      <h4
-                        className="mb-2"
-                        style={{
-                          color: "#666666",
-                          fontSize: "11px",
-                          fontFamily:
-                            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                          fontWeight: "600",
-                        }}
-                      >
-                        Lista Roja Ecuador
-                      </h4>
-                      {(() => {
-                        const sigla = fichaEspecie.listaRojaIUCN.catalogo_awe.sigla;
-
-                        // Verificar si es PE
-                        if (isPE(sigla)) {
-                          return (
-                            <div
-                              className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
-                              style={{
-                                backgroundColor: "#b71c1c",
-                                color: "#ffffff",
-                                borderRadius: "100% 0% 100% 100%",
-                                minWidth: "32px",
-                                minHeight: "32px",
-                                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                              }}
-                            >
-                              PE
-                            </div>
-                          );
-                        }
-
-                        // Normalizar el valor: trim y uppercase
-                        const valorNormalizado = sigla?.trim().toUpperCase() || "";
-                        // Lista de valores válidos
-                        const valoresValidos: readonly string[] = [
-                          "LC",
-                          "NT",
-                          "VU",
-                          "EN",
-                          "CR",
-                          "EW",
-                          "EX",
-                          "DD",
-                        ];
-
-                        // Verificar si el valor está en la lista de válidos
-                        if (valoresValidos.includes(valorNormalizado)) {
-                          return (
-                            <RedListStatus
-                              status={
-                                valorNormalizado as
-                                  | "LC"
-                                  | "NT"
-                                  | "VU"
-                                  | "EN"
-                                  | "CR"
-                                  | "EW"
-                                  | "EX"
-                                  | "DD"
-                                  | "NE"
-                              }
-                            />
-                          );
-                        }
-
-                        // Si no es válido, mostrar warning y badge con "?"
-                        console.warn(
-                          `⚠️ Valor de lista roja no válido en card-species-content: "${sigla}" (normalizado: "${valorNormalizado}")`,
-                        );
-
-                        return (
-                          <div
-                            className="inline-flex items-center justify-center px-2 py-1 text-[10px] font-semibold"
-                            style={{
-                              backgroundColor: "#d1d1c6",
-                              color: "#666666",
-                              borderRadius: "100% 0% 100% 100%",
-                              minWidth: "32px",
-                              minHeight: "32px",
-                              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
-                            }}
-                          >
-                            ?
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-
                   {/* Endemismo */}
                   <div
                     className="flex aspect-square flex-col items-center justify-center rounded-md border p-2"
