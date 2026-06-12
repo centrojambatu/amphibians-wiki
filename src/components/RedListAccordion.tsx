@@ -306,55 +306,84 @@ export default function RedListAccordion({
         key={species.id_taxon}
         className="border-border bg-card hover:border-border hover:bg-muted/50 relative w-full min-w-0 rounded-md border transition-all"
       >
-        {/* Mobile layout (< sm) */}
-        <div className="flex items-start gap-3 px-4 py-3 sm:hidden">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <Link
-                className="text-foreground text-sm font-medium italic hover:no-underline"
-                href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
-              >
-                {species.nombre_cientifico}
-              </Link>
-              {/* {species.descubridor && (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: processHTMLLinks(species.descubridor),
-                  }}
-                  className="text-xs text-gray-500"
-                />
-              )} */}
+        {/* Mobile / tablet layout (< xl) - apilado vertical para que nombres y bar tengan espacio */}
+        <div className="flex w-full min-w-0 flex-col gap-2 px-4 py-3 xl:hidden">
+          {/* Fila 1: Nombres + badges (endémica, lista roja) */}
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <Link
+                  className="text-foreground text-sm font-medium italic hover:no-underline"
+                  href={`/sapopedia/species/${species.nombre_cientifico.replace(/ /g, "-")}`}
+                >
+                  {species.nombre_cientifico}
+                </Link>
+              </div>
+              {(species.nombre_comun || species.nombre_comun_ingles) && (
+                <div className="text-muted-foreground mt-1 text-xs break-words">
+                  {species.nombre_comun}
+                  {species.nombre_comun && species.nombre_comun_ingles && (
+                    <span className="text-[#f07304]"> | </span>
+                  )}
+                  {species.nombre_comun_ingles}
+                </div>
+              )}
             </div>
-            {(species.nombre_comun || species.nombre_comun_ingles) && (
-              <div className="text-muted-foreground mt-1 text-xs">
-                {species.nombre_comun}
-                {species.nombre_comun && species.nombre_comun_ingles && (
-                  <span className="text-[#f07304]"> | </span>
-                )}
-                {species.nombre_comun_ingles}
-              </div>
-            )}
-            {showUltimoAvistamiento && (
-              <div className="text-muted-foreground mt-1 text-xs">
-                {species.ultimo_avistamiento
-                  ? formatUltimoAvistamiento(species.ultimo_avistamiento)
-                  : "—"}
-              </div>
-            )}
+            <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
+              <span
+                className={`text-xs font-semibold ${species.endemica ? "text-gray-700" : "text-gray-400"}`}
+              >
+                {species.endemica ? "E" : "NE"}
+              </span>
+              <div className="flex w-9 items-center justify-center">{redListBadge}</div>
+            </div>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
-            <span
-              className={`text-xs font-semibold ${species.endemica ? "text-gray-700" : "text-gray-400"}`}
-            >
-              {species.endemica ? "E" : "NE"}
-            </span>
-            <div className="flex w-9 items-center justify-center">{redListBadge}</div>
-          </div>
+
+          {/* Fila 2: meta-info (último avistamiento + área distribución) */}
+          {(showUltimoAvistamiento || species.area_distribucion != null) && (
+            <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              {showUltimoAvistamiento && (
+                <span>
+                  Último avistamiento:{" "}
+                  {species.ultimo_avistamiento
+                    ? formatUltimoAvistamiento(species.ultimo_avistamiento)
+                    : "—"}
+                </span>
+              )}
+              {species.area_distribucion != null && (
+                <span>Área distribución: {species.area_distribucion.toLocaleString()} km²</span>
+              )}
+            </div>
+          )}
+
+          {/* Fila 3: Pisos climáticos a todo el ancho */}
+          {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null && (
+            <div className="min-w-0 overflow-hidden">
+              <ClimaticFloorChart
+                altitudinalRange={{
+                  min: species.rango_altitudinal_min,
+                  max: species.rango_altitudinal_max,
+                  occidente: species.has_distribucion_occidental
+                    ? {
+                        min: species.rango_altitudinal_min,
+                        max: species.rango_altitudinal_max,
+                      }
+                    : undefined,
+                  oriente: species.has_distribucion_oriental
+                    ? {
+                        min: species.rango_altitudinal_min,
+                        max: species.rango_altitudinal_max,
+                      }
+                    : undefined,
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Desktop layout (≥ sm) */}
+        {/* Desktop layout (≥ xl) - solo activa cuando hay espacio horizontal suficiente */}
         <div
-          className={`hidden w-full min-w-0 items-center gap-4 py-3 pr-0 pl-4 sm:grid ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
+          className={`hidden w-full min-w-0 items-center gap-4 py-3 pr-0 pl-4 xl:grid ${showUltimoAvistamiento ? "grid-cols-[minmax(0,1fr)_11rem_9rem_3rem_4rem_20rem]" : "grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem]"}`}
         >
           {/* Nombre científico */}
           <div className="min-w-0">

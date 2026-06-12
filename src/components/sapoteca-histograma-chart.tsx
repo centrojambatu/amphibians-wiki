@@ -9,7 +9,8 @@ interface SapotecaHistogramaChartProps {
   idsTiposCientificas: number[];
 }
 
-const ALTURA_MAX_BARRA = 220;
+// Alturas máximas vienen del contenedor (h-[140px] sm:h-[220px]); las barras se
+// dimensionan como % relativo a esa altura.
 const COLOR_BARRA = "#f07304";
 const COLOR_BARRA_SELECCIONADA = "#d86503";
 const COLOR_BARRA_CERO = "#e5e7eb";
@@ -42,8 +43,8 @@ export default function SapotecaHistogramaChart({
 
   if (puntos.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <p className="text-lg font-semibold text-gray-800">
+      <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-6">
+        <p className="text-base font-semibold text-gray-800 sm:text-lg">
           Publicaciones científicas por año (1849 – {new Date().getFullYear()})
         </p>
         <p className="mt-4 text-sm text-gray-500">No hay datos disponibles.</p>
@@ -52,18 +53,20 @@ export default function SapotecaHistogramaChart({
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
+    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-6">
       <div className="mb-4">
-        <p className="text-lg font-semibold text-gray-800">
+        <p className="text-base font-semibold text-gray-800 sm:text-lg">
           Publicaciones científicas por año <span className="text-[#f07304]">|</span>{" "}
           <span className="text-gray-500">total {totalPublicaciones.toLocaleString()}</span>
         </p>
       </div>
 
-      <div className="flex w-full items-end gap-px" style={{ height: ALTURA_MAX_BARRA + 32 }}>
+      {/* Altura mobile-first: ~140px en móvil, 220px en sm+ (alturas por porcentaje
+          se calculan dentro del contenedor responsive). */}
+      <div className="flex h-[140px] w-full items-end gap-px sm:h-[220px]">
         <TooltipProvider delayDuration={0}>
           {puntos.map((punto) => {
-            const altura = maxCantidad > 0 ? (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA : 0;
+            const porcentaje = maxCantidad > 0 ? (punto.cantidad / maxCantidad) * 100 : 0;
             const tieneDatos = punto.cantidad > 0;
             const seleccionada = añosActivos.has(punto.año);
 
@@ -74,7 +77,7 @@ export default function SapotecaHistogramaChart({
                     type="button"
                     className="min-w-0 flex-1 cursor-pointer rounded-t transition-colors hover:opacity-90 focus:outline-none"
                     style={{
-                      height: tieneDatos ? Math.max(altura, 6) : 2,
+                      height: tieneDatos ? `max(${porcentaje}%, 6px)` : "2px",
                       backgroundColor: seleccionada
                         ? tieneDatos
                           ? COLOR_BARRA_SELECCIONADA

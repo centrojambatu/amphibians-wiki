@@ -41,7 +41,22 @@ async function getPublicacionesDesdeTabla(
       }
       let qVista = supabase.from("vw_publicacion_anfibios_ecuador" as any).select("id_publicacion");
       if (tiposValores.length > 0) qVista = qVista.in("tipo", tiposValores);
-      if (tieneFiltroAño) qVista = qVista.in("numero_publicacion_ano", filtros!.años!);
+      if (tieneFiltroAño) {
+        const años = filtros!.años!;
+        // Si los años son contiguos (rango del slider), usar BETWEEN para evitar IN gigante.
+        const ordenados = [...años].sort((a, b) => a - b);
+        const esContiguo =
+          ordenados.length > 1 &&
+          ordenados.every((y, i) => i === 0 || y === ordenados[i - 1] + 1);
+
+        if (esContiguo) {
+          qVista = qVista
+            .gte("numero_publicacion_ano", ordenados[0])
+            .lte("numero_publicacion_ano", ordenados[ordenados.length - 1]);
+        } else {
+          qVista = qVista.in("numero_publicacion_ano", años);
+        }
+      }
       const { data } = await qVista;
       return (data ?? []).map((r: { id_publicacion: number }) => r.id_publicacion);
     })());
@@ -62,14 +77,30 @@ async function getPublicacionesDesdeTabla(
     filterPromises.push(Promise.resolve(null));
   }
 
-  // Filtro autor
+  // Filtro autor.
+  // Se busca en `vw_publicacion_completa.autores_nombres` (mismo campo que el endpoint
+  // de sugerencias) para garantizar que un autor sugerido siempre encuentre publicaciones.
+  // El uso de `.ilike()` con el valor como parámetro evita problemas de inyección/escape
+  // cuando el nombre contiene comas, puntos, comillas o paréntesis.
   if (filtros?.autor) {
     filterPromises.push((async () => {
-      const {data: autores} = await supabase.from("autor").select("id_autor").or(`nombres.ilike.%${filtros!.autor}%,apellidos.ilike.%${filtros!.autor}%`);
-      const idsAutor = (autores ?? []).map((a) => a.id_autor);
-      if (idsAutor.length === 0) return [];
-      const {data: pa} = await supabase.from("publicacion_autor").select("publicacion_id").in("autor_id", idsAutor);
-      return [...new Set((pa ?? []).map((r) => r.publicacion_id))];
+      const termino = filtros!.autor!.trim();
+
+      if (!termino) return null;
+      const patron = `%${termino}%`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
+      const {data} = await (supabase.from("vw_publicacion_completa" as any) as any)
+        .select("id_publicacion")
+        .ilike("autores_nombres", patron)
+        .limit(5000);
+
+      return [
+        ...new Set(
+          (data ?? [])
+            .map((r: {id_publicacion: number | null}) => r.id_publicacion)
+            .filter((id: number | null): id is number => id != null),
+        ),
+      ] as number[];
     })());
   } else {
     filterPromises.push(Promise.resolve(null));

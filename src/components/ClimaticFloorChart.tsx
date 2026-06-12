@@ -278,13 +278,13 @@ export default function ClimaticFloorChart({
   ];
 
   return (
-    <div className="flex w-full flex-col items-center px-6">
+    <div className="flex w-full min-w-0 max-w-full flex-col items-center overflow-hidden box-border px-2 sm:px-6">
       {/* Gráfico de pisos climáticos - Referencia geográfica */}
-      <div className="mb-1 flex w-full justify-between text-[10px] text-gray-400">
+      <div className="mb-1 flex w-full justify-between text-[9px] text-gray-400 sm:text-[10px]">
         <span>← Occidental</span>
         <span>Oriental →</span>
       </div>
-      <div className="relative flex h-8 w-full">
+      <div className="relative flex h-6 w-full sm:h-8">
         {/* Base: Todos los pisos en color plomo */}
         {allClimaticFloors.map((floor, index) => {
           const range = Math.abs(floor.max - floor.min);
@@ -412,18 +412,28 @@ export default function ClimaticFloorChart({
       {/* Etiquetas de altitud */}
       <div className="relative mt-1 w-full">
         <div className="relative flex h-4 w-full">
-          {altitudeMarkers.map((marker, index) => (
-            <div
-              key={`altitude-marker-${index}`}
-              className="absolute text-[10px] text-gray-600"
-              style={{
-                left: `${marker.position}%`,
-                transform: "translateX(-50%)",
-              }}
-            >
-              {marker.altitude}m
-            </div>
-          ))}
+          {altitudeMarkers.map((marker, index) => {
+            // Mantener "0m" pegado a sus extremos para que no se corte en mobile
+            const isStart = index === 0;
+            const isEnd = index === altitudeMarkers.length - 1;
+
+            return (
+              <div
+                key={`altitude-marker-${index}`}
+                className="absolute text-[9px] whitespace-nowrap text-gray-600 sm:text-[10px]"
+                style={{
+                  left: `${marker.position}%`,
+                  transform: isStart
+                    ? "translateX(0)"
+                    : isEnd
+                      ? "translateX(-100%)"
+                      : "translateX(-50%)",
+                }}
+              >
+                {marker.altitude}m
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

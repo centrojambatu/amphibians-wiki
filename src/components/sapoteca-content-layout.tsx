@@ -19,8 +19,8 @@ export default function SapotecaContentLayout({
   const handlePendingChange = useCallback((p: boolean) => setIsPending(p), []);
 
   return (
-    <div className="flex gap-6">
-      <div className="w-80 flex-shrink-0">
+    <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="w-full flex-shrink-0 lg:w-80">
         <SapotecaFiltersPanel
           tiposPublicacion={tiposPublicacion}
           años={años}

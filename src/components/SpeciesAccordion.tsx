@@ -150,7 +150,7 @@ export default function SpeciesAccordion({
   const renderSpecies = (species: SpeciesData) => (
     <div
       key={species.id_taxon}
-      className="border-border bg-card hover:bg-muted/50 relative flex flex-col gap-1.5 rounded-md border px-4 py-3 transition-all lg:grid lg:grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] lg:items-center lg:gap-4"
+      className="border-border bg-card hover:bg-muted/50 relative flex flex-col gap-1.5 rounded-md border px-4 py-3 transition-all xl:grid xl:grid-cols-[minmax(0,1fr)_9rem_3rem_4rem_20rem] xl:items-center xl:gap-4"
     >
       {/* ── Nombre científico (visible en todos los tamaños) ── */}
       <div className="min-w-0">
@@ -180,8 +180,8 @@ export default function SpeciesAccordion({
           </div>
         )}
 
-        {/* Badges inline — solo en móvil/tablet (<lg) */}
-        <div className="mt-2 flex flex-wrap items-center gap-2 lg:hidden">
+        {/* Badges inline — solo en móvil/tablet (<xl) */}
+        <div className="mt-2 flex flex-wrap items-center gap-2 xl:hidden">
           {/* Endémica */}
           {species.endemica ? (
             <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800">
@@ -205,11 +205,11 @@ export default function SpeciesAccordion({
         </div>
       </div>
 
-      {/* ── Distribución km² — solo desktop ── */}
+      {/* ── Distribución km² — solo desktop (≥ xl) ── */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="text-muted-foreground hidden min-w-0 cursor-help text-center text-xs lg:block">
+            <div className="text-muted-foreground hidden min-w-0 cursor-help text-center text-xs xl:block">
               {species.area_distribucion != null ? `${species.area_distribucion.toLocaleString()} km²` : "—"}
             </div>
           </TooltipTrigger>
@@ -219,8 +219,8 @@ export default function SpeciesAccordion({
         </Tooltip>
       </TooltipProvider>
 
-      {/* ── Endémica — solo desktop ── */}
-      <div className="hidden justify-center lg:flex">
+      {/* ── Endémica — solo desktop (≥ xl) ── */}
+      <div className="hidden justify-center xl:flex">
         {species.endemica ? (
           <TooltipProvider>
             <Tooltip>
@@ -246,8 +246,8 @@ export default function SpeciesAccordion({
         )}
       </div>
 
-      {/* ── Lista Roja — solo desktop ── */}
-      <div className="hidden justify-center lg:flex">
+      {/* ── Lista Roja — solo desktop (≥ xl) ── */}
+      <div className="hidden justify-center xl:flex">
         {species.lista_roja_iucn ? (
           <TooltipProvider>
             <Tooltip>
@@ -266,9 +266,9 @@ export default function SpeciesAccordion({
         )}
       </div>
 
-      {/* ── Pisos Climáticos — solo desktop ── */}
-      <div className="hidden min-w-0 items-center justify-end lg:flex">
-        {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null ? (
+      {/* ── Pisos Climáticos — visible en móvil/tablet (apilado abajo) y en desktop (columna del grid) ── */}
+      {species.rango_altitudinal_min !== null && species.rango_altitudinal_max !== null && (
+        <div className="mt-1 min-w-0 overflow-hidden xl:mt-0 xl:flex xl:items-center xl:justify-end">
           <ClimaticFloorChart
             altitudinalRange={{
               min: species.rango_altitudinal_min,
@@ -287,10 +287,8 @@ export default function SpeciesAccordion({
                 : undefined,
             }}
           />
-        ) : (
-          <span className="text-xs text-gray-400">Sin datos</span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 

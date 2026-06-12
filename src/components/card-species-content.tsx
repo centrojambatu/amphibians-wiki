@@ -1171,10 +1171,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
   return (
     <CardContent className="flex-1 overflow-y-auto p-0">
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Columna izquierda - Contenido principal */}
-        <div className="flex-1">
-          <div className="space-y-4 p-4">
+        <div className="min-w-0 flex-1">
+          <div className="space-y-4 p-2 sm:p-4">
             {/* Secciones de contenido */}
             {/* Fotografía de la especie */}
             {fichaEspecie.fotografia_url && (
@@ -1292,13 +1292,18 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     {hasNombresEstandar && (
                       <div className={hasEtimologia ? cardSectionDivider : ""}>
                         <h4 className={cardSubsectionTitle}>Nombres estándar</h4>
-                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-[13px]">
                           {conNombre.map((idioma, i) => (
-                            <span key={idioma.key} className="inline-flex items-baseline gap-x-2">
+                            <span
+                              key={idioma.key}
+                              className="inline-flex max-w-full items-baseline gap-x-2"
+                            >
                               {i > 0 && <span style={{color: "#f07304"}}>|</span>}
-                              <span className="inline-flex items-baseline gap-x-1">
+                              <span className="inline-flex max-w-full items-baseline gap-x-1">
                                 <span className="text-xs text-gray-500">{idioma.label}</span>
-                                <span className="font-medium text-gray-900">{nc[idioma.key]}</span>
+                                <span className="font-medium break-words text-gray-900">
+                                  {nc[idioma.key]}
+                                </span>
                               </span>
                             </span>
                           ))}
@@ -1311,7 +1316,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         className={hasEtimologia || hasNombresEstandar ? cardSectionDivider : ""}
                       >
                         <h4 className={cardSubsectionTitle}>Otros nombres</h4>
-                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-[13px]">
                           {[...fichaEspecie.otrosNombres]
                             .sort((a: any, b: any) => {
                               const getAno = (x: any): number => {
@@ -1341,14 +1346,16 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                               return (
                                 <span
                                   key={`${String(on.nombre)}-${String(i)}`}
-                                  className="inline-flex items-baseline gap-x-2"
+                                  className="inline-flex max-w-full items-baseline gap-x-2"
                                 >
                                   {i > 0 && <span style={{color: "#f07304"}}>|</span>}
-                                  <span className="inline-flex items-baseline gap-x-1">
+                                  <span className="inline-flex max-w-full items-baseline gap-x-1">
                                     {label && (
                                       <span className="text-xs text-gray-500">{label}</span>
                                     )}
-                                    <span className="font-medium text-gray-900">{on.nombre}</span>
+                                    <span className="font-medium break-words text-gray-900">
+                                      {on.nombre}
+                                    </span>
                                     {citaCorta &&
                                       (publicacionId != null ? (
                                         <span
@@ -1702,7 +1709,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       })()}
                     </div>
                     {fichaEspecie.altitudinalRange ? (
-                      <div className="mt-4 mb-4 w-full">
+                      <div className="mt-4 mb-4 w-full min-w-0 overflow-hidden">
                         <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
                       </div>
                     ) : (
@@ -1710,8 +1717,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     )}
                     {/* Mapa con colecciones internas y externas filtradas por taxon */}
                     {nombreCientificoMain && (
-                      <div className="mt-4 mb-4 px-6">
-                        <div className="relative h-[640px] w-full overflow-hidden rounded-md border border-gray-200">
+                      <div className="mt-4 mb-4 px-2 sm:px-6">
+                        <div className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]">
                           <MapotecaMap especieFilter={[nombreCientificoMain]} mapType="provinces" />
                         </div>
                       </div>
@@ -1801,39 +1808,43 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 <>
                   {/* 1. Lista Roja Global */}
-                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                    <span className={cardSubsectionTitle}>Lista Roja Global</span>
-                    <span style={{color: "#f07304"}}>|</span>
-                    {fichaEspecie.listaRojaGlobal?.catalogo_awe?.nombre ? (
-                      <span className="text-muted-foreground">
-                        {fichaEspecie.listaRojaGlobal.catalogo_awe.nombre}
-                        {fichaEspecie.listaRojaGlobal.catalogo_awe.sigla && (
-                          <span className="ml-1 text-xs text-gray-500">
-                            ({fichaEspecie.listaRojaGlobal.catalogo_awe.sigla})
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">No disponible</span>
-                    )}
+                  <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-sm">
+                    <span className={`${cardSubsectionTitle} mb-0`}>Lista Roja Global</span>
+                    <span className="inline-flex max-w-full items-baseline gap-x-2">
+                      <span style={{color: "#f07304"}}>|</span>
+                      {fichaEspecie.listaRojaGlobal?.catalogo_awe?.nombre ? (
+                        <span className="text-muted-foreground break-words">
+                          {fichaEspecie.listaRojaGlobal.catalogo_awe.nombre}
+                          {fichaEspecie.listaRojaGlobal.catalogo_awe.sigla && (
+                            <span className="ml-1 text-xs text-gray-500">
+                              ({fichaEspecie.listaRojaGlobal.catalogo_awe.sigla})
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">No disponible</span>
+                      )}
+                    </span>
                   </p>
 
                   {/* 2. Lista Roja Ecuador */}
-                  <p className="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm">
-                    <span className={cardSubsectionTitle}>Lista Roja Ecuador</span>
-                    <span style={{color: "#f07304"}}>|</span>
-                    {fichaEspecie.listaRojaIUCN?.catalogo_awe?.nombre ? (
-                      <span className="text-muted-foreground">
-                        {fichaEspecie.listaRojaIUCN.catalogo_awe.nombre}
-                        {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla && (
-                          <span className="ml-1 text-xs text-gray-500">
-                            ({fichaEspecie.listaRojaIUCN.catalogo_awe.sigla})
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">No disponible</span>
-                    )}
+                  <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-sm">
+                    <span className={`${cardSubsectionTitle} mb-0`}>Lista Roja Ecuador</span>
+                    <span className="inline-flex max-w-full items-baseline gap-x-2">
+                      <span style={{color: "#f07304"}}>|</span>
+                      {fichaEspecie.listaRojaIUCN?.catalogo_awe?.nombre ? (
+                        <span className="text-muted-foreground break-words">
+                          {fichaEspecie.listaRojaIUCN.catalogo_awe.nombre}
+                          {fichaEspecie.listaRojaIUCN.catalogo_awe.sigla && (
+                            <span className="ml-1 text-xs text-gray-500">
+                              ({fichaEspecie.listaRojaIUCN.catalogo_awe.sigla})
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">No disponible</span>
+                      )}
+                    </span>
                   </p>
 
                   {/* 4. Comentario Estatus Poblacional */}
@@ -2245,8 +2256,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           </div>
         </div>
 
-        {/* Columna derecha - Sidebar fijo */}
-        <div className="sticky top-0 py-2 pr-2 pl-2" style={{width: "12%", maxHeight: "100vh"}}>
+        {/* Columna derecha - Sidebar fijo en desktop, apilado abajo en mobile */}
+        <div className="w-full px-4 py-4 lg:sticky lg:top-0 lg:max-h-screen lg:w-[12%] lg:px-2 lg:py-2">
           {/* Botón de descarga */}
           <div className="mb-2">
             <Button
@@ -2262,7 +2273,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             <CardContent className="space-y-1.5 p-2">
               {/* Información General */}
               <section>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
                   {/* Lista Roja */}
                   {fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla && (
                     <div
@@ -2434,7 +2445,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
               {/* Recursos */}
               <section>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
                   {(() => {
                     const nombreCientifico =
                       `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
@@ -2511,7 +2522,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
               {/* Fuentes Externas */}
               <section>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
                   {fichaEspecie.wikipedia && (
                     <Button
                       asChild

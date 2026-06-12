@@ -105,8 +105,8 @@ export default function SapotecaPublicacionesList() {
         ))}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-4">
-        <p className="text-xs text-gray-400">
+      <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <p className="text-center text-xs text-gray-400">
           {`Mostrando 1${RANGE_DASH}${publicaciones.length.toLocaleString()} de ${total.toLocaleString()} ${
             total === 1 ? "referencia" : "referencias"
           }`}

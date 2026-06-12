@@ -341,7 +341,7 @@ export default function SapotecaFiltersPanel({
     filtros.tiposPublicacion.every((id) => idsSoloCientificas.has(id));
 
   return (
-    <div className="sticky top-0 flex h-screen max-h-screen flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div className="flex max-h-[80vh] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white lg:sticky lg:top-0 lg:h-screen lg:max-h-screen">
       <div className="filters-panel-scroll flex-1 overflow-y-auto py-4">
         <div className="w-full space-y-6">
           {/* Limpiar - encima de todos los filtros */}
