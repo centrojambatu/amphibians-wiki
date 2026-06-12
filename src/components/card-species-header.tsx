@@ -93,10 +93,25 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
   const nombreComun = fichaEspecie?.taxones?.[0]?.nombre_comun as string | undefined;
 
   return (
-    <CardHeader className="sticky top-0 z-30 px-0 text-left">
-      <div className="space-y-4 py-5 pr-4 pl-2 sm:pr-6 sm:pl-4">
-        {/* Título principal - Jerarquía taxonómica completa + gota de Lista Roja a la derecha */}
-        <div className="relative flex flex-wrap items-baseline justify-start gap-2 pr-20">
+    <CardHeader className="relative sticky top-0 z-30 px-0 text-center">
+      {/* Gota de Lista Roja Ecuador — siempre apegada al borde derecho del card,
+          fuera del wrapper con padding para que no la afecte la compensación del sidebar. */}
+      {listaRojaSigla && (
+        <a
+          aria-label="Ver categoría de Lista Roja en la sección de Conservación"
+          className="absolute top-6 right-4 z-10 inline-flex transition-transform hover:scale-105 focus:outline-none sm:right-6"
+          href="#conservacion"
+          title="Lista Roja Ecuador"
+          onClick={handleScrollToConservacion}
+        >
+          {renderRedListBadgeGrande(listaRojaSigla)}
+        </a>
+      )}
+      {/* Padding right en desktop compensa el ancho del sidebar (lg:w-[12%]) para que el centro
+          coincida con el centro del card de la imagen / columna principal. */}
+      <div className="space-y-4 py-5 pr-4 pl-2 sm:pr-6 sm:pl-4 lg:pr-[12%]">
+        {/* Título principal - Jerarquía taxonómica completa */}
+        <div className="flex flex-wrap items-baseline justify-center gap-2 pr-20">
           {/* Orden - PEQUEÑO con link (rank_id = 4) */}
           {(() => {
             const orden = fichaEspecie.lineage?.find((item: any) => item.rank_id === 4);
@@ -168,19 +183,6 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
               }}
               className="autor-ano-links"
             />
-          )}
-
-          {/* Gota de Lista Roja Ecuador alineada a la derecha al nivel del nombre científico */}
-          {listaRojaSigla && (
-            <a
-              aria-label="Ver categoría de Lista Roja en la sección de Conservación"
-              className="absolute top-1/2 right-0 inline-flex -translate-y-1/2 transition-transform hover:scale-105 focus:outline-none"
-              href="#conservacion"
-              title="Lista Roja Ecuador"
-              onClick={handleScrollToConservacion}
-            >
-              {renderRedListBadgeGrande(listaRojaSigla)}
-            </a>
           )}
         </div>
 

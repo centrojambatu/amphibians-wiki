@@ -3,7 +3,7 @@
 import {useMemo, useState} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import {Camera, Check, Download, MapPin, Video, Volume2} from "lucide-react";
+import {Camera, Download, MapPin, Video, Volume2} from "lucide-react";
 import jsPDF from "jspdf";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -1916,12 +1916,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       const manejoExSituValor =
                         fichaEspecie.anfibio_conservacion === true ? (
                           <a
-                            className="inline-flex items-center !no-underline hover:!no-underline"
+                            className="manejo-exsitu-si inline-flex items-center font-semibold !no-underline transition-colors hover:!no-underline"
                             href={RANARIUM_URL}
                             rel="noopener noreferrer"
                             target="_blank"
                           >
-                            <Check className="h-4 w-4" strokeWidth={3} style={{color: "#2d6e2d"}} />
+                            Sí
                           </a>
                         ) : (
                           "NO"
