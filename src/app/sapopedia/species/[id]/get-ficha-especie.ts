@@ -143,8 +143,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .eq("publicar", true),
     supabaseClient
       .from("enlace_relacionado_taxon")
-      .select("id_enlace_relacionado_taxon, nombre, enlace")
-      .eq("taxon_id", taxonId),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la columna `fecha` puede no estar en los tipos generados aún
+      .select("id_enlace_relacionado_taxon, nombre, enlace, fecha" as any)
+      .eq("taxon_id", taxonId)
+      .order("fecha", {ascending: false, nullsFirst: false}),
   ]);
 
   // Manejar errores

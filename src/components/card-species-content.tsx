@@ -2612,7 +2612,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             <div className="aspect-square w-full max-w-[80px] overflow-hidden rounded-md">
                               <img
                                 alt={String(enlace.nombre || "Enlace")}
-                                className="h-full w-full object-cover grayscale transition-all duration-500 ease-in-out group-hover:grayscale-0"
+                                className="h-full w-full object-cover opacity-30 grayscale transition-all duration-500 ease-in-out group-hover:grayscale-0"
                                 src="/assets/coleccioncj-02.png"
                               />
                             </div>
