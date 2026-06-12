@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import NombresContent from "./NombresContent";
 import getTaxonNombres from "./get-taxon-nombres";
 import {
@@ -73,9 +75,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-4 text-4xl font-bold text-gray-900">
-          Nombres estándar <span style={{ color: "#f07304", fontWeight: 400, letterSpacing: "-0.1em" }}>|</span> <span className="text-2xl" style={{ color: "#a3ac9e" }}>12 idiomas</span>
-        </h1>
+        <h1 className="mb-4 text-4xl font-bold text-gray-900">Nombres</h1>
       </div>
 
       {/* Estadísticas */}
@@ -86,47 +86,63 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-900"
-            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+            style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
           >
             Nombres estandarizados
           </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
-            target="_blank"
-            rel="noopener noreferrer"
+        </div>
+
+        <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <Link
             className="hover:text-gray-900"
-            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+            href="/sapopedia/nombres-vernaculos"
+            style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
+          >
+            Nombres indígenas y vernáculos
+          </Link>
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
+            rel="noopener noreferrer"
+            style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
+            target="_blank"
           >
             Jambatu
           </a>
-          <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
-            target="_blank"
-            rel="noopener noreferrer"
+        </div>
+
+        <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <Link
             className="hover:text-gray-900"
-            style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}
+            href="/sapopedia/nombres-renacuajos"
+            style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
+          >
+            Nombres renacuajos
+          </Link>
+        </div>
+
+        <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
+            rel="noopener noreferrer"
+            style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
+            target="_blank"
           >
             Rana o sapo
           </a>
         </div>
+      </div>
 
-        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
-          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Órdenes</h4>
-          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalOrdenes}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Órdenes taxonómicos</h4>
-        </div>
-
-        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
-          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Familias</h4>
-          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalFamilias}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Familias taxonómicas</h4>
-        </div>
-
-        <div className="flex flex-col items-center justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
-          <h4 className="mb-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Géneros</h4>
-          <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{totalGeneros}</span>
-          <h4 className="mt-1" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>Géneros taxonómicos</h4>
-        </div>
+      {/* Subtítulo: Nombres estándar | 12 idiomas */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Nombres estándar{" "}
+          <span style={{color: "#f07304", fontWeight: 400, letterSpacing: "-0.1em"}}>|</span>{" "}
+          <span className="text-base" style={{color: "#a3ac9e"}}>
+            12 idiomas
+          </span>
+        </h2>
       </div>
 
       {/* Contenido con filtros y acordeón */}
