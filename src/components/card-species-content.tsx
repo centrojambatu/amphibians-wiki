@@ -2289,31 +2289,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               {/* Información General */}
               <section>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
-                  {/* Endemismo */}
-                  <div
-                    className="flex aspect-square flex-col items-center justify-center rounded-md border p-2"
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      borderColor: "#dddddd",
-                    }}
-                  >
-                    <h4
-                      className="mb-2"
-                      style={{
-                        color: "#666666",
-                        fontSize: "11px",
-                        fontFamily:
-                          '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                        fontWeight: "600",
-                      }}
-                    >
-                      Endemismo
-                    </h4>
-                    <span className="text-center text-xs font-semibold" style={{color: "#000000"}}>
-                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : " No endémica"}
-                    </span>
-                  </div>
-
                   {/* Colecciones */}
                   {(() => {
                     const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
@@ -2325,168 +2300,47 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     return (
                       <Link href={coleccionesUrl}>
                         <div
-                          className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-colors hover:bg-gray-50"
+                          className="group flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-1 transition-colors hover:bg-gray-50"
                           style={{
                             backgroundColor: "#f9f9f9",
                             borderColor: "#dddddd",
                           }}
                         >
-                          <h4
-                            className="mb-2"
-                            style={{
-                              color: "#666666",
-                              fontSize: "11px",
-                              fontFamily:
-                                '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                              fontWeight: "600",
-                            }}
-                          >
+                          <img
+                            alt="Colecciones"
+                            className="min-h-0 w-full flex-1 object-contain grayscale transition-all duration-500 ease-in-out group-hover:grayscale-0"
+                            src="/assets/coleccioncj-02.png"
+                          />
+                          <span className="mt-0.5 text-xs font-medium text-gray-600">
                             Colecciones
-                          </h4>
-                          <span
-                            className="text-center text-xs font-semibold"
-                            style={{color: "#000000"}}
-                          >
-                            {(fichaEspecie.colecciones?.length || 0) +
-                              (fichaEspecie.totalColeccionesExternas || 0)}
                           </span>
                         </div>
                       </Link>
                     );
                   })()}
-                </div>
-              </section>
 
-              {/* Recursos */}
-              <section>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
-                  {(() => {
-                    const nombreCientifico =
-                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
-                    const slug = nombreCientifico.replace(/\s+/g, "-");
-
-                    return (
-                      <Link
-                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
-                        href={`/sapopedia/species/${slug}/fotos`}
-                        style={{
-                          backgroundColor: "#f9f9f9",
-                          borderColor: "#dddddd",
-                        }}
-                      >
-                        <Camera className="h-8 w-8" style={{color: "#333333"}} />
-                        <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
-                      </Link>
-                    );
-                  })()}
-
-                  {(() => {
-                    const nombreCientifico =
-                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
-                    const slug = nombreCientifico.replace(/\s+/g, "-");
-
-                    return (
-                      <Link
-                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
-                        href={`/sapopedia/species/${slug}/audios`}
-                        style={{
-                          backgroundColor: "#f9f9f9",
-                          borderColor: "#dddddd",
-                        }}
-                      >
-                        <Volume2 className="h-8 w-8" style={{color: "#333333"}} />
-                        <span className="mt-1 text-xs font-medium text-gray-600">Audioteca</span>
-                      </Link>
-                    );
-                  })()}
-
-                  {(() => {
-                    const nombreCientifico =
-                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
-                    const slug = nombreCientifico.replace(/\s+/g, "-");
-
-                    return (
-                      <Link
-                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
-                        href={`/sapopedia/species/${slug}/videos`}
-                        style={{
-                          backgroundColor: "#f9f9f9",
-                          borderColor: "#dddddd",
-                        }}
-                      >
-                        <Video className="h-8 w-8" style={{color: "#333333"}} />
-                        <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
-                      </Link>
-                    );
-                  })()}
-
-                  <Link
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
-                    href={`/mapoteca?especie=${encodeURIComponent(`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim())}`}
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      borderColor: "#dddddd",
-                    }}
-                  >
-                    <MapPin className="h-8 w-8" style={{color: "#333333"}} />
-                    <span className="mt-1 text-xs font-medium text-gray-600">Mapoteca</span>
-                  </Link>
-                </div>
-              </section>
-
-              {/* Fuentes Externas */}
-              <section>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
-                  {fichaEspecie.wikipedia && (
+                  {fichaEspecie.morphosource && (
                     <Button
                       asChild
                       className="group hover:bg-muted/50 h-auto rounded-md border p-2"
                       style={{backgroundColor: "#f9f9f9"}}
                       variant="outline"
                     >
-                      <a href={fichaEspecie.wikipedia} rel="noopener noreferrer" target="_blank">
+                      <a
+                        className="flex flex-col items-center"
+                        href={fichaEspecie.morphosource}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
                         <img
-                          alt="ASW Logo"
+                          alt="MorphoSource Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/wikipedia.png"
+                          src="/assets/references/morphosource.png"
                           style={{width: "100%", height: "auto"}}
                         />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.aw && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.aw} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="AmphibiaWeb Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/amphibiaweb.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.genbank && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.genbank} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="NCBI Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/ncbi.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
+                        <span className="mt-0.5 text-xs font-medium text-gray-600">
+                          MorphoSource
+                        </span>
                       </a>
                     </Button>
                   )}
@@ -2503,78 +2357,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           alt="VertNet Logo"
                           className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
                           src="/assets/references/vertnet.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.inaturalist && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.inaturalist} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="iNaturalist Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/iNaturalist.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.asw && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.asw} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="amnh Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/amnh.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.uicn && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.uicn} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="IUCN Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/redlist.png"
-                          style={{width: "100%", height: "auto"}}
-                        />
-                      </a>
-                    </Button>
-                  )}
-
-                  {fichaEspecie.morphosource && (
-                    <Button
-                      asChild
-                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
-                      style={{backgroundColor: "#f9f9f9"}}
-                      variant="outline"
-                    >
-                      <a href={fichaEspecie.morphosource} rel="noopener noreferrer" target="_blank">
-                        <img
-                          alt="MorphoSource Logo"
-                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
-                          src="/assets/references/morphosource.png"
                           style={{width: "100%", height: "auto"}}
                         />
                       </a>
@@ -2598,8 +2380,251 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       </a>
                     </Button>
                   )}
+
+                  {fichaEspecie.genbank && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.genbank} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="NCBI Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/ncbi.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </section>
+
+              {/* Divisor entre sección de Colecciones y la de Recursos (Fototeca/Audioteca/Videoteca) */}
+              <hr className="my-5 border-t border-gray-200" />
+
+              {/* Recursos */}
+              <section>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
+                  {(() => {
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/fotos`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Camera className="h-20 w-20" strokeWidth={1} style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Fototeca</span>
+                      </Link>
+                    );
+                  })()}
+
+                  {(() => {
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/audios`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Volume2 className="h-20 w-20" strokeWidth={1} style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Audioteca</span>
+                      </Link>
+                    );
+                  })()}
+
+                  {(() => {
+                    const nombreCientifico =
+                      `${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim();
+                    const slug = nombreCientifico.replace(/\s+/g, "-");
+
+                    return (
+                      <Link
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                        href={`/sapopedia/species/${slug}/videos`}
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          borderColor: "#dddddd",
+                        }}
+                      >
+                        <Video className="h-20 w-20" strokeWidth={1} style={{color: "#333333"}} />
+                        <span className="mt-1 text-xs font-medium text-gray-600">Videoteca</span>
+                      </Link>
+                    );
+                  })()}
+
+                  <Link
+                    className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-2 transition-all duration-200 hover:border-gray-400 hover:bg-gray-200"
+                    href={`/mapoteca?especie=${encodeURIComponent(`${fichaEspecie.taxones?.[0]?.taxonPadre?.taxon || ""} ${fichaEspecie.taxones?.[0]?.taxon || ""}`.trim())}`}
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderColor: "#dddddd",
+                    }}
+                  >
+                    <MapPin className="h-20 w-20" strokeWidth={1} style={{color: "#333333"}} />
+                    <span className="mt-1 text-xs font-medium text-gray-600">Mapoteca</span>
+                  </Link>
+                </div>
+              </section>
+
+              {/* Divisor entre Recursos (Fototeca/Audioteca/Videoteca/Mapoteca) y Fuentes Externas */}
+              <hr className="my-5 border-t border-gray-200" />
+
+              {/* Fuentes Externas */}
+              <section>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
+                  {/* 1. American Museum of Natural History — ASW Frost */}
+                  {fichaEspecie.asw && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a
+                        className="flex flex-col items-center"
+                        href={fichaEspecie.asw}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <img
+                          alt="American Museum of Natural History Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/amnh.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                        <span className="mt-0.5 text-xs font-medium text-gray-600">ASW Frost</span>
+                      </a>
+                    </Button>
+                  )}
+
+                  {/* 2. AmphibiaWeb */}
+                  {fichaEspecie.aw && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.aw} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="AmphibiaWeb Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/amphibiaweb.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
+
+                  {/* 3. IUCN Red List */}
+                  {fichaEspecie.uicn && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.uicn} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="IUCN Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/redlist.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
+
+                  {/* 4. iNaturalist */}
+                  {fichaEspecie.inaturalist && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.inaturalist} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="iNaturalist Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/iNaturalist.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
+
+                  {/* 5. Wikipedia */}
+                  {fichaEspecie.wikipedia && (
+                    <Button
+                      asChild
+                      className="group hover:bg-muted/50 h-auto rounded-md border p-2"
+                      style={{backgroundColor: "#f9f9f9"}}
+                      variant="outline"
+                    >
+                      <a href={fichaEspecie.wikipedia} rel="noopener noreferrer" target="_blank">
+                        <img
+                          alt="Wikipedia Logo"
+                          className="mx-auto grayscale transition-all duration-[800ms] ease-in-out group-hover:grayscale-0"
+                          src="/assets/references/wikipedia.png"
+                          style={{width: "100%", height: "auto"}}
+                        />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </section>
+
+              {/* Divisor entre Fuentes Externas y Enlaces relacionados */}
+              {Array.isArray(fichaEspecie.enlacesRelacionados) &&
+                fichaEspecie.enlacesRelacionados.length > 0 && (
+                  <>
+                    <hr className="my-5 border-t border-gray-200" />
+                    <section>
+                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
+                        {fichaEspecie.enlacesRelacionados.map((enlace: any) => (
+                          <a
+                            key={enlace.id_enlace_relacionado_taxon}
+                            className="group flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border p-1 transition-colors hover:bg-gray-50"
+                            href={enlace.enlace}
+                            rel="noopener noreferrer"
+                            style={{
+                              backgroundColor: "#f9f9f9",
+                              borderColor: "#dddddd",
+                            }}
+                            target="_blank"
+                          >
+                            <div className="aspect-square w-full max-w-[80px] overflow-hidden rounded-md">
+                              <img
+                                alt={String(enlace.nombre || "Enlace")}
+                                className="h-full w-full object-cover grayscale transition-all duration-500 ease-in-out group-hover:grayscale-0"
+                                src="/assets/coleccioncj-02.png"
+                              />
+                            </div>
+                            <span className="mt-1 line-clamp-2 px-1 text-center text-xs font-medium text-gray-600">
+                              {enlace.nombre}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </section>
+                  </>
+                )}
             </CardContent>
           </Card>
         </div>

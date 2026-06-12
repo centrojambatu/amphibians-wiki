@@ -100,6 +100,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     {data: nombresComunes, error: errorNombresComunes},
     {data: otrosNombres, error: errorOtrosNombres},
     {count: countColeccionesExternas},
+    {data: enlacesRelacionados},
   ] = await Promise.all([
     // Obtener campos adicionales de ficha_especie que no están en la vista
     // Usar tanto id_ficha_especie como taxon_id para asegurar que sea el registro correcto
@@ -140,6 +141,10 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
       .select("id", {count: "exact", head: true})
       .eq("taxon_id", taxonId)
       .eq("publicar", true),
+    supabaseClient
+      .from("enlace_relacionado_taxon")
+      .select("id_enlace_relacionado_taxon, nombre, enlace")
+      .eq("taxon_id", taxonId),
   ]);
 
   // Manejar errores
@@ -500,6 +505,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     totalColeccionesExternas: countColeccionesExternas ?? 0,
     nombresComunes: nombresComunes ?? null,
     otrosNombres: Array.isArray(otrosNombres) ? otrosNombres : [],
+    enlacesRelacionados: Array.isArray(enlacesRelacionados) ? enlacesRelacionados : [],
   };
 
   return result;
