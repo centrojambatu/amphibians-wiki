@@ -41,26 +41,26 @@ export default function SapotecaHistogramaChart({
     router.push(`/sapoteca?${params.toString()}`, { scroll: false });
   };
 
+  const Pie = (
+    <div className="mt-4 flex items-center gap-4">
+      <p className="text-lg font-semibold text-gray-500">
+        Publicaciones científicas por año <span className="text-[#f07304]">|</span>{" "}
+        <span className="text-gray-500">total {totalPublicaciones.toLocaleString()}</span>
+      </p>
+    </div>
+  );
+
   if (puntos.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-6">
-        <p className="text-base font-semibold text-gray-800 sm:text-lg">
-          Publicaciones científicas por año (1849 – {new Date().getFullYear()})
-        </p>
-        <p className="mt-4 text-sm text-gray-500">No hay datos disponibles.</p>
+        <p className="text-sm text-gray-500">No hay datos disponibles.</p>
+        {Pie}
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-6">
-      <div className="mb-4">
-        <p className="text-base font-semibold text-gray-800 sm:text-lg">
-          Publicaciones científicas por año <span className="text-[#f07304]">|</span>{" "}
-          <span className="text-gray-500">total {totalPublicaciones.toLocaleString()}</span>
-        </p>
-      </div>
-
       {/* Altura mobile-first: ~140px en móvil, 220px en sm+ (alturas por porcentaje
           se calculan dentro del contenedor responsive). */}
       <div className="flex h-[140px] w-full items-end gap-px sm:h-[220px]">
@@ -71,37 +71,42 @@ export default function SapotecaHistogramaChart({
             const seleccionada = añosActivos.has(punto.año);
 
             return (
-              <Tooltip key={punto.año}>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="min-w-0 flex-1 cursor-pointer rounded-t transition-colors hover:opacity-90 focus:outline-none"
-                    style={{
-                      height: tieneDatos ? `max(${porcentaje}%, 6px)` : "2px",
-                      backgroundColor: seleccionada
-                        ? tieneDatos
-                          ? COLOR_BARRA_SELECCIONADA
-                          : COLOR_BARRA_CERO_SELECCIONADA
-                        : tieneDatos
-                          ? COLOR_BARRA
-                          : COLOR_BARRA_CERO,
-                    }}
-                    onClick={() => tieneDatos && handleBarClick(punto.año)}
-                    aria-label={`Filtrar publicaciones del año ${String(punto.año)}`}
-                  />
-                </TooltipTrigger>
-                <TooltipContent
-                  className="border border-gray-200 bg-white text-gray-900 shadow-md"
-                  side="top"
-                >
-                  <div className="space-y-0.5">
-                    <p className="font-medium">{punto.año}</p>
-                    <p className="text-xs text-gray-600">
-                      {punto.cantidad} {punto.cantidad === 1 ? "publicación científica" : "publicaciones científicas"}
-                    </p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+              <div
+                key={punto.año}
+                className="flex h-full min-w-0 flex-1 items-end justify-center"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-[5px] cursor-pointer rounded-t transition-colors hover:opacity-90 focus:outline-none"
+                      style={{
+                        height: tieneDatos ? `max(${porcentaje}%, 6px)` : "2px",
+                        backgroundColor: seleccionada
+                          ? tieneDatos
+                            ? COLOR_BARRA_SELECCIONADA
+                            : COLOR_BARRA_CERO_SELECCIONADA
+                          : tieneDatos
+                            ? COLOR_BARRA
+                            : COLOR_BARRA_CERO,
+                      }}
+                      onClick={() => tieneDatos && handleBarClick(punto.año)}
+                      aria-label={`Filtrar publicaciones del año ${String(punto.año)}`}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="border border-gray-200 bg-white text-gray-900 shadow-md"
+                    side="top"
+                  >
+                    <div className="space-y-0.5">
+                      <p className="font-medium">{punto.año}</p>
+                      <p className="text-xs text-gray-600">
+                        {punto.cantidad} {punto.cantidad === 1 ? "publicación científica" : "publicaciones científicas"}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             );
           })}
         </TooltipProvider>
@@ -120,6 +125,8 @@ export default function SapotecaHistogramaChart({
           );
         })}
       </div>
+
+      {Pie}
     </div>
   );
 }

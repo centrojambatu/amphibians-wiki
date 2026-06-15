@@ -549,7 +549,7 @@ export default function VideotecaPage() {
             }}
           >
             <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios"
+              href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios-ecuatorianos/"
               rel="noopener noreferrer"
               style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"

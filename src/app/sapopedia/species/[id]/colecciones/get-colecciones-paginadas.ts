@@ -2,14 +2,15 @@ import type {ColeccionCompleta} from "../get-colecciones-especie";
 
 import {createServiceClient} from "@/utils/supabase/server";
 
-const ITEMS_POR_PAGINA = 40;
-
-export type FuenteColeccion = "coleccion" | "coleccion_externa";
+const ITEMS_POR_PAGINA = 100;
 
 export interface ColeccionItem extends ColeccionCompleta {
-  fuente: FuenteColeccion;
+  fuente: "coleccion";
   publicacion_id: number | null;
   cita_corta: string | null;
+  tiene_muestras: boolean;
+  tiene_multimedia: boolean;
+  tiene_adn: boolean;
 }
 
 export interface ColeccionesPaginadas {
@@ -29,42 +30,33 @@ export default async function getColeccionesPaginadas(
     sc_acronimo, sc_numero, sc_sufijo, estatus_identificacion, identificado_por,
     fecha_identifica, estadio, numero_individuos, sexo, estado, svl, peso, estatus_tipo,
     fecha_col, hora, colectores, localidad, latitud, longitud, elevacion, habitat, observacion, publicar,
+    esqueleto_transparentacion, microfotografia, genbank,
     geopolitica!coleccion_provincia_id_fkey(nombre),
     campobase!coleccion_campobase_id_fkey(nombre, localidad),
     personal!coleccion_personal_id_fkey(nombre, siglas),
     taxon!coleccion_taxon_id_fkey(taxon)`;
 
-  const EXTERNA_SELECT = `id, taxon_id, provincia_id, localidad, catalogo_museo, numero_museo,
-    latitud, longitud, elevacion, fecha, colectores, tipo, publicar, publicacion_id,
-    geopolitica:provincia_id(nombre),
-    publicacion:publicacion_id(id_publicacion, cita_corta)`;
+  const from = (pagina - 1) * ITEMS_POR_PAGINA;
+  const to = from + ITEMS_POR_PAGINA - 1;
 
-  const [internas, externas] = await Promise.all([
-    supabaseClient
-      .from("coleccion")
-      .select(SELECT_FIELDS)
-      .eq("taxon_id", taxonId)
-      .eq("publicar", true)
-      .order("fecha_col", {ascending: false, nullsFirst: false})
-      .order("id_coleccion", {ascending: false})
-      .limit(50000),
-    supabaseClient
-      .from("coleccion_externa")
-      .select(EXTERNA_SELECT)
-      .eq("taxon_id", taxonId)
-      .eq("publicar", true)
-      .order("fecha", {ascending: false, nullsFirst: false})
-      .order("id", {ascending: false})
-      .limit(50000),
-  ]);
+  const {data, error, count} = await supabaseClient
+    .from("coleccion")
+    .select(SELECT_FIELDS, {count: "exact"})
+    .eq("taxon_id", taxonId)
+    .eq("publicar", true)
+    .order("fecha_col", {ascending: false, nullsFirst: false})
+    .order("id_coleccion", {ascending: false})
+    .range(from, to);
 
-  if (internas.error) console.error("Error fetch colecciones:", internas.error);
-  if (externas.error) console.error("Error fetch colecciones_externa:", externas.error);
+  if (error) console.error("Error fetch colecciones:", error);
 
-  const internasMapped: ColeccionItem[] = (internas.data ?? []).map((c: any) => ({
+  const colecciones: ColeccionItem[] = (data ?? []).map((c: any) => ({
     fuente: "coleccion" as const,
     publicacion_id: null,
     cita_corta: null,
+    tiene_muestras: Boolean(c.esqueleto_transparentacion || c.microfotografia),
+    tiene_multimedia: false,
+    tiene_adn: Boolean(c.genbank),
     id_coleccion: c.id_coleccion,
     taxon_id: c.taxon_id,
     num_colector: c.num_colector,
@@ -103,64 +95,48 @@ export default async function getColeccionesPaginadas(
     taxon_nombre_cientifico: c.taxon?.taxon ?? null,
   }));
 
-  const externasMapped: ColeccionItem[] = (externas.data ?? []).map((c: any) => ({
-    fuente: "coleccion_externa" as const,
-    publicacion_id: c.publicacion?.id_publicacion ?? c.publicacion_id ?? null,
-    cita_corta: c.publicacion?.cita_corta ?? null,
-    id_coleccion: c.id,
-    taxon_id: c.taxon_id,
-    num_colector: null,
-    sc: null,
-    gui: null,
-    num_museo: c.numero_museo,
-    catalogo_museo: c.catalogo_museo ?? null,
-    sc_acronimo: null,
-    sc_numero: null,
-    sc_sufijo: null,
-    estatus_identificacion: null,
-    taxon_nombre: null,
-    identificado_por: null,
-    fecha_identifica: null,
-    estadio: null,
-    numero_individuos: null,
-    sexo: null,
-    estado: null,
-    svl: null,
-    peso: null,
-    estatus_tipo: c.tipo ?? null,
-    fecha_coleccion: c.fecha ?? null,
-    hora: null,
-    colectores: c.colectores,
-    provincia: c.geopolitica?.nombre ?? null,
-    detalle_localidad: c.localidad,
-    latitud: c.latitud,
-    longitud: c.longitud,
-    altitud: c.elevacion,
-    habitat: null,
-    observacion: null,
-    campobase_nombre: null,
-    campobase_localidad: null,
-    personal_nombre: null,
-    personal_siglas: null,
-    taxon_nombre_cientifico: null,
-  }));
-
-  // Merge + sort por fecha desc (con null al final) y id desc como tiebreaker
-  const combined = [...internasMapped, ...externasMapped].sort((a, b) => {
-    const af = a.fecha_coleccion ? new Date(a.fecha_coleccion).getTime() : 0;
-    const bf = b.fecha_coleccion ? new Date(b.fecha_coleccion).getTime() : 0;
-
-    if (af !== bf) return bf - af;
-    // Mismo fecha → coleccion antes que externa
-    if (a.fuente !== b.fuente) return a.fuente === "coleccion" ? -1 : 1;
-
-    return b.id_coleccion - a.id_coleccion;
-  });
-
-  const total = combined.length;
+  const total = count ?? colecciones.length;
   const totalPaginas = Math.max(1, Math.ceil(total / ITEMS_POR_PAGINA));
-  const inicio = (pagina - 1) * ITEMS_POR_PAGINA;
-  const colecciones = combined.slice(inicio, inicio + ITEMS_POR_PAGINA);
+
+  const coleccionIds = colecciones.map((c) => c.id_coleccion);
+
+  if (coleccionIds.length > 0) {
+    const [
+      {data: vids},
+      {data: fotos},
+      {data: cantos},
+      {data: tejs},
+      {data: esps},
+      {data: hecs},
+      {data: epls},
+    ] = await Promise.all([
+      supabaseClient.from("video").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("fotografia").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("canto").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("tejido").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("esperma").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("heces").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+      supabaseClient.from("extracto_piel").select("coleccion_id").in("coleccion_id", coleccionIds).limit(100000),
+    ]);
+
+    const multimediaSet = new Set<number>();
+    const muestrasSet = new Set<number>();
+    [vids, fotos, cantos].forEach((arr) =>
+      (arr || []).forEach((r: any) => {
+        if (r.coleccion_id != null) multimediaSet.add(r.coleccion_id as number);
+      }),
+    );
+    [tejs, esps, hecs, epls].forEach((arr) =>
+      (arr || []).forEach((r: any) => {
+        if (r.coleccion_id != null) muestrasSet.add(r.coleccion_id as number);
+      }),
+    );
+
+    colecciones.forEach((c) => {
+      c.tiene_multimedia = multimediaSet.has(c.id_coleccion);
+      c.tiene_muestras = c.tiene_muestras || muestrasSet.has(c.id_coleccion);
+    });
+  }
 
   return {colecciones, total, totalPaginas, paginaActual: pagina};
 }

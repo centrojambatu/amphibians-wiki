@@ -658,6 +658,19 @@ export default function ColeccionesPage() {
             >
               VertNet
             </a>
+            <a
+              className="hover:text-gray-900"
+              href="mailto:direccion@anfibiosecuador.ec"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+            >
+              Préstamos CJ
+            </a>
           </div>
           <StatCard
             highlight
