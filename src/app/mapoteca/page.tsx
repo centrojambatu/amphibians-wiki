@@ -597,6 +597,17 @@ function MapotecaContent({
       .catch(() => {});
   }, []);
 
+  // Rango de años disponible (derivado de coleccion + coleccion_externa)
+  const {data: anioRange} = useQuery<{anio_min: number; anio_max: number}>({
+    queryKey: ["mapoteca", "anio-range"],
+    queryFn: async () => {
+      const res = await fetch("/api/mapoteca/anio-range");
+      if (!res.ok) return {anio_min: 1849, anio_max: new Date().getFullYear()};
+      return res.json();
+    },
+    staleTime: 60 * 60 * 1000,
+  });
+
   const clearFilters = () => {
     setProvinciaFilter([]);
     setPisoFilter([]);
@@ -718,8 +729,8 @@ function MapotecaContent({
                     <YearRangeFilter
                       desde={anioDesde}
                       hasta={anioHasta}
-                      yearMax={new Date().getFullYear()}
-                      yearMin={1970}
+                      yearMax={anioRange?.anio_max ?? new Date().getFullYear()}
+                      yearMin={anioRange?.anio_min ?? 1849}
                       onChange={(d, h) => {
                         setAnioDesde(d);
                         setAnioHasta(h);

@@ -254,7 +254,7 @@ export default function MoleculotecaListClient() {
   return (
     <>
       {/* Stats */}
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
         <div
           className="flex flex-col justify-center rounded-md border p-2"
           style={{borderColor: "#dddddd"}}
@@ -268,6 +268,20 @@ export default function MoleculotecaListClient() {
           >
             Diversidad molecular
           </a>
+          <a
+            className="hover:text-gray-900"
+            href="https://deepskyblue-beaver-511675.hostingersite.com/prestamos/"
+            rel="noopener noreferrer"
+            style={{color: "#666666", fontSize: "13px", fontWeight: 600}}
+            target="_blank"
+          >
+            Préstamos CJ
+          </a>
+        </div>
+        <div
+          className="flex flex-col justify-center rounded-md border p-2"
+          style={{borderColor: "#dddddd"}}
+        >
           <a
             className="hover:text-gray-900"
             href="https://www.ncbi.nlm.nih.gov/nuccore/?term=amphibia+ecuador"

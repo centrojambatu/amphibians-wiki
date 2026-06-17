@@ -660,7 +660,8 @@ export default function ColeccionesPage() {
             </a>
             <a
               className="hover:text-gray-900"
-              href="mailto:direccion@anfibiosecuador.ec"
+              href="https://deepskyblue-beaver-511675.hostingersite.com/prestamos/"
+              rel="noopener noreferrer"
               style={{
                 color: "#666666",
                 fontSize: "13px",
@@ -668,6 +669,7 @@ export default function ColeccionesPage() {
                   '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
                 fontWeight: "600",
               }}
+              target="_blank"
             >
               Préstamos CJ
             </a>
