@@ -67,7 +67,7 @@ const FAMILIAS_SIN_RENACUAJOS = new Set(["craugastoridae", "eleutherodactylidae"
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
-const RANARIUM_URL = "https://deepskyblue-beaver-511675.hostingersite.com/portfolio/saparium/";
+const RANARIUM_URL = "https://darkgray-kangaroo-476720.hostingersite.com/portfolio/saparium/";
 
 const getProvinciasFromGeoPolitica = (
   geoPolitica: {rank_nombre?: string; nombre?: string}[] | undefined,
@@ -2255,11 +2255,11 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         Version 1.0. ({today}) Base de datos electrónica en{" "}
                         <a
                           className="processed-link"
-                          href="https://deepskyblue-beaver-511675.hostingersite.com"
+                          href="https://darkgray-kangaroo-476720.hostingersite.com"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          https://deepskyblue-beaver-511675.hostingersite.com
+                          https://darkgray-kangaroo-476720.hostingersite.com
                         </a>
                         . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
                       </p>

@@ -509,7 +509,7 @@ function CitationLink({label, url}: {label: string; url: string}) {
 
 const ILUSTRACIONES_ANFIBIOS: Slide[] = [
   {
-    src: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Figure-5-1-scaled.webp",
+    src: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/02/Figure-5-1-scaled.webp",
     alt: "Primeras ilustraciones anfibios ecuatorianos",
     title: (
       <span
@@ -714,7 +714,7 @@ export default function FototecaPage() {
           >
             <StatCard
               imageAlt="Primeras ilustraciones anfibios ecuatorianos"
-              imageSrc="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Figure-5-1-scaled.webp"
+              imageSrc="https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/02/Figure-5-1-scaled.webp"
               label="Primeras ilustraciones anfibios ecuatorianos"
             />
           </button>

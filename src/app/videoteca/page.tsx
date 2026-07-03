@@ -405,7 +405,7 @@ function CitationLink({label, url}: {label: string; url: string}) {
 
 const PRIMERA_PELICULA_SLIDES: Slide[] = [
   {
-    src: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/Captura-de-pantalla-2026-05-28-a-las-15.12.41.png",
+    src: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/Captura-de-pantalla-2026-05-28-a-las-15.12.41.png",
     alt: "Primera película anfibios Ecuador - Gastrotheca riobambae",
     title: (
       <span
@@ -549,7 +549,7 @@ export default function VideotecaPage() {
             }}
           >
             <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/peliculas-anfibios-ecuatorianos/"
+              href="https://darkgray-kangaroo-476720.hostingersite.com/peliculas-anfibios-ecuatorianos/"
               rel="noopener noreferrer"
               style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"
@@ -578,7 +578,7 @@ export default function VideotecaPage() {
                   alt="Primera película anfibios Ecuador"
                   className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
                   loading="lazy"
-                  src="https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/Captura-de-pantalla-2026-05-28-a-las-15.12.41.png"
+                  src="https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/Captura-de-pantalla-2026-05-28-a-las-15.12.41.png"
                 />
               }
               label="Primera película anfibios Ecuador"

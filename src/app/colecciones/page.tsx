@@ -660,7 +660,7 @@ export default function ColeccionesPage() {
             </a>
             <a
               className="hover:text-gray-900"
-              href="https://deepskyblue-beaver-511675.hostingersite.com/prestamos/"
+              href="https://darkgray-kangaroo-476720.hostingersite.com/prestamos/"
               rel="noopener noreferrer"
               style={{
                 color: "#666666",

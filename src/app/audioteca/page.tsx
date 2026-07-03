@@ -461,7 +461,7 @@ export default function AudiotecaPage() {
             }}
           >
             <a
-              href="https://deepskyblue-beaver-511675.hostingersite.com/vocalizaciones"
+              href="https://darkgray-kangaroo-476720.hostingersite.com/vocalizaciones"
               rel="noopener noreferrer"
               style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"

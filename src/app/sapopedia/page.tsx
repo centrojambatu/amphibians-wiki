@@ -43,7 +43,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/historia/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/historia/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -58,7 +58,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/arqueologia/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/arqueologia/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -73,7 +73,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/cultura/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/cultura/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -88,7 +88,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/biocomercio/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/biocomercio/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -110,7 +110,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad-molecular/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/diversidad-molecular/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -125,7 +125,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/diversidad/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/diversidad/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -140,7 +140,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/especies-introducidas/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/especies-introducidas/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -155,7 +155,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/incertae-sedis/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/incertae-sedis/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -177,7 +177,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/distribucion/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/distribucion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -192,7 +192,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/extincion/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/extincion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -207,7 +207,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/conservacion/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/conservacion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",

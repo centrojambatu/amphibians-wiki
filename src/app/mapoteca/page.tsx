@@ -841,24 +841,24 @@ const MAPOTECA_CARDS: {
 }[] = [
   {
     title: "Mapa especies por provincias",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/EcuadorNumberSpeciesProvinces.webp",
   },
   {
     title: "Nombres renacuajos",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg",
   },
   {
     title: "Rana toro",
     subtitle: "Aquarana catesbeiana",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/03/Figure-54-scaled.webp",
   },
   {
     title: "Sectores biogeográficos",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBiogeographicSectors.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/EcuadorBiogeographicSectors.webp",
   },
   {
     title: "Mapa deforestación",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/04/Figure-31-1-scaled.webp",
     citation: {
       label: "MAE, 2023",
       url: "http://ide.ambiente.gob.ec:8080/mapainteractivo/",
@@ -866,11 +866,11 @@ const MAPOTECA_CARDS: {
   },
   {
     title: "Especies amenazadas minería",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/EcuadorMuseumRecordsOverlapMiningConcessions.webp",
   },
   {
     title: "Otros mapas MAE",
-    href: "https://deepskyblue-beaver-511675.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
+    href: "https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/05/EcuadorBioclimas.webp",
     citation: {
       label: "MAE, 2023",
       url: "http://ide.ambiente.gob.ec:8080/mapainteractivo/",

@@ -82,7 +82,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
       <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <a
-            href="https://deepskyblue-beaver-511675.hostingersite.com/nombres-estandarizados/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-900"
@@ -102,7 +102,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
           </Link>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/jambatu/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/jambatu/"
             rel="noopener noreferrer"
             style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
             target="_blank"
@@ -124,7 +124,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
         <div className="flex flex-col justify-center rounded-md border p-2" style={{ borderColor: "#dddddd" }}>
           <a
             className="hover:text-gray-900"
-            href="https://deepskyblue-beaver-511675.hostingersite.com/rana-sapo/"
+            href="https://darkgray-kangaroo-476720.hostingersite.com/rana-sapo/"
             rel="noopener noreferrer"
             style={{ fontSize: "15px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "500" }}
             target="_blank"
