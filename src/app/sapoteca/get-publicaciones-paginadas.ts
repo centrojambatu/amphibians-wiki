@@ -129,7 +129,9 @@ async function getPublicacionesDesdeTabla(
     .select("id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha", { count: "exact" })
     .eq("anfibios_ecuador", true);
 
-  if (filtros?.titulo) q = q.ilike("titulo", `%${filtros.titulo}%`);
+  if (filtros?.titulos && filtros.titulos.length > 0) {
+    q = q.in("titulo", filtros.titulos);
+  }
   if (filtros?.publicacionId !== undefined) q = q.eq("id_publicacion", filtros.publicacionId);
   if (filtros?.indexada !== undefined) {
     if (filtros.indexada) q = q.eq("indexada", true);
@@ -212,7 +214,8 @@ export interface PublicacionSapoteca {
 }
 
 export interface FiltrosSapoteca {
-  titulo?: string;
+  /** Lista de títulos (exact match) seleccionados vía checkbox */
+  titulos?: string[];
   años?: number[];
   autor?: string;
   tiposPublicacion?: number[];

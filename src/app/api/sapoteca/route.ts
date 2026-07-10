@@ -30,8 +30,10 @@ export async function GET(request: Request) {
     Math.max(1, Number.parseInt(searchParams.get("itemsPorPagina") || "20", 10) || 20),
   );
 
+  const titulosRaw = searchParams.getAll("titulo").filter((t) => t.trim().length > 0);
+
   const filtros: FiltrosSapoteca = {
-    titulo: searchParams.get("titulo") || undefined,
+    titulos: titulosRaw.length > 0 ? titulosRaw : undefined,
     años: parseNumberList(searchParams.get("años")),
     autor: searchParams.get("autor") || undefined,
     tiposPublicacion: parseNumberList(searchParams.get("tipos")),

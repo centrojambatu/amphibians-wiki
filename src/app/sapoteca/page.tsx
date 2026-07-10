@@ -9,9 +9,9 @@ import Link from "next/link";
 import {MoveLeft} from "lucide-react";
 
 interface SearchParams {
-  [key: string]: string | undefined;
+  [key: string]: string | string[] | undefined;
   pagina?: string;
-  titulo?: string;
+  titulo?: string | string[];
   años?: string;
   autor?: string;
   tipos?: string;
