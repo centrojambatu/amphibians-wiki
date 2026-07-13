@@ -6,6 +6,7 @@ import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {Volume2, RotateCcw, Search, X, Check, Plus} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
+import CardAudioPlayer from "@/components/card-audio-player";
 import CatalogoMultiSelect from "@/components/CatalogoMultiSelect";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 import YearRangeFilter from "@/components/YearRangeFilter";
@@ -132,15 +133,11 @@ function TextMultiSelect({
   placeholder,
   selected,
   onChange,
-  chipBg,
-  chipText,
 }: {
   apiPath: string;
   placeholder: string;
   selected: string[];
   onChange: (val: string[]) => void;
-  chipBg: string;
-  chipText: string;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -221,7 +218,7 @@ function TextMultiSelect({
           {selected.map((opt) => (
             <span
               key={opt}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${chipBg} ${chipText}`}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700"
             >
               {opt.length > 30 ? opt.slice(0, 30) + "..." : opt}
               <button type="button" onClick={() => toggle(opt)}>
@@ -292,18 +289,11 @@ function StatCard({
       className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
       style={{borderColor: "#dddddd"}}
     >
-      <div className="flex h-20 w-full items-center justify-center overflow-hidden bg-gray-50 px-2">
+      <div className="flex h-20 w-full items-center justify-center bg-gray-50 px-3">
         {headerContent ? (
           headerContent
         ) : audioSrc ? (
-          <audio
-            controls
-            className="block h-10 w-full min-w-0"
-            controlsList="nodownload noplaybackrate noremoteplayback"
-            preload="none"
-            src={audioSrc}
-            onPlay={pauseOtherAudios}
-          />
+          <CardAudioPlayer src={audioSrc} onPlay={pauseOtherAudios} />
         ) : (
           <div className="flex items-center gap-2 text-xs text-gray-400">
             <Volume2 className="h-4 w-4" />
@@ -536,9 +526,15 @@ export default function AudiotecaPage() {
         {histograma && (
           <div className="mb-8">
             <AudiotecaHistogramaChart
+              colectoresSeleccionados={autoresFilter}
               puntos={histograma.puntos}
               totalCantos={histograma.totalCantos}
               totalSinColector={histograma.totalSinColector}
+              onToggleColector={(colector) =>
+                setAutoresFilter((prev) =>
+                  prev.includes(colector) ? prev.filter((a) => a !== colector) : [...prev, colector],
+                )
+              }
             />
           </div>
         )}
@@ -591,16 +587,12 @@ export default function AudiotecaPage() {
                   <div className="space-y-3 px-6 py-4">
                     <TextMultiSelect
                       apiPath="/api/audioteca/localidades"
-                      chipBg="bg-green-100"
-                      chipText="text-green-800"
                       placeholder="Localidad"
                       selected={localidadesFilter}
                       onChange={setLocalidadesFilter}
                     />
                     <TextMultiSelect
                       apiPath="/api/audioteca/autores"
-                      chipBg="bg-blue-100"
-                      chipText="text-blue-800"
                       placeholder="Autor"
                       selected={autoresFilter}
                       onChange={setAutoresFilter}

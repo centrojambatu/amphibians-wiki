@@ -17,8 +17,17 @@ interface RegistrosPorAnioResponse {
 
 const ALTURA_MAX_BARRA = 200;
 const COLOR_BARRA = "#f07304";
+const COLOR_BARRA_SELECCIONADA = "#d86503";
 
-export default function RegistrosPorAnioChart() {
+interface RegistrosPorAnioChartProps {
+  anioSeleccionado?: number;
+  onToggleAnio?: (anio: number) => void;
+}
+
+export default function RegistrosPorAnioChart({
+  anioSeleccionado,
+  onToggleAnio,
+}: RegistrosPorAnioChartProps = {}) {
   const {data, isLoading} = useQuery<RegistrosPorAnioResponse>({
     queryKey: ["colecciones", "registros-por-anio"],
     queryFn: async () => {
@@ -64,18 +73,29 @@ export default function RegistrosPorAnioChart() {
         <TooltipProvider delayDuration={0}>
           {puntos.map((d) => {
             const altura = (d.count / maxCount) * ALTURA_MAX_BARRA;
+            const seleccionada = anioSeleccionado === d.anio;
+            const haySeleccion = anioSeleccionado !== undefined;
+            const tieneDatos = d.count > 0;
 
             return (
               <Tooltip key={d.anio}>
                 <TooltipTrigger asChild>
                   <button
-                    aria-label={`${String(d.count)} registros en ${String(d.anio)}`}
-                    className="min-w-0 flex-1 cursor-pointer rounded-t transition-opacity hover:opacity-90 focus:outline-none"
+                    aria-label={`Filtrar por ${String(d.anio)} (${String(d.count)} registros)`}
+                    aria-pressed={seleccionada}
+                    className="min-w-0 flex-1 cursor-pointer rounded-t transition-opacity hover:opacity-90 focus:outline-none disabled:cursor-default"
+                    disabled={!tieneDatos}
                     style={{
-                      height: d.count > 0 ? Math.max(altura, 4) : 1,
-                      backgroundColor: d.count > 0 ? COLOR_BARRA : "#e5e5e5",
+                      height: tieneDatos ? Math.max(altura, 4) : 1,
+                      backgroundColor: seleccionada
+                        ? COLOR_BARRA_SELECCIONADA
+                        : tieneDatos
+                          ? COLOR_BARRA
+                          : "#e5e5e5",
+                      opacity: haySeleccion && !seleccionada ? 0.4 : 1,
                     }}
                     type="button"
+                    onClick={() => tieneDatos && onToggleAnio?.(d.anio)}
                   />
                 </TooltipTrigger>
                 <TooltipContent

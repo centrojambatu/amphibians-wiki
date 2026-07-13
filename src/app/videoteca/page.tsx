@@ -137,15 +137,11 @@ function TextMultiSelect({
   placeholder,
   selected,
   onChange,
-  chipBg,
-  chipText,
 }: {
   apiPath: string;
   placeholder: string;
   selected: string[];
   onChange: (val: string[]) => void;
-  chipBg: string;
-  chipText: string;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -226,7 +222,7 @@ function TextMultiSelect({
           {selected.map((opt) => (
             <span
               key={opt}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${chipBg} ${chipText}`}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700"
             >
               {opt.length > 30 ? opt.slice(0, 30) + "..." : opt}
               <button type="button" onClick={() => toggle(opt)}>
@@ -670,16 +666,12 @@ export default function VideotecaPage() {
                   <div className="space-y-3 px-6 py-4">
                     <TextMultiSelect
                       apiPath="/api/videoteca/localidades"
-                      chipBg="bg-green-100"
-                      chipText="text-green-800"
                       placeholder="Localidad"
                       selected={localidadesFilter}
                       onChange={setLocalidadesFilter}
                     />
                     <TextMultiSelect
                       apiPath="/api/videoteca/autores"
-                      chipBg="bg-blue-100"
-                      chipText="text-blue-800"
                       placeholder="Autor"
                       selected={autoresFilter}
                       onChange={setAutoresFilter}

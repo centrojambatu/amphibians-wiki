@@ -11,17 +11,24 @@ interface AudiotecaHistogramaChartProps {
   puntos: PuntoHistogramaColector[];
   totalCantos: number;
   totalSinColector: number;
+  colectoresSeleccionados?: string[];
+  onToggleColector?: (colector: string) => void;
 }
 
 const ALTURA_MAX_BARRA = 200;
 const COLOR_BARRA = "#f07304";
+const COLOR_BARRA_SELECCIONADA = "#d86503";
 const POCOS_DATOS_UMBRAL = 12;
 
 export default function AudiotecaHistogramaChart({
   puntos,
   totalCantos,
   totalSinColector,
+  colectoresSeleccionados,
+  onToggleColector,
 }: AudiotecaHistogramaChartProps) {
+  const seleccionSet = new Set(colectoresSeleccionados ?? []);
+  const haySeleccion = seleccionSet.size > 0;
   const puntosOrdenados = [...puntos].sort((a, b) => b.cantidad - a.cantidad);
   const maxCantidad = Math.max(...puntosOrdenados.map((p) => p.cantidad), 1);
   const pocosDatos = puntosOrdenados.length > 0 && puntosOrdenados.length <= POCOS_DATOS_UMBRAL;
@@ -55,18 +62,22 @@ export default function AudiotecaHistogramaChart({
           <TooltipProvider delayDuration={0}>
             {puntosOrdenados.map((punto) => {
               const altura = (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA;
+              const seleccionada = seleccionSet.has(punto.colector);
 
               return (
                 <Tooltip key={punto.colector}>
                   <TooltipTrigger asChild>
                     <button
-                      aria-label={`${String(punto.cantidad)} cantos de ${punto.colector}`}
+                      aria-label={`Filtrar por ${punto.colector} (${String(punto.cantidad)} cantos)`}
+                      aria-pressed={seleccionada}
                       className="w-16 cursor-pointer rounded-t transition-opacity hover:opacity-90 focus:outline-none"
                       style={{
                         height: Math.max(altura, 6),
-                        backgroundColor: COLOR_BARRA,
+                        backgroundColor: seleccionada ? COLOR_BARRA_SELECCIONADA : COLOR_BARRA,
+                        opacity: haySeleccion && !seleccionada ? 0.4 : 1,
                       }}
                       type="button"
+                      onClick={() => onToggleColector?.(punto.colector)}
                     />
                   </TooltipTrigger>
                   <TooltipContent
@@ -91,18 +102,22 @@ export default function AudiotecaHistogramaChart({
           <TooltipProvider delayDuration={0}>
             {puntosOrdenados.map((punto) => {
               const altura = (punto.cantidad / maxCantidad) * ALTURA_MAX_BARRA;
+              const seleccionada = seleccionSet.has(punto.colector);
 
               return (
                 <Tooltip key={punto.colector}>
                   <TooltipTrigger asChild>
                     <button
-                      aria-label={`${String(punto.cantidad)} cantos de ${punto.colector}`}
+                      aria-label={`Filtrar por ${punto.colector} (${String(punto.cantidad)} cantos)`}
+                      aria-pressed={seleccionada}
                       className="min-w-0 flex-1 cursor-pointer rounded-t transition-opacity hover:opacity-90 focus:outline-none"
                       style={{
                         height: Math.max(altura, 6),
-                        backgroundColor: COLOR_BARRA,
+                        backgroundColor: seleccionada ? COLOR_BARRA_SELECCIONADA : COLOR_BARRA,
+                        opacity: haySeleccion && !seleccionada ? 0.4 : 1,
                       }}
                       type="button"
+                      onClick={() => onToggleColector?.(punto.colector)}
                     />
                   </TooltipTrigger>
                   <TooltipContent

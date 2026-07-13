@@ -188,7 +188,7 @@ function EspecieMultiSelect({
           {selected.map((nombre) => (
             <span
               key={nombre}
-              className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800 italic"
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700 italic"
             >
               {nombre}
               <button type="button" onClick={() => toggleEspecie(nombre)}>
@@ -298,7 +298,7 @@ function CatalogoMultiSelect({
           {selected.map((cat) => (
             <span
               key={cat}
-              className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 font-mono text-[11px] text-orange-800"
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-700"
             >
               {(() => {
                 const [museo, num] = cat.split("::");
@@ -406,7 +406,7 @@ function LocalidadMultiSelect({
           {selected.map((loc) => (
             <span
               key={loc}
-              className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800"
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700"
             >
               {loc.length > 25 ? loc.slice(0, 25) + "..." : loc}
               <button onClick={() => toggleLocalidad(loc)}>
@@ -501,7 +501,7 @@ function ProvinciaMultiSelect({
           {selected.map((nombre) => (
             <span
               key={nombre}
-              className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] text-blue-800"
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700"
             >
               {nombre}
               <button type="button" onClick={() => toggleProvincia(nombre)}>

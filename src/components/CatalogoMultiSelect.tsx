@@ -49,8 +49,6 @@ interface Props {
   selected: string[];
   onChange: (val: string[]) => void;
   placeholder?: string;
-  chipBgClass?: string;
-  chipTextClass?: string;
 }
 
 export default function CatalogoMultiSelect({
@@ -58,8 +56,6 @@ export default function CatalogoMultiSelect({
   selected,
   onChange,
   placeholder = "CJ 10441",
-  chipBgClass = "bg-orange-100",
-  chipTextClass = "text-orange-800",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -149,7 +145,7 @@ export default function CatalogoMultiSelect({
           {selected.map((cat) => (
             <span
               key={cat}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] ${chipBgClass} ${chipTextClass}`}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-700"
             >
               {formatCat(cat)}
               <button type="button" onClick={() => toggle(cat)}>

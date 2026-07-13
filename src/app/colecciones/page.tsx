@@ -259,7 +259,7 @@ function EspecieSelect({
       </Popover>
       {selected && (
         <div className="flex flex-wrap gap-1">
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800 italic">
+          <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700 italic">
             {selected}
             <button type="button" onClick={() => onChange(null)}>
               <X className="h-3 w-3" />
@@ -276,15 +276,11 @@ function TextMultiSelect({
   placeholder,
   selected,
   onChange,
-  chipBg,
-  chipText,
 }: {
   apiPath: string;
   placeholder: string;
   selected: string[];
   onChange: (val: string[]) => void;
-  chipBg: string;
-  chipText: string;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -365,7 +361,7 @@ function TextMultiSelect({
           {selected.map((opt) => (
             <span
               key={opt}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${chipBg} ${chipText}`}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-700"
             >
               {opt.length > 30 ? opt.slice(0, 30) + "..." : opt}
               <button type="button" onClick={() => toggle(opt)}>
@@ -712,7 +708,20 @@ export default function ColeccionesPage() {
         </div>
 
         <div className="mb-8">
-          <RegistrosPorAnioChart />
+          <RegistrosPorAnioChart
+            anioSeleccionado={anioEspecifico ? Number.parseInt(anioEspecifico, 10) : undefined}
+            onToggleAnio={(anio) => {
+              const actual = anioEspecifico ? Number.parseInt(anioEspecifico, 10) : undefined;
+
+              if (actual === anio) {
+                setAnioEspecifico("");
+              } else {
+                setAnioEspecifico(String(anio));
+                setAnioDesde("");
+                setAnioHasta("");
+              }
+            }}
+          />
         </div>
 
         <section className="mb-12">
@@ -814,24 +823,18 @@ export default function ColeccionesPage() {
                   <div className="space-y-3 px-6 py-4">
                     <TextMultiSelect
                       apiPath="/api/colecciones/colectores"
-                      chipBg="bg-blue-100"
-                      chipText="text-blue-800"
                       placeholder="Colector"
                       selected={colectoresFilter}
                       onChange={setColectoresFilter}
                     />
                     <TextMultiSelect
                       apiPath="/api/colecciones/localidades"
-                      chipBg="bg-green-100"
-                      chipText="text-green-800"
                       placeholder="Localidad"
                       selected={localidadesFilter}
                       onChange={setLocalidadesFilter}
                     />
                     <CatalogoMultiSelect
                       apiPath="/api/colecciones/catalogos"
-                      chipBgClass="bg-purple-100"
-                      chipTextClass="text-purple-800"
                       placeholder="Número de museo (ej. CJ 15671)"
                       selected={catalogosFilter}
                       onChange={setCatalogosFilter}
