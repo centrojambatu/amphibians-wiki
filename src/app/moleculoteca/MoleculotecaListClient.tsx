@@ -270,10 +270,8 @@ export default function MoleculotecaListClient() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/prestamos/"
-            rel="noopener noreferrer"
+            href="mailto:centrojambatu@otonga.org"
             style={{color: "#666666", fontSize: "13px", fontWeight: 600}}
-            target="_blank"
           >
             Préstamos CJ
           </a>

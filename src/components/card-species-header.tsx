@@ -6,6 +6,7 @@ import {processHTMLLinks} from "@/lib/process-html-links";
 
 import {CardHeader} from "./ui/card";
 import RedListStatus from "./RedListStatus";
+import {BackArrow} from "./back-arrow";
 
 interface CardSpeciesHeaderProps {
   fichaEspecie: any;
@@ -94,6 +95,8 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
 
   return (
     <CardHeader className="relative sticky top-0 z-30 px-0 text-center">
+      {/* Flecha para regresar al origen (Sapopedia u otra sección) */}
+      <BackArrow className="absolute top-6 left-4 z-10 sm:left-6" />
       {/* Gota de Lista Roja Ecuador — siempre apegada al borde derecho del card,
           fuera del wrapper con padding para que no la afecte la compensación del sidebar. */}
       {listaRojaSigla && (
@@ -111,7 +114,7 @@ export const CardSpeciesHeader = ({fichaEspecie}: CardSpeciesHeaderProps) => {
           coincida con el centro del card de la imagen / columna principal. */}
       <div className="space-y-4 py-5 pr-4 pl-2 sm:pr-6 sm:pl-4 lg:pr-[12%]">
         {/* Título principal - Jerarquía taxonómica completa */}
-        <div className="flex flex-wrap items-baseline justify-center gap-2 pr-20">
+        <div className="flex flex-wrap items-baseline justify-center gap-2 px-20">
           {/* Orden - PEQUEÑO con link (rank_id = 4) */}
           {(() => {
             const orden = fichaEspecie.lineage?.find((item: any) => item.rank_id === 4);
