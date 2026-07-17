@@ -80,7 +80,7 @@ export default function Navbar() {
               key={logoSrc}
               priority
               alt={logoAlt}
-              className="h-22 w-auto"
+              className="h-10 w-auto sm:h-12 md:h-16 lg:h-20"
               height={88}
               src={logoSrc}
               width={218}
@@ -88,7 +88,7 @@ export default function Navbar() {
           </a>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-2 lg:flex xl:gap-4">
+          <nav className="hidden items-center gap-0 lg:flex xl:gap-1">
             {navLinks.map((link) => (
               link.submenu ? (
                 <div
@@ -97,7 +97,7 @@ export default function Navbar() {
                   onMouseEnter={() => setOpenSubmenu(link.label)}
                   onMouseLeave={() => setOpenSubmenu(null)}
                 >
-                  <Button className="cursor-pointer text-sm gap-1" variant="ghost">
+                  <Button className="cursor-pointer text-sm gap-1 !px-2.5" variant="ghost">
                     {link.label}
                     <ChevronDown className="h-3 w-3" />
                   </Button>
@@ -137,7 +137,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link key={link.label} href={link.href}>
-                  <Button className="cursor-pointer text-sm" variant="ghost">
+                  <Button className="cursor-pointer text-sm !px-2.5" variant="ghost">
                     {link.label}
                   </Button>
                 </Link>

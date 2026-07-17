@@ -341,6 +341,59 @@ function normalizarNombres(
 
       if (!esDescriptivoCompuesto) {
         const palabras = baseFinal.split(/\s+/);
+
+        // NUEVO: calcular el LCP (longest common prefix) más largo entre la base de esta
+        // especie y las bases de OTRAS especies del grupo. Adopta el LCP si es un prefijo
+        // más específico compartido (ej: "Rana cohete de brazo" + "Rana cohete" -> ambas
+        // usan "Rana cohete"). Si la base actual ya coincide con el LCP más largo, se
+        // mantiene y se saltan las estrategias antiguas de colapso a primera palabra.
+        let mejorLCPPalabras = 0;
+
+        for (const otra of especiesConBase) {
+          if (otra.nombreBaseNormalizado === item.nombreBaseNormalizado) continue;
+          const palabrasOtra = otra.nombreBase.split(/\s+/);
+          const maxComparar = Math.min(palabras.length, palabrasOtra.length);
+          let lcpLen = 0;
+
+          for (let i = 0; i < maxComparar; i++) {
+            if (normalizarTildes(palabras[i]) === normalizarTildes(palabrasOtra[i])) {
+              lcpLen += 1;
+            } else {
+              break;
+            }
+          }
+          if (lcpLen > mejorLCPPalabras) mejorLCPPalabras = lcpLen;
+        }
+
+        // Truncar el LCP si termina en preposición/conector (ej: "Rana arlequín de")
+        // para no crear bases semánticamente inválidas.
+        const conectores = new Set(["de", "del", "con", "sin", "y", "a", "en", "para", "por"]);
+
+        while (
+          mejorLCPPalabras >= 1 &&
+          conectores.has(normalizarTildes(palabras[mejorLCPPalabras - 1]))
+        ) {
+          mejorLCPPalabras -= 1;
+        }
+
+        // Si el LCP es tan largo como la base actual, mantenerla (la base ya es un prefijo compartido)
+        if (mejorLCPPalabras >= palabras.length) {
+          // No hacer nada: la base ya es un prefijo compartido con alguna otra especie
+        } else if (mejorLCPPalabras >= 2) {
+          // Reducir a un prefijo compartido más específico que "primera palabra"
+          const lcp = palabras.slice(0, mejorLCPPalabras).join(" ");
+          baseFinal = lcp;
+          baseFinalNormalizado = normalizarTildes(lcp);
+        } else if (
+          especiesConBase.length === 1 &&
+          palabras.length >= 2 &&
+          nombresBaseSimples.has(normalizarTildes(palabras[0]))
+        ) {
+          // Grupo con una sola especie: colapsar al nombre más base (primera palabra)
+          // Ej: Tepuihyla → "Rana arbórea de tepui" → "Rana"
+          baseFinal = palabras[0];
+          baseFinalNormalizado = normalizarTildes(palabras[0]);
+        } else {
         const primeraPalabra = palabras[0];
         const baseSimpleNormalizado = normalizarTildes(primeraPalabra);
 
@@ -420,6 +473,7 @@ function normalizarNombres(
               }
             }
           }
+        }
         }
       }
     }

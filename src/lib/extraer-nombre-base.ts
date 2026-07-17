@@ -29,8 +29,10 @@ export function extraerNombreBaseNormalizado(nombreCompleto: string | null): str
   nombre = nombre.replace(descriptivosCompuestos, "$1");
 
   // Regla 2b: "[sustantivo descriptivo simple] de [Nombre Propio]"
+  // Nota: [A-ZÁÉÍÓÚÑÜ] con flag /i matchea también minúsculas. Usar \p{Lu} con /u
+  // para ser realmente case-sensitive en la mayúscula del nombre propio.
   const descriptivosSimples =
-    /(hojarasquero|arlequín|espinosa|torrentícola|venenosa|arbórea|cohete|gladiadora|gomosa|verde|ágil|amazónica|nodriza|dedilarga|bullanguero|listada|marsupial|hoja)\s+de\s+[A-ZÁÉÍÓÚÑÜ].+$/iu;
+    /(hojarasquero|arlequín|espinosa|torrentícola|venenosa|arbórea|cohete|gladiadora|gomosa|verde|ágil|amazónica|nodriza|dedilarga|bullanguero|listada|marsupial|hoja)\s+de\s+\p{Lu}.+$/u;
 
   nombre = nombre.replace(descriptivosSimples, "$1");
 
@@ -50,8 +52,8 @@ export function extraerNombreBaseNormalizado(nombreCompleto: string | null): str
   // Regla 4: "con [algo]"
   nombre = nombre.replace(/\s+con\s+[\wáéíóúñü\s]+$/iu, "");
 
-  // Regla 5: "de [Nombre Propio]"
-  nombre = nombre.replace(/\s+de\s+[A-ZÁÉÍÓÚÑÜ].+$/iu, "");
+  // Regla 5: "de [Nombre Propio]" — case-sensitive en la mayúscula (evita comerse "de cristal")
+  nombre = nombre.replace(/\s+de\s+\p{Lu}.+$/u, "");
 
   // Regla 6: "del [sustantivo] [adjetivo]"
   const delSustantivo =
@@ -63,7 +65,7 @@ export function extraerNombreBaseNormalizado(nombreCompleto: string | null): str
   // Regla 7: "del [Lugar]"
   const delExcepciones = /\s+del\s+(Cóndor|Norte|Padre|Alto\s+Amazonas|Gualaceño|Chocó|bosque)/iu;
 
-  if (!delExcepciones.test(nombre)) nombre = nombre.replace(/\s+del\s+[A-ZÁÉÍÓÚÑÜ].+$/iu, "");
+  if (!delExcepciones.test(nombre)) nombre = nombre.replace(/\s+del\s+\p{Lu}.+$/u, "");
 
   // Regla 8: "amante de [algo]" y "en forma de [algo]"
   nombre = nombre.replace(/(\s+amante)\s+de\s+.+$/iu, "$1");
@@ -77,7 +79,7 @@ export function extraerNombreBaseNormalizado(nombreCompleto: string | null): str
 
   // Regla 10: Adjetivos simples
   nombre = nombre.replace(
-    /\s+(adornado|afortunado|afro|ágata|amazónico|anaranjado|andino|atenuado|alado|amistoso|balador|bello|bonito|bromelícola|café|cañari|ceniciento|ceñudo|charlatán|conífero|coronado|cornudo|desnudo|diferente|diminuto|ecuatoriano|elfo|enano|enguatado|escondedor|espadachín|espejo|espinoso|exiliado|frío|gigante|glandular|grande|grueso|gualita|guardián|labioso|llorón|luchador|magnífico|manchado|marino|mezclado|minúsculo|minuto|modesto|montañero|morlaco|moteado|mutable|narizón|negro|negra|obscuro|ocelado|ocultador|pequeño|peruano|pinchaque|pseudoacuminado|raro|resplandeciente|rugoso|sacharuna|saltarín|salpicado|sanguinolento|sencillo|silencioso|solitario|sonrosado|sordo|sucio|tiktik|tímido|truncado|tubercular|variable|variado|verde|vertebralis|viudo|marrones|anómala|salpicada|ecuatoriana|minúscula|punteada|naranja|rosada|amarilla|azul|blanca)$/iu,
+    /\s+(adornado|afortunado|afro|ágata|amazónico|amazónica|anaranjado|andino|andina|atenuado|alado|amistoso|balador|bello|bonito|bromelícola|café|cañari|ceniciento|ceñudo|charlatán|conífero|coronado|cornudo|desnudo|diferente|diminuto|diminuta|ecuatoriano|elfo|enano|enguatado|escondedor|espadachín|espejo|espinoso|espumoso|espumosa|exiliado|frío|gigante|glandular|grande|grueso|gualita|guardián|labioso|llorón|luchador|magnífico|manchado|manchada|marino|marina|mezclado|minúsculo|minuto|modesto|montañero|morlaco|moteado|moteada|mutable|narizón|negro|negra|obscuro|ocelado|ocultador|pequeño|pequeña|peruano|pinchaque|pseudoacuminado|raro|resplandeciente|rugoso|sacharuna|saltarín|salpicado|sanguinolento|sencillo|silencioso|solitario|sonrosado|sordo|sucio|tiktik|tímido|truncado|tubercular|variable|variado|verde|vertebralis|viudo|marrones|anómala|salpicada|ecuatoriana|minúscula|punteada|naranja|rosada|amarilla|azul|blanca)$/iu,
     "",
   );
 
