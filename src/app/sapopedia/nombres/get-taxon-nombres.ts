@@ -1021,8 +1021,35 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
     return [];
   }
 
+  // Excluir especies cuya ficha_especie no está publicada (ficha_especie es la fuente de verdad).
+  // Taxones sin ficha (géneros/familias/órdenes) se mantienen.
+  const {data: fichasNoPublicadas, error: errorFichas} = await supabaseClient
+    .from("ficha_especie")
+    .select("taxon_id")
+    .or("publicar.is.null,publicar.eq.false")
+    .not("taxon_id", "is", null);
+
+  if (errorFichas) {
+    console.error("Error al obtener fichas no publicadas:", errorFichas);
+    return [];
+  }
+
+  const taxonesNoPublicados = new Set<number>(
+    (fichasNoPublicadas ?? [])
+      .map((f: any) => f.taxon_id as number)
+      .filter((id): id is number => id != null),
+  );
+
+  const nombresDataFiltrados = nombresData.filter(
+    (n: any) => !taxonesNoPublicados.has(n.taxon_id),
+  );
+
+  if (nombresDataFiltrados.length === 0) {
+    return [];
+  }
+
   // Obtener información de taxones y nombres científicos
-  const taxonIds = [...new Set(nombresData.map((n: any) => n.taxon_id))];
+  const taxonIds = [...new Set(nombresDataFiltrados.map((n: any) => n.taxon_id))];
   
   // Obtener taxones (pueden ser especies o géneros)
   const {data: taxonesData, error: errorTaxones} = await supabaseClient
@@ -1064,7 +1091,7 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
   const taxonInfoMap = await getTaxonInfo(supabaseClient, taxonIds);
 
   // Combinar datos de nombre_comun con información taxonómica
-  const taxonesValidos: TaxonNombre[] = nombresData
+  const taxonesValidos: TaxonNombre[] = nombresDataFiltrados
     .map((n: any) => {
       const taxonInfo = taxonInfoMap.get(n.taxon_id);
 
