@@ -2,10 +2,6 @@ import Link from "next/link";
 
 import NombresContent from "./NombresContent";
 import getTaxonNombres from "./get-taxon-nombres";
-import {
-  getNombresCompartidosPorFamilia,
-  getNombresCompartidosPorGenero,
-} from "./get-nombres-compartidos";
 
 // Mapa de idiomas disponibles para nombres comunes
 const IDIOMAS = [
@@ -66,10 +62,6 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
       sum + (orden.children?.reduce((s, familia) => s + (familia.children?.length || 0), 0) || 0),
     0,
   );
-
-  // Obtener nombres compartidos directamente de la vista (filtrar por idioma seleccionado)
-  const nombresPorFamilia = await getNombresCompartidosPorFamilia(idiomaIdFinal);
-  const nombresPorGenero = await getNombresCompartidosPorGenero(idiomaIdFinal);
 
   return (
     <main className="container mx-auto px-4 py-8">

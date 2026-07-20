@@ -3,12 +3,6 @@
 import {useRouter} from "next/navigation";
 
 import {Button} from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import SpeciesSearchInput from "@/components/SpeciesSearchInput";
 
 interface Idioma {
@@ -57,44 +51,36 @@ export default function NombresFiltersPanel({
         )}
       </div>
 
-      {/* Filtros */}
-      <div className="min-h-0 w-full flex-1 overflow-y-auto border-t px-6">
-        <Accordion className="w-full [&>[data-slot=accordion-item]]:border-b" type="multiple" defaultValue={["idioma"]}>
-          <AccordionItem value="idioma">
-            <AccordionTrigger className="!items-start">
-              <div className="flex flex-col items-start">
-                <span className="font-semibold">Idioma</span>
-                {idiomaActualObj && (
-                  <span className="mt-1 text-xs font-normal text-gray-500">
-                    {idiomaActualObj.nombre}
-                  </span>
-                )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-col gap-2">
-                {idiomas.map((idioma) => {
-                  const isSelected = idioma.id === idiomaActual;
-                  return (
-                    <Button
-                      key={idioma.id}
-                      className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
-                      size="sm"
-                      style={{
-                        borderColor: isSelected ? undefined : "#e8e8e8",
-                        color: isSelected ? undefined : "#2d2d2d",
-                      }}
-                      variant={isSelected ? "default" : "outline"}
-                      onClick={() => handleIdiomaChange(idioma.id)}
-                    >
-                      {idioma.nombre}
-                    </Button>
-                  );
-                })}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+      {/* Filtro de idioma */}
+      <div className="min-h-0 w-full flex-1 overflow-y-auto border-t px-6 py-4">
+        <div className="mb-3 flex flex-col">
+          <span className="font-semibold">Idioma</span>
+          {idiomaActualObj && (
+            <span className="mt-1 text-xs font-normal text-gray-500">
+              {idiomaActualObj.nombre}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          {idiomas.map((idioma) => {
+            const isSelected = idioma.id === idiomaActual;
+            return (
+              <Button
+                key={idioma.id}
+                className="h-auto min-h-[32px] w-full justify-start rounded-none px-2 py-1 text-left text-sm"
+                size="sm"
+                style={{
+                  borderColor: isSelected ? undefined : "#e8e8e8",
+                  color: isSelected ? undefined : "#2d2d2d",
+                }}
+                variant={isSelected ? "default" : "outline"}
+                onClick={() => handleIdiomaChange(idioma.id)}
+              >
+                {idioma.nombre}
+              </Button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

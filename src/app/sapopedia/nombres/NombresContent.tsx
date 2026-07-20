@@ -2,13 +2,8 @@
 
 import {useState, useMemo} from "react";
 import NombresAccordion from "@/components/NombresAccordion";
-import NombresCompartidos from "@/components/NombresCompartidos";
 import NombresFiltersPanel from "@/components/NombresFiltersPanel";
 import {NombreGroup} from "@/app/sapopedia/nombres/get-taxon-nombres";
-import {
-  NombresCompartidosPorFamilia,
-  NombresCompartidosPorGenero,
-} from "@/app/sapopedia/nombres/get-nombres-compartidos";
 
 interface Idioma {
   id: number;
@@ -95,8 +90,8 @@ export default function NombresContent({
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-      {/* Panel de filtros - lado izquierdo */}
-      <div className="order-2 w-full flex-shrink-0 lg:order-1 lg:w-80">
+      {/* Panel de filtros - arriba en mobile, izquierda en desktop */}
+      <div className="w-full flex-shrink-0 lg:w-80">
         <NombresFiltersPanel
           idiomas={idiomas}
           idiomaActual={idiomaActual}
@@ -106,7 +101,7 @@ export default function NombresContent({
       </div>
 
       {/* Contenido principal */}
-      <div className="order-1 min-w-0 flex-1 lg:order-2">
+      <div className="min-w-0 flex-1">
         {/* Acordeón de nombres */}
         <div className="mb-8">
           <NombresAccordion ordenes={ordenesFiltrados} />

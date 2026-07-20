@@ -1,3 +1,5 @@
+import {unstable_cache} from "next/cache";
+
 import {createServiceClient} from "@/utils/supabase/server";
 import {extraerNombreBaseNormalizado} from "@/lib/extraer-nombre-base";
 
@@ -937,185 +939,53 @@ export function extraerNombreBase(nombreComun: string | null): string {
   return nombreBase || nombreComun; // Si queda vacío, devolver el original
 }
 
-interface TaxonInfo {
-  id_taxon: number;
-  orden: string;
-  familia: string;
-  genero: string;
-}
-
-interface VwNombresComunes {
-  id_taxon: number;
-  id_ficha_especie: number;
-  especie: string;
-  nombre_cientifico: string | null;
-  nombre_comun_espanol: string | null;
-  nombre_comun_ingles: string | null;
-}
-
-/**
- * Obtiene la información taxonómica (orden, familia, género) para una lista de taxones.
- * Usa RPC get_taxon_hierarchy (una query con JOINs) en lugar de 4 consultas por lote.
- */
-async function getTaxonInfo(
-  supabaseClient: any,
-  taxonIds: number[],
-): Promise<Map<number, TaxonInfo>> {
-  const taxonInfoMap = new Map<number, TaxonInfo>();
-  if (taxonIds.length === 0) return taxonInfoMap;
-
-  const batchSize = 200;
-  const batches: number[][] = [];
-  for (let i = 0; i < taxonIds.length; i += batchSize) {
-    batches.push(taxonIds.slice(i, i + batchSize));
-  }
-
-  const results = await Promise.all(
-    batches.map((batch) =>
-      supabaseClient.rpc("get_taxon_hierarchy", {
-        taxon_ids: batch,
-      }),
-    ),
-  );
-
-  for (const {data: rows, error} of results) {
-    if (error) {
-      console.error("Error get_taxon_hierarchy:", error);
-      continue;
-    }
-    if (!rows?.length) continue;
-    for (const row of rows as {id_taxon: number; orden: string; familia: string; genero: string}[]) {
-      if (row.id_taxon != null && row.orden != null && row.familia != null && row.genero != null) {
-        taxonInfoMap.set(row.id_taxon, {
-          id_taxon: row.id_taxon,
-          orden: row.orden,
-          familia: row.familia,
-          genero: row.genero,
-        });
-      }
-    }
-  }
-  return taxonInfoMap;
-}
-
 // Función para obtener todos los taxones con nombres comunes, organizados jerárquicamente
 // Agrupa por orden > familia > género > nombre_base > especies
 // idiomaId: ID del idioma en catalogo_awe (1=Español, 8=Inglés, etc.). Por defecto 1 (Español)
-export default async function getTaxonNombres(idiomaId: number = 1): Promise<NombreGroup[]> {
+async function getTaxonNombresRaw(idiomaId: number = 1): Promise<NombreGroup[]> {
   const supabaseClient = createServiceClient();
 
-  // Obtener nombres comunes directamente de nombre_comun donde principal = true
-  const {data: nombresData, error: errorNombres} = await supabaseClient
-    .from("nombre_comun")
-    .select("id_nombre_comun, nombre, taxon_id, catalogo_awe_idioma_id")
-    .eq("principal", true)
-    .eq("catalogo_awe_idioma_id", idiomaId)
-    .not("taxon_id", "is", null);
+  // Una sola query a vw_nombres_comunes.
+  // La vista ya filtra ficha_especie.publicar=true y expone orden/familia/género
+  // desde vw_ficha_especie_completa, más nombres_comunes_json con todos los idiomas.
+  const {data: rows, error} = await (supabaseClient as any)
+    .from("vw_nombres_comunes")
+    .select(
+      "id_taxon, especie, nombre_cientifico, orden, familia, genero, nombres_comunes_json",
+    );
 
-  if (errorNombres) {
-    console.error("Error al obtener nombres comunes:", errorNombres);
+  if (error) {
+    console.error("Error al obtener nombres comunes:", error);
     return [];
   }
 
-  if (!nombresData || nombresData.length === 0) {
+  if (!rows || rows.length === 0) {
     return [];
   }
 
-  // Excluir especies cuya ficha_especie no está publicada (ficha_especie es la fuente de verdad).
-  // Taxones sin ficha (géneros/familias/órdenes) se mantienen.
-  const {data: fichasNoPublicadas, error: errorFichas} = await supabaseClient
-    .from("ficha_especie")
-    .select("taxon_id")
-    .or("publicar.is.null,publicar.eq.false")
-    .not("taxon_id", "is", null);
+  const idiomaKey = String(idiomaId);
+  const inglesKey = "8";
 
-  if (errorFichas) {
-    console.error("Error al obtener fichas no publicadas:", errorFichas);
-    return [];
-  }
+  const taxonesValidos: TaxonNombre[] = rows
+    .map((r: any) => {
+      const nombresJson = (r.nombres_comunes_json || {}) as Record<string, string | null>;
+      const nombreComun = nombresJson[idiomaKey];
 
-  const taxonesNoPublicados = new Set<number>(
-    (fichasNoPublicadas ?? [])
-      .map((f: any) => f.taxon_id as number)
-      .filter((id): id is number => id != null),
-  );
-
-  const nombresDataFiltrados = nombresData.filter(
-    (n: any) => !taxonesNoPublicados.has(n.taxon_id),
-  );
-
-  if (nombresDataFiltrados.length === 0) {
-    return [];
-  }
-
-  // Obtener información de taxones y nombres científicos
-  const taxonIds = [...new Set(nombresDataFiltrados.map((n: any) => n.taxon_id))];
-  
-  // Obtener taxones (pueden ser especies o géneros)
-  const {data: taxonesData, error: errorTaxones} = await supabaseClient
-    .from("taxon")
-    .select("id_taxon, taxon, taxon_id, rank_id")
-    .in("id_taxon", taxonIds);
-
-  if (errorTaxones) {
-    console.error("Error al obtener taxones:", errorTaxones);
-    return [];
-  }
-
-  // Crear mapa de taxon_id -> nombre científico
-  const taxonIdToNombreCientifico = new Map<number, string>();
-  const taxonIdToEspecie = new Map<number, string>();
-  
-  taxonesData?.forEach((t: any) => {
-    // Usar el campo taxon (no el alias especie)
-    taxonIdToEspecie.set(t.id_taxon, t.taxon);
-  });
-
-  // Obtener nombres científicos completos desde vw_lista_especies
-  const {data: vwData, error: errorVw} = await supabaseClient
-    .from("vw_lista_especies")
-    .select("id_taxon, nombre_cientifico")
-    .in("id_taxon", taxonIds);
-
-  if (errorVw) {
-    console.error("Error al obtener nombres científicos:", errorVw);
-  } else if (vwData) {
-    vwData.forEach((t: any) => {
-      if (t.nombre_cientifico) {
-        taxonIdToNombreCientifico.set(t.id_taxon, t.nombre_cientifico);
-      }
-    });
-  }
-
-  // Obtener información taxonómica
-  const taxonInfoMap = await getTaxonInfo(supabaseClient, taxonIds);
-
-  // Combinar datos de nombre_comun con información taxonómica
-  const taxonesValidos: TaxonNombre[] = nombresDataFiltrados
-    .map((n: any) => {
-      const taxonInfo = taxonInfoMap.get(n.taxon_id);
-
-      if (!taxonInfo) {
-        return null;
-      }
-
-      const nombreComun = n.nombre;
-      const especie = taxonIdToEspecie.get(n.taxon_id) || "";
-      const nombreCientifico = taxonIdToNombreCientifico.get(n.taxon_id);
+      if (!nombreComun || !r.orden || !r.familia || !r.genero) return null;
 
       return {
-        id_taxon: n.taxon_id,
-        taxon: especie,
+        id_taxon: r.id_taxon,
+        taxon: r.especie || "",
         nombre_comun: nombreComun,
         nombre_comun_completo: nombreComun,
-        nombre_comun_ingles: idiomaId === 8 ? nombreComun : undefined, // Si es inglés, también ponerlo aquí
-        nombre_cientifico: nombreCientifico,
-        orden: taxonInfo.orden,
-        familia: taxonInfo.familia,
-        genero: taxonInfo.genero,
+        nombre_comun_ingles: nombresJson[inglesKey] || undefined,
+        nombre_cientifico: r.nombre_cientifico || undefined,
+        orden: r.orden,
+        familia: r.familia,
+        genero: r.genero,
       } as TaxonNombre;
     })
-    .filter((t): t is TaxonNombre => t !== null);
+    .filter((t: TaxonNombre | null): t is TaxonNombre => t !== null);
 
   // Agrupar por orden > familia > género > nombre_comun (original)
   const ordenesMap = new Map<
@@ -1258,4 +1128,15 @@ export default async function getTaxonNombres(idiomaId: number = 1): Promise<Nom
   const ordenesOrdenados = ordenes.toSorted((a, b) => a.name.localeCompare(b.name));
 
   return ordenesOrdenados;
+}
+
+// Wrapper con cache por idioma. Un cache miss por idioma; los siguientes son instantáneos.
+const getTaxonNombresCached = unstable_cache(
+  (idiomaId: number) => getTaxonNombresRaw(idiomaId),
+  ["get-taxon-nombres"],
+  {revalidate: 3600, tags: ["nombres"]},
+);
+
+export default async function getTaxonNombres(idiomaId: number = 1): Promise<NombreGroup[]> {
+  return getTaxonNombresCached(idiomaId);
 }
