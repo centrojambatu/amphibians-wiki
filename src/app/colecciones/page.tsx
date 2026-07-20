@@ -2,7 +2,7 @@
 
 import {useEffect, useMemo, useState} from "react";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {Check, RotateCcw, Search, X} from "lucide-react";
+import {Check, RotateCcw, Search, SlidersHorizontal, X} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -457,6 +457,7 @@ export default function ColeccionesPage() {
   const [elevRange, setElevRange] = useState<[number, number] | null>(null);
   const [tiposMuestraFilter, setTiposMuestraFilter] = useState<MuestraKey[]>([]);
   const [verTodoLoading, setVerTodoLoading] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const debouncedSc = useDebounce(scInput, 300);
 
@@ -497,6 +498,22 @@ export default function ColeccionesPage() {
     anioHasta.length > 0 ||
     elevActive ||
     tiposMuestraFilter.length > 0;
+
+  // Badge del botón móvil: cuenta de selecciones + 1 por rango de años/altitud
+  const activeFilterCount =
+    [
+      familiasFilter,
+      generosFilter,
+      estadiosFilter,
+      sexosFilter,
+      colectoresFilter,
+      localidadesFilter,
+      catalogosFilter,
+      tiposMuestraFilter,
+    ].flat().length +
+    (especieFilter ? 1 : 0) +
+    (elevActive ? 1 : 0) +
+    (anioDesde || anioHasta || anioEspecifico ? 1 : 0);
 
   const clearFilters = () => {
     setFamiliasFilter([]);
@@ -723,9 +740,9 @@ export default function ColeccionesPage() {
         </div>
 
         <section className="mb-12">
-          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-            <aside className="lg:w-80 lg:flex-shrink-0">
-              <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
+          {(() => {
+            const filterPanelContent = (
+              <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="flex-shrink-0 px-6 pt-4 pb-2">
                   <EspecieSelect selected={especieFilter} onChange={setEspecieFilter} />
                 </div>
@@ -896,9 +913,34 @@ export default function ColeccionesPage() {
                   </div>
                 </div>
               </div>
-            </aside>
+            );
+
+            return (
+              <>
+                <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+                  {/* Sidebar de filtros — solo desktop */}
+                  <aside className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+                    <div className="sticky top-4">{filterPanelContent}</div>
+                  </aside>
 
             <div className="min-w-0 flex-1">
+              {/* Botón de filtros móvil */}
+              <div className="mb-4 lg:hidden">
+                <Button
+                  className="w-full gap-2"
+                  variant="outline"
+                  onClick={() => setShowMobileFilters(true)}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Filtros
+                  {activeFilterCount > 0 && (
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f07304] text-[10px] font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </div>
+
               {isLoading && colecciones.length === 0 ? (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
                   <p className="text-gray-600">Cargando colecciones...</p>
@@ -965,6 +1007,45 @@ export default function ColeccionesPage() {
               )}
             </div>
           </div>
+
+                {/* Panel de filtros móvil (bottom sheet) */}
+                {showMobileFilters && (
+                  <div
+                    aria-label="Panel de filtros"
+                    aria-modal="true"
+                    className="fixed inset-0 z-50 lg:hidden"
+                    role="dialog"
+                  >
+                    <button
+                      aria-label="Cerrar filtros"
+                      className="absolute inset-0 w-full cursor-default"
+                      style={{backgroundColor: "rgba(0,0,0,0.45)"}}
+                      type="button"
+                      onClick={() => setShowMobileFilters(false)}
+                    />
+                    <div
+                      className="absolute right-0 bottom-0 left-0 flex flex-col rounded-t-2xl bg-white shadow-2xl"
+                      style={{maxHeight: "90vh"}}
+                    >
+                      <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
+                        <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+                        <button
+                          className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100"
+                          type="button"
+                          onClick={() => setShowMobileFilters(false)}
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                      <div className="min-h-0 flex-1 overflow-hidden">
+                        {filterPanelContent}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </section>
       </div>
     </div>

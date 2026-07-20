@@ -652,9 +652,10 @@ export default function RedListAccordion({
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
-      {/* Panel izquierdo al lado del acordeón: búsqueda por especie + enlaces (Lista Roja) o solo búsqueda (sin filterCatalogs) */}
+      {/* Panel izquierdo al lado del acordeón: búsqueda por especie + enlaces (Lista Roja) o solo búsqueda (sin filterCatalogs).
+          En mobile los filtros viven en el bottom-sheet de RedListContent, aquí solo se muestra el sidebar en desktop. */}
       {hasSearchFromParent ? (
-        <div className="w-full lg:w-80 lg:flex-shrink-0">
+        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
           <div className="lg:sticky lg:top-4">
             <Card className="overflow-x-hidden">
               <CardContent className="space-y-6 pt-2">

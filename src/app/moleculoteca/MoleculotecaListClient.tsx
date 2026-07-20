@@ -1,6 +1,6 @@
 "use client";
 
-import {MoveRight, Check, RotateCcw} from "lucide-react";
+import {MoveRight, Check, RotateCcw, SlidersHorizontal, X} from "lucide-react";
 import Link from "next/link";
 import {useMemo, useState, type ReactNode} from "react";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
@@ -161,6 +161,7 @@ export default function MoleculotecaListClient() {
   const [familiasFilter, setFamiliasFilter] = useState<string[]>([]);
   const [generosFilter, setGenerosFilter] = useState<string[]>([]);
   const [verTodoLoading, setVerTodoLoading] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const queryParams = useMemo(() => {
     const p = new URLSearchParams();
@@ -251,6 +252,10 @@ export default function MoleculotecaListClient() {
     familiasFilter.length > 0 ||
     generosFilter.length > 0;
 
+  // Badge del botón móvil: chips de familia/género + tipos de muestra activos
+  const activeFilterCount =
+    familiasFilter.length + generosFilter.length + activos.size;
+
   return (
     <>
       {/* Stats */}
@@ -317,9 +322,9 @@ export default function MoleculotecaListClient() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-        <aside className="lg:w-80 lg:flex-shrink-0">
-          <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
+      {(() => {
+        const filterPanelContent = (
+          <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
             <div className="flex-shrink-0 px-6 pt-6 pb-2">
               <SpeciesSearchInput
                 apiPath="/api/moleculoteca/especies"
@@ -347,7 +352,7 @@ export default function MoleculotecaListClient() {
               </Button>
             </div>
 
-            <div className="mt-2 max-h-[75vh] min-h-0 w-full flex-1 overflow-y-auto border-t">
+            <div className="mt-2 min-h-0 w-full flex-1 overflow-y-auto border-t">
               <Accordion
                 className="w-full [&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:px-6"
                 defaultValue={["tipoMuestra"]}
@@ -407,9 +412,35 @@ export default function MoleculotecaListClient() {
               </Accordion>
             </div>
           </div>
-        </aside>
+        );
+
+        return (
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+            {/* Sidebar de filtros — solo desktop */}
+            <aside className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+              <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-hidden">
+                {filterPanelContent}
+              </div>
+            </aside>
 
         <div className="min-w-0 flex-1">
+          {/* Botón de filtros móvil */}
+          <div className="mb-4 lg:hidden">
+            <Button
+              className="w-full gap-2"
+              variant="outline"
+              onClick={() => setShowMobileFilters(true)}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Filtros
+              {activeFilterCount > 0 && (
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f07304] text-[10px] font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </div>
+
           {isLoading && taxa.length === 0 ? (
             <div className="overflow-hidden rounded-lg border border-gray-200">
               {Array.from({length: 12}).map((_, i) => (
@@ -471,112 +502,164 @@ export default function MoleculotecaListClient() {
                   <div className="shrink-0" style={{width: "20px"}} />
                 </div>
 
-                {taxa.map((t) => (
-                  <div
-                    key={t.taxon_id}
-                    className="hover:bg-muted/30 group flex flex-col gap-2 border-b border-gray-100 px-3 py-1.5 transition-colors last:border-b-0 lg:flex-row lg:items-center"
-                  >
-                    <Link
-                      className="block min-w-0 flex-1 no-underline lg:max-w-xs"
-                      href={`/moleculoteca/${String(t.taxon_id)}`}
-                    >
-                      <p className="truncate leading-tight">
-                        <span
-                          className="text-xs font-semibold italic"
-                          style={{color: "#666666"}}
-                        >
-                          {t.nombre_cientifico}
-                        </span>
-                        {t.nombre_comun && (
-                          <>
-                            <span className="mx-1.5 text-[11px]" style={{color: "#f07304"}}>
-                              |
-                            </span>
-                            <span className="text-[11px]" style={{color: "#888888"}}>
-                              {t.nombre_comun}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </Link>
+                {taxa.map((t) => {
+                  const detalleHref = `/moleculoteca/${String(t.taxon_id)}`;
 
-                    <Link
-                      className="block flex-1 no-underline"
-                      href={`/moleculoteca/${String(t.taxon_id)}`}
+                  return (
+                    <div
+                      key={t.taxon_id}
+                      className="hover:bg-muted/30 group flex flex-col gap-2 border-b border-gray-100 px-3 py-2 transition-colors last:border-b-0 lg:flex-row lg:items-center lg:py-1.5"
                     >
-                      <div
-                        className="grid gap-0.5"
-                        style={{gridTemplateColumns: `repeat(${String(MUESTRA_FIELDS.length)}, minmax(0, 1fr))`}}
-                      >
+                      {/* Fila 1 en mobile / columna 1 en desktop: nombre + flecha (mobile) */}
+                      <div className="flex items-center gap-2 lg:contents">
+                        <Link
+                          className="block min-w-0 flex-1 no-underline lg:max-w-xs"
+                          href={detalleHref}
+                        >
+                          <p className="truncate leading-tight">
+                            <span
+                              className="text-xs font-semibold italic"
+                              style={{color: "#666666"}}
+                            >
+                              {t.nombre_cientifico}
+                            </span>
+                            {t.nombre_comun && (
+                              <>
+                                <span className="mx-1.5 text-[11px]" style={{color: "#f07304"}}>
+                                  |
+                                </span>
+                                <span className="text-[11px]" style={{color: "#888888"}}>
+                                  {t.nombre_comun}
+                                </span>
+                              </>
+                            )}
+                          </p>
+                        </Link>
+                        {/* Flecha en mobile (misma fila que nombre); en desktop se renderiza al final */}
+                        <Link
+                          aria-label="Ver detalle"
+                          className="moleculoteca-detail-arrow flex shrink-0 items-center justify-center no-underline lg:hidden"
+                          href={detalleHref}
+                        >
+                          <MoveRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+
+                      {/* Chips con label en mobile — muestra qué muestras tiene la especie */}
+                      <div className="flex flex-wrap gap-1 lg:hidden">
                         {MUESTRA_FIELDS.map((field) => {
                           const value = (t as Record<string, unknown>)[field.count] as number;
-                          const active = value > 0;
 
-                          if (!active) {
-                            return (
-                              <div
-                                key={field.key}
-                                className="flex min-w-0 items-center justify-center"
-                              />
-                            );
-                          }
+                          if (!(value > 0)) return null;
 
                           return (
-                            <TooltipProvider key={field.key} delayDuration={100}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex min-w-0 cursor-default items-center justify-center">
-                                    <Check
-                                      className="h-3.5 w-3.5"
-                                      strokeWidth={3}
-                                      style={{color: "#2d6e2d"}}
-                                    />
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="text-[10px]">
-                                  {field.label}: {value}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <span
+                              key={field.key}
+                              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] text-gray-700"
+                            >
+                              <Check className="h-3 w-3" strokeWidth={2.5} style={{color: "#7ba87b"}} />
+                              <MuestraLabel label={field.label} />
+                              <span className="text-gray-400">({value})</span>
+                            </span>
                           );
                         })}
+                        {t.count_genbank > 0 && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] text-gray-700">
+                            <Check className="h-3 w-3" strokeWidth={2.5} style={{color: "#7ba87b"}} />
+                            GenBank
+                            <span className="text-gray-400">({t.count_genbank})</span>
+                          </span>
+                        )}
+                        {/* Sin datos: mensaje discreto */}
+                        {!MUESTRA_FIELDS.some(
+                          (f) => ((t as Record<string, unknown>)[f.count] as number) > 0,
+                        ) &&
+                          t.count_genbank === 0 && (
+                            <span className="text-[10px] italic text-gray-400">Sin muestras</span>
+                          )}
                       </div>
-                    </Link>
 
-                    {t.count_genbank > 0 ? (
-                      <TooltipProvider delayDuration={100}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className="flex shrink-0 cursor-default items-center justify-center"
-                              style={{width: "72px"}}
-                            >
-                              <Check
-                                className="h-3.5 w-3.5"
-                                strokeWidth={3}
-                                style={{color: "#2d6e2d"}}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="text-[10px]">
-                            Secuencias GenBank: {t.count_genbank}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <div className="shrink-0" style={{width: "72px"}} />
-                    )}
+                      {/* Grid de checks — desktop */}
+                      <Link
+                        className="hidden flex-1 no-underline lg:block"
+                        href={detalleHref}
+                      >
+                        <div
+                          className="grid gap-0.5"
+                          style={{gridTemplateColumns: `repeat(${String(MUESTRA_FIELDS.length)}, minmax(0, 1fr))`}}
+                        >
+                          {MUESTRA_FIELDS.map((field) => {
+                            const value = (t as Record<string, unknown>)[field.count] as number;
+                            const active = value > 0;
 
-                    <Link
-                      aria-label="Ver detalle"
-                      className="moleculoteca-detail-arrow flex shrink-0 items-center justify-center no-underline"
-                      href={`/moleculoteca/${String(t.taxon_id)}`}
-                      style={{width: "20px"}}
-                    >
-                      <MoveRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                ))}
+                            if (!active) {
+                              return (
+                                <div
+                                  key={field.key}
+                                  className="flex min-w-0 items-center justify-center"
+                                />
+                              );
+                            }
+
+                            return (
+                              <TooltipProvider key={field.key} delayDuration={100}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex min-w-0 cursor-default items-center justify-center">
+                                      <Check
+                                        className="h-3.5 w-3.5"
+                                        strokeWidth={3}
+                                        style={{color: "#2d6e2d"}}
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="text-[10px]">
+                                    {field.label}: {value}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            );
+                          })}
+                        </div>
+                      </Link>
+
+                      {/* GenBank check — desktop */}
+                      {t.count_genbank > 0 ? (
+                        <TooltipProvider delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="hidden shrink-0 cursor-default items-center justify-center lg:flex"
+                                style={{width: "72px"}}
+                              >
+                                <Check
+                                  className="h-3.5 w-3.5"
+                                  strokeWidth={3}
+                                  style={{color: "#2d6e2d"}}
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-[10px]">
+                              Secuencias GenBank: {t.count_genbank}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <div className="hidden shrink-0 lg:block" style={{width: "72px"}} />
+                      )}
+
+                      {/* Flecha — desktop */}
+                      <Link
+                        aria-label="Ver detalle"
+                        className="moleculoteca-detail-arrow hidden shrink-0 items-center justify-center no-underline lg:flex"
+                        href={detalleHref}
+                        style={{width: "20px"}}
+                      >
+                        <MoveRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-6 flex items-center justify-center gap-4">
@@ -625,7 +708,45 @@ export default function MoleculotecaListClient() {
             </div>
           )}
         </div>
-      </div>
+
+            {/* Panel de filtros móvil (bottom sheet) */}
+            {showMobileFilters && (
+              <div
+                aria-label="Panel de filtros"
+                aria-modal="true"
+                className="fixed inset-0 z-50 lg:hidden"
+                role="dialog"
+              >
+                <button
+                  aria-label="Cerrar filtros"
+                  className="absolute inset-0 w-full cursor-default"
+                  style={{backgroundColor: "rgba(0,0,0,0.45)"}}
+                  type="button"
+                  onClick={() => setShowMobileFilters(false)}
+                />
+                <div
+                  className="absolute right-0 bottom-0 left-0 flex flex-col rounded-t-2xl bg-white shadow-2xl"
+                  style={{maxHeight: "90vh"}}
+                >
+                  <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
+                    <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+                    <button
+                      className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100"
+                      type="button"
+                      onClick={() => setShowMobileFilters(false)}
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-hidden">
+                    {filterPanelContent}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </>
   );
 }

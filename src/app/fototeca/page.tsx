@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {Image as ImageIcon, RotateCcw, Search, X, Check} from "lucide-react";
+import {Image as ImageIcon, RotateCcw, Search, SlidersHorizontal, X, Check} from "lucide-react";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
@@ -545,6 +545,7 @@ export default function FototecaPage() {
   const [ilustracionesAbiertas, setIlustracionesAbiertas] = useState(false);
   const [fotoPremiadaAbierta, setFotoPremiadaAbierta] = useState(false);
   const [primeraFotoAbierta, setPrimeraFotoAbierta] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const search = searchInput.trim();
   const localidadesKey = localidadesFilter.join("||");
@@ -567,6 +568,19 @@ export default function FototecaPage() {
     anioEspecifico.length > 0 ||
     anioDesde.length > 0 ||
     anioHasta.length > 0;
+
+  // Badge del botón móvil: cuenta de selecciones individuales + 1 si hay rango de años
+  const activeFilterCount =
+    [
+      localidadesFilter,
+      autoresFilter,
+      catalogosFilter,
+      familiasFilter,
+      generosFilter,
+      tiposFilter,
+      categoriasFilter,
+    ].flat().length +
+    (anioEspecifico || anioDesde || anioHasta ? 1 : 0);
 
   const clearFilters = () => {
     setSearchInput("");
@@ -810,9 +824,9 @@ export default function FototecaPage() {
         )}
 
         <section className="mb-12">
-          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-            <aside className="lg:w-80 lg:flex-shrink-0">
-              <div className="sticky top-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
+          {(() => {
+            const filterPanelContent = (
+              <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="flex-shrink-0 px-6 pt-6 pb-2">
                   <SpeciesSearchInput
                     apiPath="/api/fototeca/especies"
@@ -835,7 +849,7 @@ export default function FototecaPage() {
                   </Button>
                 </div>
 
-                <div className="mt-2 min-h-0 w-full flex-1 border-t">
+                <div className="mt-2 min-h-0 w-full flex-1 overflow-y-auto border-t">
                   <Accordion
                     className="[&>[data-slot=accordion-item]]:border-b [&>[data-slot=accordion-item]]:px-6"
                     type="multiple"
@@ -899,10 +913,35 @@ export default function FototecaPage() {
                   </div>
                 </div>
               </div>
-            </aside>
+            );
 
-            <div className="min-w-0 flex-1">
-              <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
+            return (
+              <>
+                <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+                  {/* Sidebar de filtros — solo desktop */}
+                  <aside className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+                    <div className="sticky top-4">{filterPanelContent}</div>
+                  </aside>
+
+                  <div className="min-w-0 flex-1">
+                    {/* Botón de filtros móvil */}
+                    <div className="mb-4 lg:hidden">
+                      <Button
+                        className="w-full gap-2"
+                        variant="outline"
+                        onClick={() => setShowMobileFilters(true)}
+                      >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filtros
+                        {activeFilterCount > 0 && (
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f07304] text-[10px] font-bold text-white">
+                            {activeFilterCount}
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
                 <span>
                   {`${String(especies.length)} ${especies.length === 1 ? "especie" : "especies"}`}
                 </span>
@@ -1007,6 +1046,45 @@ export default function FototecaPage() {
               )}
             </div>
           </div>
+
+                {/* Panel de filtros móvil (bottom sheet) */}
+                {showMobileFilters && (
+                  <div
+                    aria-label="Panel de filtros"
+                    aria-modal="true"
+                    className="fixed inset-0 z-50 lg:hidden"
+                    role="dialog"
+                  >
+                    <button
+                      aria-label="Cerrar filtros"
+                      className="absolute inset-0 w-full cursor-default"
+                      style={{backgroundColor: "rgba(0,0,0,0.45)"}}
+                      type="button"
+                      onClick={() => setShowMobileFilters(false)}
+                    />
+                    <div
+                      className="absolute right-0 bottom-0 left-0 flex flex-col rounded-t-2xl bg-white shadow-2xl"
+                      style={{maxHeight: "90vh"}}
+                    >
+                      <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
+                        <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+                        <button
+                          className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100"
+                          type="button"
+                          onClick={() => setShowMobileFilters(false)}
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                      <div className="min-h-0 flex-1 overflow-hidden">
+                        {filterPanelContent}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </section>
       </div>
 

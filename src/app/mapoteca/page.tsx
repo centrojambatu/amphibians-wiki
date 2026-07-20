@@ -5,7 +5,7 @@ import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {useQuery} from "@tanstack/react-query";
-import {Search, X, Mountain, Check, MoveLeft, RotateCcw} from "lucide-react";
+import {Search, X, Mountain, Check, MoveLeft, RotateCcw, SlidersHorizontal} from "lucide-react";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -583,6 +583,20 @@ function MapotecaContent({
     "relief" | "terrain" | "provinces" | "satellite" | "streets"
   >(storedState?.mapType || "provinces");
   const [provincias, setProvincias] = useState<ProvinciaOption[]>([]);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Badge del botón móvil: cuenta de selecciones + 1 por rango de elevación/año
+  const activeFilterCount =
+    [
+      especieFilter,
+      catalogoFilter,
+      localidadesFilter,
+      provinciaFilter,
+      pisoFilter,
+      snapFilter,
+    ].flat().length +
+    (elevacionActive ? 1 : 0) +
+    (anioDesde || anioHasta || anioEspecifico ? 1 : 0);
 
   // Limpiar sessionStorage después de restaurar
   useEffect(() => {
@@ -645,6 +659,99 @@ function MapotecaContent({
     }
   };
 
+  const filterPanelContent = (
+    <div className="w-full space-y-5">
+      {/* Limpiar - top derecha */}
+      <div className="flex justify-end px-4">
+        <Button
+          className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+          type="button"
+          variant="ghost"
+          onClick={clearFilters}
+        >
+          <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
+          Limpiar
+        </Button>
+      </div>
+
+      <div className="space-y-5 px-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
+        <EspecieMultiSelect selected={especieFilter} onChange={setEspecieFilter} />
+        <CatalogoMultiSelect selected={catalogoFilter} onChange={setCatalogoFilter} />
+        <LocalidadMultiSelect
+          selected={localidadesFilter}
+          onChange={setLocalidadesFilter}
+        />
+        <ProvinciaMultiSelect
+          provincias={provincias}
+          selected={provinciaFilter}
+          onChange={setProvinciaFilter}
+        />
+
+        {/* Elevación */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-gray-600">
+              Elevación (msnm)
+            </label>
+            <button
+              className={`rounded px-1.5 py-0.5 text-[10px] ${elevacionActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+              onClick={() => setElevacionActive(!elevacionActive)}
+            >
+              {elevacionActive ? "Activo" : "Inactivo"}
+            </button>
+          </div>
+          <Slider
+            className="w-full"
+            max={5000}
+            min={0}
+            step={50}
+            value={elevacionRange}
+            onValueChange={(v) => {
+              setElevacionRange(v as [number, number]);
+              if (!elevacionActive) setElevacionActive(true);
+            }}
+          />
+          <div className="flex justify-between text-[10px] text-gray-400">
+            <span>{elevacionRange[0]} m</span>
+            <span>{elevacionRange[1]} m</span>
+          </div>
+        </div>
+
+        {/* Filtro por año */}
+        <YearRangeFilter
+          desde={anioDesde}
+          hasta={anioHasta}
+          yearMax={anioRange?.anio_max ?? new Date().getFullYear()}
+          yearMin={anioRange?.anio_min ?? 1849}
+          onChange={(d, h) => {
+            setAnioDesde(d);
+            setAnioHasta(h);
+            if (anioEspecifico) setAnioEspecifico("");
+          }}
+        />
+
+        {/* Tipo de mapa */}
+        <div className="space-y-4">
+          <label className="block text-xs font-semibold text-gray-600">
+            Tipo de mapa
+          </label>
+          <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
+            <SelectTrigger className="text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="z-[1100]">
+              <SelectItem value="relief">Relieve</SelectItem>
+              <SelectItem value="terrain">Topográfico</SelectItem>
+              <SelectItem value="provinces">Estándar</SelectItem>
+              <SelectItem value="satellite">Satélite</SelectItem>
+              <SelectItem value="streets">Minimalista</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       {especieFromUrl && (
@@ -668,96 +775,7 @@ function MapotecaContent({
               style={{maxHeight: "calc(100vh - 120px)"}}
             >
               <div className="flex-1 overflow-y-auto py-4">
-                <div className="w-full space-y-5">
-                  {/* Limpiar - top derecha */}
-                  <div className="flex justify-end px-4">
-                    <Button
-                      className="w-auto gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
-                      type="button"
-                      variant="ghost"
-                      onClick={clearFilters}
-                    >
-                      <RotateCcw className="h-3.5 w-3.5 shrink-0 text-black" />
-                      Limpiar
-                    </Button>
-                  </div>
-
-                  <div className="space-y-5 px-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
-                    <EspecieMultiSelect selected={especieFilter} onChange={setEspecieFilter} />
-                    <CatalogoMultiSelect selected={catalogoFilter} onChange={setCatalogoFilter} />
-                    <LocalidadMultiSelect
-                      selected={localidadesFilter}
-                      onChange={setLocalidadesFilter}
-                    />
-                    <ProvinciaMultiSelect
-                      provincias={provincias}
-                      selected={provinciaFilter}
-                      onChange={setProvinciaFilter}
-                    />
-
-                    {/* Elevación */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-gray-600">
-                          Elevación (msnm)
-                        </label>
-                        <button
-                          className={`rounded px-1.5 py-0.5 text-[10px] ${elevacionActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                          onClick={() => setElevacionActive(!elevacionActive)}
-                        >
-                          {elevacionActive ? "Activo" : "Inactivo"}
-                        </button>
-                      </div>
-                      <Slider
-                        className="w-full"
-                        max={5000}
-                        min={0}
-                        step={50}
-                        value={elevacionRange}
-                        onValueChange={(v) => {
-                          setElevacionRange(v as [number, number]);
-                          if (!elevacionActive) setElevacionActive(true);
-                        }}
-                      />
-                      <div className="flex justify-between text-[10px] text-gray-400">
-                        <span>{elevacionRange[0]} m</span>
-                        <span>{elevacionRange[1]} m</span>
-                      </div>
-                    </div>
-
-                    {/* Filtro por año */}
-                    <YearRangeFilter
-                      desde={anioDesde}
-                      hasta={anioHasta}
-                      yearMax={anioRange?.anio_max ?? new Date().getFullYear()}
-                      yearMin={anioRange?.anio_min ?? 1849}
-                      onChange={(d, h) => {
-                        setAnioDesde(d);
-                        setAnioHasta(h);
-                        if (anioEspecifico) setAnioEspecifico("");
-                      }}
-                    />
-
-                    {/* Tipo de mapa */}
-                    <div className="space-y-4">
-                      <label className="block text-xs font-semibold text-gray-600">
-                        Tipo de mapa
-                      </label>
-                      <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
-                        <SelectTrigger className="text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="z-[1100]">
-                          <SelectItem value="relief">Relieve</SelectItem>
-                          <SelectItem value="terrain">Topográfico</SelectItem>
-                          <SelectItem value="provinces">Estándar</SelectItem>
-                          <SelectItem value="satellite">Satélite</SelectItem>
-                          <SelectItem value="streets">Minimalista</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
+                {filterPanelContent}
               </div>
             </div>
           </div>
@@ -766,6 +784,19 @@ function MapotecaContent({
           <div className="min-w-0 flex-1">
             {/* Controles móviles */}
             <div className="mb-3 flex items-center gap-2 lg:hidden">
+              <Button
+                className="flex-1 gap-2"
+                variant="outline"
+                onClick={() => setShowMobileFilters(true)}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f07304] text-[10px] font-bold text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
               <Mountain className="text-muted-foreground h-4 w-4" />
               <Select value={mapType} onValueChange={(v: any) => setMapType(v)}>
                 <SelectTrigger className="w-[130px] text-sm">
@@ -815,6 +846,44 @@ function MapotecaContent({
           </div>
         </div>
       </div>
+
+      {/* Panel de filtros móvil (bottom sheet).
+          z-[1050] deja el sheet encima del mapa Leaflet y por debajo de los
+          popovers de Select (z-[1100]) para que queden visibles al abrirlos. */}
+      {showMobileFilters && (
+        <div
+          aria-label="Panel de filtros"
+          aria-modal="true"
+          className="fixed inset-0 z-[1050] lg:hidden"
+          role="dialog"
+        >
+          <button
+            aria-label="Cerrar filtros"
+            className="absolute inset-0 w-full cursor-default"
+            style={{backgroundColor: "rgba(0,0,0,0.45)"}}
+            type="button"
+            onClick={() => setShowMobileFilters(false)}
+          />
+          <div
+            className="absolute right-0 bottom-0 left-0 flex flex-col rounded-t-2xl bg-white shadow-2xl"
+            style={{maxHeight: "90vh"}}
+          >
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
+              <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+              <button
+                className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100"
+                type="button"
+                onClick={() => setShowMobileFilters(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto py-4">
+              {filterPanelContent}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
