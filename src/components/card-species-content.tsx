@@ -1304,7 +1304,16 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                     {hasNombresEstandar && (
                       <div className={hasEtimologia ? cardSectionDivider : ""}>
-                        <h4 className={cardSubsectionTitle}>Nombres estándar</h4>
+                        <h4 className={cardSubsectionTitle}>
+                          <a
+                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            Nombres estándar
+                          </a>
+                        </h4>
                         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs sm:text-[13px]">
                           {conNombre.map((idioma, i) => (
                             <span
