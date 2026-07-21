@@ -200,24 +200,54 @@ export default function SpeciesAccordion({
           )}
           {/* Distribución km² */}
           {species.area_distribucion != null && (
-            <span className="text-muted-foreground text-xs">{species.area_distribucion.toLocaleString()} km²</span>
+            <span className="text-muted-foreground text-xs">
+              <span className="text-[10px] uppercase text-gray-500">EOO</span>{" "}
+              {species.area_distribucion.toLocaleString()} km²
+            </span>
+          )}
+          {/* Ocupación km² */}
+          {species.area_ocupacion != null && (
+            <span className="text-muted-foreground text-xs">
+              <span className="text-[10px] uppercase text-gray-500">AOO</span>{" "}
+              {species.area_ocupacion.toLocaleString()} km²
+            </span>
           )}
         </div>
       </div>
 
-      {/* ── Distribución km² — solo desktop (≥ xl) ── */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="text-muted-foreground hidden min-w-0 cursor-help text-center text-xs xl:block">
-              {species.area_distribucion != null ? `${species.area_distribucion.toLocaleString()} km²` : "—"}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Área distribución Ecuador</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {/* ── Distribución / Ocupación km² — solo desktop (≥ xl) ── */}
+      <div className="hidden min-w-0 flex-col items-center gap-0.5 xl:flex">
+        {species.area_distribucion != null && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground cursor-help text-center text-xs">
+                  <span className="text-[10px] uppercase text-gray-500">EOO</span>{" "}
+                  {species.area_distribucion.toLocaleString()} km²
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Área distribución Ecuador</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {species.area_ocupacion != null && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground cursor-help text-center text-xs">
+                  <span className="text-[10px] uppercase text-gray-500">AOO</span>{" "}
+                  {species.area_ocupacion.toLocaleString()} km²
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Área ocupación Ecuador</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
 
       {/* ── Endémica — solo desktop (≥ xl) ── */}
       <div className="hidden justify-center xl:flex">

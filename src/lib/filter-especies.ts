@@ -99,6 +99,14 @@ export function filterEspecies(
       if (area < filters.areaDistribucion.min || area > filters.areaDistribucion.max) return false;
     }
 
+    const isDefaultAreaOcupacion =
+      filters.areaOcupacion.min === 1 && filters.areaOcupacion.max === 10000;
+    if (!isDefaultAreaOcupacion) {
+      const areaOc = especie.area_ocupacion;
+      if (areaOc == null) return false;
+      if (areaOc < filters.areaOcupacion.min || areaOc > filters.areaOcupacion.max) return false;
+    }
+
     const isDefaultPluvio =
       filters.pluviocidad.min === 640 && filters.pluviocidad.max === 4000;
     if (!isDefaultPluvio) {

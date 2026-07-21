@@ -32,6 +32,7 @@ export interface FiltersState {
   endemismo: string[];
   rangoAltitudinal: {min: number; max: number};
   areaDistribucion: {min: number; max: number};
+  areaOcupacion: {min: number; max: number};
   ecosistemas: string[];
   regionesBiogeograficas: string[];
   reservasBiosfera: string[];
@@ -51,6 +52,7 @@ export const DEFAULT_FILTERS_STATE: FiltersState = {
   endemismo: [],
   rangoAltitudinal: {min: 0, max: 4800},
   areaDistribucion: {min: 1, max: 100000},
+  areaOcupacion: {min: 1, max: 10000},
   ecosistemas: [],
   regionesBiogeograficas: [],
   reservasBiosfera: [],
@@ -628,6 +630,37 @@ export default function FiltersPanel({
                 </div>
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="areaOcupacion">
+              <AccordionTrigger className="!items-start">
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold">
+                    Área de ocupación <span className="mx-1 font-normal text-[#f07304]">|</span>{" "}
+                    AOO <span className="ml-1 font-normal text-gray-500">km²</span>
+                  </span>
+                  {(filters.areaOcupacion.min !== 1 ||
+                    filters.areaOcupacion.max !== 10000) && (
+                    <span className="mt-1 text-xs font-normal text-gray-500">
+                      {filters.areaOcupacion.min} km²{RANGE_DASH}{filters.areaOcupacion.max} km²
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{filters.areaOcupacion.min} km²</span>
+                    <span>{filters.areaOcupacion.max} km²</span>
+                  </div>
+                  <Slider
+                    max={10000}
+                    min={1}
+                    step={10}
+                    value={[filters.areaOcupacion.min, filters.areaOcupacion.max]}
+                    onValueChange={(values) => handleSliderChange("areaOcupacion", values)}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
             {catalogs.ecosistemas.length > 0 && (
               <AccordionItem value="ecosistemas">
                 <AccordionTrigger className="!items-start">
@@ -1066,6 +1099,39 @@ export default function FiltersPanel({
                   step={100}
                   value={[filters.areaDistribucion.min, filters.areaDistribucion.max]}
                   onValueChange={(values) => handleSliderChange("areaDistribucion", values)}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Área de ocupación */}
+          <AccordionItem value="areaOcupacion">
+            <AccordionTrigger className="!items-start">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">
+                  Área de ocupación <span className="mx-1 font-normal text-[#f07304]">|</span>{" "}
+                  AOO <span className="ml-1 font-normal text-gray-500">km²</span>
+                </span>
+                {(filters.areaOcupacion.min !== 1 ||
+                  filters.areaOcupacion.max !== 10000) && (
+                  <span className="mt-1 text-xs font-normal text-gray-500">
+                    {filters.areaOcupacion.min} km²{RANGE_DASH}{filters.areaOcupacion.max} km²
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-4 [&_[data-slot=slider-range]]:bg-gray-400 [&_[data-slot=slider-track]]:bg-gray-300">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{filters.areaOcupacion.min} km²</span>
+                  <span>{filters.areaOcupacion.max} km²</span>
+                </div>
+                <Slider
+                  max={10000}
+                  min={1}
+                  step={10}
+                  value={[filters.areaOcupacion.min, filters.areaOcupacion.max]}
+                  onValueChange={(values) => handleSliderChange("areaOcupacion", values)}
                 />
               </div>
             </AccordionContent>

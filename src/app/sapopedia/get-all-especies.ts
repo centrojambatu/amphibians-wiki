@@ -20,6 +20,7 @@ export interface SpeciesListItem {
   /** Fecha último avistamiento (ISO date, ej. para posiblemente extintas) */
   ultimo_avistamiento: string | null;
   area_distribucion: number | null;
+  area_ocupacion: number | null;
   pluviocidad_min: number | null;
   pluviocidad_max: number | null;
   temperatura_min: number | null;
@@ -213,7 +214,7 @@ export default async function getAllEspecies(
         const r = await supabaseClient
           .from("ficha_especie")
           .select(
-            "id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, fotografia_destacada:fotografia_destacada_id(enlace)",
+            "id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, area_ocupacion, fotografia_destacada:fotografia_destacada_id(enlace)",
           )
           .in("id_ficha_especie", chunk);
 
@@ -359,6 +360,7 @@ export default async function getAllEspecies(
     pluviocidad_max: number | null;
     temperatura_min: number | null;
     temperatura_max: number | null;
+    area_ocupacion: number | null;
     fotografia_url: string | null;
   }
   const fichaExtraMap = new Map<number, FichaExtra>();
@@ -376,6 +378,7 @@ export default async function getAllEspecies(
         pluviocidad_max: ficha.pluviocidad_max ?? null,
         temperatura_min: ficha.temperatura_min ?? null,
         temperatura_max: ficha.temperatura_max ?? null,
+        area_ocupacion: ficha.area_ocupacion ?? null,
         fotografia_url: ficha.fotografia_destacada?.enlace ?? null,
       });
     }
@@ -451,6 +454,7 @@ export default async function getAllEspecies(
         lista_roja_iucn: listaRojaMap.get(taxonId) || null,
         ultimo_avistamiento: especie.ultimo_avistamiento ?? null,
         area_distribucion: especie.area_distribucion ?? null,
+        area_ocupacion: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.area_ocupacion ?? null : null,
         pluviocidad_min: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.pluviocidad_min ?? null : null,
         pluviocidad_max: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.pluviocidad_max ?? null : null,
         temperatura_min: fichaEspecieId ? fichaExtraMap.get(fichaEspecieId)?.temperatura_min ?? null : null,

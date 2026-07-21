@@ -339,8 +339,10 @@ export default function RedListAccordion({
             </div>
           </div>
 
-          {/* Fila 2: meta-info (último avistamiento + área distribución) */}
-          {(showUltimoAvistamiento || species.area_distribucion != null) && (
+          {/* Fila 2: meta-info (último avistamiento + área distribución + área ocupación) */}
+          {(showUltimoAvistamiento ||
+            species.area_distribucion != null ||
+            species.area_ocupacion != null) && (
             <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               {showUltimoAvistamiento && (
                 <span>
@@ -351,7 +353,16 @@ export default function RedListAccordion({
                 </span>
               )}
               {species.area_distribucion != null && (
-                <span>Área distribución: {species.area_distribucion.toLocaleString()} km²</span>
+                <span>
+                  <span className="text-[10px] uppercase text-gray-500">EOO</span>{" "}
+                  {species.area_distribucion.toLocaleString()} km²
+                </span>
+              )}
+              {species.area_ocupacion != null && (
+                <span>
+                  <span className="text-[10px] uppercase text-gray-500">AOO</span>{" "}
+                  {species.area_ocupacion.toLocaleString()} km²
+                </span>
               )}
             </div>
           )}
@@ -432,19 +443,39 @@ export default function RedListAccordion({
             </TooltipProvider>
           )}
 
-          {/* Distribución (área km²) — por ahora valor de prueba hasta cargar de base */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-muted-foreground min-w-0 cursor-help text-center text-xs">
-                  {species.area_distribucion != null ? `${species.area_distribucion.toLocaleString()} km²` : "—"}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Área distribución Ecuador</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* Distribución / Ocupación (área km²) */}
+          <div className="flex min-w-0 flex-col items-center gap-0.5">
+            {species.area_distribucion != null && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-muted-foreground cursor-help text-center text-xs">
+                      <span className="text-[10px] uppercase text-gray-500">EOO</span>{" "}
+                      {species.area_distribucion.toLocaleString()} km²
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Área distribución Ecuador</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            {species.area_ocupacion != null && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-muted-foreground cursor-help text-center text-xs">
+                      <span className="text-[10px] uppercase text-gray-500">AOO</span>{" "}
+                      {species.area_ocupacion.toLocaleString()} km²
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Área ocupación Ecuador</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
 
           {/* Endémica */}
           <div className="w-12 text-center">

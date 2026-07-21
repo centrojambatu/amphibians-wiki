@@ -47,7 +47,9 @@ export default function RedListContent({
     (filters.rangoAltitudinal.min !== 0 ||
     filters.rangoAltitudinal.max !== 4800 ||
     filters.areaDistribucion.min !== 1 ||
-    filters.areaDistribucion.max !== 100000
+    filters.areaDistribucion.max !== 100000 ||
+    filters.areaOcupacion.min !== 1 ||
+    filters.areaOcupacion.max !== 10000
       ? 1
       : 0);
 

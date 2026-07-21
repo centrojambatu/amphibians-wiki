@@ -1682,6 +1682,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           fichaEspecie.area_distribucion != null
                             ? `${fichaEspecie.area_distribucion.toLocaleString("es")} km²`
                             : null;
+                        const areaOcupacion =
+                          fichaEspecie.area_ocupacion != null
+                            ? `${fichaEspecie.area_ocupacion.toLocaleString("es")} km²`
+                            : null;
 
                         const inlineDatos: {label: string; value: string}[] = [];
 
@@ -1694,10 +1698,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             value: areaDistribucion,
                           });
                         }
-                        inlineDatos.push({
-                          label: "Área ocupación AOO",
-                          value: "0.00 km²",
-                        });
+                        if (areaOcupacion) {
+                          inlineDatos.push({
+                            label: "Área ocupación AOO",
+                            value: areaOcupacion,
+                          });
+                        }
                         if (pisosAltitudinales.length > 0) {
                           inlineDatos.push({
                             label: "Regiones altitudinales",

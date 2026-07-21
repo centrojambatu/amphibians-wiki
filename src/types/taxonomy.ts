@@ -18,6 +18,7 @@ export interface SpeciesData {
   has_distribucion_occidental?: boolean;
   has_distribucion_oriental?: boolean;
   area_distribucion?: number | null;
+  area_ocupacion?: number | null;
 }
 
 export interface GenusGroup {
