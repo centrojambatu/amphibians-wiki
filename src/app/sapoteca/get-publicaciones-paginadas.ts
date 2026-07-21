@@ -77,30 +77,34 @@ async function getPublicacionesDesdeTabla(
     filterPromises.push(Promise.resolve(null));
   }
 
-  // Filtro autor.
-  // Se busca en `vw_publicacion_completa.autores_nombres` (mismo campo que el endpoint
-  // de sugerencias) para garantizar que un autor sugerido siempre encuentre publicaciones.
-  // El uso de `.ilike()` con el valor como parámetro evita problemas de inyección/escape
-  // cuando el nombre contiene comas, puntos, comillas o paréntesis.
-  if (filtros?.autor) {
+  // Filtro autores (múltiples vía checkbox).
+  // Se busca en `vw_publicacion_completa.autores_nombres` con `ilike` — un autor coincide
+  // si cualquiera de los términos seleccionados aparece en el string de autores.
+  if (filtros?.autores && filtros.autores.length > 0) {
     filterPromises.push((async () => {
-      const termino = filtros!.autor!.trim();
+      const terminos = filtros!.autores!
+        .map((a) => a.trim())
+        .filter((a) => a.length > 0);
 
-      if (!termino) return null;
-      const patron = `%${termino}%`;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
-      const {data} = await (supabase.from("vw_publicacion_completa" as any) as any)
-        .select("id_publicacion")
-        .ilike("autores_nombres", patron)
-        .limit(5000);
+      if (terminos.length === 0) return null;
 
-      return [
-        ...new Set(
-          (data ?? [])
+      // Ejecutar una ilike por autor y unir los IDs (semántica OR).
+      const resultados = await Promise.all(
+        terminos.map(async (termino) => {
+          const patron = `%${termino}%`;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
+          const {data} = await (supabase.from("vw_publicacion_completa" as any) as any)
+            .select("id_publicacion")
+            .ilike("autores_nombres", patron)
+            .limit(5000);
+
+          return (data ?? [])
             .map((r: {id_publicacion: number | null}) => r.id_publicacion)
-            .filter((id: number | null): id is number => id != null),
-        ),
-      ] as number[];
+            .filter((id: number | null): id is number => id != null) as number[];
+        }),
+      );
+
+      return [...new Set(resultados.flat())];
     })());
   } else {
     filterPromises.push(Promise.resolve(null));
@@ -217,7 +221,8 @@ export interface FiltrosSapoteca {
   /** Lista de títulos (exact match) seleccionados vía checkbox */
   titulos?: string[];
   años?: number[];
-  autor?: string;
+  /** Lista de autores (nombre completo) seleccionados vía checkbox */
+  autores?: string[];
   tiposPublicacion?: number[];
   indexada?: boolean;
   /** true = impreso, false = web (campo publicacion.formato_impreso) */

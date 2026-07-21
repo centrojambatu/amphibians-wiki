@@ -99,43 +99,42 @@ export default function SapotecaPublicacionesList() {
 
   return (
     <>
+      <p className="mb-3 text-xs text-gray-400">
+        {`Mostrando 1${RANGE_DASH}${publicaciones.length.toLocaleString()} de ${total.toLocaleString()} ${
+          total === 1 ? "referencia" : "referencias"
+        }`}
+      </p>
+
       <div className="mb-8 space-y-4">
         {publicaciones.map((publicacion) => (
           <ReferenciaCard key={publicacion.id_publicacion} publicacion={publicacion} />
         ))}
       </div>
 
-      <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-        <p className="text-center text-xs text-gray-400">
-          {`Mostrando 1${RANGE_DASH}${publicaciones.length.toLocaleString()} de ${total.toLocaleString()} ${
-            total === 1 ? "referencia" : "referencias"
-          }`}
-        </p>
-        {hasNextPage && (
-          <>
-            <button
-              className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
-              disabled={isFetchingNextPage || verTodoLoading}
-              type="button"
-              onClick={() => {
-                void fetchNextPage();
-              }}
-            >
-              {isFetchingNextPage ? "Cargando..." : "Cargar más"}
-            </button>
-            <button
-              className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
-              disabled={isFetchingNextPage || verTodoLoading}
-              type="button"
-              onClick={() => {
-                void handleVerTodo();
-              }}
-            >
-              {verTodoLoading ? "Cargando todo..." : "Ver todo"}
-            </button>
-          </>
-        )}
-      </div>
+      {hasNextPage && (
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <button
+            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+            disabled={isFetchingNextPage || verTodoLoading}
+            type="button"
+            onClick={() => {
+              void fetchNextPage();
+            }}
+          >
+            {isFetchingNextPage ? "Cargando..." : "Cargar más"}
+          </button>
+          <button
+            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:opacity-50"
+            disabled={isFetchingNextPage || verTodoLoading}
+            type="button"
+            onClick={() => {
+              void handleVerTodo();
+            }}
+          >
+            {verTodoLoading ? "Cargando todo..." : "Ver todo"}
+          </button>
+        </div>
+      )}
     </>
   );
 }

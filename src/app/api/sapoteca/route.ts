@@ -31,11 +31,12 @@ export async function GET(request: Request) {
   );
 
   const titulosRaw = searchParams.getAll("titulo").filter((t) => t.trim().length > 0);
+  const autoresRaw = searchParams.getAll("autor").filter((a) => a.trim().length > 0);
 
   const filtros: FiltrosSapoteca = {
     titulos: titulosRaw.length > 0 ? titulosRaw : undefined,
     años: parseNumberList(searchParams.get("años")),
-    autor: searchParams.get("autor") || undefined,
+    autores: autoresRaw.length > 0 ? autoresRaw : undefined,
     tiposPublicacion: parseNumberList(searchParams.get("tipos")),
     indexada: parseBool(searchParams.get("indexada")),
     formatoImpreso: parseBool(searchParams.get("formatoImpreso")),

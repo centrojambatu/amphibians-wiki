@@ -46,10 +46,10 @@ export default function SapotecaFiltersPanel({
   }, [isPending, onPendingChange]);
 
   const titulosIniciales = searchParams.getAll("titulo").filter((t) => t.trim().length > 0);
-  const autorInicial = searchParams.get("autor") || "";
+  const autoresIniciales = searchParams.getAll("autor").filter((a) => a.trim().length > 0);
 
   const [tituloQuery, setTituloQuery] = useState("");
-  const [autorQuery, setAutorQuery] = useState(autorInicial);
+  const [autorQuery, setAutorQuery] = useState("");
   const [tituloOpen, setTituloOpen] = useState(false);
   const [autorOpen, setAutorOpen] = useState(false);
   const [sugerenciasTitulos, setSugerenciasTitulos] = useState<string[]>([]);
@@ -82,7 +82,7 @@ export default function SapotecaFiltersPanel({
   const [filtros, setFiltros] = useState<FiltrosSapoteca>({
     titulos: titulosIniciales.length > 0 ? titulosIniciales : undefined,
     años: añosIniciales || undefined,
-    autor: autorInicial || undefined,
+    autores: autoresIniciales.length > 0 ? autoresIniciales : undefined,
     tiposPublicacion: searchParams.get("tipos")?.split(",").map(Number) || undefined,
     indexada: indexadaInicial,
     formatoImpreso: formatoImpresoInicial,
@@ -93,7 +93,7 @@ export default function SapotecaFiltersPanel({
 
   useEffect(() => {
     const titulos = searchParams.getAll("titulo").filter((t) => t.trim().length > 0);
-    const autor = searchParams.get("autor") || "";
+    const autores = searchParams.getAll("autor").filter((a) => a.trim().length > 0);
     const añosStr = searchParams.get("años");
     const años = añosStr
       ? añosStr
@@ -115,12 +115,12 @@ export default function SapotecaFiltersPanel({
     const fmt = searchParams.get("formatoImpreso");
     const formatoImpreso = fmt === "true" ? true : fmt === "false" ? false : undefined;
 
-    setAutorQuery(autor);
+    setAutorQuery("");
     setRangoAños(rango);
     setFiltros({
       titulos: titulos.length > 0 ? titulos : undefined,
       años: años?.length ? años : undefined,
-      autor: autor || undefined,
+      autores: autores.length > 0 ? autores : undefined,
       tiposPublicacion: tipos?.length ? tipos : undefined,
       indexada,
       formatoImpreso,
@@ -190,7 +190,9 @@ export default function SapotecaFiltersPanel({
       filtros.titulos.forEach((t) => params.append("titulo", t));
     }
     if (filtros.años && filtros.años.length > 0) params.set("años", filtros.años.join(","));
-    if (filtros.autor) params.set("autor", filtros.autor);
+    if (filtros.autores && filtros.autores.length > 0) {
+      filtros.autores.forEach((a) => params.append("autor", a));
+    }
     if (filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0) {
       params.set("tipos", filtros.tiposPublicacion.join(","));
     }
@@ -261,14 +263,27 @@ export default function SapotecaFiltersPanel({
 
   const handleAutorChange = (value: string) => {
     setAutorQuery(value);
-    setFiltros((prev) => ({...prev, autor: value || undefined}));
     setAutorOpen(value.length >= 2 && sugerenciasAutores.length > 0);
   };
 
-  const handleSelectAutor = (autor: string) => {
-    setAutorQuery(autor);
-    setFiltros((prev) => ({...prev, autor}));
-    setAutorOpen(false);
+  const handleToggleAutor = (autor: string) => {
+    setFiltros((prev) => {
+      const actuales = prev.autores ?? [];
+      const yaSeleccionado = actuales.includes(autor);
+      const nuevos = yaSeleccionado
+        ? actuales.filter((a) => a !== autor)
+        : [...actuales, autor];
+
+      return {...prev, autores: nuevos.length > 0 ? nuevos : undefined};
+    });
+  };
+
+  const handleQuitarAutor = (autor: string) => {
+    setFiltros((prev) => {
+      const nuevos = (prev.autores ?? []).filter((a) => a !== autor);
+
+      return {...prev, autores: nuevos.length > 0 ? nuevos : undefined};
+    });
   };
 
   const handleIndexadaChange = (valor: boolean) => {
@@ -310,7 +325,7 @@ export default function SapotecaFiltersPanel({
     setFiltros({
       titulos: undefined,
       años: undefined,
-      autor: undefined,
+      autores: undefined,
       tiposPublicacion: undefined,
       indexada: undefined,
       formatoImpreso: undefined,
@@ -321,7 +336,7 @@ export default function SapotecaFiltersPanel({
   const tieneFiltrosActivos =
     (filtros.titulos && filtros.titulos.length > 0) ||
     (filtros.años && filtros.años.length > 0) ||
-    !!filtros.autor ||
+    (filtros.autores && filtros.autores.length > 0) ||
     (filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0) ||
     filtros.indexada !== undefined ||
     filtros.formatoImpreso !== undefined;
@@ -393,9 +408,12 @@ export default function SapotecaFiltersPanel({
                       : `${String(filtros.años[0])}${RANGE_DASH}${String(filtros.años[filtros.años.length - 1])}`}
                   </li>
                 )}
-                {filtros.autor && (
-                  <li className="truncate" title={filtros.autor}>
-                    <span className="text-muted-foreground">Autor:</span> {filtros.autor}
+                {filtros.autores && filtros.autores.length > 0 && (
+                  <li>
+                    <span className="text-muted-foreground">Autor:</span>{" "}
+                    {filtros.autores.length === 1
+                      ? filtros.autores[0]
+                      : `${filtros.autores.length} autores seleccionados`}
                   </li>
                 )}
                 {filtros.tiposPublicacion && filtros.tiposPublicacion.length > 0 && (
@@ -527,6 +545,28 @@ export default function SapotecaFiltersPanel({
 
           {/* Filtro de Autor */}
           <div className="space-y-2 px-6">
+            {filtros.autores && filtros.autores.length > 0 && (
+              <ul className="flex flex-col gap-1">
+                {filtros.autores.map((a) => (
+                  <li
+                    key={a}
+                    className="flex items-start gap-2 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs"
+                  >
+                    <span className="flex-1 break-words leading-snug" title={a}>
+                      {a}
+                    </span>
+                    <button
+                      aria-label={`Quitar ${a}`}
+                      className="mt-0.5 shrink-0 text-gray-500 hover:text-gray-800"
+                      type="button"
+                      onClick={() => handleQuitarAutor(a)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <Popover open={autorOpen} onOpenChange={setAutorOpen}>
               <PopoverTrigger asChild>
                 <div className="relative">
@@ -534,7 +574,7 @@ export default function SapotecaFiltersPanel({
                   <Input
                     className="pl-10"
                     placeholder="Autor"
-                    value={autorQuery || filtros.autor || ""}
+                    value={autorQuery}
                     onChange={(e) => handleAutorChange(e.target.value)}
                     onFocus={() => {
                       if (autorQuery.length >= 2 && sugerenciasAutores.length > 0)
@@ -555,25 +595,42 @@ export default function SapotecaFiltersPanel({
                     )}
                     {sugerenciasAutores.length > 0 && (
                       <CommandGroup>
-                        {sugerenciasAutores.map((autor) => (
-                          <CommandItem
-                            key={autor}
-                            value={autor}
-                            onSelect={() => handleSelectAutor(autor)}
-                          >
-                            <span
-                              dangerouslySetInnerHTML={{
-                                __html: autor.replace(
-                                  new RegExp(
-                                    `(${autorQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-                                    "gi",
+                        {sugerenciasAutores.map((autor) => {
+                          const seleccionado = filtros.autores?.includes(autor) ?? false;
+
+                          return (
+                            <CommandItem
+                              key={autor}
+                              className="flex items-start gap-2"
+                              value={autor}
+                              onSelect={() => handleToggleAutor(autor)}
+                            >
+                              <span
+                                aria-checked={seleccionado}
+                                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                                  seleccionado
+                                    ? "border-black bg-black text-white"
+                                    : "border-gray-400 bg-white"
+                                }`}
+                                role="checkbox"
+                              >
+                                {seleccionado && <Check className="h-3 w-3" strokeWidth={3} />}
+                              </span>
+                              <span
+                                className="flex-1 leading-snug"
+                                dangerouslySetInnerHTML={{
+                                  __html: autor.replace(
+                                    new RegExp(
+                                      `(${autorQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+                                      "gi",
+                                    ),
+                                    "<strong>$1</strong>",
                                   ),
-                                  "<strong>$1</strong>",
-                                ),
-                              }}
-                            />
-                          </CommandItem>
-                        ))}
+                                }}
+                              />
+                            </CommandItem>
+                          );
+                        })}
                       </CommandGroup>
                     )}
                   </CommandList>

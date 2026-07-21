@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { createServiceClient } from "@/utils/supabase/server";
 
 export interface TipoPublicacion {
@@ -35,7 +37,7 @@ const PRIORIDAD_TIPO = ["CIENTIFICA", "TESIS", "DIVULGACIÓN", "OTRO"];
  * Obtiene los tipos de publicación desde catalogo_publicaciones,
  * agrupados en secciones por la columna tipo (una sección por valor: Científica, Tesis, Divulgación, Otro).
  */
-export default async function getTiposPublicacion(): Promise<TiposPublicacionAgrupados> {
+async function getTiposPublicacionRaw(): Promise<TiposPublicacionAgrupados> {
   const supabaseClient = createServiceClient();
 
   const { data, error } = await supabaseClient
@@ -43,8 +45,14 @@ export default async function getTiposPublicacion(): Promise<TiposPublicacionAgr
     .select("id, nombre, tipo")
     .order("nombre", { ascending: true });
 
-  if ((error && Object.keys(error).length > 0) || !data) {
-    console.error("Error al obtener tipos de publicación:", error);
+  if (error) {
+    console.error(
+      "Error al obtener tipos de publicación:",
+      JSON.stringify(error, null, 2),
+    );
+    return { secciones: [] };
+  }
+  if (!data) {
     return { secciones: [] };
   }
 
@@ -150,4 +158,17 @@ export default async function getTiposPublicacion(): Promise<TiposPublicacionAgr
   }
 
   return { secciones };
+}
+
+// Los tipos de publicación no cambian según filtros de UI: cacheamos para evitar
+// recargar la vista completa (paginación de publicacion_catalogo_awe) cada vez que
+// el usuario toca un checkbox de la URL. Sólo cache-miss cuando cambian datos.
+const getTiposPublicacionCached = unstable_cache(
+  () => getTiposPublicacionRaw(),
+  ["get-tipos-publicacion"],
+  { revalidate: 3600, tags: ["tipos-publicacion"] },
+);
+
+export default async function getTiposPublicacion(): Promise<TiposPublicacionAgrupados> {
+  return getTiposPublicacionCached();
 }
