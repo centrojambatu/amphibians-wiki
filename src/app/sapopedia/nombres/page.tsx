@@ -67,7 +67,7 @@ export default async function NombresPage({ searchParams }: NombresPageProps) {
     <main className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-4 text-4xl font-bold text-gray-900">Nombres</h1>
+        <h1 className="mb-4 text-4xl font-bold text-gray-900">Nombres comunes</h1>
       </div>
 
       {/* Estadísticas */}
