@@ -1,7 +1,7 @@
 import {revalidateTag} from "next/cache";
 import {NextResponse} from "next/server";
 
-const KNOWN_TAGS = new Set(["nombres", "tipos-publicacion"]);
+const KNOWN_TAGS = new Set(["nombres", "tipos-publicacion", "filter-catalogs"]);
 
 export async function POST(request: Request) {
   const {searchParams} = new URL(request.url);

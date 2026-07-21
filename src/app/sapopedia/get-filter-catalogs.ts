@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { createServiceClient } from "@/utils/supabase/server";
 
 export interface CatalogOption {
@@ -56,12 +58,17 @@ async function getCatalogByType(
     .order("nombre", { ascending: true });
 
   if (error) {
-    console.error(`Error al obtener catálogo tipo ${tipoId}:`, {
+    const info = {
       message: error.message,
       code: error.code,
       details: error.details,
       hint: error.hint,
-    });
+    };
+    const isEmpty = Object.values(info).every((v) => v == null || v === "");
+
+    if (!isEmpty) {
+      console.error(`Error al obtener catálogo tipo ${tipoId}:`, info);
+    }
 
     return [];
   }
@@ -122,7 +129,7 @@ async function getProvincias(
   }));
 }
 
-export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
+async function getFilterCatalogsRaw(): Promise<FilterCatalogs> {
   const supabaseClient = createServiceClient();
 
   // Ejecutar todas las consultas en paralelo
@@ -159,4 +166,16 @@ export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
     areasProtegidasEstado,
     areasProtegidasPrivadas,
   };
+}
+
+// Los catálogos de filtro son estáticos: no cambian con los filtros del usuario.
+// Cacheamos 1h para evitar re-consultar en cada cambio de URL params (cada checkbox).
+const getFilterCatalogsCached = unstable_cache(
+  () => getFilterCatalogsRaw(),
+  ["get-filter-catalogs"],
+  { revalidate: 3600, tags: ["filter-catalogs"] },
+);
+
+export default async function getFilterCatalogs(): Promise<FilterCatalogs> {
+  return getFilterCatalogsCached();
 }
