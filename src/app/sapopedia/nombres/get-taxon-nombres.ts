@@ -1077,6 +1077,37 @@ async function getTaxonNombresRaw(idiomaId: number = 1): Promise<NombreGroup[]> 
           }
         });
 
+        // Reglas excepcionales por género: garantizar que ciertos nombres base
+        // simples aparezcan siempre aunque la lógica de LCP los haya "escondido"
+        // porque cada especie tiene un adjetivo/sufijo diferente.
+        const REGLAS_EXCEPCIONALES_GENERO: Record<string, string[]> = {
+          Pristimantis: ["Cutín"],
+          Ectopoglossus: ["Rana cohete"],
+          Oophaga: ["Rana venenosa"],
+          Adelophryne: ["Rana martillo"],
+          Diasporus: ["Rana martillo"],
+          Ecnomiohyla: ["Rana arbórea"],
+          Sphaenorhynchus: ["Rana verde"],
+          Tepuihyla: ["Rana arbórea"],
+          Lithodytes: ["Rana lista"],
+          Pithecopus: ["Rana hoja"],
+          Elachistocleis: ["Ranita hocicuda"],
+          Hamptophryne: ["Ranita hocicuda"],
+          Synapturanus: ["Ranita hocicuda"],
+          Nyctimantis: ["Rana arbórea"],
+        };
+        const basesForzadas = REGLAS_EXCEPCIONALES_GENERO[generoName];
+
+        if (basesForzadas && idiomaId === 1) {
+          // Reemplazar: descartar los nombres base auto-generados y dejar solo los forzados.
+          nombresBaseGeneroMap.clear();
+          for (const base of basesForzadas) {
+            const clave = normalizarTildes(base);
+
+            nombresBaseGeneroMap.set(clave, base);
+          }
+        }
+
         // Agregar nombres base del género a la familia
         nombresBaseGeneroMap.forEach((canonico, normalizado) => {
           if (!nombresComunesFamiliaMap.has(normalizado)) {

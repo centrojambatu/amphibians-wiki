@@ -275,7 +275,7 @@ export default function MoleculotecaListClient() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="mailto:centrojambatu@otonga.org"
+            href="mailto:investigacion@anfibiosecuador.ec"
             style={{color: "#666666", fontSize: "13px", fontWeight: 600}}
           >
             Préstamos CJ
