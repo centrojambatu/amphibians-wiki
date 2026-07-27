@@ -70,15 +70,15 @@ export function SpeciesListCard({ species }: SpeciesListCardProps) {
             )}
           </div>
 
-          {/* Descubridor */}
-          {species.descubridor && (
+          {/* Primer(os) colector(es) */}
+          {species.primeros_colectores && (
             <div className="border-t pt-3">
               <p className="text-muted-foreground mb-1 text-xs font-medium">
-                Descubridor(es):
+                Primer(os) colector(es):
               </p>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: processHTMLLinks(species.descubridor),
+                  __html: processHTMLLinks(species.primeros_colectores),
                 }}
                 className="text-muted-foreground text-xs"
               />

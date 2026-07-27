@@ -14,7 +14,7 @@ export async function PUT(
 
     // Campos editables que se pueden actualizar (excluir id_ficha_especie, taxon_id, y otros campos del sistema)
     const camposEditables = [
-      "colector",
+      "primeros_colectores",
       "etimologia",
       "taxonomia",
       "habitat_biologia",
@@ -22,23 +22,12 @@ export async function PUT(
       "reproduccion",
       "informacion_adicional",
       "comentario_estatus_poblacional",
-      "distribucion",
       "distribucion_global",
-      "observacion_zona_altitudinal",
-      "rango_altitudinal",
-      "referencia_area_protegida",
-      "sinonimia",
       "identificacion",
-      "descripcion",
       "color_en_vida",
-      "color_en_preservacion",
-      "diagnosis",
-      "morfometria",
-      "larva",
       "svl_macho",
       "svl_hembra",
-      "canto",
-      "usos",
+      "peso",
       "agradecimiento",
       // Campos numéricos
       "rango_altitudinal_min",

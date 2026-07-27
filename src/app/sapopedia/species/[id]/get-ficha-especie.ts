@@ -313,7 +313,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
 
   // Extraer referencias de todos los campos de texto de ficha_especie
   const camposTexto: (string | null)[] = [
-    fichaEspecie?.descubridor ?? null,
+    fichaEspecie?.primeros_colectores ?? null,
     fichaEspecie?.etimologia ?? null,
     fichaEspecie?.taxonomia ?? null,
     fichaEspecie?.identificacion ?? null,
@@ -321,21 +321,11 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.informacion_adicional ?? null,
     fichaEspecie?.distribucion_global ?? null,
     fichaEspecie?.comentario_estatus_poblacional ?? null,
-    fichaEspecie?.descripcion ?? null,
-    fichaEspecie?.diagnosis ?? null,
     fichaEspecie?.dieta ?? null,
     fichaEspecie?.reproduccion ?? null,
-    fichaEspecie?.canto ?? null,
-    fichaEspecie?.larva ?? null,
-    fichaEspecie?.morfometria ?? null,
     fichaEspecie?.color_en_vida ?? null,
-    fichaEspecie?.color_en_preservacion ?? null,
-    fichaEspecie?.sinonimia ?? null,
-    fichaEspecie?.comparacion ?? null,
-    fichaEspecie?.usos ?? null,
     fichaEspecie?.agradecimiento ?? null,
     fichaEspecie?.historial ?? null,
-    vistaDataTyped?.distribucion_global ?? null,
   ];
 
   // Obtener todos los id_publicacion de referencias únicos
@@ -413,34 +403,22 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     taxon_id: taxonId,
     fotografia_url: fichaEspecie?.fotografia_destacada?.enlace ?? null,
     autor_foto: fichaEspecie?.fotografia_destacada?.autor ?? null,
-    descubridor: fichaEspecie?.descubridor ?? null,
-    colector: fichaEspecie?.colector ?? null,
+    primeros_colectores: fichaEspecie?.primeros_colectores ?? null,
     etimologia: fichaEspecie?.etimologia ?? null,
     taxonomia: fichaEspecie?.taxonomia ?? null,
     svl_macho: fichaEspecie?.svl_macho ?? null,
     svl_hembra: fichaEspecie?.svl_hembra ?? null,
+    peso: fichaEspecie?.peso ?? null,
     identificacion: fichaEspecie?.identificacion ?? null,
-    sinonimia: fichaEspecie?.sinonimia ?? null,
-    descripcion: fichaEspecie?.descripcion ?? null,
-    diagnosis: fichaEspecie?.diagnosis ?? null,
-    morfometria: fichaEspecie?.morfometria ?? null,
     color_en_vida: fichaEspecie?.color_en_vida ?? null,
-    color_en_preservacion: fichaEspecie?.color_en_preservacion ?? null,
-    comparacion: fichaEspecie?.comparacion ?? null,
     habitat_biologia: fichaEspecie?.habitat_biologia ?? null,
     reproduccion: fichaEspecie?.reproduccion ?? null,
     dieta: fichaEspecie?.dieta ?? null,
-    canto: fichaEspecie?.canto ?? null,
-    larva: fichaEspecie?.larva ?? null,
-    usos: fichaEspecie?.usos ?? null,
     informacion_adicional: fichaEspecie?.informacion_adicional ?? null,
-    distribucion: fichaEspecie?.distribucion ?? null,
-    distribucion_global:
-      (vistaDataTyped?.distribucion_global || fichaEspecie?.distribucion_global) ?? null,
+    distribucion_global: fichaEspecie?.distribucion_global ?? null,
     historial: fichaEspecie?.historial ?? null,
     agradecimiento: fichaEspecie?.agradecimiento ?? null,
     fecha_actualizacion: fichaEspecie?.fecha_actualizacion ?? null,
-    rango_altitudinal: fichaEspecie?.rango_altitudinal ?? null,
     rango_altitudinal_min: vistaDataTyped?.rango_altitudinal_min ?? null,
     rango_altitudinal_max: vistaDataTyped?.rango_altitudinal_max ?? null,
     area_distribucion:
@@ -450,10 +428,6 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     temperatura_max: fichaEspecie?.temperatura_max ?? null,
     pluviocidad_min: fichaEspecie?.pluviocidad_min ?? null,
     pluviocidad_max: fichaEspecie?.pluviocidad_max ?? null,
-    observacion_zona_altitudinal:
-      (vistaDataTyped?.observacion_zona_altitudinal ||
-        fichaEspecie?.observacion_zona_altitudinal) ??
-      null,
     comentario_estatus_poblacional: fichaEspecie?.comentario_estatus_poblacional ?? null,
     anfibio_conservacion: fichaEspecie?.anfibio_conservacion ?? null,
     // Links externos

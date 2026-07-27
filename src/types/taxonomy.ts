@@ -5,7 +5,7 @@ export interface SpeciesData {
   nombre_comun: string | null;
   /** Nombre común en inglés (desde vw_nombres_comunes) */
   nombre_comun_ingles?: string | null;
-  descubridor: string | null;
+  primeros_colectores: string | null;
   endemica: boolean | null;
   en_ecuador: boolean | null;
   fotografia_url: string | null;

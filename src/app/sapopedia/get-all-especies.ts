@@ -7,7 +7,7 @@ export interface SpeciesListItem {
   nombre_comun: string | null;
   /** Nombre común en inglés (desde vw_nombres_comunes, igual que en la página de nombres) */
   nombre_comun_ingles: string | null;
-  descubridor: string | null;
+  primeros_colectores: string | null;
   orden: string | null;
   familia: string | null;
   genero: string | null;
@@ -214,7 +214,7 @@ export default async function getAllEspecies(
         const r = await supabaseClient
           .from("ficha_especie")
           .select(
-            "id_ficha_especie, descubridor, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, area_ocupacion, fotografia_destacada:fotografia_destacada_id(enlace)",
+            "id_ficha_especie, primeros_colectores, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, area_ocupacion, fotografia_destacada:fotografia_destacada_id(enlace)",
           )
           .in("id_ficha_especie", chunk);
 
@@ -355,7 +355,7 @@ export default async function getAllEspecies(
   }
 
   interface FichaExtra {
-    descubridor: string | null;
+    primeros_colectores: string | null;
     pluviocidad_min: number | null;
     pluviocidad_max: number | null;
     temperatura_min: number | null;
@@ -373,7 +373,7 @@ export default async function getAllEspecies(
     })[];
     for (const ficha of fichas) {
       fichaExtraMap.set(ficha.id_ficha_especie, {
-        descubridor: ficha.descubridor ?? null,
+        primeros_colectores: ficha.primeros_colectores ?? null,
         pluviocidad_min: ficha.pluviocidad_min ?? null,
         pluviocidad_max: ficha.pluviocidad_max ?? null,
         temperatura_min: ficha.temperatura_min ?? null,
@@ -438,8 +438,8 @@ export default async function getAllEspecies(
         nombre_cientifico: especie.nombre_cientifico,
         nombre_comun: especie.nombre_comun,
         nombre_comun_ingles: nombreComunInglesMap.get(taxonId) ?? null,
-        descubridor: fichaEspecieId
-          ? fichaExtraMap.get(fichaEspecieId)?.descubridor ?? null
+        primeros_colectores: fichaEspecieId
+          ? fichaExtraMap.get(fichaEspecieId)?.primeros_colectores ?? null
           : null,
         orden: especie.orden,
         familia: especie.familia,

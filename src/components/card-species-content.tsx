@@ -61,8 +61,6 @@ const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
   ),
 });
 
-const ORDENES_SIN_RENACUAJOS = new Set(["caudata", "gymnophiona"]);
-const FAMILIAS_SIN_RENACUAJOS = new Set(["craugastoridae", "eleutherodactylidae"]);
 
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
@@ -97,22 +95,6 @@ const getPisosAltitudinales = (distributions: {catalogo_awe?: {nombre?: string}}
   });
 
   return Array.from(unique.values());
-};
-
-const shouldShowRenacuajos = (lineage: {rank_id?: number; taxon?: string}[] | undefined) => {
-  const orden = lineage
-    ?.find((item) => item.rank_id === 4)
-    ?.taxon?.trim()
-    .toLowerCase();
-  const familia = lineage
-    ?.find((item) => item.rank_id === 5)
-    ?.taxon?.trim()
-    .toLowerCase();
-
-  if (orden && ORDENES_SIN_RENACUAJOS.has(orden)) return false;
-  if (familia && FAMILIAS_SIN_RENACUAJOS.has(familia)) return false;
-
-  return true;
 };
 
 // Función para agrupar datos geopolíticos jerárquicamente
@@ -306,11 +288,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
     return ordenarPublicacionesAlfabeticamente(merged);
   }, [fichaEspecie.publicaciones, fichaEspecie.referenciasClave, fichaEspecie.otrosNombres]);
-
-  const showRenacuajos = useMemo(
-    () => shouldShowRenacuajos(fichaEspecie.lineage),
-    [fichaEspecie.lineage],
-  );
 
   // Tipo de mapa seleccionado para el mapa de colecciones
   const [mapType, setMapType] = useState<MapType>("provinces");
@@ -692,8 +669,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
       // Agregar contenido de la ficha
       const sections = [
-        {title: "Primer(os) colector(es)", content: fichaEspecie.descubridor},
-        {title: "Sinonimia", content: fichaEspecie.sinonimia},
+        {title: "Primer(os) colector(es)", content: fichaEspecie.primeros_colectores},
         {title: "Etimología", content: fichaEspecie.etimologia},
         {title: "Taxonomía", content: fichaEspecie.taxonomia},
         {title: "Identificación", content: fichaEspecie.identificacion},
@@ -702,26 +678,19 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           content: [
             fichaEspecie.svl_macho && `Longitud rostro-cloacal ♂: ${fichaEspecie.svl_macho}`,
             fichaEspecie.svl_hembra && `Longitud rostro-cloacal ♀: ${fichaEspecie.svl_hembra}`,
+            fichaEspecie.peso && `Peso: ${fichaEspecie.peso}`,
           ]
             .filter(Boolean)
             .join("<br />"),
         },
         {title: "Color en Vida", content: fichaEspecie.color_en_vida},
-        {title: "Color en Preservación", content: fichaEspecie.color_en_preservacion},
         {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
         {title: "Reproducción", content: fichaEspecie.reproduccion},
         {title: "Dieta", content: fichaEspecie.dieta},
-        {title: "Canto", content: fichaEspecie.canto},
-        ...(showRenacuajos ? [{title: "Larva", content: fichaEspecie.larva}] : []),
-        {title: "Distribución", content: fichaEspecie.distribucion},
-        {title: "Rango Altitudinal (Texto)", content: fichaEspecie.rango_altitudinal},
-        {title: "Observación Zona Altitudinal", content: fichaEspecie.observacion_zona_altitudinal},
-        {title: "Referencia Área Protegida", content: fichaEspecie.referencia_area_protegida},
         {
           title: "Comentario Estatus Poblacional",
           content: fichaEspecie.comentario_estatus_poblacional,
         },
-        {title: "Usos", content: fichaEspecie.usos},
         {title: "Información Adicional", content: fichaEspecie.informacion_adicional},
         {title: "Agradecimiento", content: fichaEspecie.agradecimiento},
       ];
@@ -1019,42 +988,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         addText(endemica ? "Endémica" : "No endémica", 10, false, 1.2);
       }
 
-      // Agregar información de compilador y editor
-      const compilador = formatValue(fichaEspecie.compilador);
-      const editor = formatValue(fichaEspecie.editor);
-
-      if (compilador || editor) {
-        yPosition += 3;
-        addText("Créditos", 11, true, 1.2);
-        yPosition += 1;
-        if (compilador) {
-          addText(`Compilador: ${compilador}`, 10, false, 1.2);
-          const autoriaComp = formatValue(fichaEspecie.autoria_compilador);
-
-          if (autoriaComp) {
-            addText(`Autoría compilador: ${autoriaComp}`, 10, false, 1.2);
-          }
-          const fechaComp = formatValue(fichaEspecie.fecha_compilacion);
-
-          if (fechaComp) {
-            addText(`Fecha compilación: ${fechaComp}`, 10, false, 1.2);
-          }
-        }
-        if (editor) {
-          addText(`Editor: ${editor}`, 10, false, 1.2);
-          const autoriaEdit = formatValue(fichaEspecie.autoria_editor);
-
-          if (autoriaEdit) {
-            addText(`Autoría editor: ${autoriaEdit}`, 10, false, 1.2);
-          }
-          const fechaEdit = formatValue(fichaEspecie.fecha_edicion);
-
-          if (fechaEdit) {
-            addText(`Fecha edición: ${fechaEdit}`, 10, false, 1.2);
-          }
-        }
-      }
-
       // Agregar historial
       const historial = formatValue(fichaEspecie.historial);
 
@@ -1214,10 +1147,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
               </CardHeader>
               <CardContent>
-                {fichaEspecie.descubridor ? (
+                {fichaEspecie.primeros_colectores ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.descubridor),
+                      __html: procesarHTML(fichaEspecie.primeros_colectores),
                     }}
                     suppressHydrationWarning
                     className="text-muted-foreground text-sm"
@@ -1227,38 +1160,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 )}
               </CardContent>
             </Card>
-            {/* Material tipo (sinonimia) */}
-            {fichaEspecie.sinonimia && (
-              <Card className="gap-0">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-baseline gap-2 text-base">
-                    <span>Material tipo</span>
-                    {fichaEspecie.asw && (
-                      <>
-                        <span style={{color: "#f07304"}}>|</span>
-                        <a
-                          className="text-base font-medium hover:underline"
-                          href={fichaEspecie.asw}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          Sinonimia
-                        </a>
-                      </>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: procesarHTML(fichaEspecie.sinonimia),
-                    }}
-                    suppressHydrationWarning
-                    className="text-muted-foreground text-sm"
-                  />
-                </CardContent>
-              </Card>
-            )}
             {/* Nombres (etimología, estándar y vernáculos) */}
             {(() => {
               const nc = fichaEspecie.nombresComunes;
@@ -1434,11 +1335,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <CardContent>
                 {(() => {
                   const hasIdentificacion = Boolean(fichaEspecie.identificacion);
-                  const hasMorfometria = Boolean(fichaEspecie.svl_macho || fichaEspecie.svl_hembra);
+                  const hasMorfometria = Boolean(
+                    fichaEspecie.svl_macho || fichaEspecie.svl_hembra || fichaEspecie.peso,
+                  );
                   const hasColorEnVida = Boolean(fichaEspecie.color_en_vida);
                   const hasPriorToMorfometria = hasIdentificacion;
                   const hasPriorToColor = hasIdentificacion || hasMorfometria;
-                  const hasPriorToSimilares = hasIdentificacion || hasMorfometria || hasColorEnVida;
 
                   return (
                     <>
@@ -1484,6 +1386,20 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                                 />
                               </div>
                             )}
+                            {fichaEspecie.peso && (
+                              <div className="flex flex-wrap items-baseline gap-x-2">
+                                <span className="text-muted-foreground text-xs font-medium">
+                                  Peso:
+                                </span>
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: procesarHTML(fichaEspecie.peso),
+                                  }}
+                                  suppressHydrationWarning
+                                  className="text-muted-foreground text-xs"
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1501,56 +1417,11 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         </div>
                       )}
 
-                      <div className={hasPriorToSimilares ? cardSectionDivider : ""}>
-                        <h4 className={cardSubsectionTitle}>Especies similares</h4>
-                        {fichaEspecie.comparacion && (
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: procesarHTML(fichaEspecie.comparacion),
-                            }}
-                            suppressHydrationWarning
-                            className="text-muted-foreground text-sm"
-                          />
-                        )}
-                      </div>
                     </>
                   );
                 })()}
-
-                {/* Color en preservación - OCULTO */}
-                {/* {fichaEspecie.color_en_preservacion && (
-                  <div className="mt-4">
-                    <h4 className={cardSubsectionTitle}>Color en preservación</h4>
-                    <div
-                      suppressHydrationWarning dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.color_en_preservacion),
-                      }}
-                      className="text-muted-foreground text-sm"
-                    />
-                  </div>
-                )} */}
               </CardContent>
             </Card>
-            {showRenacuajos && (
-              <Card className="gap-0">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Renacuajo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {fichaEspecie.larva ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: procesarHTML(fichaEspecie.larva),
-                      }}
-                      suppressHydrationWarning
-                      className="text-muted-foreground text-sm"
-                    />
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No disponible</p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
             {/* Historia Natural */}
             <Card className="">
               <CardContent>
@@ -1558,7 +1429,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   const hasHabitat = Boolean(fichaEspecie.habitat_biologia);
                   const hasReproduccion = Boolean(fichaEspecie.reproduccion);
                   const hasDieta = Boolean(fichaEspecie.dieta);
-                  const hasCanto = Boolean(fichaEspecie.canto);
 
                   return (
                     <>
@@ -1594,23 +1464,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           <div
                             dangerouslySetInnerHTML={{
                               __html: procesarHTML(fichaEspecie.dieta),
-                            }}
-                            suppressHydrationWarning
-                            className="text-muted-foreground text-sm"
-                          />
-                        </div>
-                      )}
-
-                      {hasCanto && (
-                        <div
-                          className={
-                            hasHabitat || hasReproduccion || hasDieta ? cardSectionDivider : ""
-                          }
-                        >
-                          <h4 className={cardSubsectionTitle}>Canto</h4>
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: procesarHTML(fichaEspecie.canto),
                             }}
                             suppressHydrationWarning
                             className="text-muted-foreground text-sm"
@@ -2128,21 +1981,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       <div
                         dangerouslySetInnerHTML={{
                           __html: procesarHTML(fichaEspecie.informacion_adicional),
-                        }}
-                        suppressHydrationWarning
-                        className="text-muted-foreground text-sm"
-                      />
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
-
-                  {/* Usos */}
-                  <div className="mt-3">
-                    {fichaEspecie.usos ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: procesarHTML(fichaEspecie.usos),
                         }}
                         suppressHydrationWarning
                         className="text-muted-foreground text-sm"

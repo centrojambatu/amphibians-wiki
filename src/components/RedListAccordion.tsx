@@ -405,10 +405,10 @@ export default function RedListAccordion({
               >
                 {species.nombre_cientifico}
               </Link>
-              {/* {species.descubridor && (
+              {/* {species.primeros_colectores && (
                 <span
                   dangerouslySetInnerHTML={{
-                    __html: processHTMLLinks(species.descubridor),
+                    __html: processHTMLLinks(species.primeros_colectores),
                   }}
                   className="text-xs text-gray-500"
                 />

@@ -14,13 +14,40 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_nombres_20260715: {
+        Row: {
+          idioma_id: number | null
+          origen: string | null
+          principal: boolean | null
+          ref_id: number | null
+          snapshot_at: string | null
+          valor: string | null
+        }
+        Insert: {
+          idioma_id?: number | null
+          origen?: string | null
+          principal?: boolean | null
+          ref_id?: number | null
+          snapshot_at?: string | null
+          valor?: string | null
+        }
+        Update: {
+          idioma_id?: number | null
+          origen?: string | null
+          principal?: boolean | null
+          ref_id?: number | null
+          snapshot_at?: string | null
+          valor?: string | null
+        }
+        Relationships: []
+      }
       animacion: {
         Row: {
           descripcion: string | null
           enlace: string
           id_animacion: number
           nombre: string
-          taxon_id: number
+          taxon_id: number | null
           thumbnail: string | null
         }
         Insert: {
@@ -28,7 +55,7 @@ export type Database = {
           enlace?: string
           id_animacion?: number
           nombre?: string
-          taxon_id: number
+          taxon_id?: number | null
           thumbnail?: string | null
         }
         Update: {
@@ -36,7 +63,7 @@ export type Database = {
           enlace?: string
           id_animacion?: number
           nombre?: string
-          taxon_id?: number
+          taxon_id?: number | null
           thumbnail?: string | null
         }
         Relationships: [
@@ -51,29 +78,8 @@ export type Database = {
             foreignKeyName: "animacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "animacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "animacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "animacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "animacion_taxon_id_fkey"
@@ -257,7 +263,10 @@ export type Database = {
           apellidos: string | null
           asociaciones_profesionales: string | null
           email: string | null
+          enlace_biografia: string | null
+          enlace_google_scholar: string | null
           experiencia_laboral: string | null
+          genero: string | null
           id_biografia: number
           inicio_interes_estudio: string | null
           interes_investigacion: string | null
@@ -273,7 +282,10 @@ export type Database = {
           apellidos?: string | null
           asociaciones_profesionales?: string | null
           email?: string | null
+          enlace_biografia?: string | null
+          enlace_google_scholar?: string | null
           experiencia_laboral?: string | null
+          genero?: string | null
           id_biografia?: number
           inicio_interes_estudio?: string | null
           interes_investigacion?: string | null
@@ -289,7 +301,10 @@ export type Database = {
           apellidos?: string | null
           asociaciones_profesionales?: string | null
           email?: string | null
+          enlace_biografia?: string | null
+          enlace_google_scholar?: string | null
           experiencia_laboral?: string | null
+          genero?: string | null
           id_biografia?: number
           inicio_interes_estudio?: string | null
           interes_investigacion?: string | null
@@ -619,29 +634,8 @@ export type Database = {
             foreignKeyName: "canto_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "canto_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "canto_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "canto_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "canto_taxon_id_fkey"
@@ -856,7 +850,6 @@ export type Database = {
           created_at: string | null
           datos_ambientales: string | null
           elevacion: number | null
-          esperma: boolean | null
           esqueleto_transparentacion: boolean | null
           estadio: string | null
           estado: string | null
@@ -871,9 +864,9 @@ export type Database = {
           fuente_coord: string | null
           fuente_nombrecomun: string | null
           gbif: boolean | null
+          genbank: boolean | null
           gui: string | null
           habitat: string | null
-          heces: boolean | null
           hora: string | null
           hora_aprox: string | null
           humedad: number | null
@@ -889,6 +882,7 @@ export type Database = {
           longitud: number | null
           metodo_fijacion: string | null
           metodo_preservacion: string | null
+          microfotografia: boolean | null
           nombre_comun: string | null
           nota_foto: string | null
           num_colector: string | null
@@ -900,13 +894,10 @@ export type Database = {
           personal_id: number | null
           peso: number | null
           ph: number | null
-          piel_exudado: boolean | null
-          piel_liofilizado: boolean | null
           provincia_id: number | null
           publicar: boolean | null
           rango: string | null
           responsable_ingreso: string | null
-          sangre: boolean | null
           sc: string | null
           sc_acronimo: string | null
           sc_numero: number | null
@@ -915,8 +906,6 @@ export type Database = {
           svl: number | null
           taxon_id: number | null
           tejido_count: number | null
-          tejido_higado: boolean | null
-          tejido_musculo: boolean | null
           temperatura: number | null
           updated_at: string | null
           verificado: boolean | null
@@ -932,7 +921,6 @@ export type Database = {
           created_at?: string | null
           datos_ambientales?: string | null
           elevacion?: number | null
-          esperma?: boolean | null
           esqueleto_transparentacion?: boolean | null
           estadio?: string | null
           estado?: string | null
@@ -947,9 +935,9 @@ export type Database = {
           fuente_coord?: string | null
           fuente_nombrecomun?: string | null
           gbif?: boolean | null
+          genbank?: boolean | null
           gui?: string | null
           habitat?: string | null
-          heces?: boolean | null
           hora?: string | null
           hora_aprox?: string | null
           humedad?: number | null
@@ -965,6 +953,7 @@ export type Database = {
           longitud?: number | null
           metodo_fijacion?: string | null
           metodo_preservacion?: string | null
+          microfotografia?: boolean | null
           nombre_comun?: string | null
           nota_foto?: string | null
           num_colector?: string | null
@@ -976,13 +965,10 @@ export type Database = {
           personal_id?: number | null
           peso?: number | null
           ph?: number | null
-          piel_exudado?: boolean | null
-          piel_liofilizado?: boolean | null
           provincia_id?: number | null
           publicar?: boolean | null
           rango?: string | null
           responsable_ingreso?: string | null
-          sangre?: boolean | null
           sc?: string | null
           sc_acronimo?: string | null
           sc_numero?: number | null
@@ -991,8 +977,6 @@ export type Database = {
           svl?: number | null
           taxon_id?: number | null
           tejido_count?: number | null
-          tejido_higado?: boolean | null
-          tejido_musculo?: boolean | null
           temperatura?: number | null
           updated_at?: string | null
           verificado?: boolean | null
@@ -1008,7 +992,6 @@ export type Database = {
           created_at?: string | null
           datos_ambientales?: string | null
           elevacion?: number | null
-          esperma?: boolean | null
           esqueleto_transparentacion?: boolean | null
           estadio?: string | null
           estado?: string | null
@@ -1023,9 +1006,9 @@ export type Database = {
           fuente_coord?: string | null
           fuente_nombrecomun?: string | null
           gbif?: boolean | null
+          genbank?: boolean | null
           gui?: string | null
           habitat?: string | null
-          heces?: boolean | null
           hora?: string | null
           hora_aprox?: string | null
           humedad?: number | null
@@ -1041,6 +1024,7 @@ export type Database = {
           longitud?: number | null
           metodo_fijacion?: string | null
           metodo_preservacion?: string | null
+          microfotografia?: boolean | null
           nombre_comun?: string | null
           nota_foto?: string | null
           num_colector?: string | null
@@ -1052,13 +1036,10 @@ export type Database = {
           personal_id?: number | null
           peso?: number | null
           ph?: number | null
-          piel_exudado?: boolean | null
-          piel_liofilizado?: boolean | null
           provincia_id?: number | null
           publicar?: boolean | null
           rango?: string | null
           responsable_ingreso?: string | null
-          sangre?: boolean | null
           sc?: string | null
           sc_acronimo?: string | null
           sc_numero?: number | null
@@ -1067,8 +1048,6 @@ export type Database = {
           svl?: number | null
           taxon_id?: number | null
           tejido_count?: number | null
-          tejido_higado?: boolean | null
-          tejido_musculo?: boolean | null
           temperatura?: number | null
           updated_at?: string | null
           verificado?: boolean | null
@@ -1127,29 +1106,8 @@ export type Database = {
             foreignKeyName: "coleccion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "coleccion_taxon_id_fkey"
@@ -1406,29 +1364,8 @@ export type Database = {
             foreignKeyName: "coleccion_externa_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_externa_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "coleccion_externa_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_externa_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "coleccion_externa_taxon_id_fkey"
@@ -1955,18 +1892,21 @@ export type Database = {
       enlace_relacionado_taxon: {
         Row: {
           enlace: string
+          fecha: string | null
           id_enlace_relacionado_taxon: number
           nombre: string
           taxon_id: number
         }
         Insert: {
           enlace?: string
+          fecha?: string | null
           id_enlace_relacionado_taxon?: number
           nombre?: string
           taxon_id: number
         }
         Update: {
           enlace?: string
+          fecha?: string | null
           id_enlace_relacionado_taxon?: number
           nombre?: string
           taxon_id?: number
@@ -1983,29 +1923,8 @@ export type Database = {
             foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
@@ -2142,36 +2061,172 @@ export type Database = {
           },
         ]
       }
+      esperma: {
+        Row: {
+          caja: string | null
+          codesperma: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_esperma: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codesperma?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_esperma?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codesperma?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_esperma?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esperma_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "esperma_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+        ]
+      }
+      extracto_piel: {
+        Row: {
+          caja: string | null
+          codextracto_piel: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_extracto_piel: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_extracto_piel_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codextracto_piel?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_extracto_piel?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_extracto_piel_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codextracto_piel?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_extracto_piel?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_extracto_piel_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extracto_piel_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "extracto_piel_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "extracto_piel_tipo_extracto_piel_id_fkey"
+            columns: ["tipo_extracto_piel_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       ficha_especie: {
         Row: {
           agradecimiento: string | null
           anfibio_conservacion: boolean | null
           anfibio_investigacion: boolean | null
           area_distribucion: number | null
+          area_ocupacion: number | null
           asw: string | null
-          autoria_compilador: string | null
-          autoria_editor: string | null
           aw: string | null
-          blog: string | null
-          canto: string | null
           canto_destacado_id: number | null
-          colector: string | null
-          color_en_preservacion: string | null
           color_en_vida: string | null
           comentario_estatus_poblacional: string | null
-          comparacion: string | null
-          compilador: string | null
-          descripcion: string | null
-          descubridor: string | null
-          diagnosis: string | null
+          criterio_eval_lrecuador: string | null
+          criterio_eval_lruicn: string | null
           dieta: string | null
-          distribucion: string | null
           distribucion_global: string | null
-          editor: string | null
           etimologia: string | null
           fecha_actualizacion: string | null
-          fecha_compilacion: string | null
-          fecha_edicion: string | null
           fotografia_destacada_id: number | null
           fuente_lista_roja: string | null
           gbif: string | null
@@ -2183,21 +2238,18 @@ export type Database = {
           identificacion: string | null
           inaturalist: string | null
           informacion_adicional: string | null
-          larva: string | null
-          morfometria: string | null
           morphosource: string | null
-          observacion_zona_altitudinal: string | null
+          peso: string | null
           pluviocidad_max: number | null
           pluviocidad_min: number | null
           pluviocidad_prom: number | null
+          primeros_colectores: string | null
           publicacion_id: number | null
           publicar: boolean
-          rango_altitudinal: string | null
           rango_altitudinal_max: number | null
           rango_altitudinal_min: number | null
-          referencia_area_protegida: string | null
           reproduccion: string | null
-          sinonimia: string | null
+          spp_similares: string | null
           svl_hembra: string | null
           svl_macho: string | null
           taxon_id: number
@@ -2208,7 +2260,6 @@ export type Database = {
           traducciones: Json | null
           uicn: string | null
           ultimo_avistamiento: string | null
-          usos: string | null
           video_destacado_id: number | null
           wikipedia: string | null
         }
@@ -2217,30 +2268,18 @@ export type Database = {
           anfibio_conservacion?: boolean | null
           anfibio_investigacion?: boolean | null
           area_distribucion?: number | null
+          area_ocupacion?: number | null
           asw?: string | null
-          autoria_compilador?: string | null
-          autoria_editor?: string | null
           aw?: string | null
-          blog?: string | null
-          canto?: string | null
           canto_destacado_id?: number | null
-          colector?: string | null
-          color_en_preservacion?: string | null
           color_en_vida?: string | null
           comentario_estatus_poblacional?: string | null
-          comparacion?: string | null
-          compilador?: string | null
-          descripcion?: string | null
-          descubridor?: string | null
-          diagnosis?: string | null
+          criterio_eval_lrecuador?: string | null
+          criterio_eval_lruicn?: string | null
           dieta?: string | null
-          distribucion?: string | null
           distribucion_global?: string | null
-          editor?: string | null
           etimologia?: string | null
           fecha_actualizacion?: string | null
-          fecha_compilacion?: string | null
-          fecha_edicion?: string | null
           fotografia_destacada_id?: number | null
           fuente_lista_roja?: string | null
           gbif?: string | null
@@ -2252,21 +2291,18 @@ export type Database = {
           identificacion?: string | null
           inaturalist?: string | null
           informacion_adicional?: string | null
-          larva?: string | null
-          morfometria?: string | null
           morphosource?: string | null
-          observacion_zona_altitudinal?: string | null
+          peso?: string | null
           pluviocidad_max?: number | null
           pluviocidad_min?: number | null
           pluviocidad_prom?: number | null
+          primeros_colectores?: string | null
           publicacion_id?: number | null
           publicar?: boolean
-          rango_altitudinal?: string | null
           rango_altitudinal_max?: number | null
           rango_altitudinal_min?: number | null
-          referencia_area_protegida?: string | null
           reproduccion?: string | null
-          sinonimia?: string | null
+          spp_similares?: string | null
           svl_hembra?: string | null
           svl_macho?: string | null
           taxon_id: number
@@ -2277,7 +2313,6 @@ export type Database = {
           traducciones?: Json | null
           uicn?: string | null
           ultimo_avistamiento?: string | null
-          usos?: string | null
           video_destacado_id?: number | null
           wikipedia?: string | null
         }
@@ -2286,30 +2321,18 @@ export type Database = {
           anfibio_conservacion?: boolean | null
           anfibio_investigacion?: boolean | null
           area_distribucion?: number | null
+          area_ocupacion?: number | null
           asw?: string | null
-          autoria_compilador?: string | null
-          autoria_editor?: string | null
           aw?: string | null
-          blog?: string | null
-          canto?: string | null
           canto_destacado_id?: number | null
-          colector?: string | null
-          color_en_preservacion?: string | null
           color_en_vida?: string | null
           comentario_estatus_poblacional?: string | null
-          comparacion?: string | null
-          compilador?: string | null
-          descripcion?: string | null
-          descubridor?: string | null
-          diagnosis?: string | null
+          criterio_eval_lrecuador?: string | null
+          criterio_eval_lruicn?: string | null
           dieta?: string | null
-          distribucion?: string | null
           distribucion_global?: string | null
-          editor?: string | null
           etimologia?: string | null
           fecha_actualizacion?: string | null
-          fecha_compilacion?: string | null
-          fecha_edicion?: string | null
           fotografia_destacada_id?: number | null
           fuente_lista_roja?: string | null
           gbif?: string | null
@@ -2321,21 +2344,18 @@ export type Database = {
           identificacion?: string | null
           inaturalist?: string | null
           informacion_adicional?: string | null
-          larva?: string | null
-          morfometria?: string | null
           morphosource?: string | null
-          observacion_zona_altitudinal?: string | null
+          peso?: string | null
           pluviocidad_max?: number | null
           pluviocidad_min?: number | null
           pluviocidad_prom?: number | null
+          primeros_colectores?: string | null
           publicacion_id?: number | null
           publicar?: boolean
-          rango_altitudinal?: string | null
           rango_altitudinal_max?: number | null
           rango_altitudinal_min?: number | null
-          referencia_area_protegida?: string | null
           reproduccion?: string | null
-          sinonimia?: string | null
+          spp_similares?: string | null
           svl_hembra?: string | null
           svl_macho?: string | null
           taxon_id?: number
@@ -2346,7 +2366,6 @@ export type Database = {
           traducciones?: Json | null
           uicn?: string | null
           ultimo_avistamiento?: string | null
-          usos?: string | null
           video_destacado_id?: number | null
           wikipedia?: string | null
         }
@@ -2418,29 +2437,8 @@ export type Database = {
             foreignKeyName: "ficha_especie_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "ficha_especie_taxon_id_fkey"
@@ -2584,6 +2582,846 @@ export type Database = {
           },
         ]
       }
+      ficha_especie_31_741_backup: {
+        Row: {
+          agradecimiento: string | null
+          anfibio_conservacion: boolean | null
+          anfibio_investigacion: boolean | null
+          area_distribucion: number | null
+          asw: string | null
+          autoria_compilador: string | null
+          autoria_editor: string | null
+          aw: string | null
+          blog: string | null
+          canto: string | null
+          canto_destacado_id: number | null
+          colector: string | null
+          color_en_preservacion: string | null
+          color_en_vida: string | null
+          comentario_estatus_poblacional: string | null
+          comparacion: string | null
+          compilador: string | null
+          descripcion: string | null
+          descubridor: string | null
+          diagnosis: string | null
+          dieta: string | null
+          distribucion: string | null
+          distribucion_global: string | null
+          editor: string | null
+          etimologia: string | null
+          fecha_actualizacion: string | null
+          fecha_compilacion: string | null
+          fecha_edicion: string | null
+          fotografia_destacada_id: number | null
+          fuente_lista_roja: string | null
+          gbif: string | null
+          genbank: string | null
+          habitat_biologia: string | null
+          herpnet: string | null
+          historial: string | null
+          id_ficha_especie: number | null
+          identificacion: string | null
+          inaturalist: string | null
+          informacion_adicional: string | null
+          larva: string | null
+          morfometria: string | null
+          morphosource: string | null
+          observacion_zona_altitudinal: string | null
+          pluviocidad_max: number | null
+          pluviocidad_min: number | null
+          pluviocidad_prom: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          rango_altitudinal: string | null
+          rango_altitudinal_max: number | null
+          rango_altitudinal_min: number | null
+          referencia_area_protegida: string | null
+          reproduccion: string | null
+          sinonimia: string | null
+          svl_hembra: string | null
+          svl_macho: string | null
+          taxon_id: number | null
+          taxonomia: string | null
+          temperatura_max: number | null
+          temperatura_min: number | null
+          temperatura_prom: number | null
+          traducciones: Json | null
+          uicn: string | null
+          ultimo_avistamiento: string | null
+          usos: string | null
+          video_destacado_id: number | null
+          wikipedia: string | null
+        }
+        Insert: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Update: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Relationships: []
+      }
+      ficha_especie_backup_pre_fotodest: {
+        Row: {
+          agradecimiento: string | null
+          anfibio_conservacion: boolean | null
+          anfibio_investigacion: boolean | null
+          area_distribucion: number | null
+          asw: string | null
+          autoria_compilador: string | null
+          autoria_editor: string | null
+          aw: string | null
+          blog: string | null
+          canto: string | null
+          canto_destacado_id: number | null
+          colector: string | null
+          color_en_preservacion: string | null
+          color_en_vida: string | null
+          comentario_estatus_poblacional: string | null
+          comparacion: string | null
+          compilador: string | null
+          descripcion: string | null
+          descubridor: string | null
+          diagnosis: string | null
+          dieta: string | null
+          distribucion: string | null
+          distribucion_global: string | null
+          editor: string | null
+          etimologia: string | null
+          fecha_actualizacion: string | null
+          fecha_compilacion: string | null
+          fecha_edicion: string | null
+          fotografia_destacada_id: number | null
+          fuente_lista_roja: string | null
+          gbif: string | null
+          genbank: string | null
+          habitat_biologia: string | null
+          herpnet: string | null
+          historial: string | null
+          id_ficha_especie: number | null
+          identificacion: string | null
+          inaturalist: string | null
+          informacion_adicional: string | null
+          larva: string | null
+          morfometria: string | null
+          morphosource: string | null
+          observacion_zona_altitudinal: string | null
+          pluviocidad_max: number | null
+          pluviocidad_min: number | null
+          pluviocidad_prom: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          rango_altitudinal: string | null
+          rango_altitudinal_max: number | null
+          rango_altitudinal_min: number | null
+          referencia_area_protegida: string | null
+          reproduccion: string | null
+          sinonimia: string | null
+          svl_hembra: string | null
+          svl_macho: string | null
+          taxon_id: number | null
+          taxonomia: string | null
+          temperatura_max: number | null
+          temperatura_min: number | null
+          temperatura_prom: number | null
+          traducciones: Json | null
+          uicn: string | null
+          ultimo_avistamiento: string | null
+          usos: string | null
+          video_destacado_id: number | null
+          wikipedia: string | null
+        }
+        Insert: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Update: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Relationships: []
+      }
+      ficha_especie_backup_pre_publicar_false: {
+        Row: {
+          agradecimiento: string | null
+          anfibio_conservacion: boolean | null
+          anfibio_investigacion: boolean | null
+          area_distribucion: number | null
+          asw: string | null
+          autoria_compilador: string | null
+          autoria_editor: string | null
+          aw: string | null
+          blog: string | null
+          canto: string | null
+          canto_destacado_id: number | null
+          colector: string | null
+          color_en_preservacion: string | null
+          color_en_vida: string | null
+          comentario_estatus_poblacional: string | null
+          comparacion: string | null
+          compilador: string | null
+          descripcion: string | null
+          descubridor: string | null
+          diagnosis: string | null
+          dieta: string | null
+          distribucion: string | null
+          distribucion_global: string | null
+          editor: string | null
+          etimologia: string | null
+          fecha_actualizacion: string | null
+          fecha_compilacion: string | null
+          fecha_edicion: string | null
+          fotografia_destacada_id: number | null
+          fuente_lista_roja: string | null
+          gbif: string | null
+          genbank: string | null
+          habitat_biologia: string | null
+          herpnet: string | null
+          historial: string | null
+          id_ficha_especie: number | null
+          identificacion: string | null
+          inaturalist: string | null
+          informacion_adicional: string | null
+          larva: string | null
+          morfometria: string | null
+          morphosource: string | null
+          observacion_zona_altitudinal: string | null
+          pluviocidad_max: number | null
+          pluviocidad_min: number | null
+          pluviocidad_prom: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          rango_altitudinal: string | null
+          rango_altitudinal_max: number | null
+          rango_altitudinal_min: number | null
+          referencia_area_protegida: string | null
+          reproduccion: string | null
+          sinonimia: string | null
+          svl_hembra: string | null
+          svl_macho: string | null
+          taxon_id: number | null
+          taxonomia: string | null
+          temperatura_max: number | null
+          temperatura_min: number | null
+          temperatura_prom: number | null
+          traducciones: Json | null
+          uicn: string | null
+          ultimo_avistamiento: string | null
+          usos: string | null
+          video_destacado_id: number | null
+          wikipedia: string | null
+        }
+        Insert: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Update: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Relationships: []
+      }
+      ficha_especie_backup_pre_recovery: {
+        Row: {
+          agradecimiento: string | null
+          anfibio_conservacion: boolean | null
+          anfibio_investigacion: boolean | null
+          area_distribucion: number | null
+          asw: string | null
+          autoria_compilador: string | null
+          autoria_editor: string | null
+          aw: string | null
+          blog: string | null
+          canto: string | null
+          canto_destacado_id: number | null
+          colector: string | null
+          color_en_preservacion: string | null
+          color_en_vida: string | null
+          comentario_estatus_poblacional: string | null
+          comparacion: string | null
+          compilador: string | null
+          descripcion: string | null
+          descubridor: string | null
+          diagnosis: string | null
+          dieta: string | null
+          distribucion: string | null
+          distribucion_global: string | null
+          editor: string | null
+          etimologia: string | null
+          fecha_actualizacion: string | null
+          fecha_compilacion: string | null
+          fecha_edicion: string | null
+          fotografia_destacada_id: number | null
+          fuente_lista_roja: string | null
+          gbif: string | null
+          genbank: string | null
+          habitat_biologia: string | null
+          herpnet: string | null
+          historial: string | null
+          id_ficha_especie: number | null
+          identificacion: string | null
+          inaturalist: string | null
+          informacion_adicional: string | null
+          larva: string | null
+          morfometria: string | null
+          morphosource: string | null
+          observacion_zona_altitudinal: string | null
+          pluviocidad_max: number | null
+          pluviocidad_min: number | null
+          pluviocidad_prom: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          rango_altitudinal: string | null
+          rango_altitudinal_max: number | null
+          rango_altitudinal_min: number | null
+          referencia_area_protegida: string | null
+          reproduccion: string | null
+          sinonimia: string | null
+          svl_hembra: string | null
+          svl_macho: string | null
+          taxon_id: number | null
+          taxonomia: string | null
+          temperatura_max: number | null
+          temperatura_min: number | null
+          temperatura_prom: number | null
+          traducciones: Json | null
+          uicn: string | null
+          ultimo_avistamiento: string | null
+          usos: string | null
+          video_destacado_id: number | null
+          wikipedia: string | null
+        }
+        Insert: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Update: {
+          agradecimiento?: string | null
+          anfibio_conservacion?: boolean | null
+          anfibio_investigacion?: boolean | null
+          area_distribucion?: number | null
+          asw?: string | null
+          autoria_compilador?: string | null
+          autoria_editor?: string | null
+          aw?: string | null
+          blog?: string | null
+          canto?: string | null
+          canto_destacado_id?: number | null
+          colector?: string | null
+          color_en_preservacion?: string | null
+          color_en_vida?: string | null
+          comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
+          compilador?: string | null
+          descripcion?: string | null
+          descubridor?: string | null
+          diagnosis?: string | null
+          dieta?: string | null
+          distribucion?: string | null
+          distribucion_global?: string | null
+          editor?: string | null
+          etimologia?: string | null
+          fecha_actualizacion?: string | null
+          fecha_compilacion?: string | null
+          fecha_edicion?: string | null
+          fotografia_destacada_id?: number | null
+          fuente_lista_roja?: string | null
+          gbif?: string | null
+          genbank?: string | null
+          habitat_biologia?: string | null
+          herpnet?: string | null
+          historial?: string | null
+          id_ficha_especie?: number | null
+          identificacion?: string | null
+          inaturalist?: string | null
+          informacion_adicional?: string | null
+          larva?: string | null
+          morfometria?: string | null
+          morphosource?: string | null
+          observacion_zona_altitudinal?: string | null
+          pluviocidad_max?: number | null
+          pluviocidad_min?: number | null
+          pluviocidad_prom?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          rango_altitudinal?: string | null
+          rango_altitudinal_max?: number | null
+          rango_altitudinal_min?: number | null
+          referencia_area_protegida?: string | null
+          reproduccion?: string | null
+          sinonimia?: string | null
+          svl_hembra?: string | null
+          svl_macho?: string | null
+          taxon_id?: number | null
+          taxonomia?: string | null
+          temperatura_max?: number | null
+          temperatura_min?: number | null
+          temperatura_prom?: number | null
+          traducciones?: Json | null
+          uicn?: string | null
+          ultimo_avistamiento?: string | null
+          usos?: string | null
+          video_destacado_id?: number | null
+          wikipedia?: string | null
+        }
+        Relationships: []
+      }
       ficha_familia: {
         Row: {
           agradecimientos: string | null
@@ -2630,29 +3468,8 @@ export type Database = {
             foreignKeyName: "ficha_familia_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_familia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_familia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_familia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "ficha_familia_taxon_id_fkey"
@@ -2835,29 +3652,8 @@ export type Database = {
             foreignKeyName: "ficha_genero_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_genero_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_genero_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_genero_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "ficha_genero_taxon_id_fkey"
@@ -3040,29 +3836,8 @@ export type Database = {
             foreignKeyName: "ficha_orden_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: true
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_orden_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: true
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_orden_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: true
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_orden_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: true
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "ficha_orden_taxon_id_fkey"
@@ -3210,8 +3985,10 @@ export type Database = {
           descripción: string | null
           destacada: boolean
           enlace: string
+          enlace_externo: string | null
           fecha: string | null
           id_fotografia: number
+          in_situ: boolean | null
           latitud: number | null
           localidad: string | null
           longitud: number | null
@@ -3234,8 +4011,10 @@ export type Database = {
           descripción?: string | null
           destacada?: boolean
           enlace?: string
+          enlace_externo?: string | null
           fecha?: string | null
           id_fotografia?: number
+          in_situ?: boolean | null
           latitud?: number | null
           localidad?: string | null
           longitud?: number | null
@@ -3258,8 +4037,10 @@ export type Database = {
           descripción?: string | null
           destacada?: boolean
           enlace?: string
+          enlace_externo?: string | null
           fecha?: string | null
           id_fotografia?: number
+          in_situ?: boolean | null
           latitud?: number | null
           localidad?: string | null
           longitud?: number | null
@@ -3354,29 +4135,8 @@ export type Database = {
             foreignKeyName: "fotografia_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "fotografia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "fotografia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "fotografia_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "fotografia_taxon_id_fkey"
@@ -3513,6 +4273,156 @@ export type Database = {
           },
         ]
       }
+      fotografia_backup_pre_publicar: {
+        Row: {
+          autor: string | null
+          catalogo_awe_id: number | null
+          catalogo_museo: string | null
+          coleccion_externa_id: number | null
+          coleccion_id: number | null
+          created_at: string | null
+          descripción: string | null
+          destacada: boolean | null
+          enlace: string | null
+          fecha: string | null
+          id_fotografia: number | null
+          latitud: number | null
+          localidad: string | null
+          longitud: number | null
+          nombre: string | null
+          observaciones: string | null
+          orden: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          slide_id: number | null
+          taxon_id: number | null
+          tipo_licencia: string | null
+        }
+        Insert: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Update: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Relationships: []
+      }
+      fotografia_backup_pre_recovery: {
+        Row: {
+          autor: string | null
+          catalogo_awe_id: number | null
+          catalogo_museo: string | null
+          coleccion_externa_id: number | null
+          coleccion_id: number | null
+          created_at: string | null
+          descripción: string | null
+          destacada: boolean | null
+          enlace: string | null
+          fecha: string | null
+          id_fotografia: number | null
+          latitud: number | null
+          localidad: string | null
+          longitud: number | null
+          nombre: string | null
+          observaciones: string | null
+          orden: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          slide_id: number | null
+          taxon_id: number | null
+          tipo_licencia: string | null
+        }
+        Insert: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Update: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Relationships: []
+      }
       geopolitica: {
         Row: {
           geopolitica_id: number | null
@@ -3553,6 +4463,75 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "rank_geopolitica"
             referencedColumns: ["id_rank_geopolitica"]
+          },
+        ]
+      }
+      heces: {
+        Row: {
+          caja: string | null
+          codheces: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_heces: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codheces?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_heces?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codheces?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_heces?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heces_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "heces_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
           },
         ]
       }
@@ -3700,29 +4679,8 @@ export type Database = {
             foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
@@ -3914,29 +4872,8 @@ export type Database = {
             foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
             columns: ["manejo_ex_situ_taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
-            columns: ["manejo_ex_situ_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
-            columns: ["manejo_ex_situ_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
-            columns: ["manejo_ex_situ_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
@@ -4183,6 +5120,270 @@ export type Database = {
           },
         ]
       }
+      merge_minuta_siona_fotografia_bk: {
+        Row: {
+          autor: string | null
+          catalogo_awe_id: number | null
+          catalogo_museo: string | null
+          coleccion_externa_id: number | null
+          coleccion_id: number | null
+          created_at: string | null
+          descripción: string | null
+          destacada: boolean | null
+          enlace: string | null
+          fecha: string | null
+          id_fotografia: number | null
+          latitud: number | null
+          localidad: string | null
+          longitud: number | null
+          nombre: string | null
+          observaciones: string | null
+          orden: number | null
+          publicacion_id: number | null
+          publicar: boolean | null
+          slide_id: number | null
+          taxon_id: number | null
+          tipo_licencia: string | null
+        }
+        Insert: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Update: {
+          autor?: string | null
+          catalogo_awe_id?: number | null
+          catalogo_museo?: string | null
+          coleccion_externa_id?: number | null
+          coleccion_id?: number | null
+          created_at?: string | null
+          descripción?: string | null
+          destacada?: boolean | null
+          enlace?: string | null
+          fecha?: string | null
+          id_fotografia?: number | null
+          latitud?: number | null
+          localidad?: string | null
+          longitud?: number | null
+          nombre?: string | null
+          observaciones?: string | null
+          orden?: number | null
+          publicacion_id?: number | null
+          publicar?: boolean | null
+          slide_id?: number | null
+          taxon_id?: number | null
+          tipo_licencia?: string | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_nombre_comun_bk: {
+        Row: {
+          catalogo_awe_etnia_id: number | null
+          catalogo_awe_idioma_id: number | null
+          comentario: string | null
+          id_nombre_comun: number | null
+          nombre: string | null
+          principal: boolean | null
+          publicacion_id: number | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number | null
+          nombre?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number | null
+          nombre?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_taxon_bk: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          eol: boolean | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          nombre_aceptado: boolean | null
+          nombre_comun: string | null
+          nombre_original: boolean | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+          taxon: string | null
+          taxon_id: number | null
+        }
+        Insert: {
+          autor_ano?: string | null
+          en_ecuador?: boolean | null
+          endemica?: boolean | null
+          eol?: boolean | null
+          id_taxon?: number | null
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean | null
+          nombre_comun?: string | null
+          nombre_original?: boolean | null
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean | null
+          taxon?: string | null
+          taxon_id?: number | null
+        }
+        Update: {
+          autor_ano?: string | null
+          en_ecuador?: boolean | null
+          endemica?: boolean | null
+          eol?: boolean | null
+          id_taxon?: number | null
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean | null
+          nombre_comun?: string | null
+          nombre_original?: boolean | null
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean | null
+          taxon?: string | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_taxon_catalogo_awe_bk: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          observación: string | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_taxon_geopolitica_bk: {
+        Row: {
+          geopolitica_id: number | null
+          id_taxon_geopolitica: number | null
+          principal: boolean | null
+          taxon_id: number | null
+        }
+        Insert: {
+          geopolitica_id?: number | null
+          id_taxon_geopolitica?: number | null
+          principal?: boolean | null
+          taxon_id?: number | null
+        }
+        Update: {
+          geopolitica_id?: number | null
+          id_taxon_geopolitica?: number | null
+          principal?: boolean | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_taxon_publicacion_bk: {
+        Row: {
+          id_taxon_publicacion: number | null
+          principal: boolean | null
+          publicacion_id: number | null
+          svl_hembra: boolean | null
+          svl_macho: boolean | null
+          taxon_id: number | null
+        }
+        Insert: {
+          id_taxon_publicacion?: number | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          svl_hembra?: boolean | null
+          svl_macho?: boolean | null
+          taxon_id?: number | null
+        }
+        Update: {
+          id_taxon_publicacion?: number | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          svl_hembra?: boolean | null
+          svl_macho?: boolean | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      merge_minuta_siona_tipo_bk: {
+        Row: {
+          catalogo_awe_id: number | null
+          comentario: string | null
+          geopolitica_id: number | null
+          id_tipo: number | null
+          medidas: string | null
+          numero_museo: string | null
+          principal: boolean | null
+          publicacion_id: number | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_id?: number | null
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number | null
+          medidas?: string | null
+          numero_museo?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_id?: number | null
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number | null
+          medidas?: string | null
+          numero_museo?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
       nombre_comun: {
         Row: {
           catalogo_awe_etnia_id: number | null
@@ -4282,29 +5483,8 @@ export type Database = {
             foreignKeyName: "nombre_comun_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "nombre_comun_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "nombre_comun_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "nombre_comun_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "nombre_comun_taxon_id_fkey"
@@ -4441,6 +5621,39 @@ export type Database = {
           },
         ]
       }
+      nombre_comun_backup_pre_recovery: {
+        Row: {
+          catalogo_awe_etnia_id: number | null
+          catalogo_awe_idioma_id: number | null
+          comentario: string | null
+          id_nombre_comun: number | null
+          nombre: string | null
+          principal: boolean | null
+          publicacion_id: number | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number | null
+          nombre?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_etnia_id?: number | null
+          catalogo_awe_idioma_id?: number | null
+          comentario?: string | null
+          id_nombre_comun?: number | null
+          nombre?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
       nombre_comun_vernaculo: {
         Row: {
           catalogo_awe_idioma_id: number | null
@@ -4524,29 +5737,8 @@ export type Database = {
             foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
@@ -5133,6 +6325,7 @@ export type Database = {
           contador_citas: number | null
           editor: boolean
           editorial: string | null
+          enlace: string | null
           fecha: string
           formato_impreso: boolean | null
           id_publicacion: number
@@ -5161,6 +6354,7 @@ export type Database = {
           contador_citas?: number | null
           editor?: boolean
           editorial?: string | null
+          enlace?: string | null
           fecha: string
           formato_impreso?: boolean | null
           id_publicacion?: number
@@ -5189,6 +6383,7 @@ export type Database = {
           contador_citas?: number | null
           editor?: boolean
           editorial?: string | null
+          enlace?: string | null
           fecha?: string
           formato_impreso?: boolean | null
           id_publicacion?: number
@@ -5563,6 +6758,85 @@ export type Database = {
         }
         Relationships: []
       }
+      secuencia: {
+        Row: {
+          caja: string | null
+          codsecuencia: string | null
+          coleccion_id: number
+          coordenada: string | null
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_secuencia: number
+          observacion: string | null
+          permisocontrato_id: number | null
+          piso: string | null
+          preservacion: string | null
+          rack: string | null
+          tipo_secuencia_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codsecuencia?: string | null
+          coleccion_id: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_secuencia?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_secuencia_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codsecuencia?: string | null
+          coleccion_id?: number
+          coordenada?: string | null
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_secuencia?: number
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          piso?: string | null
+          preservacion?: string | null
+          rack?: string | null
+          tipo_secuencia_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secuencia_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "secuencia_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "secuencia_tipo_secuencia_id_fkey"
+            columns: ["tipo_secuencia_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       slide: {
         Row: {
           fecha: string | null
@@ -5615,29 +6889,8 @@ export type Database = {
             foreignKeyName: "slide_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "slide_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "slide_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "slide_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "slide_taxon_id_fkey"
@@ -5774,6 +7027,79 @@ export type Database = {
           },
         ]
       }
+      swabs: {
+        Row: {
+          caja: string | null
+          codswab: string | null
+          coleccion_id: number
+          created_at: string | null
+          estatus: string | null
+          fecha: string | null
+          id_swab: number
+          jaula: string | null
+          observacion: string | null
+          permisocontrato_id: number | null
+          preservante: string | null
+          tipo_swab_id: number | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          caja?: string | null
+          codswab?: string | null
+          coleccion_id: number
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_swab?: number
+          jaula?: string | null
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          preservante?: string | null
+          tipo_swab_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          caja?: string | null
+          codswab?: string | null
+          coleccion_id?: number
+          created_at?: string | null
+          estatus?: string | null
+          fecha?: string | null
+          id_swab?: number
+          jaula?: string | null
+          observacion?: string | null
+          permisocontrato_id?: number | null
+          preservante?: string | null
+          tipo_swab_id?: number | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swabs_coleccion_id_fkey"
+            columns: ["coleccion_id"]
+            isOneToOne: false
+            referencedRelation: "coleccion"
+            referencedColumns: ["id_coleccion"]
+          },
+          {
+            foreignKeyName: "swabs_permisocontrato_id_fkey"
+            columns: ["permisocontrato_id"]
+            isOneToOne: false
+            referencedRelation: "permisocontrato"
+            referencedColumns: ["id_permisocontrato"]
+          },
+          {
+            foreignKeyName: "swabs_tipo_swab_id_fkey"
+            columns: ["tipo_swab_id"]
+            isOneToOne: false
+            referencedRelation: "catalogo_awe"
+            referencedColumns: ["id_catalogo_awe"]
+          },
+        ]
+      }
       taxon: {
         Row: {
           autor_ano: string | null
@@ -5786,6 +7112,7 @@ export type Database = {
           nombre_comun: string | null
           nombre_original: boolean
           publicacion: string | null
+          publicacion_id: number | null
           rank_id: number | null
           sinonimo: boolean
           taxon: string
@@ -5802,6 +7129,7 @@ export type Database = {
           nombre_comun?: string | null
           nombre_original?: boolean
           publicacion?: string | null
+          publicacion_id?: number | null
           rank_id?: number | null
           sinonimo?: boolean
           taxon: string
@@ -5818,12 +7146,55 @@ export type Database = {
           nombre_comun?: string | null
           nombre_original?: boolean
           publicacion?: string | null
+          publicacion_id?: number | null
           rank_id?: number | null
           sinonimo?: boolean
           taxon?: string
           taxon_id?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicacion"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_anfibios_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_cientifica_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_completa"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_completa_ecuador"
+            referencedColumns: ["id_publicacion"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "vw_publicacion_slug"
+            referencedColumns: ["id_publicacion"]
+          },
           {
             foreignKeyName: "taxon_rank_id_fkey"
             columns: ["rank_id"]
@@ -5842,29 +7213,8 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -6000,6 +7350,57 @@ export type Database = {
             referencedColumns: ["id_taxon"]
           },
         ]
+      }
+      taxon_backup_pre_recovery: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          eol: boolean | null
+          id_taxon: number | null
+          id_taxon_correcto: number | null
+          nombre_aceptado: boolean | null
+          nombre_comun: string | null
+          nombre_original: boolean | null
+          publicacion: string | null
+          rank_id: number | null
+          sinonimo: boolean | null
+          taxon: string | null
+          taxon_id: number | null
+        }
+        Insert: {
+          autor_ano?: string | null
+          en_ecuador?: boolean | null
+          endemica?: boolean | null
+          eol?: boolean | null
+          id_taxon?: number | null
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean | null
+          nombre_comun?: string | null
+          nombre_original?: boolean | null
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean | null
+          taxon?: string | null
+          taxon_id?: number | null
+        }
+        Update: {
+          autor_ano?: string | null
+          en_ecuador?: boolean | null
+          endemica?: boolean | null
+          eol?: boolean | null
+          id_taxon?: number | null
+          id_taxon_correcto?: number | null
+          nombre_aceptado?: boolean | null
+          nombre_comun?: string | null
+          nombre_original?: boolean | null
+          publicacion?: string | null
+          rank_id?: number | null
+          sinonimo?: boolean | null
+          taxon?: string | null
+          taxon_id?: number | null
+        }
+        Relationships: []
       }
       taxon_catalogo_awe: {
         Row: {
@@ -6039,29 +7440,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -6197,6 +7577,48 @@ export type Database = {
             referencedColumns: ["id_taxon"]
           },
         ]
+      }
+      taxon_catalogo_awe_backup_pre_recovery: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          observación: string | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
+      taxon_catalogo_awe_backup_pre_regionbiogeo: {
+        Row: {
+          catalogo_awe_id: number | null
+          id_taxon_catalogo_awe: number | null
+          observación: string | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_id?: number | null
+          id_taxon_catalogo_awe?: number | null
+          observación?: string | null
+          taxon_id?: number | null
+        }
+        Relationships: []
       }
       taxon_geopolitica: {
         Row: {
@@ -6243,29 +7665,8 @@ export type Database = {
             foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
@@ -6401,6 +7802,27 @@ export type Database = {
             referencedColumns: ["id_taxon"]
           },
         ]
+      }
+      taxon_geopolitica_backup_pre_recovery: {
+        Row: {
+          geopolitica_id: number | null
+          id_taxon_geopolitica: number | null
+          principal: boolean | null
+          taxon_id: number | null
+        }
+        Insert: {
+          geopolitica_id?: number | null
+          id_taxon_geopolitica?: number | null
+          principal?: boolean | null
+          taxon_id?: number | null
+        }
+        Update: {
+          geopolitica_id?: number | null
+          id_taxon_geopolitica?: number | null
+          principal?: boolean | null
+          taxon_id?: number | null
+        }
+        Relationships: []
       }
       taxon_publicacion: {
         Row: {
@@ -6487,29 +7909,8 @@ export type Database = {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
@@ -6646,374 +8047,32 @@ export type Database = {
           },
         ]
       }
-      esperma: {
+      taxon_publicacion_backup_pre_recovery: {
         Row: {
-          caja: string | null
-          codesperma: string | null
-          coleccion_id: number
-          coordenada: string | null
-          created_at: string | null
-          estatus: string | null
-          fecha: string | null
-          id_esperma: number
-          observacion: string | null
-          permisocontrato_id: number | null
-          piso: string | null
-          preservacion: string | null
-          rack: string | null
-          ubicacion: string | null
-          updated_at: string | null
+          id_taxon_publicacion: number | null
+          principal: boolean | null
+          publicacion_id: number | null
+          svl_hembra: boolean | null
+          svl_macho: boolean | null
+          taxon_id: number | null
         }
         Insert: {
-          caja?: string | null
-          codesperma?: string | null
-          coleccion_id: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_esperma?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          ubicacion?: string | null
-          updated_at?: string | null
+          id_taxon_publicacion?: number | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          svl_hembra?: boolean | null
+          svl_macho?: boolean | null
+          taxon_id?: number | null
         }
         Update: {
-          caja?: string | null
-          codesperma?: string | null
-          coleccion_id?: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_esperma?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          ubicacion?: string | null
-          updated_at?: string | null
+          id_taxon_publicacion?: number | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          svl_hembra?: boolean | null
+          svl_macho?: boolean | null
+          taxon_id?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "esperma_coleccion_id_fkey"
-            columns: ["coleccion_id"]
-            isOneToOne: false
-            referencedRelation: "coleccion"
-            referencedColumns: ["id_coleccion"]
-          },
-          {
-            foreignKeyName: "esperma_permisocontrato_id_fkey"
-            columns: ["permisocontrato_id"]
-            isOneToOne: false
-            referencedRelation: "permisocontrato"
-            referencedColumns: ["id_permisocontrato"]
-          },
-        ]
-      }
-      heces: {
-        Row: {
-          caja: string | null
-          codheces: string | null
-          coleccion_id: number
-          coordenada: string | null
-          created_at: string | null
-          estatus: string | null
-          fecha: string | null
-          id_heces: number
-          observacion: string | null
-          permisocontrato_id: number | null
-          piso: string | null
-          preservacion: string | null
-          rack: string | null
-          ubicacion: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          caja?: string | null
-          codheces?: string | null
-          coleccion_id: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_heces?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          caja?: string | null
-          codheces?: string | null
-          coleccion_id?: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_heces?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "heces_coleccion_id_fkey"
-            columns: ["coleccion_id"]
-            isOneToOne: false
-            referencedRelation: "coleccion"
-            referencedColumns: ["id_coleccion"]
-          },
-          {
-            foreignKeyName: "heces_permisocontrato_id_fkey"
-            columns: ["permisocontrato_id"]
-            isOneToOne: false
-            referencedRelation: "permisocontrato"
-            referencedColumns: ["id_permisocontrato"]
-          },
-        ]
-      }
-      extracto_piel: {
-        Row: {
-          caja: string | null
-          codextracto_piel: string | null
-          coleccion_id: number
-          coordenada: string | null
-          created_at: string | null
-          estatus: string | null
-          fecha: string | null
-          id_extracto_piel: number
-          observacion: string | null
-          permisocontrato_id: number | null
-          piso: string | null
-          preservacion: string | null
-          rack: string | null
-          tipo_extracto_piel_id: number | null
-          ubicacion: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          caja?: string | null
-          codextracto_piel?: string | null
-          coleccion_id: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_extracto_piel?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          tipo_extracto_piel_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          caja?: string | null
-          codextracto_piel?: string | null
-          coleccion_id?: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_extracto_piel?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          tipo_extracto_piel_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "extracto_piel_coleccion_id_fkey"
-            columns: ["coleccion_id"]
-            isOneToOne: false
-            referencedRelation: "coleccion"
-            referencedColumns: ["id_coleccion"]
-          },
-          {
-            foreignKeyName: "extracto_piel_permisocontrato_id_fkey"
-            columns: ["permisocontrato_id"]
-            isOneToOne: false
-            referencedRelation: "permisocontrato"
-            referencedColumns: ["id_permisocontrato"]
-          },
-          {
-            foreignKeyName: "extracto_piel_tipo_extracto_piel_id_fkey"
-            columns: ["tipo_extracto_piel_id"]
-            isOneToOne: false
-            referencedRelation: "catalogo_awe"
-            referencedColumns: ["id_catalogo_awe"]
-          },
-        ]
-      }
-      secuencia: {
-        Row: {
-          caja: string | null
-          codsecuencia: string | null
-          coleccion_id: number
-          coordenada: string | null
-          created_at: string | null
-          estatus: string | null
-          fecha: string | null
-          id_secuencia: number
-          observacion: string | null
-          permisocontrato_id: number | null
-          piso: string | null
-          preservacion: string | null
-          rack: string | null
-          tipo_secuencia_id: number | null
-          ubicacion: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          caja?: string | null
-          codsecuencia?: string | null
-          coleccion_id: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_secuencia?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          tipo_secuencia_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          caja?: string | null
-          codsecuencia?: string | null
-          coleccion_id?: number
-          coordenada?: string | null
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_secuencia?: number
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          piso?: string | null
-          preservacion?: string | null
-          rack?: string | null
-          tipo_secuencia_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "secuencia_coleccion_id_fkey"
-            columns: ["coleccion_id"]
-            isOneToOne: false
-            referencedRelation: "coleccion"
-            referencedColumns: ["id_coleccion"]
-          },
-          {
-            foreignKeyName: "secuencia_permisocontrato_id_fkey"
-            columns: ["permisocontrato_id"]
-            isOneToOne: false
-            referencedRelation: "permisocontrato"
-            referencedColumns: ["id_permisocontrato"]
-          },
-          {
-            foreignKeyName: "secuencia_tipo_secuencia_id_fkey"
-            columns: ["tipo_secuencia_id"]
-            isOneToOne: false
-            referencedRelation: "catalogo_awe"
-            referencedColumns: ["id_catalogo_awe"]
-          },
-        ]
-      }
-      swabs: {
-        Row: {
-          caja: string | null
-          codswab: string | null
-          coleccion_id: number
-          created_at: string | null
-          estatus: string | null
-          fecha: string | null
-          id_swab: number
-          jaula: string | null
-          observacion: string | null
-          permisocontrato_id: number | null
-          preservante: string | null
-          tipo_swab_id: number | null
-          ubicacion: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          caja?: string | null
-          codswab?: string | null
-          coleccion_id: number
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_swab?: number
-          jaula?: string | null
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          preservante?: string | null
-          tipo_swab_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          caja?: string | null
-          codswab?: string | null
-          coleccion_id?: number
-          created_at?: string | null
-          estatus?: string | null
-          fecha?: string | null
-          id_swab?: number
-          jaula?: string | null
-          observacion?: string | null
-          permisocontrato_id?: number | null
-          preservante?: string | null
-          tipo_swab_id?: number | null
-          ubicacion?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "swabs_coleccion_id_fkey"
-            columns: ["coleccion_id"]
-            isOneToOne: false
-            referencedRelation: "coleccion"
-            referencedColumns: ["id_coleccion"]
-          },
-          {
-            foreignKeyName: "swabs_permisocontrato_id_fkey"
-            columns: ["permisocontrato_id"]
-            isOneToOne: false
-            referencedRelation: "permisocontrato"
-            referencedColumns: ["id_permisocontrato"]
-          },
-          {
-            foreignKeyName: "swabs_tipo_swab_id_fkey"
-            columns: ["tipo_swab_id"]
-            isOneToOne: false
-            referencedRelation: "catalogo_awe"
-            referencedColumns: ["id_catalogo_awe"]
-          },
-        ]
+        Relationships: []
       }
       tejido: {
         Row: {
@@ -7203,29 +8262,8 @@ export type Database = {
             foreignKeyName: "tipo_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "tipo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "tipo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "tipo_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "tipo_taxon_id_fkey"
@@ -7362,6 +8400,42 @@ export type Database = {
           },
         ]
       }
+      tipo_backup_pre_recovery: {
+        Row: {
+          catalogo_awe_id: number | null
+          comentario: string | null
+          geopolitica_id: number | null
+          id_tipo: number | null
+          medidas: string | null
+          numero_museo: string | null
+          principal: boolean | null
+          publicacion_id: number | null
+          taxon_id: number | null
+        }
+        Insert: {
+          catalogo_awe_id?: number | null
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number | null
+          medidas?: string | null
+          numero_museo?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Update: {
+          catalogo_awe_id?: number | null
+          comentario?: string | null
+          geopolitica_id?: number | null
+          id_tipo?: number | null
+          medidas?: string | null
+          numero_museo?: string | null
+          principal?: boolean | null
+          publicacion_id?: number | null
+          taxon_id?: number | null
+        }
+        Relationships: []
+      }
       tipo_catalogo_awe: {
         Row: {
           descripcion: string | null
@@ -7387,12 +8461,14 @@ export type Database = {
           coleccion_externa_id: number | null
           coleccion_id: number | null
           descripcion: string | null
+          destacado: boolean | null
           enlace: string
+          fecha: string | null
           id_video: number
           nombre: string
-          numero_museo: string | null
+          premiado: boolean | null
           publicar: boolean | null
-          taxon_id: number
+          taxon_id: number | null
           thumbnail: string | null
         }
         Insert: {
@@ -7401,12 +8477,14 @@ export type Database = {
           coleccion_externa_id?: number | null
           coleccion_id?: number | null
           descripcion?: string | null
+          destacado?: boolean | null
           enlace?: string
+          fecha?: string | null
           id_video?: number
           nombre?: string
-          numero_museo?: string | null
+          premiado?: boolean | null
           publicar?: boolean | null
-          taxon_id: number
+          taxon_id?: number | null
           thumbnail?: string | null
         }
         Update: {
@@ -7415,12 +8493,14 @@ export type Database = {
           coleccion_externa_id?: number | null
           coleccion_id?: number | null
           descripcion?: string | null
+          destacado?: boolean | null
           enlace?: string
+          fecha?: string | null
           id_video?: number
           nombre?: string
-          numero_museo?: string | null
+          premiado?: boolean | null
           publicar?: boolean | null
-          taxon_id?: number
+          taxon_id?: number | null
           thumbnail?: string | null
         }
         Relationships: [
@@ -7456,29 +8536,8 @@ export type Database = {
             foreignKeyName: "video_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "video_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "video_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "video_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "video_taxon_id_fkey"
@@ -7736,18 +8795,6 @@ export type Database = {
         }
         Relationships: []
       }
-      mv_mapoteca_especies_busqueda: {
-        Row: {
-          endemica: boolean | null
-          familia: string | null
-          genero: string | null
-          lista_roja_nombre: string | null
-          nombre_comun: string | null
-          nombre_especie: string | null
-          taxon_id: number | null
-        }
-        Relationships: []
-      }
       mv_mapoteca_localidades_busqueda: {
         Row: {
           localidad: string | null
@@ -7834,8 +8881,6 @@ export type Database = {
           awe_reservas_biosfera: string | null
           awe_tipo_generacional: string | null
           clase: string | null
-          distribucion: string | null
-          distribucion_global: string | null
           en_ecuador: boolean | null
           endemica: boolean | null
           especie: string | null
@@ -7847,227 +8892,18 @@ export type Database = {
           id_ficha_especie: number | null
           nombre_cientifico: string | null
           nombre_comun: string | null
-          observacion_zona_altitudinal: string | null
           orden: string | null
           phylum: string | null
           pluviocidad: number | null
+          primeros_colectores: string | null
           publicar: boolean | null
-          rango_altitudinal: string | null
           rango_altitudinal_max: number | null
           rango_altitudinal_min: number | null
-          referencia_area_protegida: string | null
           reino: string | null
           temperatura: number | null
           ubicaciones_geopoliticas: string | null
           ubicaciones_principales: string | null
           ultimo_avistamiento: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "taxon"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_especies"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_especies"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_especies_alejandro_arteaga"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_especies_george_fletcher"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_especies_jmg"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_familias"
-            referencedColumns: ["id_familia"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_familias"
-            referencedColumns: ["id_orden"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_generos"
-            referencedColumns: ["id_familia"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_generos"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_generos"
-            referencedColumns: ["id_orden"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp"
-            referencedColumns: ["id_especie"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp"
-            referencedColumns: ["id_familia"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp"
-            referencedColumns: ["id_orden"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp_lrc"
-            referencedColumns: ["id_especie"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp_lrc"
-            referencedColumns: ["id_familia"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp_lrc"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lista_spp_lrc"
-            referencedColumns: ["id_orden"]
-          },
-          {
-            foreignKeyName: "ficha_especie_taxon_id_fkey"
-            columns: ["especie_taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_nombres_comunes"
-            referencedColumns: ["id_taxon"]
-          },
-        ]
-      }
-      vw_ficha_especie_conservacion: {
-        Row: {
-          autor_ano: string | null
-          colector: string | null
-          en_ecuador: boolean | null
-          endemica: boolean | null
-          especie: string | null
-          etimologia: string | null
-          genero: string | null
-          habitat_biologia: string | null
-          id_ficha_especie: number | null
-          id_genero: number | null
-          id_taxon: number | null
-          nombre_cientifico: string | null
-          nombre_comun: string | null
-          taxonomia: string | null
-        }
-        Relationships: []
-      }
-      vw_ficha_especie_investigacion: {
-        Row: {
-          autor_ano: string | null
-          colector: string | null
-          en_ecuador: boolean | null
-          endemica: boolean | null
-          especie: string | null
-          etimologia: string | null
-          genero: string | null
-          habitat_biologia: string | null
-          id_ficha_especie: number | null
-          id_genero: number | null
-          id_taxon: number | null
-          nombre_cientifico: string | null
-          nombre_comun: string | null
-          taxonomia: string | null
         }
         Relationships: []
       }
@@ -8110,29 +8946,8 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -8304,29 +9119,8 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -8498,29 +9292,8 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -8692,29 +9465,8 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_taxon_id_fkey"
-            columns: ["id_taxon_padre"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -9008,7 +9760,9 @@ export type Database = {
         Row: {
           count_esperma: number | null
           count_esqueleto_transparentacion: number | null
+          count_genbank: number | null
           count_heces: number | null
+          count_otros: number | null
           count_piel_exudado: number | null
           count_piel_liofilizado: number | null
           count_sangre: number | null
@@ -9029,29 +9783,8 @@ export type Database = {
             foreignKeyName: "coleccion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "coleccion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "coleccion_taxon_id_fkey"
@@ -9191,6 +9924,8 @@ export type Database = {
       vw_nombres_comunes: {
         Row: {
           especie: string | null
+          familia: string | null
+          genero: string | null
           id_ficha_especie: number | null
           id_taxon: number | null
           nombre_cientifico: string | null
@@ -9207,6 +9942,7 @@ export type Database = {
           nombre_comun_portugues: string | null
           nombre_comun_ruso: string | null
           nombres_comunes_json: Json | null
+          orden: string | null
         }
         Relationships: []
       }
@@ -9648,29 +10384,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -9832,29 +10547,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10016,29 +10710,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10200,29 +10873,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10384,29 +11036,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10568,29 +11199,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10790,29 +11400,8 @@ export type Database = {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
@@ -10975,29 +11564,8 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_conservacion"
-            referencedColumns: ["id_taxon"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_genero"]
-          },
-          {
-            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
-            columns: ["taxon_id"]
-            isOneToOne: false
-            referencedRelation: "vw_ficha_especie_investigacion"
-            referencedColumns: ["id_taxon"]
+            referencedRelation: "vw_ficha_especie_completa"
+            referencedColumns: ["especie_taxon_id"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -11227,6 +11795,37 @@ export type Database = {
         }
         Returns: Json
       }
+      get_fototeca_autores: {
+        Args: { p_q: string }
+        Returns: {
+          autor: string
+        }[]
+      }
+      get_fototeca_catalogos: {
+        Args: { p_q: string }
+        Returns: {
+          catalogo_museo: string
+          numero_museo: string
+        }[]
+      }
+      get_fototeca_familias: {
+        Args: { p_q: string }
+        Returns: {
+          familia: string
+        }[]
+      }
+      get_fototeca_generos: {
+        Args: { p_q: string }
+        Returns: {
+          genero: string
+        }[]
+      }
+      get_fototeca_localidades: {
+        Args: { p_q: string }
+        Returns: {
+          localidad: string
+        }[]
+      }
       get_tabla_taxon_ids: {
         Args: {
           p_catalogos?: string[]
@@ -11410,3 +12009,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
