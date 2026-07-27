@@ -229,12 +229,18 @@ export default function ColeccionDetailClient({
   const searchParams = useSearchParams();
   const cameFromColecciones = searchParams?.get("from") === "colecciones";
   const cameFromMoleculoteca = searchParams?.get("from") === "moleculoteca";
+  const cameFromMapoteca = searchParams?.get("from") === "mapoteca";
   const moleculotecaTaxonId = searchParams?.get("taxonId");
-  const backHref = cameFromMoleculoteca && moleculotecaTaxonId
-    ? `/moleculoteca/${moleculotecaTaxonId}`
-    : cameFromColecciones
-      ? "/colecciones"
-      : coleccionesUrl;
+  const mapotecaEspecie = searchParams?.get("mapotecaEspecie");
+  const backHref = cameFromMapoteca
+    ? mapotecaEspecie
+      ? `/mapoteca?especie=${encodeURIComponent(mapotecaEspecie)}`
+      : "/mapoteca"
+    : cameFromMoleculoteca && moleculotecaTaxonId
+      ? `/moleculoteca/${moleculotecaTaxonId}`
+      : cameFromColecciones
+        ? "/colecciones"
+        : coleccionesUrl;
 
   const catalogoLabel = (() => {
     const acronimo = c.catalogo_museo?.includes(" - ")

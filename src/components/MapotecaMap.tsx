@@ -1,56 +1,43 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef, memo } from "react";
 import {
   MapContainer,
   TileLayer,
-  CircleMarker,
+  Marker,
   Popup,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import { useRouter } from "next/navigation";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 import type { UbicacionEspecie } from "@/app/api/mapoteca/route";
 import { useMapotecaData } from "@/hooks/use-mapoteca-data";
 import { useGbifOccurrence } from "@/lib/gbif";
 
-// Canvas renderer para mejor rendimiento con miles de puntos
-function createCanvasRenderer() {
-  if (typeof window === "undefined") return undefined;
-  return L.canvas({ padding: 0.5 });
-}
-
-// Componente para ajustar la vista del mapa
+// Componente para ajustar la vista del mapa (evita fitBounds con miles de puntos)
 function MapBoundsAdjuster({
-  ubicaciones,
+  bounds,
   skip,
 }: {
-  ubicaciones: UbicacionEspecie[];
+  bounds: L.LatLngBoundsExpression | null;
   skip?: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (skip) return;
-    if (ubicaciones.length > 0) {
-      const validUbicaciones = ubicaciones.filter(
-        (u) => u.latitud && u.longitud
-      );
-      if (validUbicaciones.length > 0) {
-        const bounds = validUbicaciones.map(
-          (u) => [u.latitud!, u.longitud!] as [number, number]
-        );
-        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 10 });
-      }
-    }
-  }, [ubicaciones, map, skip]);
+    if (skip || !bounds) return;
+    map.fitBounds(bounds, { padding: [20, 20], maxZoom: 10 });
+  }, [bounds, map, skip]);
 
   return null;
 }
 
-// Componente para rastrear zoom/center del mapa
+// Rastrea zoom/center para persistirlos al navegar
 function MapStateTracker({
   stateRef,
 }: {
@@ -61,10 +48,7 @@ function MapStateTracker({
   useEffect(() => {
     const update = () => {
       const c = map.getCenter();
-      stateRef.current = {
-        center: [c.lat, c.lng],
-        zoom: map.getZoom(),
-      };
+      stateRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() };
     };
     map.on("moveend", update);
     map.on("zoomend", update);
@@ -77,17 +61,19 @@ function MapStateTracker({
   return null;
 }
 
-// Componente para restaurar el estado del mapa (zoom, center, popup)
+// Restaura zoom/center; abre popup del marker si es visible (o zoomToShowLayer si está clusterizado)
 function MapStateRestorer({
   center,
   zoom,
   popupKey,
   markerRefs,
+  clusterRef,
 }: {
   center: [number, number];
   zoom: number;
   popupKey: string | null;
-  markerRefs: React.MutableRefObject<Map<string, L.CircleMarker>>;
+  markerRefs: React.MutableRefObject<Map<string, L.Marker>>;
+  clusterRef: React.MutableRefObject<any>;
 }) {
   const map = useMap();
   const restored = useRef(false);
@@ -98,21 +84,22 @@ function MapStateRestorer({
 
     map.setView(center, zoom, { animate: false });
 
-    if (popupKey) {
-      // Small delay to ensure markers are rendered
-      setTimeout(() => {
-        const marker = markerRefs.current.get(popupKey);
-        if (marker) {
-          marker.openPopup();
-        }
-      }, 300);
-    }
-  }, [map, center, zoom, popupKey, markerRefs]);
+    if (!popupKey) return;
+    setTimeout(() => {
+      const marker = markerRefs.current.get(popupKey);
+      if (!marker) return;
+      const cluster = clusterRef.current;
+      if (cluster && typeof cluster.zoomToShowLayer === "function") {
+        cluster.zoomToShowLayer(marker, () => marker.openPopup());
+      } else {
+        marker.openPopup();
+      }
+    }, 300);
+  }, [map, center, zoom, popupKey, markerRefs, clusterRef]);
 
   return null;
 }
 
-// Link a la ocurrencia en GBIF para colecciones externas
 function GbifLink({
   catalogoMuseo,
   numeroMuseo,
@@ -124,12 +111,9 @@ function GbifLink({
 
   if (isLoading) {
     return (
-      <span className="text-[10px] text-gray-400">
-        Buscando en GBIF...
-      </span>
+      <span className="text-[10px] text-gray-400">Buscando en GBIF...</span>
     );
   }
-
   if (!gbifUrl) return null;
 
   return (
@@ -151,22 +135,16 @@ const MESES = [
 ];
 
 function formatFecha(fecha: string): string {
-  // fecha puede ser "YYYY-MM-DD" o "YYYY-MM" o "YYYY"
   const partes = fecha.split("-");
   const anio = partes[0];
   const mes = partes[1] ? parseInt(partes[1], 10) : null;
   const dia = partes[2] ? parseInt(partes[2], 10) : null;
 
-  if (dia && mes) {
-    return `${String(dia).padStart(2, "0")} ${MESES[mes - 1]} ${anio}`;
-  }
-  if (mes) {
-    return `${MESES[mes - 1]} ${anio}`;
-  }
+  if (dia && mes) return `${String(dia).padStart(2, "0")} ${MESES[mes - 1]} ${anio}`;
+  if (mes) return `${MESES[mes - 1]} ${anio}`;
   return anio;
 }
 
-// Contenido compacto de un registro
 function RegistroInfo({
   u,
   onSpeciesClick,
@@ -179,12 +157,7 @@ function RegistroInfo({
   const isExterna = u.origen === "coleccion_externa";
   const isCJ = u.origen === "coleccion";
   const isSpeciesLevel = u.rank_id === 7;
-  // Navegable si tiene rank_id conocido (4=orden, 5=familia, 6=género, 7=especie)
   const canNavigate = onSpeciesClick && u.rank_id != null && u.rank_id >= 4;
-
-  // Etiqueta y nombre según el nivel taxonómico
-  const rankLabel = u.rank_id === 4 ? "Orden" : u.rank_id === 5 ? "Familia" : u.rank_id === 6 ? "Género" : "Especie";
-  // Para especie: "Género especie"; para otros niveles: solo el nombre del taxón (segunda palabra)
   const displayName = isSpeciesLevel
     ? u.nombre_cientifico
     : u.nombre_cientifico.split(" ").pop() || u.nombre_cientifico;
@@ -254,7 +227,126 @@ function RegistroInfo({
   );
 }
 
-// Tipos de mapas base disponibles
+// Contenido del popup — se monta solo cuando el popup se abre por primera vez
+function PopupBody({
+  group,
+  onSpeciesClick,
+  onColeccionClick,
+}: {
+  group: UbicacionEspecie[];
+  onSpeciesClick: (u: UbicacionEspecie) => void;
+  onColeccionClick: (u: UbicacionEspecie) => void;
+}) {
+  const isMultiple = group.length > 1;
+  return (
+    <div className="max-w-[280px] text-gray-800">
+      {isMultiple && (
+        <p className="mb-1 pb-1 border-b text-[10px] font-semibold text-gray-400">
+          {group.length} registros
+        </p>
+      )}
+      <div
+        style={{
+          maxHeight: isMultiple ? "220px" : "none",
+          overflowY: isMultiple ? "auto" : "visible",
+        }}
+      >
+        {group.map((u, i) => (
+          <div
+            key={i}
+            className={`py-1 ${i > 0 ? "border-t border-gray-100 mt-1 pt-1" : ""}`}
+          >
+            <RegistroInfo
+              u={u}
+              onSpeciesClick={onSpeciesClick}
+              onColeccionClick={u.origen === "coleccion" ? onColeccionClick : undefined}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Marker + Popup con render diferido y memoización
+const ClusteredMarker = memo(function ClusteredMarker({
+  markerKey,
+  group,
+  icon,
+  markerRefs,
+  onSpeciesClick,
+  onColeccionClick,
+}: {
+  markerKey: string;
+  group: UbicacionEspecie[];
+  icon: L.DivIcon;
+  markerRefs: React.MutableRefObject<Map<string, L.Marker>>;
+  onSpeciesClick: (u: UbicacionEspecie) => void;
+  onColeccionClick: (u: UbicacionEspecie) => void;
+}) {
+  const [opened, setOpened] = useState(false);
+  const first = group[0];
+
+  const setRef = useCallback(
+    (ref: L.Marker | null) => {
+      if (ref) markerRefs.current.set(markerKey, ref);
+      else markerRefs.current.delete(markerKey);
+    },
+    [markerKey, markerRefs],
+  );
+
+  const eventHandlers = useMemo(
+    () => ({
+      popupopen: () => setOpened(true),
+    }),
+    [],
+  );
+
+  return (
+    <Marker
+      ref={setRef}
+      position={[first.latitud!, first.longitud!]}
+      icon={icon}
+      eventHandlers={eventHandlers}
+    >
+      <Popup
+        offset={[0, -5]}
+        className="mapoteca-popup"
+        maxWidth={300}
+        minWidth={200}
+        autoPan={true}
+      >
+        {opened ? (
+          <PopupBody
+            group={group}
+            onSpeciesClick={onSpeciesClick}
+            onColeccionClick={onColeccionClick}
+          />
+        ) : null}
+      </Popup>
+    </Marker>
+  );
+});
+
+// Cache de iconos por color+radio para no crear un divIcon por marker
+const iconCache = new Map<string, L.DivIcon>();
+function getDotIcon(color: string, radius: number, hasDate: boolean): L.DivIcon {
+  const key = `${color}-${radius}-${String(hasDate)}`;
+  const cached = iconCache.get(key);
+  if (cached) return cached;
+  const size = radius * 2;
+  const border = hasDate ? "#fff" : "#666";
+  const opacity = hasDate ? 0.9 : 0.8;
+  const icon = L.divIcon({
+    className: "mapoteca-dot",
+    html: `<div style="width:${String(size)}px;height:${String(size)}px;border-radius:50%;background:${color};opacity:${String(opacity)};border:1px solid ${border};box-sizing:border-box;"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [radius, radius],
+  });
+  iconCache.set(key, icon);
+  return icon;
+}
+
 const MAP_TILES = {
   relief: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}",
@@ -318,7 +410,6 @@ export default function MapotecaMap({
   mapType = "provinces",
   onNavigateToSpecies,
 }: MapotecaMapProps) {
-  // TanStack Query — cache automático, deduplicación, IndexedDB
   const { data: queryData, isLoading: loading, error: queryError } = useMapotecaData({
     provinciaFilter, pisoFilter, snapFilter, especieFilter,
     catalogoFilter, localidadesFilter, elevacionMin, elevacionMax,
@@ -326,21 +417,17 @@ export default function MapotecaMap({
   });
 
   const ubicaciones = queryData?.data ?? [];
-  const total = queryData?.total ?? 0;
   const error = queryError ? (queryError instanceof Error ? queryError.message : "Error desconocido") : null;
 
   const router = useRouter();
 
-  // Map state tracking
   const mapStateRef = useRef<{ center: [number, number]; zoom: number }>({
     center: [-1.8312, -78.1834],
     zoom: 7,
   });
-  const markerRefs = useRef<Map<string, L.CircleMarker>>(new Map());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const canvasRenderer = useMemo(() => createCanvasRenderer(), []);
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+  const clusterRef = useRef<any>(null);
 
-  // Restore saved map state from sessionStorage
   const [savedMapState] = useState<{
     center: [number, number];
     zoom: number;
@@ -359,49 +446,83 @@ export default function MapotecaMap({
     return null;
   });
 
-  const ubicacionesVisibles = useMemo(() => ubicaciones, [ubicaciones]);
-
   // Rango de fechas para el gradiente
   const { minDate, maxDate } = useMemo(() => {
-    const timestamps = ubicaciones
-      .map((u) => u.fecha_coleccion)
-      .filter(Boolean)
-      .map((d) => new Date(d!).getTime())
-      .filter((t) => !isNaN(t));
-    if (timestamps.length === 0) return { minDate: null, maxDate: null };
-    return { minDate: Math.min(...timestamps), maxDate: Math.max(...timestamps) };
+    let min = Infinity;
+    let max = -Infinity;
+    for (const u of ubicaciones) {
+      if (!u.fecha_coleccion) continue;
+      const t = new Date(u.fecha_coleccion).getTime();
+      if (isNaN(t)) continue;
+      if (t < min) min = t;
+      if (t > max) max = t;
+    }
+    if (min === Infinity) return { minDate: null, maxDate: null };
+    return { minDate: min, maxDate: max };
   }, [ubicaciones]);
 
-  // Púrpura oscuro (antiguo) → Naranja (reciente); gris claro si no hay fecha
   const getColorForDate = useCallback(
     (fecha: string | null): string => {
       if (!fecha || minDate === null || maxDate === null) return "#d4d4d4";
       const t = new Date(fecha).getTime();
       if (isNaN(t)) return "#d4d4d4";
       const ratio = maxDate === minDate ? 1 : (t - minDate) / (maxDate - minDate);
-      // Interpolación RGB: #4c1d95 → #fb923c
       const r = Math.round(0x4c + ratio * (0xfb - 0x4c));
       const g = Math.round(0x1d + ratio * (0x92 - 0x1d));
       const b = Math.round(0x95 + ratio * (0x3c - 0x95));
       return `rgb(${r}, ${g}, ${b})`;
     },
-    [minDate, maxDate]
+    [minDate, maxDate],
   );
 
-  // Agrupar por ubicación para evitar sobreposición
-  const groupedUbicaciones = useMemo(() => {
-    const groups = new Map<string, UbicacionEspecie[]>();
+  // Agrupar por coordenada + precomputar icon y bounds
+  const { groups, bounds } = useMemo(() => {
+    const map = new Map<string, UbicacionEspecie[]>();
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    let minLng = Infinity;
+    let maxLng = -Infinity;
 
-    ubicacionesVisibles.forEach((u) => {
-      const key = `${u.latitud?.toFixed(4)}_${u.longitud?.toFixed(4)}`;
-      const existing = groups.get(key) || [];
-      groups.set(key, [...existing, u]);
-    });
+    for (const u of ubicaciones) {
+      if (u.latitud == null || u.longitud == null) continue;
+      const key = `${u.latitud.toFixed(4)}_${u.longitud.toFixed(4)}`;
+      const existing = map.get(key);
+      if (existing) existing.push(u);
+      else map.set(key, [u]);
+      if (u.latitud < minLat) minLat = u.latitud;
+      if (u.latitud > maxLat) maxLat = u.latitud;
+      if (u.longitud < minLng) minLng = u.longitud;
+      if (u.longitud > maxLng) maxLng = u.longitud;
+    }
 
-    return groups;
-  }, [ubicacionesVisibles]);
+    const groupsArr: {
+      key: string;
+      group: UbicacionEspecie[];
+      icon: L.DivIcon;
+    }[] = [];
+    for (const [key, group] of map) {
+      let latestDate: string | null = null;
+      for (const u of group) {
+        if (u.fecha_coleccion && (!latestDate || u.fecha_coleccion > latestDate)) {
+          latestDate = u.fecha_coleccion;
+        }
+      }
+      const color = getColorForDate(latestDate);
+      const radius = group.length > 1 ? 7 : 5;
+      groupsArr.push({ key, group, icon: getDotIcon(color, radius, !!latestDate) });
+    }
 
-  // Guardar estado del mapa antes de navegar
+    const b: L.LatLngBoundsExpression | null =
+      minLat === Infinity
+        ? null
+        : [
+            [minLat, minLng],
+            [maxLat, maxLng],
+          ];
+
+    return { groups: groupsArr, bounds: b };
+  }, [ubicaciones, getColorForDate]);
+
   const saveMapState = useCallback(
     (ubicacion: UbicacionEspecie) => {
       const popupKey = ubicacion.latitud && ubicacion.longitud
@@ -413,36 +534,24 @@ export default function MapotecaMap({
           center: mapStateRef.current.center,
           zoom: mapStateRef.current.zoom,
           popupKey,
-        })
+        }),
       );
-      if (onNavigateToSpecies) {
-        onNavigateToSpecies();
-      }
+      if (onNavigateToSpecies) onNavigateToSpecies();
     },
-    [onNavigateToSpecies]
+    [onNavigateToSpecies],
   );
 
-  // Obtener la ruta de la ficha según el rank_id
-  // rank_id: 4=Orden, 5=Familia, 6=Género, 7=especie
   const getTaxonRoute = useCallback((ubicacion: UbicacionEspecie): string | null => {
     const parts = ubicacion.nombre_cientifico.split(" ");
-    // Para especie: slug es "Género-especie"
-    // Para otros: el nombre del taxon es la segunda palabra (el taxon directo)
     switch (ubicacion.rank_id) {
-      case 7: // especie
-        return `/sapopedia/species/${ubicacion.nombre_cientifico.replaceAll(" ", "-")}`;
-      case 6: // género - segunda palabra es el género
-        return parts[1] ? `/sapopedia/genus/${parts[1]}` : null;
-      case 5: // familia - segunda palabra es la familia
-        return parts[1] ? `/sapopedia/family/${parts[1]}` : null;
-      case 4: // orden - segunda palabra es el orden
-        return parts[1] ? `/sapopedia/order/${parts[1]}` : null;
-      default:
-        return null;
+      case 7: return `/sapopedia/species/${ubicacion.nombre_cientifico.replaceAll(" ", "-")}`;
+      case 6: return parts[1] ? `/sapopedia/genus/${parts[1]}` : null;
+      case 5: return parts[1] ? `/sapopedia/family/${parts[1]}` : null;
+      case 4: return parts[1] ? `/sapopedia/order/${parts[1]}` : null;
+      default: return null;
     }
   }, []);
 
-  // Navegar a la ficha del taxón (especie, género, familia u orden)
   const handleTaxonClick = useCallback(
     (ubicacion: UbicacionEspecie) => {
       const route = getTaxonRoute(ubicacion);
@@ -450,20 +559,25 @@ export default function MapotecaMap({
       saveMapState(ubicacion);
       router.push(route);
     },
-    [router, saveMapState, getTaxonRoute]
+    [router, saveMapState, getTaxonRoute],
   );
 
-  // Navegar a la vista de colección CJ
   const handleColeccionClick = useCallback(
     (ubicacion: UbicacionEspecie) => {
       if (!ubicacion.id_coleccion) return;
       saveMapState(ubicacion);
       const slug = ubicacion.nombre_cientifico.replaceAll(" ", "-");
-      router.push(`/sapopedia/species/${slug}/colecciones/${ubicacion.id_coleccion}`);
+      const params = new URLSearchParams({ from: "mapoteca" });
+      if (typeof window !== "undefined") {
+        const currentEspecie = new URLSearchParams(window.location.search).get("especie");
+        if (currentEspecie) params.set("mapotecaEspecie", currentEspecie);
+      }
+      router.push(
+        `/sapopedia/species/${slug}/colecciones/${ubicacion.id_coleccion}?${params.toString()}`,
+      );
     },
-    [router, saveMapState]
+    [router, saveMapState],
   );
-
 
   if (error) {
     return (
@@ -475,7 +589,6 @@ export default function MapotecaMap({
     );
   }
 
-  // Centro de Ecuador (o restaurado)
   const ecuadorCenter: [number, number] = savedMapState?.center ?? [-1.8312, -78.1834];
   const initialZoom = savedMapState?.zoom ?? 7;
 
@@ -486,11 +599,11 @@ export default function MapotecaMap({
           <div className="h-1.5 w-full overflow-hidden bg-gray-200">
             <div
               className="h-full w-full animate-pulse rounded-r-full"
-              style={{backgroundColor: "#f07304"}}
+              style={{ backgroundColor: "#f07304" }}
             />
           </div>
           <div className="absolute top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-xs font-medium text-gray-600 shadow-md">
-            <div className="h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" style={{borderColor: "#f07304", borderTopColor: "transparent"}} />
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: "#f07304", borderTopColor: "transparent" }} />
             Cargando puntos...
           </div>
         </div>
@@ -500,7 +613,6 @@ export default function MapotecaMap({
         zoom={initialZoom}
         className="h-full w-full"
         scrollWheelZoom={true}
-        renderer={canvasRenderer}
         preferCanvas={true}
       >
         <TileLayer
@@ -518,87 +630,36 @@ export default function MapotecaMap({
             zoom={savedMapState.zoom}
             popupKey={savedMapState.popupKey}
             markerRefs={markerRefs}
+            clusterRef={clusterRef}
           />
         )}
 
-        {ubicacionesVisibles.length > 0 && (
-          <MapBoundsAdjuster ubicaciones={ubicacionesVisibles} skip={!!savedMapState} />
+        {bounds && (
+          <MapBoundsAdjuster bounds={bounds} skip={!!savedMapState} />
         )}
 
-        {Array.from(groupedUbicaciones.entries()).map(([key, group]) => {
-          const first = group[0];
-          if (!first.latitud || !first.longitud) return null;
-
-          const isMultiple = group.length > 1;
-          const groupDates = group.map((u) => u.fecha_coleccion).filter(Boolean).sort();
-          const representativeDate = groupDates[groupDates.length - 1] ?? null;
-          const color = getColorForDate(representativeDate);
-          const radius = isMultiple ? 7 : 5;
-
-          const popupContent = (
-            <div className="max-w-[280px] text-gray-800">
-              {isMultiple && (
-                <p className="mb-1 pb-1 border-b text-[10px] font-semibold text-gray-400">
-                  {group.length} registros
-                </p>
-              )}
-              <div
-                style={{
-                  maxHeight: isMultiple ? "220px" : "none",
-                  overflowY: isMultiple ? "auto" : "visible",
-                }}
-              >
-                {group.map((u, i) => (
-                  <div
-                    key={i}
-                    className={`py-1 ${
-                      i > 0 ? "border-t border-gray-100 mt-1 pt-1" : ""
-                    }`}
-                  >
-                    <RegistroInfo
-                      u={u}
-                      onSpeciesClick={handleTaxonClick}
-                      onColeccionClick={u.origen === "coleccion" ? handleColeccionClick : undefined}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-
-          return (
-            <CircleMarker
+        <MarkerClusterGroup
+          ref={clusterRef}
+          chunkedLoading
+          showCoverageOnHover={false}
+          spiderfyOnMaxZoom={true}
+          removeOutsideVisibleBounds={true}
+          disableClusteringAtZoom={14}
+          maxClusterRadius={50}
+        >
+          {groups.map(({ key, group, icon }) => (
+            <ClusteredMarker
               key={key}
-              ref={(ref) => {
-                if (ref) {
-                  markerRefs.current.set(key, ref as unknown as L.CircleMarker);
-                } else {
-                  markerRefs.current.delete(key);
-                }
-              }}
-              center={[first.latitud, first.longitud]}
-              radius={radius}
-              pathOptions={{
-                fillColor: color,
-                fillOpacity: representativeDate ? 0.9 : 0.8,
-                color: representativeDate ? "#fff" : "#666",
-                weight: 1,
-              }}
-            >
-              <Popup
-                offset={[0, -5]}
-                className="mapoteca-popup"
-                maxWidth={300}
-                minWidth={200}
-                autoPan={true}
-              >
-                {popupContent}
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+              markerKey={key}
+              group={group}
+              icon={icon}
+              markerRefs={markerRefs}
+              onSpeciesClick={handleTaxonClick}
+              onColeccionClick={handleColeccionClick}
+            />
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
-
 
       {/* Leyenda de gradiente por fecha */}
       {minDate !== null && maxDate !== null && (
@@ -622,7 +683,7 @@ export default function MapotecaMap({
       {/* Contador de registros */}
       <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg">
         <span className="font-semibold text-green-700">
-          {ubicacionesVisibles.length.toLocaleString()}
+          {ubicaciones.length.toLocaleString()}
         </span>
         <span className="text-gray-600"> registros</span>
       </div>

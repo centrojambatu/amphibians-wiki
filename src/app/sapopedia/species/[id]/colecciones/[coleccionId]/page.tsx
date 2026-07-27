@@ -1,5 +1,7 @@
 import {notFound} from "next/navigation";
 
+import {createServiceClient} from "@/utils/supabase/server";
+
 import getFichaEspecie from "../../get-ficha-especie";
 import getColeccionById from "./get-coleccion-by-id";
 import {
@@ -27,6 +29,40 @@ interface PageProps {
   }>;
 }
 
+// La colección se identifica de forma única por su id. El slug del URL solo
+// se usa para el breadcrumb / back link. Si el slug no corresponde al taxón
+// real de la colección, buscamos la ficha correcta por `especie_taxon_id`.
+async function resolveFichaEspecie(
+  urlSlug: string,
+  coleccionTaxonId: number | null,
+) {
+  const decoded = decodeURIComponent(urlSlug);
+  const sanitized = /^\d+$/.test(decoded) ? decoded : decoded.replaceAll("-", " ");
+  const looksLikeSpecies = / [a-z]/.test(sanitized) || /^\d+$/.test(sanitized);
+
+  const fichaFromUrl = looksLikeSpecies ? await getFichaEspecie(sanitized) : null;
+
+  if (fichaFromUrl && (!coleccionTaxonId || fichaFromUrl.taxon_id === coleccionTaxonId)) {
+    return fichaFromUrl;
+  }
+
+  if (!coleccionTaxonId) return fichaFromUrl;
+
+  const supabase = createServiceClient();
+  const {data: match} = await (supabase as any)
+    .from("vw_ficha_especie_completa")
+    .select("nombre_cientifico")
+    .eq("especie_taxon_id", coleccionTaxonId)
+    .maybeSingle();
+
+  if (match?.nombre_cientifico) {
+    const alt = await getFichaEspecie(match.nombre_cientifico as string);
+    if (alt) return alt;
+  }
+
+  return fichaFromUrl;
+}
+
 export default async function ColeccionDetailPage({params}: PageProps) {
   const {id, coleccionId} = await params;
 
@@ -36,18 +72,15 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     notFound();
   }
 
-  // Decodificar el id de la URL (puede ser número o nombre científico)
-  const decodedId = decodeURIComponent(id);
-  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+  const coleccion = await getColeccionById(coleccionIdNum);
 
-  // Obtener la ficha de especie para validar y obtener datos (solo si parece ser una especie)
-  // Registros a nivel de género/familia/orden tienen ambas palabras capitalizadas (e.g. "Amphibia Anura")
-  const looksLikeSpecies = / [a-z]/.test(sanitizedId) || /^\d+$/.test(sanitizedId);
-  const fichaEspecie = looksLikeSpecies ? await getFichaEspecie(sanitizedId) : null;
+  if (!coleccion) {
+    notFound();
+  }
 
-  // Fetch colección y todos los datos relacionados en paralelo
+  const fichaEspecie = await resolveFichaEspecie(id, coleccion.taxon_id ?? null);
+
   const [
-    coleccion,
     cantos,
     tejidos,
     espermas,
@@ -63,7 +96,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     fotografias,
     videos,
   ] = await Promise.all([
-    getColeccionById(coleccionIdNum),
     getCantosByColeccion(coleccionIdNum),
     getTejidosByColeccion(coleccionIdNum),
     getEspermasByColeccion(coleccionIdNum),
@@ -80,38 +112,6 @@ export default async function ColeccionDetailPage({params}: PageProps) {
     getVideosByColeccion(coleccionIdNum),
   ]);
 
-  if (!coleccion) {
-    notFound();
-  }
-
-  // Validar que la colección pertenece al taxón indicado en la URL (solo si hay ficha de especie)
-  if (fichaEspecie) {
-    const taxonIdNum = fichaEspecie.taxon_id;
-    const nombreCientificoCompleto = fichaEspecie.taxones?.[0]?.taxonPadre?.taxon
-      ? `${fichaEspecie.taxones[0].taxonPadre.taxon} ${fichaEspecie.taxones[0].taxon}`
-      : fichaEspecie.taxones?.[0]?.taxon || "";
-
-    const taxonIdCoincide = coleccion.taxon_id === taxonIdNum;
-
-    if (!taxonIdCoincide) {
-      const coleccionTaxonNombre = coleccion.taxon_nombre?.toLowerCase().trim() || "";
-      const nombreCientificoLower = nombreCientificoCompleto.toLowerCase().trim();
-
-      const nombresCoinciden =
-        coleccionTaxonNombre &&
-        (coleccionTaxonNombre.includes(nombreCientificoLower) ||
-          nombreCientificoLower.includes(coleccionTaxonNombre));
-
-      if (!nombresCoinciden) {
-        notFound();
-      }
-    }
-  }
-
-  // Construir URLs de navegación
-  const especieUrl = `/sapopedia/species/${encodeURIComponent(id)}`;
-  const coleccionesUrl = `${especieUrl}/colecciones`;
-
   // Extraer taxonomía del lineage
   const lineage: any[] = (fichaEspecie as any)?.lineage ?? [];
   const orden = lineage.find((l: any) => l.rank?.rank === "Orden")?.taxon ?? null;
@@ -120,6 +120,13 @@ export default async function ColeccionDetailPage({params}: PageProps) {
   const especie = lineage.find((l: any) => l.rank?.rank === "especie")?.taxon ?? null;
   const nombreCientifico = genero && especie ? `${String(genero)} ${String(especie)}` : null;
   const nombreComun = (fichaEspecie as any)?.nombresComunes?.nombre_comun_espanol ?? null;
+
+  // URL slug preferido: nombre científico real de la ficha; fallback al slug del URL.
+  const especieSlug = nombreCientifico
+    ? nombreCientifico.replaceAll(" ", "-")
+    : id;
+  const especieUrl = `/sapopedia/species/${encodeURIComponent(especieSlug)}`;
+  const coleccionesUrl = `${especieUrl}/colecciones`;
 
   return (
     <ColeccionDetailClient
