@@ -122,6 +122,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
     fetch("/api/mapoteca/estadisticas")
       .then((r) => r.json())
       .then((data: MapStats) => {
+        if (!data || !data.provincia) return;
         applyStats(data);
         try {
           sessionStorage.setItem(STATS_KEY, JSON.stringify({data, timestamp: Date.now()}));
@@ -187,7 +188,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           onClick={() => setHistogramMode("provincias")}
         >
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-            {stats ? stats.provincia.total.toLocaleString() : "—"}
+            {stats?.provincia ? stats.provincia.total.toLocaleString() : "—"}
           </span>
           <h4
             className="mt-1 text-center"
@@ -216,7 +217,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           onClick={() => setHistogramMode("biogeografico")}
         >
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-            {stats ? stats.biogeografico.total.toLocaleString() : "—"}
+            {stats?.biogeografico ? stats.biogeografico.total.toLocaleString() : "—"}
           </span>
           <h4
             className="mt-1 text-center"
@@ -246,9 +247,11 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
         >
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-              {stats ? stats.biogeograficoEndemica.total.toLocaleString() : "—"}
+              {stats?.biogeograficoEndemica
+                ? stats.biogeograficoEndemica.total.toLocaleString()
+                : "—"}
             </span>
-            {stats && stats.biogeograficoEndemica.totalRegion > 0 && (
+            {stats?.biogeograficoEndemica && stats.biogeograficoEndemica.totalRegion > 0 && (
               <span className="text-base font-semibold sm:text-lg" style={{color: "#f07304"}}>
                 {stats.biogeograficoEndemica.porcentaje}%
               </span>
@@ -281,7 +284,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           onClick={() => setHistogramMode("ecosistema")}
         >
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-            {stats ? stats.ecosistema.total.toLocaleString() : "—"}
+            {stats?.ecosistema ? stats.ecosistema.total.toLocaleString() : "—"}
           </span>
           <h4
             className="mt-1 text-center"
@@ -310,7 +313,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           onClick={() => setHistogramMode("piso")}
         >
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-            {stats ? stats.piso.total.toLocaleString() : "—"}
+            {stats?.piso ? stats.piso.total.toLocaleString() : "—"}
           </span>
           <h4
             className="mt-1 text-center"
@@ -339,7 +342,7 @@ export default function MapotecaStats({initialStats = null}: MapotecaStatsProps 
           onClick={() => setHistogramMode("snap")}
         >
           <span className="text-center text-3xl font-bold sm:text-4xl" style={{color: "#000000"}}>
-            {stats ? stats.snap.total.toLocaleString() : "—"}
+            {stats?.snap ? stats.snap.total.toLocaleString() : "—"}
           </span>
           <h4
             className="mt-1 text-center"

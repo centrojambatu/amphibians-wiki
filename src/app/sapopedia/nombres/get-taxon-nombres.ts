@@ -1164,7 +1164,7 @@ async function getTaxonNombresRaw(idiomaId: number = 1): Promise<NombreGroup[]> 
 // Wrapper con cache por idioma. Un cache miss por idioma; los siguientes son instantáneos.
 const getTaxonNombresCached = unstable_cache(
   (idiomaId: number) => getTaxonNombresRaw(idiomaId),
-  ["get-taxon-nombres"],
+  ["get-taxon-nombres-v2"],
   {revalidate: 3600, tags: ["nombres"]},
 );
 

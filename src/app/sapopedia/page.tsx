@@ -9,6 +9,8 @@ import getFilterCatalogs from "./get-filter-catalogs";
 import getMapotecaStats from "./get-mapoteca-stats";
 import getTaxonNombres from "./nombres/get-taxon-nombres";
 
+export const revalidate = 0;
+
 export default async function SapopediaPage() {
   const [especies, filterCatalogs, ordenesNombres, mapotecaStats] = await Promise.all([
     getAllEspecies(),

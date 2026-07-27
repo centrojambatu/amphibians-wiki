@@ -3,6 +3,8 @@ import RedListContent from "@/components/RedListContent";
 import getAllEspecies from "../get-all-especies";
 import getFilterCatalogs from "../get-filter-catalogs";
 
+export const revalidate = 0;
+
 export default async function ListaRojaPage() {
   // Obtener especies y catálogos de filtros
   const [especies, filterCatalogs] = await Promise.all([getAllEspecies(), getFilterCatalogs()]);

@@ -3,6 +3,8 @@ import Link from "next/link";
 import NombresContent from "./NombresContent";
 import getTaxonNombres from "./get-taxon-nombres";
 
+export const revalidate = 0;
+
 // Mapa de idiomas disponibles para nombres comunes
 const IDIOMAS = [
   { id: 1, nombre: "Español", codigo: "ES" },

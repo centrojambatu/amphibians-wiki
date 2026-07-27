@@ -172,7 +172,7 @@ async function getFilterCatalogsRaw(): Promise<FilterCatalogs> {
 // Cacheamos 1h para evitar re-consultar en cada cambio de URL params (cada checkbox).
 const getFilterCatalogsCached = unstable_cache(
   () => getFilterCatalogsRaw(),
-  ["get-filter-catalogs"],
+  ["get-filter-catalogs-v2"],
   { revalidate: 3600, tags: ["filter-catalogs"] },
 );
 
