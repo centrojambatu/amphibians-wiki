@@ -286,13 +286,19 @@ const ClusteredMarker = memo(function ClusteredMarker({
 }) {
   const [opened, setOpened] = useState(false);
   const first = group[0];
+  const groupSize = group.length;
 
   const setRef = useCallback(
     (ref: L.Marker | null) => {
-      if (ref) markerRefs.current.set(markerKey, ref);
-      else markerRefs.current.delete(markerKey);
+      if (ref) {
+        markerRefs.current.set(markerKey, ref);
+        // Attach group size to marker options so iconCreateFunction can sum registros (not markers)
+        (ref.options as L.MarkerOptions & { groupSize?: number }).groupSize = groupSize;
+      } else {
+        markerRefs.current.delete(markerKey);
+      }
     },
-    [markerKey, markerRefs],
+    [markerKey, markerRefs, groupSize],
   );
 
   const eventHandlers = useMemo(
@@ -327,6 +333,35 @@ const ClusteredMarker = memo(function ClusteredMarker({
     </Marker>
   );
 });
+
+// Icon del cluster que suma los registros (no los markers). Los markers marcan
+// `options.groupSize` con la cantidad de registros que representan.
+function createClusterIcon(cluster: L.MarkerCluster): L.DivIcon {
+  const markers = cluster.getAllChildMarkers() as (L.Marker & {
+    options: L.MarkerOptions & { groupSize?: number };
+  })[];
+  let total = 0;
+  for (const m of markers) total += m.options.groupSize ?? 1;
+
+  let size: number;
+  let cls: string;
+  if (total < 100) {
+    size = 40;
+    cls = "marker-cluster-small";
+  } else if (total < 1000) {
+    size = 44;
+    cls = "marker-cluster-medium";
+  } else {
+    size = 48;
+    cls = "marker-cluster-large";
+  }
+
+  return L.divIcon({
+    html: `<div><span>${total.toLocaleString()}</span></div>`,
+    className: `marker-cluster ${cls}`,
+    iconSize: L.point(size, size),
+  });
+}
 
 // Cache de iconos por color+radio para no crear un divIcon por marker
 const iconCache = new Map<string, L.DivIcon>();
@@ -646,6 +681,7 @@ export default function MapotecaMap({
           removeOutsideVisibleBounds={true}
           disableClusteringAtZoom={14}
           maxClusterRadius={50}
+          iconCreateFunction={createClusterIcon}
         >
           {groups.map(({ key, group, icon }) => (
             <ClusteredMarker
