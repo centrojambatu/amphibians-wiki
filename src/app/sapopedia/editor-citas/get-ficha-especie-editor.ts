@@ -13,6 +13,7 @@ export interface FichaEspecieEditor {
   distribucion_global: string | null;
   identificacion: string | null;
   color_en_vida: string | null;
+  renacuajo: string | null;
   svl_macho: string | null;
   svl_hembra: string | null;
   peso: string | null;

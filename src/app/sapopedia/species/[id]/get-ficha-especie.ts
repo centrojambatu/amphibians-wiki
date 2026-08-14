@@ -324,6 +324,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     fichaEspecie?.dieta ?? null,
     fichaEspecie?.reproduccion ?? null,
     fichaEspecie?.color_en_vida ?? null,
+    fichaEspecie?.renacuajo ?? null,
     fichaEspecie?.agradecimiento ?? null,
     fichaEspecie?.historial ?? null,
   ];
@@ -411,6 +412,7 @@ export default async function getFichaEspecie(idFichaEspecie: string) {
     peso: fichaEspecie?.peso ?? null,
     identificacion: fichaEspecie?.identificacion ?? null,
     color_en_vida: fichaEspecie?.color_en_vida ?? null,
+    renacuajo: fichaEspecie?.renacuajo ?? null,
     habitat_biologia: fichaEspecie?.habitat_biologia ?? null,
     reproduccion: fichaEspecie?.reproduccion ?? null,
     dieta: fichaEspecie?.dieta ?? null,

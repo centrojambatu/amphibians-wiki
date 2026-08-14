@@ -25,6 +25,7 @@ export async function PUT(
       "distribucion_global",
       "identificacion",
       "color_en_vida",
+      "renacuajo",
       "svl_macho",
       "svl_hembra",
       "peso",

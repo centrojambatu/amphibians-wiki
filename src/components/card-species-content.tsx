@@ -684,6 +684,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             .join("<br />"),
         },
         {title: "Color en Vida", content: fichaEspecie.color_en_vida},
+        {title: "Renacuajo", content: fichaEspecie.renacuajo},
         {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
         {title: "Reproducción", content: fichaEspecie.reproduccion},
         {title: "Dieta", content: fichaEspecie.dieta},
@@ -1339,8 +1340,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     fichaEspecie.svl_macho || fichaEspecie.svl_hembra || fichaEspecie.peso,
                   );
                   const hasColorEnVida = Boolean(fichaEspecie.color_en_vida);
+                  const hasRenacuajo = Boolean(fichaEspecie.renacuajo);
                   const hasPriorToMorfometria = hasIdentificacion;
                   const hasPriorToColor = hasIdentificacion || hasMorfometria;
+                  const hasPriorToRenacuajo = hasPriorToColor || hasColorEnVida;
 
                   return (
                     <>
@@ -1410,6 +1413,19 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           <div
                             dangerouslySetInnerHTML={{
                               __html: procesarHTML(fichaEspecie.color_en_vida),
+                            }}
+                            suppressHydrationWarning
+                            className="text-muted-foreground text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {hasRenacuajo && (
+                        <div className={hasPriorToRenacuajo ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Renacuajo</h4>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.renacuajo),
                             }}
                             suppressHydrationWarning
                             className="text-muted-foreground text-sm"

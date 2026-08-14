@@ -71,6 +71,7 @@ const CAMPOS_FICHA = [
     label: "Color en Vida",
     tipo: "texto" as const,
   },
+  {key: "renacuajo" as const, label: "Renacuajo", tipo: "texto" as const},
   {key: "svl_macho" as const, label: "SVL Macho", tipo: "texto" as const},
   {key: "svl_hembra" as const, label: "SVL Hembra", tipo: "texto" as const},
   {key: "peso" as const, label: "Peso", tipo: "texto" as const},
