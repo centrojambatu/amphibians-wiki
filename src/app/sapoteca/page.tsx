@@ -153,7 +153,7 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
           >
             <div className="flex h-full flex-col items-center justify-center rounded-md border p-2 cursor-pointer transition-shadow hover:shadow-md" style={{ borderColor: "#dddddd" }}>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>451</span>
+                <span className="text-3xl font-bold sm:text-4xl" style={{ color: "#000000" }}>{estadisticas.publicacionMasCitada.contadorCitas.toLocaleString()}</span>
                 <span className="text-xs font-semibold" style={{ color: "#666666" }}>citas</span>
               </div>
               <h4 className="mt-1 text-center" style={{ color: "#666666", fontSize: "13px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif', fontWeight: "400" }}>
