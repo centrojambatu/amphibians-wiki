@@ -35,6 +35,13 @@ práctica un UPDATE por `taxon_id`, no un INSERT.
 - `vw_ficha_especie_conservacion` / `vw_ficha_especie_investigacion` — **las lee WordPress vía JetEngine**.
   Exponen `etimologia`, `habitat_biologia` y `taxonomia` filtradas por los flags `anfibio_conservacion` /
   `anfibio_investigacion`. Cambiar esas columnas altera el sitio de WordPress en vivo.
+- `vw_publicacion_anfibios_ecuador` — una fila por publicación de Ecuador con **un solo** `tipo`,
+  asignado por prioridad `CIENTIFICA > TESIS > DIVULGACIÓN > OTRO`. Es la que hace que los contadores
+  del panel de Sapoteca sumen el total (2.355 + 206 + 71 + 768 + 13 = 3.413).
+- `vw_publicacion_cientifica_ecuador` — Ecuador + tipo `CIENTIFICA` **o `TESIS`**. Ojo: en la interfaz
+  "científica" **excluye las tesis**, así que las cards y el histograma de Sapoteca restan los 71 ids
+  de tesis (ver `get-estadisticas-sapoteca.ts`). Sin esa resta el número no cuadra con el panel.
+  Definición SQL de estas vistas: `scripts/recreate-views-publicacion.sql`.
 
 ## Reglas críticas
 
@@ -99,10 +106,21 @@ Después, regenerar `src/types/supabase.ts`.
 
 - **El MCP de Supabase devuelve "permission denied"**. Alternativas: la service role key de
   `.env.local` vía PostgREST (los scripts de `scripts/` usan ese patrón), o el SQL Editor.
+- **PostgREST corta en 1.000 filas y no avisa**. No hay error: la consulta devuelve 200 con menos
+  datos. `.limit(5000)` **no sirve**, el servidor devuelve 1.000 igual. Hay que paginar con `.range()`
+  hasta que una página traiga menos de 1.000. Ya mordió cuatro veces: el histograma de Sapoteca,
+  `/bibliography` (mostraba 1.000 de 5.305), los filtros de Sapoteca (Científica decía 1.000 de 2.355)
+  y `get-all-especies.ts` (bloques de 200 taxones cubrían 61). Dos reglas asociadas:
+  - **Ordenar por una columna única** al paginar (`id_*`, no `nombre` ni `año`): con valores repetidos
+    la paginación salta o duplica filas.
+  - **Filtrar por una columna de un recurso embebido no reduce filas** salvo con `!inner`. Sin él,
+    `.in("catalogo_awe.tipo_catalogo_awe_id", [...])` trae igual todas las filas y solo anula el
+    embebido — se leían 12.237 filas para usar 4.864.
 - **No usar `supabase db push`**: 7 migraciones locales figuran como no aplicadas en remoto porque se
   aplicaron vía MCP con otro timestamp. Un push las re-ejecutaría todas.
-- `npx tsc --noEmit` arroja **14 errores preexistentes** (fototeca y moleculoteca). Comparar antes y
-  después, no buscar cero.
+- `npx tsc --noEmit` arroja **11 errores preexistentes** (8 en `api/fototeca/estadisticas/route.ts`,
+  3 en `moleculoteca/MoleculotecaListClient.tsx`). Comparar antes y después, no buscar cero. Con
+  ESLint igual: contar errores antes del cambio, porque hay decenas de warnings de estilo previos.
 - macOS guarda los nombres de archivo en **NFD**. Comparar nombres con acentos requiere normalizar
   Unicode o los `dict.get()` fallan silenciosamente.
 - Las columnas eliminadas en julio de 2026 siguen disponibles en `ficha_especie_backup_pre_recovery`

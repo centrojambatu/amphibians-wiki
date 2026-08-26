@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -80,6 +80,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "animacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "animacion_taxon_id_fkey"
@@ -641,6 +669,34 @@ export type Database = {
             foreignKeyName: "canto_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "canto_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "canto_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "canto_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "canto_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -1113,6 +1169,34 @@ export type Database = {
             foreignKeyName: "coleccion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -1366,6 +1450,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "coleccion_externa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_externa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "coleccion_externa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_externa_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "coleccion_externa_taxon_id_fkey"
@@ -1930,6 +2042,34 @@ export type Database = {
             foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "enlace_relacionado_taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -2221,8 +2361,10 @@ export type Database = {
           canto_destacado_id: number | null
           color_en_vida: string | null
           comentario_estatus_poblacional: string | null
+          comparacion: string | null
           criterio_eval_lrecuador: string | null
           criterio_eval_lruicn: string | null
+          descripcion_canto: string | null
           dieta: string | null
           distribucion_global: string | null
           etimologia: string | null
@@ -2234,6 +2376,7 @@ export type Database = {
           habitat_biologia: string | null
           herpnet: string | null
           historial: string | null
+          holotipo: string | null
           id_ficha_especie: number
           identificacion: string | null
           inaturalist: string | null
@@ -2248,6 +2391,7 @@ export type Database = {
           publicar: boolean
           rango_altitudinal_max: number | null
           rango_altitudinal_min: number | null
+          renacuajo: string | null
           reproduccion: string | null
           spp_similares: string | null
           svl_hembra: string | null
@@ -2274,8 +2418,10 @@ export type Database = {
           canto_destacado_id?: number | null
           color_en_vida?: string | null
           comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
           criterio_eval_lrecuador?: string | null
           criterio_eval_lruicn?: string | null
+          descripcion_canto?: string | null
           dieta?: string | null
           distribucion_global?: string | null
           etimologia?: string | null
@@ -2287,6 +2433,7 @@ export type Database = {
           habitat_biologia?: string | null
           herpnet?: string | null
           historial?: string | null
+          holotipo?: string | null
           id_ficha_especie?: number
           identificacion?: string | null
           inaturalist?: string | null
@@ -2301,6 +2448,7 @@ export type Database = {
           publicar?: boolean
           rango_altitudinal_max?: number | null
           rango_altitudinal_min?: number | null
+          renacuajo?: string | null
           reproduccion?: string | null
           spp_similares?: string | null
           svl_hembra?: string | null
@@ -2327,8 +2475,10 @@ export type Database = {
           canto_destacado_id?: number | null
           color_en_vida?: string | null
           comentario_estatus_poblacional?: string | null
+          comparacion?: string | null
           criterio_eval_lrecuador?: string | null
           criterio_eval_lruicn?: string | null
+          descripcion_canto?: string | null
           dieta?: string | null
           distribucion_global?: string | null
           etimologia?: string | null
@@ -2340,6 +2490,7 @@ export type Database = {
           habitat_biologia?: string | null
           herpnet?: string | null
           historial?: string | null
+          holotipo?: string | null
           id_ficha_especie?: number
           identificacion?: string | null
           inaturalist?: string | null
@@ -2354,6 +2505,7 @@ export type Database = {
           publicar?: boolean
           rango_altitudinal_max?: number | null
           rango_altitudinal_min?: number | null
+          renacuajo?: string | null
           reproduccion?: string | null
           spp_similares?: string | null
           svl_hembra?: string | null
@@ -2439,6 +2591,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_especie_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "ficha_especie_taxon_id_fkey"
@@ -3475,6 +3655,34 @@ export type Database = {
             foreignKeyName: "ficha_familia_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_familia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_familia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_familia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_familia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -3659,6 +3867,34 @@ export type Database = {
             foreignKeyName: "ficha_genero_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_genero_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_genero_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_genero_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_genero_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -3838,6 +4074,34 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "ficha_orden_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: true
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_orden_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: true
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "ficha_orden_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: true
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "ficha_orden_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: true
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "ficha_orden_taxon_id_fkey"
@@ -4137,6 +4401,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "fotografia_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "fotografia_taxon_id_fkey"
@@ -4686,6 +4978,34 @@ export type Database = {
             foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -4874,6 +5194,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
+            columns: ["manejo_ex_situ_taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "manejo_ex_situ_geopolitica_manejo_ex_situ_taxon_id_fkey"
@@ -5490,6 +5838,34 @@ export type Database = {
             foreignKeyName: "nombre_comun_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -5739,6 +6115,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "nombre_comun_vernaculo_taxon_id_fkey"
@@ -6896,6 +7300,34 @@ export type Database = {
             foreignKeyName: "slide_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "slide_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "slide_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "slide_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "slide_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -7220,6 +7652,34 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -7447,6 +7907,34 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -7667,6 +8155,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_geopolitica_taxon_id_fkey"
@@ -7911,6 +8427,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
@@ -8269,6 +8813,34 @@ export type Database = {
             foreignKeyName: "tipo_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "tipo_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -8538,6 +9110,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "video_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "video_taxon_id_fkey"
@@ -8907,6 +9507,42 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_ficha_especie_conservacion: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          especie: string | null
+          etimologia: string | null
+          genero: string | null
+          habitat_biologia: string | null
+          id_ficha_especie: number | null
+          id_genero: number | null
+          id_taxon: number | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          taxonomia: string | null
+        }
+        Relationships: []
+      }
+      vw_ficha_especie_investigacion: {
+        Row: {
+          autor_ano: string | null
+          en_ecuador: boolean | null
+          endemica: boolean | null
+          especie: string | null
+          etimologia: string | null
+          genero: string | null
+          habitat_biologia: string | null
+          id_ficha_especie: number | null
+          id_genero: number | null
+          id_taxon: number | null
+          nombre_cientifico: string | null
+          nombre_comun: string | null
+          taxonomia: string | null
+        }
+        Relationships: []
+      }
       vw_lista_especies: {
         Row: {
           autor_ano: string | null
@@ -8948,6 +9584,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -9126,6 +9790,34 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -9299,6 +9991,34 @@ export type Database = {
             foreignKeyName: "taxon_taxon_id_fkey"
             columns: ["id_taxon_padre"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -9467,6 +10187,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_taxon_id_fkey"
+            columns: ["id_taxon_padre"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_taxon_id_fkey"
@@ -9785,6 +10533,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "coleccion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "coleccion_taxon_id_fkey"
@@ -10391,6 +11167,34 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -10549,6 +11353,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -10717,6 +11549,34 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -10875,6 +11735,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -11043,6 +11931,34 @@ export type Database = {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -11201,6 +12117,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -11407,6 +12351,34 @@ export type Database = {
             foreignKeyName: "taxon_publicacion_taxon_id_fkey"
             columns: ["taxon_id"]
             isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_publicacion_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
             referencedRelation: "vw_lista_especies"
             referencedColumns: ["id_genero"]
           },
@@ -11566,6 +12538,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_ficha_especie_completa"
             referencedColumns: ["especie_taxon_id"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_conservacion"
+            referencedColumns: ["id_taxon"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_genero"]
+          },
+          {
+            foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
+            columns: ["taxon_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ficha_especie_investigacion"
+            referencedColumns: ["id_taxon"]
           },
           {
             foreignKeyName: "taxon_catalogo_awe_taxon_id_fkey"
@@ -12009,4 +13009,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
