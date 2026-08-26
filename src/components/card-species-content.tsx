@@ -28,13 +28,7 @@ import {
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Separator} from "./ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./ui/select";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
 
@@ -60,8 +54,6 @@ const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
     </div>
   ),
 });
-
-
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
@@ -1208,10 +1200,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       <div className={hasEtimologia ? cardSectionDivider : ""}>
                         <h4 className={cardSubsectionTitle}>
                           <a
-                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="hover:underline"
+                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
+                            rel="noopener noreferrer"
+                            target="_blank"
                           >
                             Nombres estándar
                           </a>
@@ -1432,7 +1424,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           />
                         </div>
                       )}
-
                     </>
                   );
                 })()}
@@ -2130,7 +2121,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         >
                           https://darkgray-kangaroo-476720.hostingersite.com
                         </a>
-                        . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
+                        . Centro Jambatu de Investigación y Conservación de Anfibios, Quito,
+                        Ecuador.
                       </p>
                     </CardContent>
                   </Card>
