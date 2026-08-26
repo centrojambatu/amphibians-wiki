@@ -78,29 +78,52 @@ function describeSupabaseError(err: unknown): Record<string, unknown> {
   };
 }
 
+/** PostgREST devuelve como máximo 1.000 filas por respuesta. */
+const PAGE_SIZE = 1000;
+
 /**
  * Ejecuta una query con .in(field, ids) por chunks en paralelo y une resultados.
  * Evita requests muy grandes y planes ineficientes (supabase-postgres-best-practices).
+ *
+ * Cada chunk se pagina: 200 taxones pueden traer varios miles de filas y
+ * PostgREST corta en 1.000 sin avisar, dejando taxones sin datos en silencio.
+ * Por eso `run` recibe el rango y su query debe ordenar por una columna única.
  */
 async function fetchInChunks<T>(
   ids: number[],
   chunkSize: number,
-  run: (chunk: number[]) => Promise<{ data: T[] | null; error: unknown }>,
+  run: (
+    chunk: number[],
+    desde: number,
+    hasta: number,
+  ) => Promise<{ data: T[] | null; error: unknown }>,
   label = "chunks",
 ): Promise<{ data: T[]; error: unknown }> {
   if (ids.length === 0) return { data: [], error: null };
-  if (ids.length <= chunkSize) {
-    const r = await run(ids);
 
-    if (r.error) console.error(`Error en consulta por ${label}:`, describeSupabaseError(r.error));
-
-    return { data: r.data ?? [], error: r.error };
-  }
   const chunks: number[][] = [];
   for (let i = 0; i < ids.length; i += chunkSize) {
     chunks.push(ids.slice(i, i + chunkSize));
   }
-  const results = await Promise.all(chunks.map((c) => run(c)));
+
+  const leerChunk = async (chunk: number[]) => {
+    const filas: T[] = [];
+    let offset = 0;
+
+    for (;;) {
+      const r = await run(chunk, offset, offset + PAGE_SIZE - 1);
+
+      if (r.error) return { data: filas, error: r.error };
+
+      const pagina = r.data ?? [];
+
+      filas.push(...pagina);
+      if (pagina.length < PAGE_SIZE) return { data: filas, error: null };
+      offset += PAGE_SIZE;
+    }
+  };
+
+  const results = await Promise.all(chunks.map((c) => leerChunk(c)));
   const firstError = results.find((r) => r.error)?.error ?? null;
 
   if (firstError) {
@@ -111,7 +134,7 @@ async function fetchInChunks<T>(
   }
 
   return {
-    data: results.flatMap((r) => r.data ?? []),
+    data: results.flatMap((r) => r.data),
     error: firstError,
   };
 }
@@ -122,26 +145,49 @@ export default async function getAllEspecies(
   const supabaseClient = createServiceClient();
 
   // Obtener todas las especies publicadas desde la vista completa
-  let query = (supabaseClient as any)
-    .from("vw_ficha_especie_completa")
-    .select("*")
-    .eq("publicar", true)
-    .order("nombre_cientifico", { ascending: true });
+  const crearQueryEspecies = () => {
+    let q = (supabaseClient as any)
+      .from("vw_ficha_especie_completa")
+      .select("*")
+      .eq("publicar", true)
+      .order("nombre_cientifico", { ascending: true })
+      // Desempate estable: si dos especies comparten nombre científico, sin este
+      // segundo criterio la paginación puede repetir o saltarse filas.
+      .order("especie_taxon_id", { ascending: true });
 
-  // Filtrar por familia si se proporciona
-  if (familia) {
-    query = query.eq("familia", familia);
+    // Filtrar por familia si se proporciona
+    if (familia) {
+      q = q.eq("familia", familia);
+    }
+
+    return q;
+  };
+
+  // Se pagina aunque hoy quepa en una sola respuesta: al superar las 1.000
+  // especies publicadas, PostgREST cortaría el listado sin devolver error.
+  const especies: any[] = [];
+  let offsetEspecies = 0;
+
+  for (;;) {
+    const { data, error: errorEspecies } = await crearQueryEspecies().range(
+      offsetEspecies,
+      offsetEspecies + PAGE_SIZE - 1,
+    );
+
+    if (errorEspecies) {
+      console.error("Error al obtener especies:", errorEspecies);
+
+      return [];
+    }
+
+    const pagina = (data ?? []) as unknown[];
+
+    especies.push(...pagina);
+    if (pagina.length < PAGE_SIZE) break;
+    offsetEspecies += PAGE_SIZE;
   }
 
-  const { data: especies, error: errorEspecies } = await query;
-
-  if (errorEspecies) {
-    console.error("Error al obtener especies:", errorEspecies);
-
-    return [];
-  }
-
-  if (!especies || especies.length === 0) {
+  if (especies.length === 0) {
     return [];
   }
 
@@ -178,16 +224,21 @@ export default async function getAllEspecies(
     fetchInChunks(
       taxonIds,
       CHUNK_SIZE,
-      async (chunk) => {
+      async (chunk, desde, hasta) => {
+        // `!inner` para que el filtro por tipo descarte filas de verdad: sin él
+        // PostgREST devuelve igual todos los catálogos del taxón y solo anula
+        // el embebido, multiplicando por tres las filas leídas.
         const r = await supabaseClient
           .from("taxon_catalogo_awe")
-          .select("taxon_id, catalogo_awe(nombre, sigla, tipo_catalogo_awe_id)")
+          .select("taxon_id, catalogo_awe!inner(nombre, sigla, tipo_catalogo_awe_id)")
           .in("taxon_id", chunk)
           .in("catalogo_awe.tipo_catalogo_awe_id", [
             TIPO_ECOSISTEMAS,
             TIPO_RESERVAS_BIOSFERA,
             TIPO_BOSQUES_PROTEGIDOS,
-          ]);
+          ])
+          .order("id_taxon_catalogo_awe", {ascending: true})
+          .range(desde, hasta);
 
         return {data: r.data as unknown[] | null, error: r.error};
       },
@@ -196,12 +247,14 @@ export default async function getAllEspecies(
     fetchInChunks(
       taxonIds,
       CHUNK_SIZE,
-      async (chunk) => {
+      async (chunk, desde, hasta) => {
         const r = await supabaseClient
           .from("taxon_geopolitica")
-          .select("taxon_id, geopolitica(id_geopolitica, nombre, rank_geopolitica_id)")
+          .select("taxon_id, geopolitica!inner(id_geopolitica, nombre, rank_geopolitica_id)")
           .in("taxon_id", chunk)
-          .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS);
+          .eq("geopolitica.rank_geopolitica_id", RANK_PROVINCIAS)
+          .order("id_taxon_geopolitica", {ascending: true})
+          .range(desde, hasta);
 
         return {data: r.data as unknown[] | null, error: r.error};
       },
@@ -210,13 +263,15 @@ export default async function getAllEspecies(
     fetchInChunks(
       fichaEspecieIds,
       CHUNK_SIZE,
-      async (chunk) => {
+      async (chunk, desde, hasta) => {
         const r = await supabaseClient
           .from("ficha_especie")
           .select(
             "id_ficha_especie, primeros_colectores, pluviocidad_min, pluviocidad_max, temperatura_min, temperatura_max, area_ocupacion, fotografia_destacada:fotografia_destacada_id(enlace)",
           )
-          .in("id_ficha_especie", chunk);
+          .in("id_ficha_especie", chunk)
+          .order("id_ficha_especie", {ascending: true})
+          .range(desde, hasta);
 
         return {data: r.data as unknown[] | null, error: r.error};
       },
@@ -225,11 +280,13 @@ export default async function getAllEspecies(
     fetchInChunks(
       taxonIds,
       CHUNK_SIZE,
-      async (chunk) => {
+      async (chunk, desde, hasta) => {
         const r = await (supabaseClient as any)
           .from("vw_nombres_comunes")
           .select("id_taxon, nombre_comun_ingles")
-          .in("id_taxon", chunk);
+          .in("id_taxon", chunk)
+          .order("id_taxon", {ascending: true})
+          .range(desde, hasta);
 
         return {data: r.data as unknown[] | null, error: r.error};
       },
@@ -291,7 +348,7 @@ export default async function getAllEspecies(
   // Procesar Lista Roja UICN directamente desde la vista (awe_lista_roja_uicn)
   // Esto es más eficiente y evita problemas con límites de .in()
   let especiesConUICN = 0;
-  for (const especie of especies as any[]) {
+  for (const especie of especies) {
     const taxonId = especie.especie_taxon_id as number;
     const nombreUICN = especie.awe_lista_roja_uicn as string | null;
 

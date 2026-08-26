@@ -41,7 +41,6 @@ const navLinks: NavLink[] = [
   {href: "/videoteca", label: "Videoteca"},
   {href: "/mapoteca", label: "Mapoteca"},
   {href: "/colecciones", label: "Colecciones"},
-  {href: "/moleculoteca", label: "Moleculoteca"},
   // {href: "/sapopedia/editor-citas", label: "Editor Ficha Especie"},
 ];
 
