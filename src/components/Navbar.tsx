@@ -71,7 +71,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <a
-            className="flex items-center gap-2 !no-underline hover:!no-underline"
+            className="flex shrink-0 items-center gap-2 !no-underline hover:!no-underline"
             href={SITE_HOME_URL}
             onClick={closeMenu}
             style={{textDecoration: "none"}}
@@ -80,10 +80,11 @@ export default function Navbar() {
               key={logoSrc}
               priority
               alt={logoAlt}
-              className="h-10 w-auto sm:h-12 md:h-16 lg:h-20"
+              className="h-10 w-auto shrink-0 sm:h-12 md:h-16 lg:h-20"
               height={88}
               src={logoSrc}
               width={218}
+              style={{ objectFit: "contain" }}
             />
           </a>
 
