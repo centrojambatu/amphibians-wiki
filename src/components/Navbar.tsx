@@ -51,7 +51,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const isBiobanco =
     pathname?.startsWith("/colecciones") || pathname?.startsWith("/moleculoteca");
-  const logoSrc = isBiobanco ? "/assets/logo-biobanco.png" : "/assets/logo-sapopedia.png";
+  const logoSrc = isBiobanco
+    ? "/assets/logo_biobanco_v2.jpeg"
+    : "/assets/logo_sapopedia_v2.jpeg";
   const logoAlt = isBiobanco ? "Biobanco Jambatu" : "Sapopedia Jambatu";
 
   const toggleMenu = () => setIsOpen(!isOpen);

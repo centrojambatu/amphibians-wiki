@@ -42,7 +42,7 @@ export async function GET() {
   {
     const {data} = await supabase
       .from("fotografia")
-      .select("id_fotografia, enlace, autor, fecha, taxon_id, descripción")
+      .select('id_fotografia, enlace, autor, fecha, taxon_id, descripcion:"descripción"')
       .not("fecha", "is", null)
       .order("fecha", {ascending: true})
       .limit(1)
@@ -54,7 +54,7 @@ export async function GET() {
         autor: data.autor ?? null,
         fecha: data.fecha,
         nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
-        descripcion: (data as any).descripción ?? null,
+        descripcion: data.descripcion ?? null,
       };
     }
   }
@@ -95,7 +95,7 @@ export async function GET() {
   {
     const {data} = await supabase
       .from("fotografia")
-      .select("id_fotografia, enlace, autor, taxon_id, descripción, fecha")
+      .select('id_fotografia, enlace, autor, taxon_id, descripcion:"descripción", fecha')
       .eq("destacada", true)
       .order("id_fotografia", {ascending: false})
       .limit(1)
@@ -107,7 +107,7 @@ export async function GET() {
         autor: data.autor ?? null,
         fecha: data.fecha,
         nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
-        descripcion: (data as any).descripción ?? null,
+        descripcion: data.descripcion ?? null,
       };
     }
   }
