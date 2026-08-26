@@ -21,7 +21,9 @@ export default function SapotecaPublicacionesList() {
     const p = new URLSearchParams();
     const titulos = searchParams.getAll("titulo").filter((t) => t.trim().length > 0);
     const años = searchParams.get("años");
-    const autor = searchParams.get("autor");
+    // El panel añade un parámetro `autor` por cada uno seleccionado: hay que
+    // reenviarlos todos o la API solo filtra por el primero.
+    const autores = searchParams.getAll("autor").filter((a) => a.trim().length > 0);
     const tipos = searchParams.get("tipos");
     const indexada = searchParams.get("indexada");
     const formatoImpreso = searchParams.get("formatoImpreso");
@@ -29,7 +31,7 @@ export default function SapotecaPublicacionesList() {
 
     titulos.forEach((t) => p.append("titulo", t));
     if (años) p.set("años", años);
-    if (autor) p.set("autor", autor);
+    autores.forEach((a) => p.append("autor", a));
     if (tipos) p.set("tipos", tipos);
     if (indexada) p.set("indexada", indexada);
     if (formatoImpreso) p.set("formatoImpreso", formatoImpreso);

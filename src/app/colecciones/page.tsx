@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect, useMemo, useState} from "react";
+import Link from "next/link";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {Check, RotateCcw, Search, SlidersHorizontal, X} from "lucide-react";
 
@@ -641,6 +642,19 @@ export default function ColeccionesPage() {
             className="flex flex-col justify-center rounded-md border p-2"
             style={{borderColor: "#dddddd"}}
           >
+            <Link
+              className="hover:text-gray-900"
+              href="/moleculoteca"
+              style={{
+                color: "#666666",
+                fontSize: "13px",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                fontWeight: "600",
+              }}
+            >
+              Moleculoteca
+            </Link>
             <a
               className="hover:text-gray-900"
               href="https://www.gbif.org/occurrence/search?offset=400&q=amphibia%20ecuador&taxon_key=131"

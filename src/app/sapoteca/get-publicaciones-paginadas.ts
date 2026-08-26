@@ -5,6 +5,39 @@ import type {SupabaseClient} from "@supabase/supabase-js";
 /** Máximo de IDs en un .in() para evitar URLs demasiado largas (fetch failed) */
 const MAX_IDS_IN_QUERY = 150;
 
+/** PostgREST corta la respuesta en 1.000 filas; los filtros por IDs hay que paginarlos. */
+const PAGE_SIZE_IDS = 1000;
+
+/**
+ * Recorre una query paginando hasta agotarla y devuelve todos los IDs.
+ * Sin esto un filtro con más de 1.000 coincidencias se trunca en silencio y el
+ * listado muestra menos publicaciones de las que anuncia el contador del panel.
+ */
+async function recolectarIds(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- el builder de Supabase no está tipado aquí
+  crearQuery: () => any,
+  columna: "id_publicacion" | "publicacion_id" = "id_publicacion",
+): Promise<number[]> {
+  const ids: number[] = [];
+  let offset = 0;
+
+  for (;;) {
+    const {data} = await crearQuery()
+      .order(columna, {ascending: true})
+      .range(offset, offset + PAGE_SIZE_IDS - 1);
+    const filas = (data ?? []) as Record<string, number | null>[];
+
+    for (const fila of filas) {
+      const id = fila[columna];
+
+      if (id != null) ids.push(id);
+    }
+
+    if (filas.length < PAGE_SIZE_IDS) return ids;
+    offset += PAGE_SIZE_IDS;
+  }
+}
+
 /**
  * Obtiene publicaciones paginadas con filtros.
  * Optimizado: queries de filtros en paralelo, luego query principal.
@@ -20,119 +53,117 @@ async function getPublicacionesDesdeTabla(
     publicaciones: [], total: 0, pagina: Math.floor(offset / itemsPorPagina) + 1, totalPaginas: 0, itemsPorPagina,
   };
 
-  // Ejecutar todos los filtros que generan IDs en paralelo
-  const filterPromises: Promise<number[] | null>[] = [];
+  const tiposSeleccionados = filtros?.tiposPublicacion ?? [];
+  const añosSeleccionados = filtros?.años ?? [];
+  const tieneFiltroTipo = tiposSeleccionados.length > 0;
+  const tieneFiltroAño = añosSeleccionados.length > 0;
 
-  // Filtro formato (ya resuelto como idsFormato)
-  filterPromises.push(Promise.resolve(idsFormato));
+  // Tipo y autores son las dos consultas auxiliares; el resto de filtros se
+  // resuelven como condiciones SQL en la query principal.
+  const [tiposDeCatalogo, idsAutores] = await Promise.all([
+    tieneFiltroTipo
+      ? (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- catalogo_publicaciones puede no estar en tipos generados
+          const {data} = await supabase
+            .from("catalogo_publicaciones" as any)
+            .select("tipo")
+            .in("id", tiposSeleccionados);
 
-  // Filtro tipo + año
-  const tieneFiltroTipo = filtros?.tiposPublicacion && filtros.tiposPublicacion.length > 0;
-  const tieneFiltroAño = filtros?.años && filtros.años.length > 0;
-  if (tieneFiltroTipo || tieneFiltroAño) {
-    filterPromises.push((async () => {
-      let tiposValores: string[] = [];
-      if (tieneFiltroTipo) {
-        const { data: catData } = await supabase
-          .from("catalogo_publicaciones" as any)
-          .select("tipo")
-          .in("id", filtros!.tiposPublicacion!);
-        tiposValores = [...new Set((catData ?? []).map((r: { tipo: string | null }) => (r.tipo ?? "OTRO").trim()))];
-      }
-      let qVista = supabase.from("vw_publicacion_anfibios_ecuador" as any).select("id_publicacion");
-      if (tiposValores.length > 0) qVista = qVista.in("tipo", tiposValores);
-      if (tieneFiltroAño) {
-        const años = filtros!.años!;
-        // Si los años son contiguos (rango del slider), usar BETWEEN para evitar IN gigante.
-        const ordenados = [...años].sort((a, b) => a - b);
-        const esContiguo =
-          ordenados.length > 1 &&
-          ordenados.every((y, i) => i === 0 || y === ordenados[i - 1] + 1);
+          return [
+            ...new Set(
+              ((data ?? []) as unknown as {tipo: string | null}[]).map((r) =>
+                (r.tipo ?? "OTRO").trim(),
+              ),
+            ),
+          ];
+        })()
+      : Promise.resolve(null),
+    // Filtro autores (múltiples vía checkbox).
+    // Se busca en `vw_publicacion_completa.autores_nombres` con `ilike` — un autor coincide
+    // si cualquiera de los términos seleccionados aparece en el string de autores.
+    filtros?.autores && filtros.autores.length > 0
+      ? (async () => {
+          const terminos = (filtros.autores ?? [])
+            .map((a) => a.trim())
+            .filter((a) => a.length > 0);
 
-        if (esContiguo) {
-          qVista = qVista
-            .gte("numero_publicacion_ano", ordenados[0])
-            .lte("numero_publicacion_ano", ordenados[ordenados.length - 1]);
-        } else {
-          qVista = qVista.in("numero_publicacion_ano", años);
-        }
-      }
-      const { data } = await qVista;
-      return (data ?? []).map((r: { id_publicacion: number }) => r.id_publicacion);
-    })());
-  } else {
-    filterPromises.push(Promise.resolve(null));
-  }
+          if (terminos.length === 0) return null;
 
-  // Filtro indexada
+          // Ejecutar una ilike por autor y unir los IDs (semántica OR).
+          const resultados = await Promise.all(
+            terminos.map((termino) =>
+              recolectarIds(() =>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
+                (supabase.from("vw_publicacion_completa" as any) as any)
+                  .select("id_publicacion")
+                  .ilike("autores_nombres", `%${termino}%`),
+              ),
+            ),
+          );
+
+          return [...new Set(resultados.flat())];
+        })()
+      : Promise.resolve(null),
+  ]);
+
+  // "Indexada" describe solo al universo científico, sin tesis, igual que la
+  // card de estadísticas; se cruza con los tipos marcados en el panel.
+  let tiposValores = tiposDeCatalogo;
+
   if (filtros?.indexada !== undefined) {
-    filterPromises.push((async () => {
-      let q = supabase.from("vw_publicacion_cientifica_ecuador" as any).select("id_publicacion");
-      if (filtros!.indexada) q = q.eq("indexada", true);
-      else q = q.or("indexada.eq.false,indexada.is.null");
-      const { data } = await q;
-      return (data ?? []).map((r: { id_publicacion: number }) => r.id_publicacion);
-    })());
-  } else {
-    filterPromises.push(Promise.resolve(null));
+    const cientificos = ["CIENTIFICA"];
+
+    tiposValores =
+      tiposValores === null
+        ? cientificos
+        : tiposValores.filter((t) => cientificos.includes(t));
   }
+  if (tiposValores !== null && tiposValores.length === 0) return emptyResult;
 
-  // Filtro autores (múltiples vía checkbox).
-  // Se busca en `vw_publicacion_completa.autores_nombres` con `ilike` — un autor coincide
-  // si cualquiera de los términos seleccionados aparece en el string de autores.
-  if (filtros?.autores && filtros.autores.length > 0) {
-    filterPromises.push((async () => {
-      const terminos = filtros!.autores!
-        .map((a) => a.trim())
-        .filter((a) => a.length > 0);
-
-      if (terminos.length === 0) return null;
-
-      // Ejecutar una ilike por autor y unir los IDs (semántica OR).
-      const resultados = await Promise.all(
-        terminos.map(async (termino) => {
-          const patron = `%${termino}%`;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
-          const {data} = await (supabase.from("vw_publicacion_completa" as any) as any)
-            .select("id_publicacion")
-            .ilike("autores_nombres", patron)
-            .limit(5000);
-
-          return (data ?? [])
-            .map((r: {id_publicacion: number | null}) => r.id_publicacion)
-            .filter((id: number | null): id is number => id != null) as number[];
-        }),
-      );
-
-      return [...new Set(resultados.flat())];
-    })());
-  } else {
-    filterPromises.push(Promise.resolve(null));
-  }
-
-  // Ejecutar todos los filtros en paralelo
-  const filterResults = await Promise.all(filterPromises);
-
-  // Intersectar todos los conjuntos de IDs
+  // Intersectar los conjuntos de IDs que sí hay que resolver aparte
   let idsFiltro: number[] | null = null;
-  for (const ids of filterResults) {
+
+  for (const ids of [idsFormato, idsAutores]) {
     if (ids === null) continue;
     if (ids.length === 0) return emptyResult;
     if (idsFiltro === null) {
       idsFiltro = ids;
     } else {
       const setF = new Set(ids);
+
       idsFiltro = idsFiltro.filter((id) => setF.has(id));
       if (idsFiltro.length === 0) return emptyResult;
     }
   }
 
-  // Query principal paginada
+  // Query principal paginada sobre la vista: tiene las mismas columnas que la
+  // tabla más `tipo`, así que tipo/año/indexada se filtran en SQL en vez de con
+  // listas de IDs (PostgREST las truncaba en 1.000 y el listado mentía).
   let q = supabase
-    .from("publicacion")
-    .select("id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha", { count: "exact" })
-    .eq("anfibios_ecuador", true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- la vista no está en los tipos generados
+    .from("vw_publicacion_anfibios_ecuador" as any)
+    .select(
+      "id_publicacion, titulo, titulo_secundario, cita_corta, cita, cita_larga, numero_publicacion_ano, fecha, tipo",
+      { count: "exact" },
+    );
 
+  if (tiposValores !== null) q = q.in("tipo", tiposValores);
+  if (tieneFiltroAño) {
+    const años = añosSeleccionados;
+    // Si los años son contiguos (rango del slider), usar BETWEEN para evitar IN gigante.
+    const ordenados = [...años].sort((a, b) => a - b);
+    const esContiguo =
+      ordenados.length > 1 &&
+      ordenados.every((y, i) => i === 0 || y === ordenados[i - 1] + 1);
+
+    if (esContiguo) {
+      q = q
+        .gte("numero_publicacion_ano", ordenados[0])
+        .lte("numero_publicacion_ano", ordenados[ordenados.length - 1]);
+    } else {
+      q = q.in("numero_publicacion_ano", años);
+    }
+  }
   if (filtros?.titulos && filtros.titulos.length > 0) {
     q = q.in("titulo", filtros.titulos);
   }
@@ -162,16 +193,15 @@ async function getPublicacionesDesdeTabla(
   const totalPaginas = Math.ceil(total / itemsPorPagina);
   const publicacionIds = rows.map((r: { id_publicacion: number }) => r.id_publicacion);
 
-  // Obtener tipos y enlaces en paralelo
-  const [tipoData, enlacesData] = await Promise.all([
-    publicacionIds.length > 0
-      ? supabase.from("vw_publicacion_anfibios_ecuador" as any).select("id_publicacion, tipo").in("id_publicacion", publicacionIds.slice(0, MAX_IDS_IN_QUERY)).then((r) => r.data)
-      : Promise.resolve(null),
-    supabase.from("publicacion_enlace").select("publicacion_id, enlace").in("publicacion_id", publicacionIds).neq("enlace", "http://").neq("enlace", "").not("enlace", "is", null).order("id_publicacion_enlace", {ascending: true}).then((r) => r.data),
-  ]);
-
-  const tipoMap = new Map<number, string>();
-  (tipoData ?? []).forEach((r: { id_publicacion: number; tipo: string }) => tipoMap.set(r.id_publicacion, r.tipo));
+  // El tipo ya viene en cada fila de la vista; solo faltan los enlaces.
+  const {data: enlacesData} = await supabase
+    .from("publicacion_enlace")
+    .select("publicacion_id, enlace")
+    .in("publicacion_id", publicacionIds)
+    .neq("enlace", "http://")
+    .neq("enlace", "")
+    .not("enlace", "is", null)
+    .order("id_publicacion_enlace", {ascending: true});
 
   const enlacesMap = new Map<number, string>();
   const totalEnlacesMap = new Map<number, number>();
@@ -194,7 +224,7 @@ async function getPublicacionesDesdeTabla(
       slug: generatePublicacionSlug(pub.cita_corta as string | null, año, pub.titulo as string, pub.id_publicacion as number),
       total_enlaces: totalEnlacesMap.get(Number(pub.id_publicacion)) ?? null,
       primer_enlace: enlacesMap.get(Number(pub.id_publicacion)) ?? null,
-      tipo: tipoMap.get(Number(pub.id_publicacion)) ?? undefined,
+      tipo: (pub.tipo as string | null) ?? undefined,
     };
   });
 
@@ -253,7 +283,9 @@ export default async function getPublicacionesPaginadas(
 
   // Impresas/web: IDs de publicaciones divulgación con ese formato
   let idsFormato: number[] | null = null;
-  if (filtros?.formatoImpreso !== undefined) {
+  const formatoImpreso = filtros?.formatoImpreso;
+
+  if (formatoImpreso !== undefined) {
     const {data: catDivulgacion} = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- catalogo_publicaciones puede no estar en tipos generados
       .from("catalogo_publicaciones" as any)
@@ -263,20 +295,25 @@ export default async function getPublicacionesPaginadas(
       (r) => r.id,
     );
 
-    const {data: pcaDivulgacion} = await supabaseClient
-      .from("publicacion_catalogo_awe")
-      .select("publicacion_id")
-      .in("catalogo_publicaciones_id", idsCatDivulgacion);
-    const setDivulgacion = new Set(
-      (pcaDivulgacion ?? []).map((r: { publicacion_id: number }) => r.publicacion_id),
-    );
+    const [idsDivulgacion, idsConFormato] = await Promise.all([
+      recolectarIds(
+        () =>
+          supabaseClient
+            .from("publicacion_catalogo_awe")
+            .select("publicacion_id")
+            .in("catalogo_publicaciones_id", idsCatDivulgacion),
+        "publicacion_id",
+      ),
+      recolectarIds(() =>
+        supabaseClient
+          .from("publicacion")
+          .select("id_publicacion")
+          .eq("anfibios_ecuador", true)
+          .eq("formato_impreso", formatoImpreso),
+      ),
+    ]);
+    const setDivulgacion = new Set(idsDivulgacion);
 
-    const {data: rowsFormato} = await supabaseClient
-      .from("publicacion")
-      .select("id_publicacion")
-      .eq("anfibios_ecuador", true)
-      .eq("formato_impreso", filtros.formatoImpreso);
-    const idsConFormato = rowsFormato?.map((r) => r.id_publicacion) ?? [];
     idsFormato = idsConFormato.filter((id) => setDivulgacion.has(id));
 
     if (idsFormato.length === 0) {

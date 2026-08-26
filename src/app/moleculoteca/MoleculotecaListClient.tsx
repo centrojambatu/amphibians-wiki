@@ -548,7 +548,7 @@ export default function MoleculotecaListClient() {
                       {/* Chips con label en mobile — muestra qué muestras tiene la especie */}
                       <div className="flex flex-wrap gap-1 lg:hidden">
                         {MUESTRA_FIELDS.map((field) => {
-                          const value = (t as Record<string, unknown>)[field.count] as number;
+                          const value = t[field.count];
 
                           if (!(value > 0)) return null;
 
@@ -572,7 +572,7 @@ export default function MoleculotecaListClient() {
                         )}
                         {/* Sin datos: mensaje discreto */}
                         {!MUESTRA_FIELDS.some(
-                          (f) => ((t as Record<string, unknown>)[f.count] as number) > 0,
+                          (f) => t[f.count] > 0,
                         ) &&
                           t.count_genbank === 0 && (
                             <span className="text-[10px] italic text-gray-400">Sin muestras</span>
@@ -589,7 +589,7 @@ export default function MoleculotecaListClient() {
                           style={{gridTemplateColumns: `repeat(${String(MUESTRA_FIELDS.length)}, minmax(0, 1fr))`}}
                         >
                           {MUESTRA_FIELDS.map((field) => {
-                            const value = (t as Record<string, unknown>)[field.count] as number;
+                            const value = t[field.count];
                             const active = value > 0;
 
                             if (!active) {

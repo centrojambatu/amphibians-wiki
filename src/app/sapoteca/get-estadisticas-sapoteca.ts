@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/utils/supabase/server";
+import {createServiceClient} from "@/utils/supabase/server";
 
 export interface PublicacionMasCitada {
   idPublicacion: number;
@@ -29,64 +29,136 @@ export interface EstadisticasSapoteca {
 }
 
 /**
- * Obtiene las estadísticas de la biblioteca usando la vista materializada.
- * Una sola query para todos los conteos + 2 queries para más citada y más reciente.
+ * Conteos en vivo de las cards de Biblioteca.
+ * Científicas = Ecuador + tipo CIENTIFICA, sin tesis (la vista incluye ambos).
  */
 export default async function getEstadisticasSapoteca(): Promise<EstadisticasSapoteca> {
   const supabase = createServiceClient();
+  const añoActual = new Date().getFullYear();
+  const añoInicioDecada = añoActual - 9;
 
-  // 3 queries en paralelo en vez de 12+ secuenciales
-  const [statsResult, masCitadaResult, masRecienteResult] = await Promise.all([
-    // 1. Todos los conteos desde la vista materializada (1 query)
-    (supabase as any)
-      .from("mv_sapoteca_stats")
-      .select("*")
-      .single(),
-    // 2. Publicación más citada
-    (supabase as any)
-      .from("vw_publicacion_cientifica_ecuador")
-      .select("id_publicacion, titulo, contador_citas")
+  const {data: catDivulgacion} = await supabase
+    .from("catalogo_publicaciones" as never)
+    .select("id")
+    .eq("tipo", "DIVULGACIÓN");
+  const idsCatDivulgacion = ((catDivulgacion ?? []) as {id: number}[]).map((r) => r.id);
+
+  // La vista incluye CIENTIFICA y TESIS. Las tesis se excluyen de estas cards
+  // para que el número cuadre con la sección "Científica" del panel de filtros
+  // (ninguna publicación tiene ambos tipos, así que restarlas es exacto).
+  const {data: tesisRows} = await supabase
+    .from("vw_publicacion_anfibios_ecuador" as never)
+    .select("id_publicacion")
+    .eq("tipo", "TESIS");
+  const idsTesis = ((tesisRows ?? []) as unknown as {id_publicacion: number}[]).map(
+    (r) => r.id_publicacion,
+  );
+  const listaTesis = idsTesis.length > 0 ? `(${idsTesis.join(",")})` : null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- el builder no está tipado para la vista
+  const sinTesis = (q: any) =>
+    listaTesis ? q.not("id_publicacion", "in", listaTesis) : q;
+
+  const cientifica = () =>
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("*", {count: "exact", head: true}),
+    );
+
+  const [
+    cientificasRes,
+    divulgacionRes,
+    indexadasRes,
+    noIndexadasRes,
+    decadaRes,
+    anioActualRes,
+    taxonomiaRes,
+    evolucionRes,
+    ecologiaRes,
+    conservacionRes,
+    masCitadaResult,
+    masRecienteResult,
+  ] = await Promise.all([
+    cientifica(),
+    idsCatDivulgacion.length === 0
+      ? Promise.resolve({count: 0})
+      : supabase
+          .from("publicacion")
+          .select("id_publicacion, publicacion_catalogo_awe!inner(catalogo_publicaciones_id)", {
+            count: "exact",
+            head: true,
+          })
+          .eq("anfibios_ecuador", true)
+          .in("publicacion_catalogo_awe.catalogo_publicaciones_id", idsCatDivulgacion),
+    cientifica().eq("indexada", true),
+    cientifica().or("indexada.eq.false,indexada.is.null"),
+    cientifica()
+      .gte("numero_publicacion_ano", añoInicioDecada)
+      .lte("numero_publicacion_ano", añoActual),
+    cientifica().eq("numero_publicacion_ano", añoActual),
+    cientifica().eq("rel_taxonomia", true),
+    cientifica().eq("rel_evolucion", true),
+    cientifica().eq("rel_ecologia", true),
+    cientifica().eq("rel_conservacion", true),
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("id_publicacion, titulo, contador_citas"),
+    )
       .gt("contador_citas", 0)
-      .order("contador_citas", { ascending: false })
+      .order("contador_citas", {ascending: false})
       .limit(1)
-      .single(),
-    // 3. Publicación más reciente
-    (supabase as any)
-      .from("vw_publicacion_cientifica_ecuador")
-      .select("id_publicacion, titulo, numero_publicacion_ano, fecha")
-      .order("numero_publicacion_ano", { ascending: false, nullsFirst: false })
+      .maybeSingle(),
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("id_publicacion, titulo, numero_publicacion_ano, fecha"),
+    )
+      .order("numero_publicacion_ano", {ascending: false, nullsFirst: false})
+      .order("fecha", {ascending: false, nullsFirst: false})
+      .order("id_publicacion", {ascending: false})
       .limit(1)
-      .single(),
+      .maybeSingle(),
   ]);
 
-  const stats = statsResult.data as any;
+  const totalUltimaDecada = decadaRes.count ?? 0;
+  const promedioUltimaDecada =
+    totalUltimaDecada > 0 ? Math.round(totalUltimaDecada / 10) : 0;
 
-  const totalUltimaDecada = stats?.total_ultima_decada ?? 0;
-  const promedioUltimaDecada = totalUltimaDecada > 0 ? Math.round(totalUltimaDecada / 10) : 0;
+  const masCitada = masCitadaResult.data as {
+    id_publicacion: number;
+    titulo: string;
+    contador_citas: number;
+  } | null;
+  const masReciente = masRecienteResult.data as {
+    id_publicacion: number;
+    titulo: string;
+  } | null;
 
-  // Obtener enlaces para más citada y más reciente en paralelo
-  const masCitada = masCitadaResult.data as { id_publicacion: number; titulo: string; contador_citas: number } | null;
-  const masReciente = masRecienteResult.data as { id_publicacion: number; titulo: string } | null;
+  const enlaceIds = [masCitada?.id_publicacion, masReciente?.id_publicacion].filter(
+    Boolean,
+  ) as number[];
 
-  const enlaceIds = [masCitada?.id_publicacion, masReciente?.id_publicacion].filter(Boolean) as number[];
+  const enlacesMap = new Map<number, string>();
 
-  let enlacesMap = new Map<number, string>();
   if (enlaceIds.length > 0) {
-    const { data: enlacesData } = await supabase
+    const {data: enlacesData} = await supabase
       .from("publicacion_enlace")
       .select("publicacion_id, enlace")
       .in("publicacion_id", enlaceIds)
       .neq("enlace", "")
       .neq("enlace", "http://")
       .not("enlace", "is", null)
-      .order("id_publicacion_enlace", { ascending: true });
+      .order("id_publicacion_enlace", {ascending: true});
 
-    for (const e of (enlacesData ?? []) as { publicacion_id: number; enlace: string }[]) {
+    for (const e of (enlacesData ?? []) as {publicacion_id: number; enlace: string}[]) {
       if (!enlacesMap.has(e.publicacion_id)) enlacesMap.set(e.publicacion_id, e.enlace);
     }
   }
 
   let publicacionMasCitada: PublicacionMasCitada | null = null;
+
   if (masCitada?.titulo && masCitada?.contador_citas) {
     publicacionMasCitada = {
       idPublicacion: masCitada.id_publicacion,
@@ -97,6 +169,7 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
   }
 
   let publicacionCientificaMasReciente: PublicacionCientificaMasReciente | null = null;
+
   if (masReciente?.id_publicacion && masReciente?.titulo) {
     publicacionCientificaMasReciente = {
       idPublicacion: masReciente.id_publicacion,
@@ -106,16 +179,16 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
   }
 
   return {
-    totalCientificas: stats?.total_cientificas ?? 0,
-    totalDivulgacion: stats?.total_divulgacion ?? 0,
-    totalIndexadas: stats?.total_indexadas ?? 0,
-    totalNoIndexadas: stats?.total_no_indexadas ?? 0,
+    totalCientificas: cientificasRes.count ?? 0,
+    totalDivulgacion: divulgacionRes.count ?? 0,
+    totalIndexadas: indexadasRes.count ?? 0,
+    totalNoIndexadas: noIndexadasRes.count ?? 0,
     promedioUltimaDecada,
-    publicacionesAnioActual: stats?.publicaciones_anio_actual ?? 0,
-    totalTaxonomia: stats?.total_taxonomia ?? 0,
-    totalEvolucion: stats?.total_evolucion ?? 0,
-    totalEcologia: stats?.total_ecologia ?? 0,
-    totalConservacion: stats?.total_conservacion ?? 0,
+    publicacionesAnioActual: anioActualRes.count ?? 0,
+    totalTaxonomia: taxonomiaRes.count ?? 0,
+    totalEvolucion: evolucionRes.count ?? 0,
+    totalEcologia: ecologiaRes.count ?? 0,
+    totalConservacion: conservacionRes.count ?? 0,
     publicacionMasCitada,
     publicacionCientificaMasReciente,
   };

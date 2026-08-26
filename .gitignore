@@ -44,3 +44,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Reportes generados por los scripts de carga
+scripts/output/

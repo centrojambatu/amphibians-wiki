@@ -3,7 +3,7 @@
 import {useMemo, useState} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import {Camera, Download, MapPin, Video, Volume2} from "lucide-react";
+import {Camera, Download, Mars, MapPin, Venus, Video, Volume2} from "lucide-react";
 import jsPDF from "jspdf";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -28,13 +28,7 @@ import {
 import {Button} from "./ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Separator} from "./ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./ui/select";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
 
@@ -60,8 +54,6 @@ const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
     </div>
   ),
 });
-
-
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
@@ -671,21 +663,34 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       const sections = [
         {title: "Primer(os) colector(es)", content: fichaEspecie.primeros_colectores},
         {title: "Etimología", content: fichaEspecie.etimologia},
-        {title: "Taxonomía", content: fichaEspecie.taxonomia},
+        {
+          title: "Taxonomía",
+          // El holotipo va sin título propio, como entradilla del texto de
+          // taxonomía, igual que en la ficha.
+          content: [fichaEspecie.holotipo, fichaEspecie.taxonomia]
+            .filter(Boolean)
+            .join("<br /><br />"),
+        },
         {title: "Identificación", content: fichaEspecie.identificacion},
         {
           title: "Morfometría",
           content: [
-            fichaEspecie.svl_macho && `Longitud rostro-cloacal ♂: ${fichaEspecie.svl_macho}`,
-            fichaEspecie.svl_hembra && `Longitud rostro-cloacal ♀: ${fichaEspecie.svl_hembra}`,
+            // En el PDF van con palabra: jsPDF usa WinAnsi y no tiene glifo para ♂/♀.
+            fichaEspecie.svl_macho && `Longitud rostro-cloacal (macho): ${fichaEspecie.svl_macho}`,
+            fichaEspecie.svl_hembra &&
+              `Longitud rostro-cloacal (hembra): ${fichaEspecie.svl_hembra}`,
             fichaEspecie.peso && `Peso: ${fichaEspecie.peso}`,
           ]
             .filter(Boolean)
             .join("<br />"),
         },
         {title: "Color en Vida", content: fichaEspecie.color_en_vida},
+        {title: "Comparación", content: fichaEspecie.comparacion},
+        {title: "Especies Similares", content: fichaEspecie.spp_similares},
+        {title: "Renacuajo", content: fichaEspecie.renacuajo},
         {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
         {title: "Reproducción", content: fichaEspecie.reproduccion},
+        {title: "Canto", content: fichaEspecie.descripcion_canto},
         {title: "Dieta", content: fichaEspecie.dieta},
         {
           title: "Comentario Estatus Poblacional",
@@ -1141,13 +1146,13 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </CardContent>
               </Card>
             )}
-            {/* Primer(os) colector(es) */}
-            <Card className="gap-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fichaEspecie.primeros_colectores ? (
+            {/* Primer(os) colector(es) — solo si hay contenido */}
+            {fichaEspecie.primeros_colectores && (
+              <Card className="gap-0">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Primer(os) colector(es)</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div
                     dangerouslySetInnerHTML={{
                       __html: procesarHTML(fichaEspecie.primeros_colectores),
@@ -1155,11 +1160,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     suppressHydrationWarning
                     className="text-muted-foreground text-sm"
                   />
-                ) : (
-                  <p className="text-muted-foreground text-sm">No disponible</p>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
             {/* Nombres (etimología, estándar y vernáculos) */}
             {(() => {
               const nc = fichaEspecie.nombresComunes;
@@ -1207,10 +1210,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                       <div className={hasEtimologia ? cardSectionDivider : ""}>
                         <h4 className={cardSubsectionTitle}>
                           <a
-                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="hover:underline"
+                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
+                            rel="noopener noreferrer"
+                            target="_blank"
                           >
                             Nombres estándar
                           </a>
@@ -1314,6 +1317,17 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 <CardTitle className="text-base">Taxonomía y relaciones filogenéticas</CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Holotipo: sin título ni divisor, se lee como entradilla de la taxonomía */}
+                {fichaEspecie.holotipo && (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.holotipo),
+                    }}
+                    suppressHydrationWarning
+                    className="text-muted-foreground mb-2 text-sm"
+                  />
+                )}
+
                 {fichaEspecie.taxonomia ? (
                   <div
                     dangerouslySetInnerHTML={{
@@ -1339,8 +1353,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     fichaEspecie.svl_macho || fichaEspecie.svl_hembra || fichaEspecie.peso,
                   );
                   const hasColorEnVida = Boolean(fichaEspecie.color_en_vida);
+                  const hasComparacion = Boolean(fichaEspecie.comparacion);
+                  const hasSppSimilares = Boolean(fichaEspecie.spp_similares);
                   const hasPriorToMorfometria = hasIdentificacion;
                   const hasPriorToColor = hasIdentificacion || hasMorfometria;
+                  const hasPriorToComparacion = hasPriorToColor || hasColorEnVida;
+                  const hasPriorToSppSimilares = hasPriorToComparacion || hasComparacion;
 
                   return (
                     <>
@@ -1360,8 +1378,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           <div className="space-y-1.5">
                             {fichaEspecie.svl_macho && (
                               <div className="flex flex-wrap items-baseline gap-x-2">
-                                <span className="text-muted-foreground text-xs font-medium">
-                                  Longitud rostro-cloacal ♂:
+                                <span className="text-muted-foreground inline-flex items-center gap-1 text-xs font-medium">
+                                  Longitud rostro-cloacal
+                                  <Mars aria-label="macho" className="h-3.5 w-3.5 shrink-0" />:
                                 </span>
                                 <span
                                   dangerouslySetInnerHTML={{
@@ -1374,8 +1393,9 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             )}
                             {fichaEspecie.svl_hembra && (
                               <div className="flex flex-wrap items-baseline gap-x-2">
-                                <span className="text-muted-foreground text-xs font-medium">
-                                  Longitud rostro-cloacal ♀:
+                                <span className="text-muted-foreground inline-flex items-center gap-1 text-xs font-medium">
+                                  Longitud rostro-cloacal
+                                  <Venus aria-label="hembra" className="h-3.5 w-3.5 shrink-0" />:
                                 </span>
                                 <span
                                   dangerouslySetInnerHTML={{
@@ -1417,17 +1437,62 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         </div>
                       )}
 
+                      {hasComparacion && (
+                        <div className={hasPriorToComparacion ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Comparación</h4>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.comparacion),
+                            }}
+                            suppressHydrationWarning
+                            className="text-muted-foreground text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {hasSppSimilares && (
+                        <div className={hasPriorToSppSimilares ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Especies similares</h4>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.spp_similares),
+                            }}
+                            suppressHydrationWarning
+                            className="text-muted-foreground text-sm"
+                          />
+                        </div>
+                      )}
+
                     </>
                   );
                 })()}
               </CardContent>
             </Card>
+            {/* Renacuajo — card propia, solo si hay contenido */}
+            {fichaEspecie.renacuajo && (
+              <Card className="gap-0">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Renacuajo</CardTitle>
+                  <hr className="mt-2 border-t border-gray-200" />
+                </CardHeader>
+                <CardContent>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: procesarHTML(fichaEspecie.renacuajo),
+                    }}
+                    suppressHydrationWarning
+                    className="text-muted-foreground text-sm"
+                  />
+                </CardContent>
+              </Card>
+            )}
             {/* Historia Natural */}
             <Card className="">
               <CardContent>
                 {(() => {
                   const hasHabitat = Boolean(fichaEspecie.habitat_biologia);
                   const hasReproduccion = Boolean(fichaEspecie.reproduccion);
+                  const hasCanto = Boolean(fichaEspecie.descripcion_canto);
                   const hasDieta = Boolean(fichaEspecie.dieta);
 
                   return (
@@ -1458,8 +1523,25 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         </div>
                       )}
 
-                      {hasDieta && (
+                      {hasCanto && (
                         <div className={hasHabitat || hasReproduccion ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Canto</h4>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: procesarHTML(fichaEspecie.descripcion_canto),
+                            }}
+                            suppressHydrationWarning
+                            className="text-muted-foreground text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {hasDieta && (
+                        <div
+                          className={
+                            hasHabitat || hasReproduccion || hasCanto ? cardSectionDivider : ""
+                          }
+                        >
                           <h4 className={cardSubsectionTitle}>Dieta</h4>
                           <div
                             dangerouslySetInnerHTML={{
@@ -1699,6 +1781,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             <Card className="scroll-mt-24 gap-0" id="conservacion">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Conservación</CardTitle>
+                <hr className="mt-2 border-t border-gray-200" />
               </CardHeader>
               <CardContent>
                 <>
@@ -2104,8 +2187,14 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <Card className="gap-0">
                     <CardContent className="py-3">
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Coloma, L. A. {anoActualizacion}. Anfibios Ecuador: Referencia en línea.
-                        Version 1.0. ({today}) Base de datos electrónica en{" "}
+                        Coloma, L. A. {anoActualizacion}.{" "}
+                        {nombreCientificoMain && (
+                          <>
+                            <i>{nombreCientificoMain}</i>.{" "}
+                          </>
+                        )}
+                        Anfibios Ecuador: Referencia en línea. Version 1.0. ({today}) Base de
+                        datos electrónica en{" "}
                         <a
                           className="processed-link"
                           href="https://darkgray-kangaroo-476720.hostingersite.com"
@@ -2114,7 +2203,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         >
                           https://darkgray-kangaroo-476720.hostingersite.com
                         </a>
-                        . Centro Jambatu de investigación y conservación de anfibios, Quito, Ecuador.
+                        . Centro Jambatu de Investigación y Conservación de Anfibios, Quito,
+                        Ecuador.
                       </p>
                     </CardContent>
                   </Card>
@@ -2255,7 +2345,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </section>
 
               {/* Divisor entre sección de Colecciones y la de Recursos (Fototeca/Audioteca/Videoteca) */}
-              <hr className="my-5 border-t border-gray-200" />
+              <hr className="my-5 border-t border-[#f07304]" />
 
               {/* Recursos */}
               <section>
@@ -2335,7 +2425,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               </section>
 
               {/* Divisor entre Recursos (Fototeca/Audioteca/Videoteca/Mapoteca) y Fuentes Externas */}
-              <hr className="my-5 border-t border-gray-200" />
+              <hr className="my-5 border-t border-[#f07304]" />
 
               {/* Fuentes Externas */}
               <section>
@@ -2447,7 +2537,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               {Array.isArray(fichaEspecie.enlacesRelacionados) &&
                 fichaEspecie.enlacesRelacionados.length > 0 && (
                   <>
-                    <hr className="my-5 border-t border-gray-200" />
+                    <hr className="my-5 border-t border-[#f07304]" />
                     <section>
                       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-1">
                         {fichaEspecie.enlacesRelacionados.map((enlace: any) => (

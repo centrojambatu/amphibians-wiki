@@ -49,6 +49,7 @@ const CAMPOS_FICHA = [
     tipo: "texto" as const,
   },
   {key: "etimologia" as const, label: "Etimología", tipo: "texto" as const},
+  {key: "holotipo" as const, label: "Holotipo", tipo: "texto" as const},
   {key: "taxonomia" as const, label: "Taxonomía", tipo: "texto" as const},
   {
     key: "habitat_biologia" as const,
@@ -62,6 +63,11 @@ const CAMPOS_FICHA = [
     tipo: "texto" as const,
   },
   {
+    key: "descripcion_canto" as const,
+    label: "Canto",
+    tipo: "texto" as const,
+  },
+  {
     key: "identificacion" as const,
     label: "Identificación",
     tipo: "texto" as const,
@@ -71,6 +77,17 @@ const CAMPOS_FICHA = [
     label: "Color en Vida",
     tipo: "texto" as const,
   },
+  {
+    key: "comparacion" as const,
+    label: "Comparación",
+    tipo: "texto" as const,
+  },
+  {
+    key: "spp_similares" as const,
+    label: "Especies similares",
+    tipo: "texto" as const,
+  },
+  {key: "renacuajo" as const, label: "Renacuajo", tipo: "texto" as const},
   {key: "svl_macho" as const, label: "SVL Macho", tipo: "texto" as const},
   {key: "svl_hembra" as const, label: "SVL Hembra", tipo: "texto" as const},
   {key: "peso" as const, label: "Peso", tipo: "texto" as const},

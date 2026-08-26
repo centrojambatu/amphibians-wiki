@@ -27,7 +27,7 @@ export default function SapotecaContentLayout({
   const searchParams = useSearchParams();
   const activeFilterCount = [
     searchParams.getAll("titulo").filter((t) => t.trim().length > 0).length > 0,
-    (searchParams.get("autor") || "").trim().length > 0,
+    searchParams.getAll("autor").filter((a) => a.trim().length > 0).length > 0,
     (searchParams.get("años") || "").length > 0,
     (searchParams.get("tipos") || "").length > 0,
     searchParams.get("indexada") != null,

@@ -25,6 +25,16 @@ export default function SapotecaHistogramaChart({
   const { puntos, totalPublicaciones } = data;
   const maxCantidad = Math.max(...puntos.map((p) => p.cantidad), 1);
 
+  // Etiquetas del eje X: se recorre desde el final hacia atrás para que el año
+  // más reciente quede siempre rotulado (si no, el paso deja el eje cortado
+  // uno o dos años antes y parece que el histograma no llega hasta hoy).
+  const pasoEtiquetas = Math.max(1, Math.floor(puntos.length / 10));
+  const indicesEtiquetados = new Set<number>();
+
+  for (let i = puntos.length - 1; i >= 0; i -= pasoEtiquetas) {
+    indicesEtiquetados.add(i);
+  }
+
   const añosActivos = new Set(
     (searchParams.get("años") ?? "")
       .split(",")
@@ -112,18 +122,13 @@ export default function SapotecaHistogramaChart({
         </TooltipProvider>
       </div>
 
-      {/* Eje X: años cada cierto paso */}
+      {/* Eje X: años cada cierto paso, anclados al año más reciente */}
       <div className="mt-2 flex w-full gap-px text-xs text-gray-500">
-        {puntos.map((punto, i) => {
-          const step = Math.max(1, Math.floor(puntos.length / 10));
-          const mostrar = i % step === 0;
-
-          return (
-            <div key={punto.año} className="min-w-0 flex-1 text-center">
-              {mostrar ? punto.año : ""}
-            </div>
-          );
-        })}
+        {puntos.map((punto, i) => (
+          <div key={punto.año} className="min-w-0 flex-1 text-center">
+            {indicesEtiquetados.has(i) ? punto.año : ""}
+          </div>
+        ))}
       </div>
 
       {Pie}
