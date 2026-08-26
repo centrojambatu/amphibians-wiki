@@ -24,19 +24,38 @@ export default async function getHistogramaPublicaciones(): Promise<DatosHistogr
   const supabase = createServiceClient();
   const añoActual = new Date().getFullYear();
 
+  // La vista incluye CIENTIFICA y TESIS; las tesis se excluyen para que el
+  // histograma y su total cuadren con la card "Publicaciones científicas".
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista puede no estar en tipos
-  const { count: totalPublicaciones } = await supabase
-    .from("vw_publicacion_cientifica_ecuador" as any)
-    .select("*", { count: "exact", head: true });
+  const { data: tesisRows } = await supabase
+    .from("vw_publicacion_anfibios_ecuador" as any)
+    .select("id_publicacion")
+    .eq("tipo", "TESIS");
+  const idsTesis = ((tesisRows ?? []) as unknown as { id_publicacion: number }[]).map(
+    (r) => r.id_publicacion,
+  );
+  const listaTesis = idsTesis.length > 0 ? `(${idsTesis.join(",")})` : null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- el builder no está tipado para la vista
+  const sinTesis = (q: any) =>
+    listaTesis ? q.not("id_publicacion", "in", listaTesis) : q;
+
+  const { count: totalPublicaciones } = await sinTesis(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista puede no estar en tipos
+    supabase
+      .from("vw_publicacion_cientifica_ecuador" as any)
+      .select("*", { count: "exact", head: true }),
+  );
 
   const countsByYear = new Map<number, number>();
   let offset = 0;
 
   while (true) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista puede no estar en tipos
-    const { data: rows, error } = await supabase
-      .from("vw_publicacion_cientifica_ecuador" as any)
-      .select("id_publicacion, numero_publicacion_ano")
+    const { data: rows, error } = await sinTesis(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vista puede no estar en tipos
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as any)
+        .select("id_publicacion, numero_publicacion_ano"),
+    )
       .not("numero_publicacion_ano", "is", null)
       .gte("numero_publicacion_ano", AÑO_MIN_SANE)
       .lte("numero_publicacion_ano", añoActual)

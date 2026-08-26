@@ -30,7 +30,7 @@ export interface EstadisticasSapoteca {
 
 /**
  * Conteos en vivo de las cards de Biblioteca.
- * Científicas = Ecuador + tipo CIENTIFICA/TESIS (`vw_publicacion_cientifica_ecuador`).
+ * Científicas = Ecuador + tipo CIENTIFICA, sin tesis (la vista incluye ambos).
  */
 export default async function getEstadisticasSapoteca(): Promise<EstadisticasSapoteca> {
   const supabase = createServiceClient();
@@ -43,8 +43,28 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     .eq("tipo", "DIVULGACIÓN");
   const idsCatDivulgacion = ((catDivulgacion ?? []) as {id: number}[]).map((r) => r.id);
 
+  // La vista incluye CIENTIFICA y TESIS. Las tesis se excluyen de estas cards
+  // para que el número cuadre con la sección "Científica" del panel de filtros
+  // (ninguna publicación tiene ambos tipos, así que restarlas es exacto).
+  const {data: tesisRows} = await supabase
+    .from("vw_publicacion_anfibios_ecuador" as never)
+    .select("id_publicacion")
+    .eq("tipo", "TESIS");
+  const idsTesis = ((tesisRows ?? []) as unknown as {id_publicacion: number}[]).map(
+    (r) => r.id_publicacion,
+  );
+  const listaTesis = idsTesis.length > 0 ? `(${idsTesis.join(",")})` : null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- el builder no está tipado para la vista
+  const sinTesis = (q: any) =>
+    listaTesis ? q.not("id_publicacion", "in", listaTesis) : q;
+
   const cientifica = () =>
-    supabase.from("vw_publicacion_cientifica_ecuador" as never).select("*", {count: "exact", head: true});
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("*", {count: "exact", head: true}),
+    );
 
   const [
     cientificasRes,
@@ -81,16 +101,20 @@ export default async function getEstadisticasSapoteca(): Promise<EstadisticasSap
     cientifica().eq("rel_evolucion", true),
     cientifica().eq("rel_ecologia", true),
     cientifica().eq("rel_conservacion", true),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as never)
-      .select("id_publicacion, titulo, contador_citas")
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("id_publicacion, titulo, contador_citas"),
+    )
       .gt("contador_citas", 0)
       .order("contador_citas", {ascending: false})
       .limit(1)
       .maybeSingle(),
-    supabase
-      .from("vw_publicacion_cientifica_ecuador" as never)
-      .select("id_publicacion, titulo, numero_publicacion_ano, fecha")
+    sinTesis(
+      supabase
+        .from("vw_publicacion_cientifica_ecuador" as never)
+        .select("id_publicacion, titulo, numero_publicacion_ano, fecha"),
+    )
       .order("numero_publicacion_ano", {ascending: false, nullsFirst: false})
       .order("fecha", {ascending: false, nullsFirst: false})
       .order("id_publicacion", {ascending: false})

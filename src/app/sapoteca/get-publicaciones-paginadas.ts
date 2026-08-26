@@ -106,12 +106,12 @@ async function getPublicacionesDesdeTabla(
       : Promise.resolve(null),
   ]);
 
-  // "Indexada" describe solo al universo científico (CIENTIFICA/TESIS), igual que
-  // la card de estadísticas; se cruza con los tipos marcados en el panel.
+  // "Indexada" describe solo al universo científico, sin tesis, igual que la
+  // card de estadísticas; se cruza con los tipos marcados en el panel.
   let tiposValores = tiposDeCatalogo;
 
   if (filtros?.indexada !== undefined) {
-    const cientificos = ["CIENTIFICA", "TESIS"];
+    const cientificos = ["CIENTIFICA"];
 
     tiposValores =
       tiposValores === null

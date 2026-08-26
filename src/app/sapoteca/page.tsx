@@ -36,8 +36,10 @@ export default async function SapotecaPage({ searchParams }: PageProps) {
     getHistogramaPublicaciones(),
   ]);
 
+  // Solo CIENTIFICA: al pinchar una barra del histograma el listado debe dar el
+  // mismo número que la barra, y el histograma ya no cuenta tesis.
   const idsTiposCientificas = tiposPublicacion.secciones
-    .filter((s) => s.tipo === "CIENTIFICA" || s.tipo === "TESIS")
+    .filter((s) => s.tipo === "CIENTIFICA")
     .flatMap((s) => s.items.map((i) => i.id));
 
   // Validar URL de back (solo permitir rutas internas)
