@@ -89,16 +89,17 @@ no se ven, aunque los datos estén correctos.
 
 ## Añadir un campo de texto a la ficha
 
-Hay que tocar **7 puntos** (referencia: los commits de `peso` y `renacuajo`):
+Hay que tocar **5 puntos** (referencia: los commits de `peso` y `renacuajo`):
 
 1. Migración SQL en `supabase/migrations/`
 2. `src/components/card-species-content.tsx` — sección en la interfaz
 3. `src/components/card-species-content.tsx` — array `sections` del PDF exportable
 4. `src/app/sapopedia/species/[id]/get-ficha-especie.ts` — `camposTexto` (para las citas)
 5. `src/app/sapopedia/species/[id]/get-ficha-especie.ts` — objeto de retorno
-6. `src/app/sapopedia/editor-citas/get-ficha-especie-editor.ts` — interfaz TS
-7. `src/components/EditorCitas.tsx` + `src/app/api/ficha-especie/[taxonId]/route.ts` — campo editable
-   y lista `camposEditables` (sin esto el editor no guarda)
+
+Antes eran 7: los dos pasos restantes eran del editor de citas
+(`/sapopedia/editor-citas` + `/api/ficha-especie/[taxonId]`), eliminado en septiembre de 2026
+porque ya no se muestra en la web. La ficha es hoy solo de lectura desde la app.
 
 Después, regenerar `src/types/supabase.ts`.
 
