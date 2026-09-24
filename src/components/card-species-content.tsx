@@ -186,7 +186,7 @@ const PublicacionesList = ({
   publicaciones: any[];
   processHTMLLinksNoUnderline: (html: string) => string;
 }) => (
-  <div className="space-y-3">
+  <div className="space-y-1">
     {publicaciones.map((pub: any, i: number) => {
       const citaParaMostrar = buildCitaLargaDesdePublicacion(pub);
       const citaResaltada = resaltarTituloEnCita(
@@ -207,7 +207,7 @@ const PublicacionesList = ({
       }
 
       return (
-        <div key={key} className="px-1 py-1">
+        <div key={key} className="px-1">
           <p
             dangerouslySetInnerHTML={{
               __html: processHTMLLinksNoUnderline(citaResaltada),
@@ -1314,7 +1314,22 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             {/* Taxonomía */}
             <Card className="gap-0">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Taxonomía y relaciones filogenéticas</CardTitle>
+                <CardTitle className="text-base">
+                  Taxonomía y relaciones filogenéticas
+                  {fichaEspecie.asw && (
+                    <>
+                      <span style={{color: "#f07304"}}> | </span>
+                      <a
+                        className="processed-link"
+                        href={fichaEspecie.asw}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Sinonimia
+                      </a>
+                    </>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {/* Holotipo: sin título ni divisor, se lee como entradilla de la taxonomía */}
@@ -1462,7 +1477,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           />
                         </div>
                       )}
-
                     </>
                   );
                 })()}
@@ -1473,7 +1487,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
               <Card className="gap-0">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Renacuajo</CardTitle>
-                  <hr className="mt-2 border-t border-gray-200" />
                 </CardHeader>
                 <CardContent>
                   <div
@@ -2187,14 +2200,14 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   <Card className="gap-0">
                     <CardContent className="py-3">
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Coloma, L. A. {anoActualizacion}.{" "}
+                        Centro Jambatu. {anoActualizacion}.{" "}
                         {nombreCientificoMain && (
                           <>
                             <i>{nombreCientificoMain}</i>.{" "}
                           </>
                         )}
-                        Anfibios Ecuador: Referencia en línea. Version 1.0. ({today}) Base de
-                        datos electrónica en{" "}
+                        Anfibios Ecuador: Referencia en línea. Version 2.0. Base de datos
+                        electrónica en{" "}
                         <a
                           className="processed-link"
                           href="https://darkgray-kangaroo-476720.hostingersite.com"
@@ -2204,7 +2217,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                           https://darkgray-kangaroo-476720.hostingersite.com
                         </a>
                         . Centro Jambatu de Investigación y Conservación de Anfibios, Quito,
-                        Ecuador.
+                        Ecuador. (Consultado en: {today})
                       </p>
                     </CardContent>
                   </Card>
