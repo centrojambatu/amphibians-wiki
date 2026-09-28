@@ -93,7 +93,7 @@ Hay que tocar **5 puntos** (referencia: los commits de `peso` y `renacuajo`):
 
 1. Migración SQL en `supabase/migrations/`
 2. `src/components/card-species-content.tsx` — sección en la interfaz
-3. `src/components/card-species-content.tsx` — array `sections` del PDF exportable
+3. `src/lib/ficha-pdf.ts` — sección del PDF exportable (maquetación de paper a dos columnas)
 4. `src/app/sapopedia/species/[id]/get-ficha-especie.ts` — `camposTexto` (para las citas)
 5. `src/app/sapopedia/species/[id]/get-ficha-especie.ts` — objeto de retorno
 

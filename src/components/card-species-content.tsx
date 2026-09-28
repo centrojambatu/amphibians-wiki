@@ -4,7 +4,6 @@ import {useMemo, useState} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {Camera, Download, Mars, MapPin, Venus, Video, Volume2} from "lucide-react";
-import jsPDF from "jspdf";
 import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
@@ -12,12 +11,18 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 
+import {
+  SITE_URL,
+  buildCitaSugerida,
+  formatFechaLarga,
+  getAnoActualizacion,
+} from "@/lib/cita-sitio";
+import {buildFichaPdf} from "@/lib/ficha-pdf";
 import {formatNumericRange} from "@/lib/format-range";
 import {
   processHTMLLinks,
   processHTMLLinksNoUnderline,
   processCitationReferences,
-  processCitationReferencesPlain,
 } from "@/lib/process-html-links";
 import {
   buildCitaLargaDesdePublicacion,
@@ -88,53 +93,6 @@ const getPisosAltitudinales = (distributions: {catalogo_awe?: {nombre?: string}}
   });
 
   return Array.from(unique.values());
-};
-
-// Función para agrupar datos geopolíticos jerárquicamente
-const groupGeoPoliticalData = (geoPolitica: any[]) => {
-  if (!geoPolitica || geoPolitica.length === 0) return {};
-
-  // Ordenar por rank_geopolitica_id (de menor a mayor, asumiendo que 1=Continente, 2=País, 3=Provincia)
-  const sortedData = [...geoPolitica].sort((a, b) => a.rank_geopolitica_id - b.rank_geopolitica_id);
-
-  const grouped: any = {};
-  let currentContinente: string | null = null;
-  let currentPais: string | null = null;
-
-  sortedData.forEach((item: any) => {
-    const {rank_nombre, nombre} = item;
-    const normalizedRankNombre = rank_nombre?.toLowerCase();
-
-    if (normalizedRankNombre === "continente") {
-      currentContinente = nombre;
-      if (!grouped[nombre]) {
-        grouped[nombre] = {paises: {}};
-      }
-    } else if (normalizedRankNombre === "país" || normalizedRankNombre === "pais") {
-      if (!currentContinente) {
-        currentContinente = "Sin continente";
-        grouped[currentContinente] = {paises: {}};
-      }
-      currentPais = nombre;
-      if (!grouped[currentContinente].paises[nombre]) {
-        grouped[currentContinente].paises[nombre] = {provincias: []};
-      }
-    } else if (normalizedRankNombre === "provincia") {
-      if (!currentContinente) {
-        currentContinente = "Sin continente";
-        grouped[currentContinente] = {paises: {}};
-      }
-      if (!currentPais) {
-        currentPais = "Sin país";
-        grouped[currentContinente].paises[currentPais] = {provincias: []};
-      }
-      if (!grouped[currentContinente].paises[currentPais].provincias.includes(nombre)) {
-        grouped[currentContinente].paises[currentPais].provincias.push(nombre);
-      }
-    }
-  });
-
-  return grouped;
 };
 
 const buildReferenciaClaveText = (pub: any) => {
@@ -325,783 +283,120 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     [publicaciones],
   );
 
-  // Función para extraer texto de un elemento HTML
-  const extractTextFromElement = (element: HTMLElement): string => {
-    let text = "";
+  // Carga una imagen como dataURL; usa el proxy del servidor para esquivar CORS.
+  const cargarImagen = async (url: string): Promise<string | null> => {
+    try {
+      const response = await fetch(`/api/image-proxy?url=${encodeURIComponent(url)}`);
 
-    // Obtener texto directo del nodo
-    if (element.nodeType === Node.TEXT_NODE) {
-      text += element.textContent?.trim() || "";
-    } else {
-      // Procesar hijos
-      element.childNodes.forEach((node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const nodeText = node.textContent?.trim();
+      if (!response.ok) throw new Error(`Proxy respondió ${String(response.status)}`);
 
-          if (nodeText) {
-            text += nodeText + " ";
+      const data = await response.json();
+
+      if (data.dataUrl) return data.dataUrl as string;
+      throw new Error("El proxy no devolvió dataUrl");
+    } catch (proxyError) {
+      console.warn("Error con proxy, intentando método directo:", proxyError);
+
+      return new Promise((resolve) => {
+        const img = new Image();
+
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d");
+
+            if (!ctx) {
+              resolve(null);
+
+              return;
+            }
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg", 0.9));
+          } catch (canvasError) {
+            console.warn("Error con canvas:", canvasError);
+            resolve(null);
           }
-        } else if (node instanceof HTMLElement) {
-          // Ignorar imágenes y elementos ocultos
-          if (
-            node.tagName === "IMG" ||
-            node.style.display === "none" ||
-            node.style.visibility === "hidden"
-          ) {
+        };
+        img.onerror = () => resolve(null);
+        img.src = url;
+        setTimeout(() => resolve(null), 5000);
+      });
+    }
+  };
+
+  // Lee el logo local y devuelve también su proporción, para no deformarlo.
+  const cargarLogo = async (): Promise<{dataUrl: string; ratio: number} | null> =>
+    new Promise((resolve) => {
+      const img = new Image();
+
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            resolve(null);
+
             return;
           }
-
-          // Agregar saltos de línea para elementos de bloque
-          const blockElements = ["DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BR"];
-
-          if (blockElements.includes(node.tagName)) {
-            const childText = extractTextFromElement(node);
-
-            if (childText) {
-              text += childText + "\n";
-            }
-          } else {
-            text += extractTextFromElement(node);
-          }
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            dataUrl: canvas.toDataURL("image/png"),
+            ratio: img.naturalWidth / img.naturalHeight,
+          });
+        } catch {
+          resolve(null);
         }
-      });
-    }
+      };
+      img.onerror = () => resolve(null);
+      img.src = "/assets/references/logo.png";
+      setTimeout(() => resolve(null), 2000);
+    });
 
-    return text.trim();
-  };
-
-  // Función para limpiar HTML y obtener texto plano
-  const stripHTML = (html: string | null | undefined): string => {
-    if (!html || html === "undefined" || html === "null") return "";
-    const tmp = document.createElement("div");
-
-    tmp.innerHTML = html;
-    const text = tmp.textContent || tmp.innerText || "";
-
-    return text.trim();
-  };
-
-  // Función para validar y formatear valores
-  const formatValue = (value: any): string => {
-    if (value === null || value === undefined || value === "undefined" || value === "null") {
-      return "";
-    }
-    if (typeof value === "string") {
-      return value.trim();
-    }
-
-    return String(value).trim();
-  };
-
-  // Función para descargar la ficha como PDF (solo texto)
+  // Descarga la ficha como PDF con maquetación de paper (ver src/lib/ficha-pdf.ts)
   const handleDownloadPDF = async () => {
+    const loadingMessage = document.createElement("div");
+
+    loadingMessage.textContent = "Generando PDF...";
+    loadingMessage.style.cssText =
+      "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 10000;";
+    document.body.appendChild(loadingMessage);
+
     try {
-      // Obtener el nombre científico para el nombre del archivo
-      const nombreCientifico = fichaEspecie.taxones?.[0]?.taxon
-        ? `${fichaEspecie.taxones[0].taxonPadre?.taxon || ""} ${fichaEspecie.taxones[0].taxon}`.trim()
-        : "especie";
+      const nombreCientifico = nombreCientificoMain || "especie";
+      const hoy = new Date();
+      const [logo, foto] = await Promise.all([
+        cargarLogo(),
+        fichaEspecie.fotografia_url
+          ? cargarImagen(fichaEspecie.fotografia_url)
+          : Promise.resolve(null),
+      ]);
+      const fechaConsulta = formatFechaLarga(hoy);
 
-      // Mostrar mensaje de carga
-      const loadingMessage = document.createElement("div");
-
-      loadingMessage.textContent = "Generando PDF...";
-      loadingMessage.style.cssText =
-        "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 10000;";
-      document.body.appendChild(loadingMessage);
-
-      // Crear PDF
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
+      const pdf = buildFichaPdf({
+        ficha: fichaEspecie,
+        nombreCientifico,
+        publicaciones,
+        literaturaCitada: publicacionesLiteraturaCitada,
+        referenciasClave: fichaEspecie.referenciasClave || [],
+        fotografia: foto ? {dataUrl: foto, autor: fichaEspecie.autor_foto} : null,
+        logo,
+        citaSugerida: buildCitaSugerida({
+          ano: getAnoActualizacion(fichaEspecie.fecha_actualizacion, hoy),
+          nombreCientifico: nombreCientificoMain,
+          fechaConsulta,
+        }),
+        fechaConsulta,
       });
 
-      const pageWidth = 210; // Ancho A4 en mm
-      const pageHeight = 297; // Alto A4 en mm
-      const margin = 20;
-      const maxWidth = pageWidth - 2 * margin;
-      let yPosition = margin;
-
-      // Función para agregar texto con salto de página automático
-      // Factor de conversión: 1 punto = 0.352778 mm, con lineHeight aplicado
-      const ptToMm = 0.352778;
-      const addText = (
-        text: string,
-        fontSize: number = 10,
-        isBold: boolean = false,
-        lineHeight: number = 1.2,
-      ) => {
-        if (!text || text.trim() === "" || text === "undefined" || text === "null") {
-          return;
-        }
-
-        pdf.setFontSize(fontSize);
-        pdf.setFont("helvetica", isBold ? "bold" : "normal");
-
-        const lines = pdf.splitTextToSize(text.trim(), maxWidth);
-
-        lines.forEach((line: string) => {
-          if (yPosition > pageHeight - margin - 15) {
-            pdf.addPage();
-            yPosition = margin;
-          }
-          pdf.text(line, margin, yPosition);
-          yPosition += fontSize * ptToMm * lineHeight;
-        });
-      };
-
-      // Función para procesar citas {{id}} en el texto.
-      // Usa la versión plana (sin HTML/popup) para evitar duplicar la
-      // cita_larga cuando luego se aplica stripHTML antes de pintar en el PDF.
-      const procesarCitas = (texto: string | null | undefined): string => {
-        if (!texto) return "";
-
-        return processCitationReferencesPlain(texto, publicaciones);
-      };
-
-      // Función para agregar una sección con título
-      const addSection = (title: string, content: string | null | undefined) => {
-        // Primero procesar las citas, luego limpiar HTML
-        const contentConCitas = procesarCitas(content);
-        const cleanContent = formatValue(stripHTML(contentConCitas));
-
-        if (!cleanContent) return;
-
-        yPosition += 3;
-        addText(title, 12, true, 1.2);
-        yPosition += 1;
-        addText(cleanContent, 10, false, 1.2);
-      };
-
-      // Cargar y agregar logo
-      try {
-        const logoImg = new Image();
-
-        logoImg.crossOrigin = "anonymous";
-        logoImg.src = "/assets/references/logo.png";
-
-        await new Promise((resolve) => {
-          logoImg.onload = () => {
-            try {
-              // Calcular proporciones para mantener el aspecto original
-              const originalWidth = logoImg.naturalWidth;
-              const originalHeight = logoImg.naturalHeight;
-              const aspectRatio = originalWidth / originalHeight;
-
-              // Definir altura máxima deseada y calcular ancho proporcional
-              const maxHeight = 20; // mm
-              const calculatedWidth = maxHeight * aspectRatio;
-
-              // Limitar el ancho máximo a 60mm
-              const finalWidth = Math.min(calculatedWidth, 60);
-              const finalHeight = finalWidth / aspectRatio;
-
-              pdf.addImage(logoImg, "PNG", margin, yPosition, finalWidth, finalHeight);
-              yPosition += finalHeight + 10;
-            } catch (err) {
-              console.warn("Error al agregar logo:", err);
-            }
-            resolve(null);
-          };
-          logoImg.onerror = () => resolve(null);
-          setTimeout(() => resolve(null), 2000);
-        });
-      } catch (err) {
-        console.warn("Error al cargar logo:", err);
-      }
-
-      // Título principal
-      addText(nombreCientifico, 16, true, 1.3);
-      yPosition += 3;
-
-      // Agregar fotografía de la especie si existe
-      if (fichaEspecie.fotografia_url) {
-        try {
-          // Función para obtener imagen como base64 usando proxy del servidor
-          const getImageAsBase64 = async (url: string): Promise<string | null> => {
-            try {
-              // Usar el proxy del servidor para evitar problemas de CORS
-              const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`;
-              const response = await fetch(proxyUrl);
-
-              if (!response.ok) {
-                console.warn("Proxy response not ok:", response.status);
-                throw new Error("Proxy fetch failed");
-              }
-
-              const data = await response.json();
-
-              if (data.dataUrl) {
-                return data.dataUrl;
-              }
-              throw new Error("No dataUrl in response");
-            } catch (proxyError) {
-              console.warn("Error con proxy, intentando método directo:", proxyError);
-
-              // Fallback: intentar con Image y canvas (puede fallar por CORS)
-              return new Promise((resolve) => {
-                const img = new Image();
-
-                img.crossOrigin = "anonymous";
-                img.onload = () => {
-                  try {
-                    const canvas = document.createElement("canvas");
-
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext("2d");
-
-                    if (ctx) {
-                      ctx.drawImage(img, 0, 0);
-                      resolve(canvas.toDataURL("image/jpeg", 0.9));
-                    } else {
-                      resolve(null);
-                    }
-                  } catch (canvasError) {
-                    console.warn("Error con canvas:", canvasError);
-                    resolve(null);
-                  }
-                };
-                img.onerror = (e) => {
-                  console.warn("Error cargando imagen:", e);
-                  resolve(null);
-                };
-                img.src = url;
-                setTimeout(() => resolve(null), 5000);
-              });
-            }
-          };
-
-          console.log("Cargando imagen:", fichaEspecie.fotografia_url);
-          const imageBase64 = await getImageAsBase64(fichaEspecie.fotografia_url);
-
-          console.log("Imagen cargada:", imageBase64 ? "Sí" : "No");
-
-          if (imageBase64) {
-            // Crear imagen temporal para obtener dimensiones
-            const tempImg = new Image();
-
-            await new Promise<void>((resolve) => {
-              tempImg.onload = () => resolve();
-              tempImg.onerror = () => resolve();
-              tempImg.src = imageBase64;
-            });
-
-            if (tempImg.naturalWidth > 0 && tempImg.naturalHeight > 0) {
-              // Calcular proporciones para mantener el aspecto original
-              const originalWidth = tempImg.naturalWidth;
-              const originalHeight = tempImg.naturalHeight;
-              const aspectRatio = originalWidth / originalHeight;
-
-              // Definir ancho máximo y calcular altura proporcional
-              const maxImgWidth = 80; // mm
-              const maxImgHeight = 60; // mm
-
-              let imgWidth = maxImgWidth;
-              let imgHeight = imgWidth / aspectRatio;
-
-              // Si la altura excede el máximo, ajustar
-              if (imgHeight > maxImgHeight) {
-                imgHeight = maxImgHeight;
-                imgWidth = imgHeight * aspectRatio;
-              }
-
-              // Alinear la imagen a la izquierda
-              const imgX = margin;
-
-              // Verificar si hay espacio en la página actual
-              if (yPosition + imgHeight > pageHeight - margin - 15) {
-                pdf.addPage();
-                yPosition = margin;
-              }
-
-              pdf.addImage(imageBase64, "JPEG", imgX, yPosition, imgWidth, imgHeight);
-              yPosition += imgHeight + 15;
-              console.log("Imagen agregada al PDF");
-            } else {
-              console.warn("Dimensiones de imagen inválidas");
-            }
-          } else {
-            console.warn("No se pudo cargar la fotografía de la especie");
-          }
-        } catch (err) {
-          console.warn("Error al procesar fotografía:", err);
-        }
-      }
-
-      // Información taxonómica (Orden, Familia, Género)
-      const orden = formatValue(
-        fichaEspecie.lineage?.find((item: any) => item.rank_id === 4)?.taxon,
-      );
-      const familia = formatValue(
-        fichaEspecie.lineage?.find((item: any) => item.rank_id === 5)?.taxon,
-      );
-      const genero = formatValue(
-        fichaEspecie.taxones?.[0]?.taxonPadre?.taxon ||
-          fichaEspecie.lineage?.find((item: any) => item.rank_id === 6)?.taxon,
-      );
-      const nombreComun = formatValue(fichaEspecie.taxones?.[0]?.nombre_comun);
-
-      if (orden || familia || genero || nombreComun) {
-        addText("Clasificación Taxonómica", 11, true, 1.2);
-        yPosition += 1;
-        if (orden) {
-          addText(`Orden: ${orden}`, 10, false, 1.2);
-        }
-        if (familia) {
-          addText(`Familia: ${familia}`, 10, false, 1.2);
-        }
-        if (genero) {
-          addText(`Género: ${genero}`, 10, false, 1.2);
-        }
-        if (nombreComun) {
-          addText(`Nombre común: ${nombreComun}`, 10, false, 1.2);
-        }
-        yPosition += 2;
-      }
-
-      // Agregar contenido de la ficha
-      const sections = [
-        {title: "Primer(os) colector(es)", content: fichaEspecie.primeros_colectores},
-        {title: "Etimología", content: fichaEspecie.etimologia},
-        {
-          title: "Taxonomía",
-          // El holotipo va sin título propio, como entradilla del texto de
-          // taxonomía, igual que en la ficha.
-          content: [fichaEspecie.holotipo, fichaEspecie.taxonomia]
-            .filter(Boolean)
-            .join("<br /><br />"),
-        },
-        {title: "Identificación", content: fichaEspecie.identificacion},
-        {
-          title: "Morfometría",
-          content: [
-            // En el PDF van con palabra: jsPDF usa WinAnsi y no tiene glifo para ♂/♀.
-            fichaEspecie.svl_macho && `Longitud rostro-cloacal (macho): ${fichaEspecie.svl_macho}`,
-            fichaEspecie.svl_hembra &&
-              `Longitud rostro-cloacal (hembra): ${fichaEspecie.svl_hembra}`,
-            fichaEspecie.peso && `Peso: ${fichaEspecie.peso}`,
-          ]
-            .filter(Boolean)
-            .join("<br />"),
-        },
-        {title: "Color en Vida", content: fichaEspecie.color_en_vida},
-        {title: "Especies Similares", content: fichaEspecie.spp_similares},
-        {title: "Comparación", content: fichaEspecie.comparacion},
-        {title: "Renacuajo", content: fichaEspecie.renacuajo},
-        {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
-        {title: "Reproducción", content: fichaEspecie.reproduccion},
-        {title: "Canto", content: fichaEspecie.descripcion_canto},
-        {title: "Dieta", content: fichaEspecie.dieta},
-        {
-          title: "Comentario Estatus Poblacional",
-          content: fichaEspecie.comentario_estatus_poblacional,
-        },
-        {title: "Información Adicional", content: fichaEspecie.informacion_adicional},
-        {title: "Agradecimiento", content: fichaEspecie.agradecimiento},
-      ];
-
-      sections.forEach((section) => {
-        // addSection ahora procesa citas y limpia HTML internamente
-        addSection(section.title, section.content);
-      });
-
-      // Agregar información de distribución detallada
-      yPosition += 3;
-      addText("Distribución y Ecología", 11, true, 1.2);
-      yPosition += 1;
-
-      // Rango Altitudinal numérico
-      const minAlt = fichaEspecie.rango_altitudinal_min;
-      const maxAlt = fichaEspecie.rango_altitudinal_max;
-
-      if ((minAlt !== null && minAlt !== undefined) || (maxAlt !== null && maxAlt !== undefined)) {
-        addText("Rango Altitudinal", 10, true, 1.2);
-        yPosition += 1;
-        if (minAlt !== null && minAlt !== undefined && maxAlt !== null && maxAlt !== undefined) {
-          addText(formatNumericRange(minAlt, maxAlt, "m") ?? "", 10, false, 1.2);
-        } else if (minAlt !== null && minAlt !== undefined) {
-          addText(`Mínimo: ${minAlt} m`, 10, false, 1.2);
-        } else if (maxAlt !== null && maxAlt !== undefined) {
-          addText(`Máximo: ${maxAlt} m`, 10, false, 1.2);
-        }
-        yPosition += 1.5;
-      }
-
-      // Distribución Global con Geopolítica
-      const distribucionGlobal = stripHTML(procesarCitas(fichaEspecie.distribucion_global));
-      const geoPoliticaData = fichaEspecie.geoPolitica;
-
-      if (distribucionGlobal || (geoPoliticaData && geoPoliticaData.length > 0)) {
-        addText("Distribución global", 10, true, 1.2);
-        yPosition += 1;
-
-        // Geopolítica
-        if (geoPoliticaData && geoPoliticaData.length > 0) {
-          addText("Geopolítica:", 10, false, 1.2);
-          yPosition += 0.5;
-          const grouped = groupGeoPoliticalData(geoPoliticaData);
-
-          Object.entries(grouped).forEach(([continente, continenteData]: [string, any]) => {
-            Object.entries(continenteData.paises).forEach(([pais, paisData]: [string, any]) => {
-              let geoText = `${continente} > ${pais}`;
-
-              if (paisData.provincias && paisData.provincias.length > 0) {
-                geoText += ` > ${paisData.provincias.join(", ")}`;
-              }
-              addText(geoText, 10, false, 1.2);
-            });
-          });
-          yPosition += 0.5;
-        }
-
-        // Descripción de distribución global
-        if (distribucionGlobal) {
-          addText(distribucionGlobal, 10, false, 1.2);
-        }
-        yPosition += 1.5;
-      }
-
-      // Zonas Altitudinales
-      const zonasAltitudinales = fichaEspecie.distributions;
-
-      if (zonasAltitudinales && zonasAltitudinales.length > 0) {
-        const uniqueZonas = new Map();
-
-        zonasAltitudinales.forEach((categoria: any) => {
-          const key = categoria.id_taxon_catalogo_awe || categoria.catalogo_awe_id;
-
-          if (!uniqueZonas.has(key) && categoria.catalogo_awe?.nombre) {
-            uniqueZonas.set(key, categoria.catalogo_awe.nombre);
-          }
-        });
-        if (uniqueZonas.size > 0) {
-          addText("Zonas Altitudinales", 10, true, 1.2);
-          yPosition += 1;
-          Array.from(uniqueZonas.values()).forEach((nombre: string) => {
-            addText(`• ${nombre}`, 10, false, 1.2);
-          });
-          yPosition += 1.5;
-        }
-      }
-
-      // Ecosistemas
-      const ecosistemas =
-        fichaEspecie.taxon_catalogo_awe_results?.filter(
-          (categoria: any) => categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Ecosistemas",
-        ) || [];
-
-      if (ecosistemas.length > 0) {
-        addText("Ecosistemas", 10, true, 1.2);
-        yPosition += 1;
-        ecosistemas.forEach((categoria: any) => {
-          if (categoria.catalogo_awe?.nombre) {
-            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
-          }
-        });
-        yPosition += 1.5;
-      }
-
-      // Regiones Biogeográficas
-      const regionesBio = fichaEspecie.dataRegionBio;
-
-      if (regionesBio && regionesBio.length > 0) {
-        addText("Regiones Biogeográficas", 10, true, 1.2);
-        yPosition += 1;
-        regionesBio.forEach((region: any) => {
-          if (region.catalogo_awe?.nombre) {
-            addText(`• ${region.catalogo_awe.nombre}`, 10, false, 1.2);
-          }
-        });
-        yPosition += 1.5;
-      }
-
-      // Reservas de la Biosfera
-      const reservasBiosfera =
-        fichaEspecie.taxon_catalogo_awe_results?.filter(
-          (categoria: any) =>
-            categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Reservas de la Biósfera",
-        ) || [];
-
-      if (reservasBiosfera.length > 0) {
-        addText("Reservas de la Biosfera", 10, true, 1.2);
-        yPosition += 1;
-        reservasBiosfera.forEach((categoria: any) => {
-          if (categoria.catalogo_awe?.nombre) {
-            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
-          }
-        });
-        yPosition += 1.5;
-      }
-
-      // Bosques Protegidos
-      const bosquesProtegidos =
-        fichaEspecie.taxon_catalogo_awe_results?.filter(
-          (categoria: any) =>
-            categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Bosques Protegidos",
-        ) || [];
-
-      if (bosquesProtegidos.length > 0) {
-        addText("Bosques Protegidos", 10, true, 1.2);
-        yPosition += 1;
-        bosquesProtegidos.forEach((categoria: any) => {
-          if (categoria.catalogo_awe?.nombre) {
-            addText(`• ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
-          }
-        });
-        yPosition += 1.5;
-      }
-
-      // Áreas Protegidas
-      const areasProtegidas =
-        fichaEspecie.taxon_catalogo_awe_results?.filter(
-          (categoria: any) =>
-            categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas del Estado" ||
-            categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas Privadas",
-        ) || [];
-
-      if (areasProtegidas.length > 0) {
-        // Eliminar duplicados
-        const uniqueAreas = new Map();
-
-        areasProtegidas.forEach((categoria: any) => {
-          const key = categoria.catalogo_awe_id;
-
-          if (!uniqueAreas.has(key) && categoria.catalogo_awe?.nombre) {
-            uniqueAreas.set(key, categoria);
-          }
-        });
-        const areasUnicas = Array.from(uniqueAreas.values());
-
-        if (areasUnicas.length > 0) {
-          addText("Áreas Protegidas", 10, true, 1.2);
-          yPosition += 1;
-
-          const areasEstado = areasUnicas.filter(
-            (categoria: any) =>
-              categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas del Estado",
-          );
-          const areasPrivadas = areasUnicas.filter(
-            (categoria: any) =>
-              categoria.catalogo_awe?.tipo_catalogo_awe?.nombre === "Áreas protegidas Privadas",
-          );
-
-          if (areasEstado.length > 0) {
-            addText("Áreas protegidas del Estado:", 10, false, 1.2);
-            yPosition += 0.5;
-            areasEstado.forEach((categoria: any) => {
-              addText(`  • ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
-            });
-            yPosition += 0.5;
-          }
-
-          if (areasPrivadas.length > 0) {
-            addText("Áreas protegidas Privadas:", 10, false, 1.2);
-            yPosition += 0.5;
-            areasPrivadas.forEach((categoria: any) => {
-              addText(`  • ${categoria.catalogo_awe.nombre}`, 10, false, 1.2);
-            });
-            yPosition += 0.5;
-          }
-        }
-      }
-
-      // Agregar información de SVL si existe
-      const svlMacho = formatValue(fichaEspecie.svl_macho);
-      const svlHembra = formatValue(fichaEspecie.svl_hembra);
-
-      if (svlMacho || svlHembra) {
-        yPosition += 3;
-        addText("Tamaño", 11, true, 1.2);
-        yPosition += 1;
-        if (svlMacho) {
-          addText(`SVL Macho: ${svlMacho}`, 10, false, 1.2);
-        }
-        if (svlHembra) {
-          addText(`SVL Hembra: ${svlHembra}`, 10, false, 1.2);
-        }
-      }
-
-      // Agregar información de temperatura si existe
-      const temp = fichaEspecie.temperatura;
-      const tempMin = fichaEspecie.temperatura_min;
-      const tempMax = fichaEspecie.temperatura_max;
-
-      if (
-        (temp !== null && temp !== undefined) ||
-        (tempMin !== null && tempMin !== undefined) ||
-        (tempMax !== null && tempMax !== undefined)
-      ) {
-        yPosition += 3;
-        addText("Temperatura", 11, true, 1.2);
-        yPosition += 1;
-        if (temp !== null && temp !== undefined) {
-          addText(`Temperatura: ${temp}°C`, 10, false, 1.2);
-        }
-        if (tempMin !== null && tempMin !== undefined) {
-          addText(`Temperatura mínima: ${tempMin}°C`, 10, false, 1.2);
-        }
-        if (tempMax !== null && tempMax !== undefined) {
-          addText(`Temperatura máxima: ${tempMax}°C`, 10, false, 1.2);
-        }
-      }
-
-      // Agregar información de pluviocidad si existe
-      const pluv = fichaEspecie.pluviocidad;
-      const pluvMin = fichaEspecie.pluviocidad_min;
-      const pluvMax = fichaEspecie.pluviocidad_max;
-
-      if (
-        (pluv !== null && pluv !== undefined) ||
-        (pluvMin !== null && pluvMin !== undefined) ||
-        (pluvMax !== null && pluvMax !== undefined)
-      ) {
-        yPosition += 3;
-        addText("Pluviocidad", 11, true, 1.2);
-        yPosition += 1;
-        if (pluv !== null && pluv !== undefined) {
-          addText(`Pluviocidad: ${pluv} mm`, 10, false, 1.2);
-        }
-        if (pluvMin !== null && pluvMin !== undefined) {
-          addText(`Pluviocidad mínima: ${pluvMin} mm`, 10, false, 1.2);
-        }
-        if (pluvMax !== null && pluvMax !== undefined) {
-          addText(`Pluviocidad máxima: ${pluvMax} mm`, 10, false, 1.2);
-        }
-      }
-
-      // Agregar información de Lista Roja si existe
-      const listaRojaSigla = formatValue(fichaEspecie.listaRojaIUCN?.catalogo_awe?.sigla);
-      const listaRojaNombre = formatValue(fichaEspecie.listaRojaIUCN?.catalogo_awe?.nombre);
-
-      if (listaRojaSigla) {
-        yPosition += 3;
-        addText("Lista Roja Ecuador", 11, true, 1.2);
-        yPosition += 1;
-        addText(`Estado: ${listaRojaSigla}`, 10, false, 1.2);
-        if (listaRojaNombre) {
-          addText(`Categoría: ${listaRojaNombre}`, 10, false, 1.2);
-        }
-      }
-
-      // Agregar información de endemismo
-      const endemica = fichaEspecie.taxones?.[0]?.endemica;
-
-      if (endemica !== undefined && endemica !== null) {
-        yPosition += 3;
-        addText("Endemismo", 11, true, 1.2);
-        yPosition += 1;
-        addText(endemica ? "Endémica" : "No endémica", 10, false, 1.2);
-      }
-
-      // Agregar historial
-      const historial = formatValue(fichaEspecie.historial);
-
-      if (historial) {
-        yPosition += 3;
-        addText("Historial", 11, true, 1.2);
-        yPosition += 1;
-        const cleanHistorial = stripHTML(procesarCitas(historial));
-
-        if (cleanHistorial) {
-          addText(cleanHistorial, 10, false, 1.2);
-        }
-      }
-
-      // Agregar fecha de actualización
-      const fechaActualizacion = formatValue(fichaEspecie.fecha_actualizacion);
-
-      if (fechaActualizacion) {
-        yPosition += 3;
-        addText("Fecha de Actualización", 11, true, 1.2);
-        yPosition += 1;
-        addText(fechaActualizacion, 10, false, 1.2);
-      }
-
-      const referenciasClave = fichaEspecie.referenciasClave || [];
-
-      if (referenciasClave.length > 0) {
-        yPosition += 5;
-        addText("Referencias clave", 11, true, 1.2);
-        yPosition += 2;
-
-        const referenciasClaveTexto = referenciasClave
-          .map((pub: any) => (pub.publicacion ? stripHTML(buildReferenciaClaveText(pub)) : ""))
-          .filter(Boolean)
-          .join(" | ");
-
-        if (referenciasClaveTexto) {
-          addText(referenciasClaveTexto, 9, false, 1.2);
-        }
-      }
-
-      // Agregar Literatura citada
-      if (publicaciones && publicaciones.length > 0) {
-        yPosition += 5;
-        addText("Literatura citada", 11, true, 1.2);
-        yPosition += 2;
-
-        publicaciones.forEach((pub: any) => {
-          if (!pub.publicacion) return;
-
-          // Construir cita completa
-          let citaCompleta = "";
-
-          if (pub.publicacion.cita_larga) {
-            citaCompleta = pub.publicacion.cita_larga;
-          } else if (pub.publicacion.cita_corta) {
-            const partes: string[] = [];
-
-            partes.push(pub.publicacion.cita_corta);
-
-            if (
-              pub.publicacion.titulo &&
-              !pub.publicacion.cita_corta.includes(pub.publicacion.titulo)
-            ) {
-              partes.push(pub.publicacion.titulo);
-            }
-            if (pub.publicacion.editorial) {
-              partes.push(pub.publicacion.editorial);
-            }
-            if (pub.publicacion.volumen) {
-              partes.push(`Vol. ${pub.publicacion.volumen}`);
-            }
-            if (pub.publicacion.numero) {
-              partes.push(`No. ${pub.publicacion.numero}`);
-            }
-            if (pub.publicacion.pagina) {
-              partes.push(`pp. ${pub.publicacion.pagina}`);
-            }
-            if (pub.publicacion.numero_publicacion_ano) {
-              const añoStr = String(pub.publicacion.numero_publicacion_ano);
-
-              if (!pub.publicacion.cita_corta.includes(añoStr)) {
-                partes.push(`(${añoStr})`);
-              }
-            }
-            citaCompleta = partes.join(", ");
-          } else if (pub.publicacion.cita) {
-            citaCompleta = pub.publicacion.cita;
-          }
-
-          if (citaCompleta) {
-            // Limpiar HTML de la cita
-            const citaLimpia = stripHTML(citaCompleta);
-
-            if (citaLimpia) {
-              addText(`• ${citaLimpia}`, 9, false, 1.2);
-              yPosition += 1;
-            }
-          }
-        });
-      }
-
-      // Remover mensaje de carga
-      if (document.body.contains(loadingMessage)) {
-        document.body.removeChild(loadingMessage);
-      }
-
-      // Descargar el PDF
       pdf.save(`Ficha_${nombreCientifico.replace(/\s+/g, "_")}.pdf`);
     } catch (error) {
       console.error("Error al generar PDF:", error);
@@ -1111,11 +406,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       alert(
         `Error al generar el PDF: ${errorMessage}\n\nPor favor, verifica la consola para más detalles.`,
       );
-
-      // Remover mensaje de carga en caso de error
-      const loadingMessage = document.getElementById("pdf-loading-message");
-
-      if (loadingMessage) {
+    } finally {
+      if (document.body.contains(loadingMessage)) {
         document.body.removeChild(loadingMessage);
       }
     }
@@ -2157,15 +1449,11 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 }
               }
 
-              const sitioUrl = "https://anfibiosecuador.ec";
-              const citaSugerida = [
-                `Centro Jambatu. ${anoActualizacion}.`,
-                nombreCientificoMain
-                  ? `Anfibios Ecuador: ${nombreCientificoMain}.`
-                  : "Anfibios Ecuador.",
-                `Referencia en línea. Version 2.0. Base de datos electrónica en ${sitioUrl}.`,
-                `Centro Jambatu de Investigación y Conservación de Anfibios, Quito, Ecuador. (Consultado en: ${today})`,
-              ].join(" ");
+              const citaSugerida = buildCitaSugerida({
+                ano: anoActualizacion,
+                nombreCientifico: nombreCientificoMain,
+                fechaConsulta: today,
+              });
 
               return (
                 <>
@@ -2226,11 +1514,11 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         . Referencia en línea. Version 2.0. Base de datos electrónica en{" "}
                         <a
                           className="processed-link"
-                          href={sitioUrl}
+                          href={SITE_URL}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          {sitioUrl}
+                          {SITE_URL}
                         </a>
                         . Centro Jambatu de Investigación y Conservación de Anfibios, Quito,
                         Ecuador. (Consultado en: {today})
