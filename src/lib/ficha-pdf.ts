@@ -18,6 +18,15 @@ import jsPDF from "jspdf";
 import {buildCitaLargaDesdePublicacion} from "./format-cita-publicacion";
 import {formatNumericRange} from "./format-range";
 import {processCitationReferencesPlain} from "./process-html-links";
+import {
+  ALTITUDE_MARKERS,
+  CLIMATIC_FLOORS,
+  FLOOR_DEFAULT_COLOR,
+  floorStartPercentage,
+  floorWidthPercentage,
+  getFloorActiveSegment,
+  type AltitudinalRange,
+} from "./pisos-altitudinales";
 
 // ---------------------------------------------------------------- geometría
 const PAGE_W = 210;
@@ -37,6 +46,8 @@ const SMALL_SIZE = 7.4;
 
 const GRAY = 110;
 const RULE = 190;
+/** Naranja de la marca, el mismo que separa datos en la ficha web. */
+const NARANJA: [number, number, number] = [240, 115, 4];
 
 // jsPDF usa WinAnsi con las fuentes estándar: hay glifos que no existen.
 const REEMPLAZOS: [RegExp, string][] = [
@@ -55,11 +66,20 @@ const REEMPLAZOS: [RegExp, string][] = [
 const sanear = (texto: string): string =>
   REEMPLAZOS.reduce((acc, [patron, reemplazo]) => acc.replace(patron, reemplazo), texto);
 
+/** `#RRGGBB` a la terna que espera jsPDF. */
+const hexARgb = (hex: string): [number, number, number] => [
+  Number.parseInt(hex.slice(1, 3), 16),
+  Number.parseInt(hex.slice(3, 5), 16),
+  Number.parseInt(hex.slice(5, 7), 16),
+];
+
 // --------------------------------------------------------- texto con estilo
 interface Seg {
   text: string;
   italic: boolean;
   bold: boolean;
+  /** Color propio del segmento, como [r, g, b]. Por defecto hereda el del párrafo. */
+  color?: [number, number, number];
 }
 
 /** Una palabra puede mezclar estilos: `<i>Atelopus</i>,` son dos segmentos. */
@@ -184,6 +204,8 @@ export interface FichaPdfOptions {
   literaturaCitada: any[];
   referenciasClave: any[];
   fotografia?: {dataUrl: string; formato?: string; autor?: string | null} | null;
+  /** Captura del mapa de colecciones (html2canvas), ya en dataURL. */
+  mapa?: {dataUrl: string; tipo?: string} | null;
   logo?: {dataUrl: string; ratio: number} | null;
   citaSugerida: string;
   fechaConsulta: string;
@@ -382,7 +404,10 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     for (const palabra of linea.palabras) {
       for (const seg of palabra) {
         aplicarFuente(size, seg.italic, seg.bold);
+
+        if (seg.color) pdf.setTextColor(seg.color[0], seg.color[1], seg.color[2]);
         pdf.text(seg.text, cursor, baseline);
+        if (seg.color) pdf.setTextColor(0);
         cursor += anchoSeg(seg, size);
       }
       cursor += hueco;
@@ -476,11 +501,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     aplicarFuente(SECTION_SIZE, false, true);
     pdf.setTextColor(0);
     pdf.text(sanear(titulo), colX(), y);
-    y += 1.4;
-    pdf.setDrawColor(RULE);
-    pdf.setLineWidth(0.2);
-    pdf.line(colX(), y, colX() + COL_W, y);
-    y += 2.6;
+    y += SECTION_SIZE * PT_TO_MM * 1.25;
   };
 
   /** Pares etiqueta/valor en una línea, separados por `·`. */
@@ -504,6 +525,141 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   const lista = (etiqueta: string, valores: string[]) => {
     if (valores.length === 0) return;
     bloque(etiqueta, valores.join(", "));
+  };
+
+  // ------------------------------------------------------------ figuras
+  let numeroFigura = 0;
+
+  /** Pie de figura, alineado a la izquierda del elemento. */
+  const pieFigura = (x: number, texto: string, cursiva?: string) => {
+    y += 2.4;
+    pdf.setTextColor(GRAY);
+
+    const piezas: Seg[] = cursiva
+      ? [
+          {text: `Figura ${String(numeroFigura)}. `, italic: false, bold: false},
+          {text: cursiva, italic: true, bold: false},
+          {text: texto, italic: false, bold: false},
+        ]
+      : [{text: `Figura ${String(numeroFigura)}. ${texto}`, italic: false, bold: false}];
+    let cursor = x;
+
+    piezas.forEach((seg) => {
+      const limpio = sanear(seg.text);
+
+      aplicarFuente(SMALL_SIZE, seg.italic, seg.bold);
+      pdf.text(limpio, cursor, y);
+      cursor += anchoSeg({...seg, text: limpio}, SMALL_SIZE);
+    });
+    pdf.setTextColor(0);
+    y += 4.6;
+  };
+
+  /** Imagen al ancho de la columna, dentro del flujo del cuerpo. */
+  const figuraEnColumna = (dataUrl: string, tipo: string, pie: string) => {
+    let ratio: number;
+
+    try {
+      const props = pdf.getImageProperties(dataUrl);
+
+      ratio = props.width / props.height;
+    } catch {
+      return;
+    }
+
+    let ancho = COL_W;
+    let alto = COL_W / ratio;
+    // Nunca más alta que una columna entera, o no cabría en ninguna.
+    const maxAlto = bottomY - MARGIN.top - 12;
+
+    if (alto > maxAlto) {
+      alto = maxAlto;
+      ancho = alto * ratio;
+    }
+
+    y += 1.6;
+    reservar(alto + 8);
+    numeroFigura += 1;
+
+    try {
+      pdf.addImage(dataUrl, tipo, colX(), y, ancho, alto);
+    } catch {
+      return;
+    }
+    y += alto;
+    pieFigura(colX(), pie);
+  };
+
+  /** Barra de pisos altitudinales, dibujada en vectorial. */
+  const barraPisos = (rango: AltitudinalRange) => {
+    const altoEtiquetas = 2.6;
+    const altoBarra = 4.6;
+
+    y += 1.6;
+    reservar(altoEtiquetas * 2 + altoBarra + 9);
+    numeroFigura += 1;
+
+    // Vertientes
+    aplicarFuente(6.4, false, false);
+    pdf.setTextColor(GRAY);
+    pdf.text("<- Occidental", colX(), y);
+    pdf.text("Oriental ->", colX() + COL_W, y, {align: "right"});
+    pdf.setTextColor(0);
+    y += altoEtiquetas;
+
+    // Base gris con separadores blancos
+    const base = hexARgb(FLOOR_DEFAULT_COLOR);
+
+    pdf.setFillColor(base[0], base[1], base[2]);
+    pdf.rect(colX(), y, COL_W, altoBarra, "F");
+
+    // Separadores entre pisos, sobre la base
+    pdf.setDrawColor(255, 255, 255);
+    pdf.setLineWidth(0.3);
+    CLIMATIC_FLOORS.slice(1).forEach((_, i) => {
+      const x = colX() + (floorStartPercentage(i + 1) / 100) * COL_W;
+
+      pdf.line(x, y, x, y + altoBarra);
+    });
+
+    // Tramos dentro del rango de la especie, encima de todo
+    CLIMATIC_FLOORS.forEach((floor, i) => {
+      const segmento = getFloorActiveSegment(
+        floor,
+        floorStartPercentage(i),
+        floorWidthPercentage(floor),
+        rango,
+      );
+
+      if (!segmento || segmento.width <= 0) return;
+
+      const color = hexARgb(segmento.color);
+
+      pdf.setFillColor(color[0], color[1], color[2]);
+      pdf.rect(
+        colX() + (segmento.left / 100) * COL_W,
+        y,
+        (segmento.width / 100) * COL_W,
+        altoBarra,
+        "F",
+      );
+    });
+
+    y += altoBarra + 2.6;
+
+    // Marcas de altitud
+    aplicarFuente(6.4, false, false);
+    pdf.setTextColor(GRAY);
+    ALTITUDE_MARKERS.forEach((marker, i) => {
+      const x = colX() + (marker.position / 100) * COL_W;
+      const align = i === 0 ? "left" : i === ALTITUDE_MARKERS.length - 1 ? "right" : "center";
+
+      pdf.text(`${String(marker.altitude)}m`, x, y, {align});
+    });
+    pdf.setTextColor(0);
+    y += 1;
+
+    pieFigura(colX(), "Pisos altitudinales ocupados en Ecuador.");
   };
 
   // ------------------------------------------------------------- cabecera
@@ -540,41 +696,56 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   pdf.line(MARGIN.left, headerY, PAGE_W - MARGIN.right, headerY);
   headerY += 9;
 
-  // Título: el nombre científico en cursiva, con su autoría en redonda.
-  const autorAno = ficha.taxones?.[0]?.autor_ano ? String(ficha.taxones[0].autor_ano).trim() : "";
-  const tituloSize = 19;
-  const tituloPalabras: Word[] = [
-    ...palabrasDe(nombreCientifico, {italic: true}),
-    ...(autorAno ? palabrasDe(autorAno) : []),
-  ];
-  const tituloLineas = repartirLineas(tituloPalabras, tituloSize, CONTENT_W);
-
-  tituloLineas.forEach((linea) => {
-    const x =
-      MARGIN.left +
-      (CONTENT_W - linea.ancho - anchoEspacio(tituloSize) * (linea.palabras.length - 1)) / 2;
-
-    pintarLinea(linea, x, headerY, tituloSize, CONTENT_W, false);
-    headerY += tituloSize * PT_TO_MM * 1.2;
-  });
-
-  // Linaje y nombre común, centrados bajo el título.
+  // Título en tres filas: familia | nombre científico, autoría y nombre común.
   const rango = (rankId: number): string =>
-    ficha.lineage?.find((item: any) => item.rank_id === rankId)?.taxon ?? "";
-  const linaje = [rango(3), rango(4), rango(5)].filter(Boolean).join(" · ");
-  const nombreComun = ficha.taxones?.[0]?.nombre_comun
-    ? String(ficha.taxones[0].nombre_comun).trim()
-    : "";
-  const subtitulo = [linaje, nombreComun].filter(Boolean).join("  |  ");
+    comoTexto(
+      (ficha.lineage as {rank_id?: number; taxon?: string}[] | undefined)?.find(
+        (item) => item.rank_id === rankId,
+      )?.taxon,
+    );
+  const familia = rango(5);
+  const autorAno = comoTexto(ficha.taxones?.[0]?.autor_ano).trim();
+  const nombreComun = comoTexto(ficha.taxones?.[0]?.nombre_comun).trim();
 
-  if (subtitulo) {
-    headerY += 1.2;
-    aplicarFuente(9, false, false);
-    pdf.setTextColor(GRAY);
-    pdf.text(sanear(subtitulo), PAGE_W / 2, headerY, {align: "center"});
-    pdf.setTextColor(0);
-    headerY += 5;
+  /** Pinta un bloque centrado a ancho completo y devuelve la nueva altura. */
+  const filaCentrada = (palabras: Word[], size: number, interlinea = 1.22): void => {
+    if (palabras.length === 0) return;
+
+    repartirLineas(palabras, size, CONTENT_W).forEach((linea) => {
+      pintarLinea(
+        linea,
+        MARGIN.left + (CONTENT_W - linea.ancho) / 2,
+        headerY,
+        size,
+        CONTENT_W,
+        false,
+      );
+      headerY += size * PT_TO_MM * interlinea;
+    });
+  };
+
+  filaCentrada(
+    [
+      ...(familia ? palabrasDe(familia) : []),
+      ...(familia ? [[{text: "|", italic: false, bold: false, color: NARANJA}] as Word] : []),
+      ...palabrasDe(nombreCientifico, {italic: true}),
+    ],
+    18,
+  );
+
+  if (autorAno) {
+    headerY += 1.4;
+    filaCentrada(palabrasDe(autorAno), 11);
   }
+
+  if (nombreComun) {
+    headerY += 1.2;
+    pdf.setTextColor(GRAY);
+    filaCentrada(palabrasDe(nombreComun), 10);
+    pdf.setTextColor(0);
+  }
+
+  headerY += 3;
 
   pdf.setDrawColor(RULE);
   pdf.setLineWidth(0.3);
@@ -609,12 +780,13 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     }
 
     if (alto > 0) {
+      numeroFigura += 1;
       headerY += alto + 3.4;
       pdf.setTextColor(GRAY);
 
       // El pie va alineado con la figura, con el nombre científico en cursiva.
       const piezas: Seg[] = [
-        {text: "Figura 1. ", italic: false, bold: false},
+        {text: `Figura ${String(numeroFigura)}. `, italic: false, bold: false},
         {text: nombreCientifico, italic: true, bold: false},
         {
           text: opts.fotografia.autor ? `. Foto: ${opts.fotografia.autor}.` : ".",
@@ -703,6 +875,20 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   if (pluviocidad) datosEcuador.push({label: "Pluviocidad", value: pluviocidad});
 
   datosEnLinea("Distribución Ecuador", datosEcuador);
+
+  const altitudinalRange = ficha.altitudinalRange as AltitudinalRange | null | undefined;
+
+  if (altitudinalRange) {
+    barraPisos(altitudinalRange);
+  }
+
+  if (opts.mapa) {
+    figuraEnColumna(
+      opts.mapa.dataUrl,
+      opts.mapa.tipo ?? "JPEG",
+      "Registros de colecciones para la especie.",
+    );
+  }
 
   const provincias = new Set<string>();
 

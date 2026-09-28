@@ -1,6 +1,6 @@
 "use client";
 
-import {useMemo, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {Camera, Download, Mars, MapPin, Venus, Video, Volume2} from "lucide-react";
@@ -245,6 +245,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
   // Lightbox para la foto destacada de la especie
   const [fotoDestacadaOpen, setFotoDestacadaOpen] = useState(false);
+  // Contenedor del mapa, para poder rasterizarlo al exportar el PDF
+  const mapaRef = useRef<HTMLDivElement>(null);
   const nombreCientificoMain = useMemo(() => {
     const t = fichaEspecie.taxones?.[0];
 
@@ -361,6 +363,29 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
       setTimeout(() => resolve(null), 2000);
     });
 
+  // Rasteriza el mapa que ya está pintado en la página; sin él el PDF sale igual.
+  const capturarMapa = async (): Promise<string | null> => {
+    const contenedor = mapaRef.current;
+
+    if (!contenedor) return null;
+
+    try {
+      const {default: html2canvas} = await import("html2canvas");
+      const canvas = await html2canvas(contenedor, {
+        backgroundColor: "#ffffff",
+        logging: false,
+        scale: 2,
+        useCORS: true,
+      });
+
+      return canvas.toDataURL("image/jpeg", 0.85);
+    } catch (error) {
+      console.warn("No se pudo capturar el mapa para el PDF:", error);
+
+      return null;
+    }
+  };
+
   // Descarga la ficha como PDF con maquetación de paper (ver src/lib/ficha-pdf.ts)
   const handleDownloadPDF = async () => {
     const loadingMessage = document.createElement("div");
@@ -373,11 +398,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     try {
       const nombreCientifico = nombreCientificoMain || "especie";
       const hoy = new Date();
-      const [logo, foto] = await Promise.all([
+      const [logo, foto, mapa] = await Promise.all([
         cargarLogo(),
         fichaEspecie.fotografia_url
           ? cargarImagen(fichaEspecie.fotografia_url)
           : Promise.resolve(null),
+        capturarMapa(),
       ]);
       const fechaConsulta = formatFechaLarga(hoy);
 
@@ -388,6 +414,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         literaturaCitada: publicacionesLiteraturaCitada,
         referenciasClave: fichaEspecie.referenciasClave || [],
         fotografia: foto ? {dataUrl: foto, autor: fichaEspecie.autor_foto} : null,
+        mapa: mapa ? {dataUrl: mapa} : null,
         logo,
         citaSugerida: buildCitaSugerida({
           ano: getAnoActualizacion(fichaEspecie.fecha_actualizacion, hoy),
@@ -577,7 +604,10 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]">
+                        <div
+                          ref={mapaRef}
+                          className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]"
+                        >
                           <MapotecaMap especieFilter={[nombreCientificoMain]} mapType={mapType} />
                         </div>
                       </div>
