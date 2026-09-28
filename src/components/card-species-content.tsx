@@ -26,11 +26,12 @@ import {
 } from "@/lib/format-cita-publicacion";
 
 import {Button} from "./ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "./ui/card";
+import {Card, CardAction, CardContent, CardHeader, CardTitle} from "./ui/card";
 import {Separator} from "./ui/separator";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./ui/select";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "./ui/tooltip";
 import ClimaticFloorChart from "./ClimaticFloorChart";
+import CopyButton from "./copy-button";
 
 type MapType = "relief" | "terrain" | "provinces" | "satellite" | "streets";
 
@@ -685,8 +686,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             .join("<br />"),
         },
         {title: "Color en Vida", content: fichaEspecie.color_en_vida},
-        {title: "Comparación", content: fichaEspecie.comparacion},
         {title: "Especies Similares", content: fichaEspecie.spp_similares},
+        {title: "Comparación", content: fichaEspecie.comparacion},
         {title: "Renacuajo", content: fichaEspecie.renacuajo},
         {title: "Hábitat y Biología", content: fichaEspecie.habitat_biologia},
         {title: "Reproducción", content: fichaEspecie.reproduccion},
@@ -1146,6 +1147,226 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 </CardContent>
               </Card>
             )}
+            {/* Contenido */} {/* Información básica */}
+            <Card className="">
+              <CardContent>
+                <>
+                  {/* 0. Endemismo */}
+                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                    <span className={cardSubsectionTitle}>Endemismo</span>
+                    <span style={{color: "#f07304"}}>|</span>
+                    <span className="text-muted-foreground">
+                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : "No endémica"}
+                    </span>
+                  </p>
+
+                  {/* 0b. Distribución Global — oculto si es endémica */}
+                  {!fichaEspecie.taxones?.[0]?.endemica && (
+                    <div className={cardSectionDivider}>
+                      <h4 className={cardSubsectionTitle}>Distribución global</h4>
+                      {fichaEspecie.distribucion_global ? (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: procesarHTML(fichaEspecie.distribucion_global),
+                          }}
+                          suppressHydrationWarning
+                          className="text-muted-foreground text-sm"
+                        />
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 1. Distribución Altitudinal */}
+                  <div className={`${cardSectionDivider} -mx-6`}>
+                    <div className="mb-2 px-6">
+                      <h4 className="text-base font-semibold text-gray-900">
+                        Distribución Ecuador
+                      </h4>
+                      {(() => {
+                        const rangoAltitudinal = formatNumericRange(
+                          fichaEspecie.rango_altitudinal_min,
+                          fichaEspecie.rango_altitudinal_max,
+                          "m",
+                        );
+                        const pisosAltitudinales = getPisosAltitudinales(
+                          fichaEspecie.distributions,
+                        );
+                        const temperatura = formatNumericRange(
+                          fichaEspecie.temperatura_min,
+                          fichaEspecie.temperatura_max,
+                          "°C",
+                        );
+                        const pluviocidad = formatNumericRange(
+                          fichaEspecie.pluviocidad_min,
+                          fichaEspecie.pluviocidad_max,
+                          "mm",
+                        );
+                        const areaDistribucion =
+                          fichaEspecie.area_distribucion != null
+                            ? `${fichaEspecie.area_distribucion.toLocaleString("es")} km²`
+                            : null;
+                        const areaOcupacion =
+                          fichaEspecie.area_ocupacion != null
+                            ? `${fichaEspecie.area_ocupacion.toLocaleString("es")} km²`
+                            : null;
+
+                        const inlineDatos: {label: string; value: string}[] = [];
+
+                        if (rangoAltitudinal) {
+                          inlineDatos.push({label: "Altitud", value: rangoAltitudinal});
+                        }
+                        if (areaDistribucion) {
+                          inlineDatos.push({
+                            label: "Área distribución EOO",
+                            value: areaDistribucion,
+                          });
+                        }
+                        if (areaOcupacion) {
+                          inlineDatos.push({
+                            label: "Área ocupación AOO",
+                            value: areaOcupacion,
+                          });
+                        }
+                        if (pisosAltitudinales.length > 0) {
+                          inlineDatos.push({
+                            label: "Regiones altitudinales",
+                            value: pisosAltitudinales.join(", "),
+                          });
+                        }
+                        if (temperatura) {
+                          inlineDatos.push({label: "Temperatura", value: temperatura});
+                        }
+                        if (pluviocidad) {
+                          inlineDatos.push({label: "Pluviocidad", value: pluviocidad});
+                        }
+
+                        if (inlineDatos.length === 0) {
+                          return null;
+                        }
+
+                        return (
+                          <p className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-gray-800">
+                            {inlineDatos.map((item, i) => (
+                              <span key={item.label} className="inline-flex items-baseline gap-x-2">
+                                {i > 0 && <span style={{color: "#f07304"}}>|</span>}
+                                <span className="inline-flex items-baseline gap-x-1">
+                                  <span className="text-xs text-gray-500">{item.label}</span>
+                                  <span>{item.value}</span>
+                                </span>
+                              </span>
+                            ))}
+                          </p>
+                        );
+                      })()}
+                    </div>
+                    {fichaEspecie.altitudinalRange ? (
+                      <div className="mt-4 mb-4 w-full min-w-0 overflow-hidden">
+                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground mb-4 px-6 text-sm">No disponible</p>
+                    )}
+                    {/* Mapa con colecciones internas y externas filtradas por taxon */}
+                    {nombreCientificoMain && (
+                      <div className="mt-4 mb-4 space-y-2 px-2 sm:px-6">
+                        <div className="flex items-center justify-end">
+                          <Select value={mapType} onValueChange={(v) => setMapType(v as MapType)}>
+                            <SelectTrigger className="h-8 w-[140px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="z-[1100]">
+                              {MAP_TYPE_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} className="text-xs" value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]">
+                          <MapotecaMap especieFilter={[nombreCientificoMain]} mapType={mapType} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Provincias */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>Provincias</h4>
+                    {(() => {
+                      const provincias = getProvinciasFromGeoPolitica(fichaEspecie.geoPolitica);
+
+                      return provincias.length > 0 ? (
+                        <div className="space-y-1">
+                          {provincias.map((provincia) => (
+                            <div key={provincia} className="flex items-start gap-2">
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">{provincia}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 3. Ecosistemas */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>Ecosistemas</h4>
+                    {(() => {
+                      const ecosistemas =
+                        fichaEspecie.taxon_catalogo_awe_results?.filter(
+                          (categoria: any) =>
+                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas",
+                        ) || [];
+
+                      return ecosistemas.length > 0 ? (
+                        <div className="space-y-1">
+                          {ecosistemas.map((categoria: any) => (
+                            <div
+                              key={categoria.id_taxon_catalogo_awe}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-muted-foreground text-xs">•</span>
+                              <span className="text-muted-foreground text-xs">
+                                {categoria.catalogo_awe.nombre}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No disponible</p>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 8. Sectores Biogeográficos */}
+                  <div className={cardSectionDivider}>
+                    <h4 className={cardSubsectionTitle}>Sectores biogeográficos</h4>
+                    {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
+                      <div className="space-y-1">
+                        {fichaEspecie.dataRegionBio.map((region: any, index: number) => (
+                          <div
+                            key={region.id_catalogo_awe || region.id_taxon_catalogo_awe || index}
+                            className="flex items-start gap-2"
+                          >
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <span className="text-muted-foreground text-xs">
+                              {region.nombre || region.catalogo_awe?.nombre}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No disponible</p>
+                    )}
+                  </div>
+                </>
+              </CardContent>
+            </Card>
             {/* Primer(os) colector(es) — solo si hay contenido */}
             {fichaEspecie.primeros_colectores && (
               <Card className="gap-0">
@@ -1372,8 +1593,8 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                   const hasSppSimilares = Boolean(fichaEspecie.spp_similares);
                   const hasPriorToMorfometria = hasIdentificacion;
                   const hasPriorToColor = hasIdentificacion || hasMorfometria;
-                  const hasPriorToComparacion = hasPriorToColor || hasColorEnVida;
-                  const hasPriorToSppSimilares = hasPriorToComparacion || hasComparacion;
+                  const hasPriorToSppSimilares = hasPriorToColor || hasColorEnVida;
+                  const hasPriorToComparacion = hasPriorToSppSimilares || hasSppSimilares;
 
                   return (
                     <>
@@ -1452,12 +1673,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         </div>
                       )}
 
-                      {hasComparacion && (
-                        <div className={hasPriorToComparacion ? cardSectionDivider : ""}>
-                          <h4 className={cardSubsectionTitle}>Comparación</h4>
+                      {hasSppSimilares && (
+                        <div className={hasPriorToSppSimilares ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Especies similares</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: procesarHTML(fichaEspecie.comparacion),
+                              __html: procesarHTML(fichaEspecie.spp_similares),
                             }}
                             suppressHydrationWarning
                             className="text-muted-foreground text-sm"
@@ -1465,12 +1686,12 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         </div>
                       )}
 
-                      {hasSppSimilares && (
-                        <div className={hasPriorToSppSimilares ? cardSectionDivider : ""}>
-                          <h4 className={cardSubsectionTitle}>Especies similares</h4>
+                      {hasComparacion && (
+                        <div className={hasPriorToComparacion ? cardSectionDivider : ""}>
+                          <h4 className={cardSubsectionTitle}>Comparación</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: procesarHTML(fichaEspecie.spp_similares),
+                              __html: procesarHTML(fichaEspecie.comparacion),
                             }}
                             suppressHydrationWarning
                             className="text-muted-foreground text-sm"
@@ -1568,226 +1789,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                     </>
                   );
                 })()}
-              </CardContent>
-            </Card>
-            {/* Contenido */} {/* Información básica */}
-            <Card className="">
-              <CardContent>
-                <>
-                  {/* 0. Endemismo */}
-                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                    <span className={cardSubsectionTitle}>Endemismo</span>
-                    <span style={{color: "#f07304"}}>|</span>
-                    <span className="text-muted-foreground">
-                      {fichaEspecie.taxones?.[0]?.endemica ? "Endémica" : "No endémica"}
-                    </span>
-                  </p>
-
-                  {/* 0b. Distribución Global — oculto si es endémica */}
-                  {!fichaEspecie.taxones?.[0]?.endemica && (
-                    <div className={cardSectionDivider}>
-                      <h4 className={cardSubsectionTitle}>Distribución global</h4>
-                      {fichaEspecie.distribucion_global ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: procesarHTML(fichaEspecie.distribucion_global),
-                          }}
-                          suppressHydrationWarning
-                          className="text-muted-foreground text-sm"
-                        />
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No disponible</p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* 1. Distribución Altitudinal */}
-                  <div className={`${cardSectionDivider} -mx-6`}>
-                    <div className="mb-2 px-6">
-                      <h4 className="text-base font-semibold text-gray-900">
-                        Distribución Ecuador
-                      </h4>
-                      {(() => {
-                        const rangoAltitudinal = formatNumericRange(
-                          fichaEspecie.rango_altitudinal_min,
-                          fichaEspecie.rango_altitudinal_max,
-                          "m",
-                        );
-                        const pisosAltitudinales = getPisosAltitudinales(
-                          fichaEspecie.distributions,
-                        );
-                        const temperatura = formatNumericRange(
-                          fichaEspecie.temperatura_min,
-                          fichaEspecie.temperatura_max,
-                          "°C",
-                        );
-                        const pluviocidad = formatNumericRange(
-                          fichaEspecie.pluviocidad_min,
-                          fichaEspecie.pluviocidad_max,
-                          "mm",
-                        );
-                        const areaDistribucion =
-                          fichaEspecie.area_distribucion != null
-                            ? `${fichaEspecie.area_distribucion.toLocaleString("es")} km²`
-                            : null;
-                        const areaOcupacion =
-                          fichaEspecie.area_ocupacion != null
-                            ? `${fichaEspecie.area_ocupacion.toLocaleString("es")} km²`
-                            : null;
-
-                        const inlineDatos: {label: string; value: string}[] = [];
-
-                        if (rangoAltitudinal) {
-                          inlineDatos.push({label: "Altitud", value: rangoAltitudinal});
-                        }
-                        if (areaDistribucion) {
-                          inlineDatos.push({
-                            label: "Área distribución EOO",
-                            value: areaDistribucion,
-                          });
-                        }
-                        if (areaOcupacion) {
-                          inlineDatos.push({
-                            label: "Área ocupación AOO",
-                            value: areaOcupacion,
-                          });
-                        }
-                        if (pisosAltitudinales.length > 0) {
-                          inlineDatos.push({
-                            label: "Regiones altitudinales",
-                            value: pisosAltitudinales.join(", "),
-                          });
-                        }
-                        if (temperatura) {
-                          inlineDatos.push({label: "Temperatura", value: temperatura});
-                        }
-                        if (pluviocidad) {
-                          inlineDatos.push({label: "Pluviocidad", value: pluviocidad});
-                        }
-
-                        if (inlineDatos.length === 0) {
-                          return null;
-                        }
-
-                        return (
-                          <p className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-gray-800">
-                            {inlineDatos.map((item, i) => (
-                              <span key={item.label} className="inline-flex items-baseline gap-x-2">
-                                {i > 0 && <span style={{color: "#f07304"}}>|</span>}
-                                <span className="inline-flex items-baseline gap-x-1">
-                                  <span className="text-xs text-gray-500">{item.label}</span>
-                                  <span>{item.value}</span>
-                                </span>
-                              </span>
-                            ))}
-                          </p>
-                        );
-                      })()}
-                    </div>
-                    {fichaEspecie.altitudinalRange ? (
-                      <div className="mt-4 mb-4 w-full min-w-0 overflow-hidden">
-                        <ClimaticFloorChart altitudinalRange={fichaEspecie.altitudinalRange} />
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground mb-4 px-6 text-sm">No disponible</p>
-                    )}
-                    {/* Mapa con colecciones internas y externas filtradas por taxon */}
-                    {nombreCientificoMain && (
-                      <div className="mt-4 mb-4 space-y-2 px-2 sm:px-6">
-                        <div className="flex items-center justify-end">
-                          <Select value={mapType} onValueChange={(v) => setMapType(v as MapType)}>
-                            <SelectTrigger className="h-8 w-[140px] text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="z-[1100]">
-                              {MAP_TYPE_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} className="text-xs" value={opt.value}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="relative h-[360px] w-full overflow-hidden rounded-md border border-gray-200 sm:h-[480px] lg:h-[640px]">
-                          <MapotecaMap especieFilter={[nombreCientificoMain]} mapType={mapType} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 2. Provincias */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Provincias</h4>
-                    {(() => {
-                      const provincias = getProvinciasFromGeoPolitica(fichaEspecie.geoPolitica);
-
-                      return provincias.length > 0 ? (
-                        <div className="space-y-1">
-                          {provincias.map((provincia) => (
-                            <div key={provincia} className="flex items-start gap-2">
-                              <span className="text-muted-foreground text-xs">•</span>
-                              <span className="text-muted-foreground text-xs">{provincia}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No disponible</p>
-                      );
-                    })()}
-                  </div>
-
-                  {/* 3. Ecosistemas */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Ecosistemas</h4>
-                    {(() => {
-                      const ecosistemas =
-                        fichaEspecie.taxon_catalogo_awe_results?.filter(
-                          (categoria: any) =>
-                            categoria.catalogo_awe.tipo_catalogo_awe?.nombre === "Ecosistemas",
-                        ) || [];
-
-                      return ecosistemas.length > 0 ? (
-                        <div className="space-y-1">
-                          {ecosistemas.map((categoria: any) => (
-                            <div
-                              key={categoria.id_taxon_catalogo_awe}
-                              className="flex items-start gap-2"
-                            >
-                              <span className="text-muted-foreground text-xs">•</span>
-                              <span className="text-muted-foreground text-xs">
-                                {categoria.catalogo_awe.nombre}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No disponible</p>
-                      );
-                    })()}
-                  </div>
-
-                  {/* 8. Sectores Biogeográficos */}
-                  <div className={cardSectionDivider}>
-                    <h4 className={cardSubsectionTitle}>Sectores biogeográficos</h4>
-                    {fichaEspecie.dataRegionBio && fichaEspecie.dataRegionBio.length > 0 ? (
-                      <div className="space-y-1">
-                        {fichaEspecie.dataRegionBio.map((region: any, index: number) => (
-                          <div
-                            key={region.id_catalogo_awe || region.id_taxon_catalogo_awe || index}
-                            className="flex items-start gap-2"
-                          >
-                            <span className="text-muted-foreground text-xs">•</span>
-                            <span className="text-muted-foreground text-xs">
-                              {region.nombre || region.catalogo_awe?.nombre}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No disponible</p>
-                    )}
-                  </div>
-                </>
               </CardContent>
             </Card>
             {/* Conservación */}
@@ -2090,7 +2091,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
             </Card>
             {/* { Publicaciones } */}
             <Card className="gap-0">
-              <CardContent className="pt-4">
+              <CardContent>
                 <div>
                   <h4 className={cardSubsectionTitle}>Referencias clave</h4>
                   {fichaEspecie.referenciasClave && fichaEspecie.referenciasClave.length > 0 ? (
@@ -2156,10 +2157,20 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 }
               }
 
+              const sitioUrl = "https://darkgray-kangaroo-476720.hostingersite.com";
+              const citaSugerida = [
+                `Centro Jambatu. ${anoActualizacion}.`,
+                nombreCientificoMain
+                  ? `Anfibios Ecuador: ${nombreCientificoMain}.`
+                  : "Anfibios Ecuador.",
+                `Referencia en línea. Version 2.0. Base de datos electrónica en ${sitioUrl}.`,
+                `Centro Jambatu de Investigación y Conservación de Anfibios, Quito, Ecuador. (Consultado en: ${today})`,
+              ].join(" ");
+
               return (
                 <>
                   <Card className="gap-0">
-                    <CardContent className="pt-4">
+                    <CardContent>
                       <>
                         {/* Historial cambios */}
                         <div>
@@ -2198,23 +2209,28 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
                   {/* Cita sugerida del sitio */}
                   <Card className="gap-0">
-                    <CardContent className="py-3">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Cita</CardTitle>
+                      <CardAction>
+                        <CopyButton className="-mr-2" text={citaSugerida} />
+                      </CardAction>
+                    </CardHeader>
+                    <CardContent>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Centro Jambatu. {anoActualizacion}.{" "}
+                        Centro Jambatu. {anoActualizacion}. Anfibios Ecuador
                         {nombreCientificoMain && (
                           <>
-                            <i>{nombreCientificoMain}</i>.{" "}
+                            : <i>{nombreCientificoMain}</i>
                           </>
                         )}
-                        Anfibios Ecuador: Referencia en línea. Version 2.0. Base de datos
-                        electrónica en{" "}
+                        . Referencia en línea. Version 2.0. Base de datos electrónica en{" "}
                         <a
                           className="processed-link"
-                          href="https://darkgray-kangaroo-476720.hostingersite.com"
+                          href={sitioUrl}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          https://darkgray-kangaroo-476720.hostingersite.com
+                          {sitioUrl}
                         </a>
                         . Centro Jambatu de Investigación y Conservación de Anfibios, Quito,
                         Ecuador. (Consultado en: {today})

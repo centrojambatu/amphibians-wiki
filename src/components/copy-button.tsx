@@ -30,19 +30,14 @@ export default function CopyButton({text, className = ""}: CopyButtonProps) {
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground ${className}`}
+      aria-label={copied ? "Copiado" : "Copiar al portapapeles"}
+      className={`text-muted-foreground hover:text-foreground inline-flex items-center px-2 py-1 transition-colors ${className}`}
       title={copied ? "¡Copiado!" : "Copiar al portapapeles"}
     >
       {copied ? (
-        <>
-          <Check className="h-3.5 w-3.5 text-green-600" />
-          <span className="text-green-600">Copiado</span>
-        </>
+        <Check className="h-3.5 w-3.5 text-green-600" />
       ) : (
-        <>
-          <Copy className="h-3.5 w-3.5" />
-          <span>Copiar</span>
-        </>
+        <Copy className="h-3.5 w-3.5" />
       )}
     </button>
   );
