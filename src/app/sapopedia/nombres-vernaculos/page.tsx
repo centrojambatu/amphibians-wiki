@@ -48,7 +48,7 @@ export default async function NombresVernaculosPage({ searchParams }: NombresVer
             <CardContent>
               <div className="mt-3 flex flex-col gap-1.5 items-start">
                 <a
-                  href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-indigenas-vernaculos/"
+                  href="https://anfibiosecuador.ec/nombres-indigenas-vernaculos/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-primary hover:no-underline"

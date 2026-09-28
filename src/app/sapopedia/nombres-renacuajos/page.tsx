@@ -47,7 +47,7 @@ export default async function RenacuajosPage({ searchParams }: RenacuajosPagePro
             <CardContent>
               <div className="mt-3 flex flex-col gap-1.5 items-start">
                 <a
-                  href="https://darkgray-kangaroo-476720.hostingersite.com/renacuajos/"
+                  href="https://anfibiosecuador.ec/renacuajos/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-primary hover:no-underline"
@@ -61,7 +61,7 @@ export default async function RenacuajosPage({ searchParams }: RenacuajosPagePro
             <CardContent>
               <div className="mt-3 flex flex-col gap-1.5 items-start">
                 <a
-                  href="https://darkgray-kangaroo-476720.hostingersite.com/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg"
+                  href="https://anfibiosecuador.ec/wp-content/uploads/2026/02/Mapa-Nombres-renacuajos-scaled.jpg"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-primary hover:no-underline"

@@ -153,7 +153,7 @@ export default function RedListSummaryCards({
         >
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/lista-roja/"
+            href="https://anfibiosecuador.ec/lista-roja/"
             rel="noopener noreferrer"
             style={referenceLinkStyle}
             target="_blank"

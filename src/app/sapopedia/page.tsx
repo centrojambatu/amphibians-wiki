@@ -45,7 +45,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/historia/"
+            href="https://anfibiosecuador.ec/historia/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -60,7 +60,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/arqueologia/"
+            href="https://anfibiosecuador.ec/arqueologia/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -75,7 +75,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/cultura/"
+            href="https://anfibiosecuador.ec/cultura/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -90,7 +90,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/biocomercio/"
+            href="https://anfibiosecuador.ec/biocomercio/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -112,7 +112,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/diversidad-molecular/"
+            href="https://anfibiosecuador.ec/diversidad-molecular/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -127,7 +127,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/diversidad/"
+            href="https://anfibiosecuador.ec/diversidad/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -142,7 +142,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/especies-introducidas/"
+            href="https://anfibiosecuador.ec/especies-introducidas/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -157,7 +157,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/incertae-sedis/"
+            href="https://anfibiosecuador.ec/incertae-sedis/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -179,7 +179,7 @@ export default async function SapopediaPage() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/distribucion/"
+            href="https://anfibiosecuador.ec/distribucion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -194,7 +194,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/extincion/"
+            href="https://anfibiosecuador.ec/extincion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",
@@ -209,7 +209,7 @@ export default async function SapopediaPage() {
           </a>
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/conservacion/"
+            href="https://anfibiosecuador.ec/conservacion/"
             rel="noopener noreferrer"
             style={{
               color: "#666666",

@@ -20,7 +20,7 @@ interface NavLink {
   submenu?: SubMenuItem[];
 }
 
-const SITE_HOME_URL = "https://darkgray-kangaroo-476720.hostingersite.com/";
+const SITE_HOME_URL = "https://anfibiosecuador.ec/";
 
 const navLinks: NavLink[] = [
   {

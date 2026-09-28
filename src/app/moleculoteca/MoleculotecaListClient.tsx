@@ -266,7 +266,7 @@ export default function MoleculotecaListClient() {
         >
           <a
             className="hover:text-gray-900"
-            href="https://darkgray-kangaroo-476720.hostingersite.com/diversidad-molecular/"
+            href="https://anfibiosecuador.ec/diversidad-molecular/"
             rel="noopener noreferrer"
             style={{color: "#666666", fontSize: "13px", fontWeight: 600}}
             target="_blank"

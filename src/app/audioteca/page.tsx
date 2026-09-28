@@ -463,7 +463,7 @@ export default function AudiotecaPage() {
             }}
           >
             <a
-              href="https://darkgray-kangaroo-476720.hostingersite.com/vocalizaciones"
+              href="https://anfibiosecuador.ec/vocalizaciones"
               rel="noopener noreferrer"
               style={{fontSize: "18px", fontWeight: "600"}}
               target="_blank"

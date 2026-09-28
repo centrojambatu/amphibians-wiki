@@ -58,7 +58,7 @@ const MapotecaMap = dynamic(() => import("./MapotecaMap"), {
 
 const cardSubsectionTitle = "mb-2 text-base font-semibold text-gray-900";
 const cardSectionDivider = "mt-4 border-t border-gray-100 pt-3";
-const RANARIUM_URL = "https://darkgray-kangaroo-476720.hostingersite.com/portfolio/saparium/";
+const RANARIUM_URL = "https://anfibiosecuador.ec/portfolio/saparium/";
 
 const getProvinciasFromGeoPolitica = (
   geoPolitica: {rank_nombre?: string; nombre?: string}[] | undefined,
@@ -1432,7 +1432,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                         <h4 className={cardSubsectionTitle}>
                           <a
                             className="hover:underline"
-                            href="https://darkgray-kangaroo-476720.hostingersite.com/nombres-estandarizados/"
+                            href="https://anfibiosecuador.ec/nombres-estandarizados/"
                             rel="noopener noreferrer"
                             target="_blank"
                           >
@@ -2157,7 +2157,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
                 }
               }
 
-              const sitioUrl = "https://darkgray-kangaroo-476720.hostingersite.com";
+              const sitioUrl = "https://anfibiosecuador.ec";
               const citaSugerida = [
                 `Centro Jambatu. ${anoActualizacion}.`,
                 nombreCientificoMain
