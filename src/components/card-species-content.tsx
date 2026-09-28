@@ -2248,11 +2248,11 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           {/* Botón de descarga */}
           <div className="mb-2">
             <Button
-              className="flex h-7 w-full items-center justify-center gap-1 px-2 text-[11px]"
+              className="text-muted-foreground flex h-11 w-full items-center justify-center gap-2 px-3 text-base font-semibold"
               variant="outline"
               onClick={handleDownloadPDF}
             >
-              <Download className="h-3 w-3" />
+              <Download className="h-5 w-5" />
               Ficha Pdf
             </Button>
           </div>
