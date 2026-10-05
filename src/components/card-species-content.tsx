@@ -466,7 +466,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           nombreCientifico: nombreCientificoMain,
           fechaConsulta,
         }),
-        fechaConsulta,
       });
 
       pdf.save(`Ficha_${nombreCientifico.replace(/\s+/g, "_")}.pdf`);

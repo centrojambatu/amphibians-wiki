@@ -210,7 +210,6 @@ export interface FichaPdfOptions {
   mapa?: {dataUrl: string; tipo?: string} | null;
   logo?: {dataUrl: string; ratio: number} | null;
   citaSugerida: string;
-  fechaConsulta: string;
 }
 
 /** Normaliza valores que vienen de la ficha (tipada como `any`). */
@@ -588,8 +587,33 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     // Vertientes
     aplicarFuente(6.4, false, false);
     pdf.setTextColor(GRAY);
-    pdf.text("<- Occidental", colX(), y);
-    pdf.text("Oriental ->", colX() + COL_W, y, {align: "right"});
+    // Flechas vectoriales: las fuentes estándar de jsPDF no tienen el glifo "←".
+    const largoFlecha = 3;
+    const separacion = 0.8;
+    const yFlecha = y - 0.75;
+    const flecha = (desde: number, hasta: number) => {
+      const dir = Math.sign(hasta - desde);
+      const punta = 0.9;
+
+      pdf.setDrawColor(GRAY);
+      pdf.setFillColor(GRAY, GRAY, GRAY);
+      pdf.setLineWidth(0.2);
+      pdf.line(desde, yFlecha, hasta - dir * punta, yFlecha);
+      pdf.triangle(
+        hasta,
+        yFlecha,
+        hasta - dir * punta,
+        yFlecha - 0.5,
+        hasta - dir * punta,
+        yFlecha + 0.5,
+        "F",
+      );
+    };
+
+    flecha(colX() + largoFlecha, colX());
+    pdf.text("Occidental", colX() + largoFlecha + separacion, y);
+    flecha(colX() + COL_W - largoFlecha, colX() + COL_W);
+    pdf.text("Oriental", colX() + COL_W - largoFlecha - separacion, y, {align: "right"});
     pdf.setTextColor(0);
     y += altoEtiquetas;
 
@@ -660,18 +684,11 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
 
   aplicarFuente(SMALL_SIZE, true, false);
   pdf.setTextColor(GRAY);
+  // Una sola línea, centrada en vertical con el logo (9 mm de alto).
   pdf.text(
     "Anfibios Ecuador: Referencia en línea · Versión 2.0",
     PAGE_W - MARGIN.right,
-    headerY + 3.4,
-    {
-      align: "right",
-    },
-  );
-  pdf.text(
-    `Centro Jambatu · Consultado en ${sanear(opts.fechaConsulta)}`,
-    PAGE_W - MARGIN.right,
-    headerY + 6.8,
+    headerY + 5.4,
     {align: "right"},
   );
   pdf.setTextColor(0);
@@ -1035,13 +1052,19 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     bloque("Agradecimiento", ficha.agradecimiento);
 
     if (ficha.fecha_actualizacion) {
-      bloque("Última actualización", String(ficha.fecha_actualizacion), {permitirRelleno: true});
+      bloque("Actualización", String(ficha.fecha_actualizacion), {permitirRelleno: true});
     }
   }
 
   // 13. Cita sugerida
   seccion("Cita");
-  bloque(null, opts.citaSugerida, {
+  // La cita llega en texto plano (es la misma que copia la web); aquí solo se pone el binomio en cursiva.
+  const citaConCursiva = opts.citaSugerida.replace(
+    `: ${nombreCientifico}.`,
+    `: <i>${nombreCientifico}</i>.`,
+  );
+
+  bloque(null, citaConCursiva, {
     size: SMALL_SIZE,
     leading: 1.25,
     permitirRelleno: true,
