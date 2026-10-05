@@ -1,4 +1,6 @@
 import {notFound} from "next/navigation";
+
+import {slugANombreCientifico} from "@/lib/species-slug";
 import getFichaEspecie from "../get-ficha-especie";
 import {createClient} from "@/utils/supabase/server";
 import SpeciesAudiosClient from "./SpeciesAudiosClient";
@@ -97,7 +99,7 @@ export default async function SpeciesAudiosPage({params, searchParams}: PageProp
   const paramsSearch = await searchParams;
 
   const decodedId = decodeURIComponent(id);
-  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+  const sanitizedId = slugANombreCientifico(decodedId);
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 

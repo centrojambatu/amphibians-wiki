@@ -1,5 +1,7 @@
 import {notFound} from "next/navigation";
 
+import {slugANombreCientifico} from "@/lib/species-slug";
+
 import {createServiceClient} from "@/utils/supabase/server";
 
 import getFichaEspecie from "../../get-ficha-especie";
@@ -37,7 +39,7 @@ async function resolveFichaEspecie(
   coleccionTaxonId: number | null,
 ) {
   const decoded = decodeURIComponent(urlSlug);
-  const sanitized = /^\d+$/.test(decoded) ? decoded : decoded.replaceAll("-", " ");
+  const sanitized = slugANombreCientifico(decoded);
   const looksLikeSpecies = / [a-z]/.test(sanitized) || /^\d+$/.test(sanitized);
 
   const fichaFromUrl = looksLikeSpecies ? await getFichaEspecie(sanitized) : null;

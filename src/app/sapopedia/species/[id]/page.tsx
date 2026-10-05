@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { slugANombreCientifico } from "@/lib/species-slug";
+
 import { CardSpecies } from "@/components/card-species";
 
 import getFichaEspecie from "./get-ficha-especie";
@@ -16,12 +18,8 @@ export default async function SpeciesPage({ params }: PageProps) {
   // Decodificar el id de la URL
   const decodedId = decodeURIComponent(id);
 
-  // Si es un número (id_ficha_especie), usarlo directamente
-  // Si no es un número (nombre científico con guiones), reemplazar guiones por espacios
-  // Esto coincide con el formato usado en el acordeón: nombre_cientifico.replaceAll(" ", "-")
-  const sanitizedId = /^\d+$/.test(decodedId)
-    ? decodedId
-    : decodedId.replaceAll("-", " ");
+  // Número = id_ficha_especie; si no, slug "Genero-epiteto" (ver slugANombreCientifico)
+  const sanitizedId = slugANombreCientifico(decodedId);
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 

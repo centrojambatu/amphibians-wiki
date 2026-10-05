@@ -1,5 +1,7 @@
 import {notFound} from "next/navigation";
 
+import {slugANombreCientifico} from "@/lib/species-slug";
+
 import {createClient} from "@/utils/supabase/server";
 
 import getFichaEspecie from "../get-ficha-especie";
@@ -88,7 +90,7 @@ export default async function SpeciesFotosPage({params, searchParams}: PageProps
   const search = searchParamsResolved.search as string | undefined;
 
   const decodedId = decodeURIComponent(id);
-  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+  const sanitizedId = slugANombreCientifico(decodedId);
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 

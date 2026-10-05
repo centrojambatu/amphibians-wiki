@@ -1,4 +1,6 @@
 import {notFound} from "next/navigation";
+
+import {slugANombreCientifico} from "@/lib/species-slug";
 import Link from "next/link";
 import {MoveLeft} from "lucide-react";
 
@@ -18,7 +20,7 @@ export default async function ColeccionesPage({params}: PageProps) {
   const {id} = await params;
 
   const decodedId = decodeURIComponent(id);
-  const sanitizedId = /^\d+$/.test(decodedId) ? decodedId : decodedId.replaceAll("-", " ");
+  const sanitizedId = slugANombreCientifico(decodedId);
 
   const fichaEspecie = await getFichaEspecie(sanitizedId);
 
