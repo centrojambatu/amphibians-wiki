@@ -285,6 +285,39 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
     [publicaciones],
   );
 
+  // Recodifica cualquier imagen a un JPEG estándar. jsPDF rechaza como 'UNKNOWN' los JPEG
+  // con cabecera de Photoshop (FFD8 FFED) y no admite WebP; además así se limita el tamaño.
+  const normalizarAJpeg = (src: string, ladoMax = 1600): Promise<string | null> =>
+    new Promise((resolve) => {
+      const img = new Image();
+
+      img.onload = () => {
+        try {
+          const escala = Math.min(1, ladoMax / Math.max(img.naturalWidth, img.naturalHeight));
+          const canvas = document.createElement("canvas");
+
+          canvas.width = Math.round(img.naturalWidth * escala);
+          canvas.height = Math.round(img.naturalHeight * escala);
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            resolve(null);
+
+            return;
+          }
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.9));
+        } catch (canvasError) {
+          console.warn("Error al recodificar la imagen:", canvasError);
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+
   // Carga una imagen como dataURL; usa el proxy del servidor para esquivar CORS.
   const cargarImagen = async (url: string): Promise<string | null> => {
     try {
@@ -294,7 +327,7 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
       const data = await response.json();
 
-      if (data.dataUrl) return data.dataUrl as string;
+      if (data.dataUrl) return await normalizarAJpeg(data.dataUrl as string);
       throw new Error("El proxy no devolvió dataUrl");
     } catch (proxyError) {
       console.warn("Error con proxy, intentando método directo:", proxyError);
@@ -365,17 +398,29 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
 
   // Rasteriza el mapa que ya está pintado en la página; sin él el PDF sale igual.
   const capturarMapa = async (): Promise<string | null> => {
-    const contenedor = mapaRef.current;
+    // Se captura la raíz de MapotecaMap (mapa + leyenda), no el envoltorio: este tiene alto fijo
+    // y el mapa usa calc(100vh - 220px), así que el envoltorio deja una franja blanca debajo.
+    const contenedor =
+      mapaRef.current?.querySelector<HTMLElement>(".leaflet-container")?.parentElement ??
+      mapaRef.current;
 
     if (!contenedor) return null;
 
     try {
-      const {default: html2canvas} = await import("html2canvas");
+      // html2canvas-pro: el html2canvas original aborta con los colores lab()/oklch() de Tailwind 4.
+      const {default: html2canvas} = await import("html2canvas-pro");
       const canvas = await html2canvas(contenedor, {
         backgroundColor: "#ffffff",
         logging: false,
         scale: 2,
         useCORS: true,
+        // Leaflet hace aparecer las teselas con un fundido de opacidad que no termina si el
+        // mapa está fuera de la vista: sin esto el PDF sale con el fondo gris vacío.
+        onclone: (doc) => {
+          doc.querySelectorAll<HTMLElement>(".leaflet-tile").forEach((tile) => {
+            tile.style.opacity = "1";
+          });
+        },
       });
 
       return canvas.toDataURL("image/jpeg", 0.85);

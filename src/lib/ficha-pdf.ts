@@ -48,6 +48,8 @@ const GRAY = 110;
 const RULE = 190;
 /** Naranja de la marca, el mismo que separa datos en la ficha web. */
 const NARANJA: [number, number, number] = [240, 115, 4];
+/** Azul marino casi negro de los títulos de sección. */
+const AZUL_OSCURO: [number, number, number] = [16, 28, 52];
 
 // jsPDF usa WinAnsi con las fuentes estándar: hay glifos que no existen.
 const REEMPLAZOS: [RegExp, string][] = [
@@ -454,7 +456,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     y += opciones.espacioDespues ?? 1.4;
   };
 
-  /** Texto (HTML) precedido por una etiqueta en negrita, al estilo `Etiqueta.—`. */
+  /** Texto (HTML) precedido por una etiqueta en negrita, al estilo **Etiqueta**`.—` (el `.—` sin negrita). */
   const bloque = (
     etiqueta: string | null,
     contenido: unknown,
@@ -478,9 +480,12 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
       let contenidoLinea = palabras;
 
       if (i === 0 && etiqueta) {
-        const marca: Seg = {text: `${etiqueta}.—`, italic: false, bold: true};
+        const marca: Seg[] = [
+          {text: etiqueta, italic: false, bold: true},
+          {text: ".—", italic: false, bold: false},
+        ];
 
-        contenidoLinea = [[marca, ...palabras[0]], ...palabras.slice(1)];
+        contenidoLinea = [[...marca, ...palabras[0]], ...palabras.slice(1)];
       }
       escribirParrafo(contenidoLinea, {
         ...opciones,
@@ -496,28 +501,38 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     const alto = SECTION_SIZE * PT_TO_MM * 1.2;
 
     // Evita que el título quede colgado al final de la columna.
-    reservar(alto + BODY_SIZE * PT_TO_MM * BODY_LEADING * 2 + 3);
+    reservar(alto + BODY_SIZE * PT_TO_MM * BODY_LEADING * 2 + 4.2);
     y += 2.6;
     aplicarFuente(SECTION_SIZE, false, true);
-    pdf.setTextColor(0);
+    pdf.setTextColor(AZUL_OSCURO[0], AZUL_OSCURO[1], AZUL_OSCURO[2]);
     pdf.text(sanear(titulo), colX(), y);
-    y += SECTION_SIZE * PT_TO_MM * 1.25;
+    pdf.setTextColor(0);
+    // Margen extra bajo el título para separarlo del primer párrafo.
+    y += SECTION_SIZE * PT_TO_MM * 1.25 + 1.2;
   };
 
-  /** Pares etiqueta/valor en una línea, separados por `·`. */
-  const datosEnLinea = (etiqueta: string | null, datos: {label: string; value: string}[]) => {
+  /** Pares etiqueta/valor en una línea, separados por `·` (o por `separador`). */
+  const datosEnLinea = (
+    etiqueta: string | null,
+    datos: {label: string; value: string}[],
+    separador = "·",
+  ) => {
     if (datos.length === 0) return;
 
     const palabras: Word[] = [];
 
     datos.forEach((dato, i) => {
-      if (i > 0) palabras.push([{text: "·", italic: false, bold: false}]);
+      if (i > 0) palabras.push([{text: separador, italic: false, bold: false}]);
       palabras.push(...palabrasDe(dato.label, {italic: true}));
       palabras.push(...palabrasDe(dato.value));
     });
 
     if (etiqueta) {
-      palabras[0] = [{text: `${etiqueta}.—`, italic: false, bold: true}, ...palabras[0]];
+      palabras[0] = [
+        {text: etiqueta, italic: false, bold: true},
+        {text: ".—", italic: false, bold: false},
+        ...palabras[0],
+      ];
     }
     escribirParrafo(palabras, {justificar: false});
   };
@@ -528,35 +543,8 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   };
 
   // ------------------------------------------------------------ figuras
-  let numeroFigura = 0;
-
-  /** Pie de figura, alineado a la izquierda del elemento. */
-  const pieFigura = (x: number, texto: string, cursiva?: string) => {
-    y += 2.4;
-    pdf.setTextColor(GRAY);
-
-    const piezas: Seg[] = cursiva
-      ? [
-          {text: `Figura ${String(numeroFigura)}. `, italic: false, bold: false},
-          {text: cursiva, italic: true, bold: false},
-          {text: texto, italic: false, bold: false},
-        ]
-      : [{text: `Figura ${String(numeroFigura)}. ${texto}`, italic: false, bold: false}];
-    let cursor = x;
-
-    piezas.forEach((seg) => {
-      const limpio = sanear(seg.text);
-
-      aplicarFuente(SMALL_SIZE, seg.italic, seg.bold);
-      pdf.text(limpio, cursor, y);
-      cursor += anchoSeg({...seg, text: limpio}, SMALL_SIZE);
-    });
-    pdf.setTextColor(0);
-    y += 4.6;
-  };
-
   /** Imagen al ancho de la columna, dentro del flujo del cuerpo. */
-  const figuraEnColumna = (dataUrl: string, tipo: string, pie: string) => {
+  const figuraEnColumna = (dataUrl: string, tipo: string) => {
     let ratio: number;
 
     try {
@@ -578,16 +566,15 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     }
 
     y += 1.6;
-    reservar(alto + 8);
-    numeroFigura += 1;
+    reservar(alto + 6);
 
     try {
       pdf.addImage(dataUrl, tipo, colX(), y, ancho, alto);
     } catch {
       return;
     }
-    y += alto;
-    pieFigura(colX(), pie);
+    // Sin pie de figura: solo un margen antes del texto siguiente.
+    y += alto + 4;
   };
 
   /** Barra de pisos altitudinales, dibujada en vectorial. */
@@ -597,7 +584,6 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
 
     y += 1.6;
     reservar(altoEtiquetas * 2 + altoBarra + 9);
-    numeroFigura += 1;
 
     // Vertientes
     aplicarFuente(6.4, false, false);
@@ -657,9 +643,9 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
       pdf.text(`${String(marker.altitude)}m`, x, y, {align});
     });
     pdf.setTextColor(0);
-    y += 1;
 
-    pieFigura(colX(), "Pisos altitudinales ocupados en Ecuador.");
+    // Sin pie de figura: la barra se explica sola y no consume número.
+    y += 5;
   };
 
   // ------------------------------------------------------------- cabecera
@@ -752,63 +738,14 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   pdf.line(MARGIN.left, headerY, PAGE_W - MARGIN.right, headerY);
   headerY += 6;
 
-  // --------------------------------------------------------------- figura
-  if (opts.fotografia) {
-    const maxAlto = 52;
-    let alto = 0;
-    let figuraX = MARGIN.left;
-    let figuraW = CONTENT_W;
-
-    try {
-      const props = pdf.getImageProperties(opts.fotografia.dataUrl);
-      const ratio = props.width / props.height;
-
-      alto = Math.min(maxAlto, CONTENT_W / ratio);
-      figuraW = alto * ratio;
-      figuraX = MARGIN.left + (CONTENT_W - figuraW) / 2;
-
-      pdf.addImage(
-        opts.fotografia.dataUrl,
-        opts.fotografia.formato ?? "JPEG",
-        figuraX,
-        headerY,
-        figuraW,
-        alto,
-      );
-    } catch {
-      alto = 0;
-    }
-
-    if (alto > 0) {
-      numeroFigura += 1;
-      headerY += alto + 3.4;
-      pdf.setTextColor(GRAY);
-
-      // El pie va alineado con la figura, con el nombre científico en cursiva.
-      const piezas: Seg[] = [
-        {text: `Figura ${String(numeroFigura)}. `, italic: false, bold: false},
-        {text: nombreCientifico, italic: true, bold: false},
-        {
-          text: opts.fotografia.autor ? `. Foto: ${opts.fotografia.autor}.` : ".",
-          italic: false,
-          bold: false,
-        },
-      ];
-      let cursor = figuraX;
-
-      piezas.forEach((seg) => {
-        aplicarFuente(SMALL_SIZE, seg.italic, seg.bold);
-        pdf.text(sanear(seg.text), cursor, headerY);
-        cursor += anchoSeg({...seg, text: sanear(seg.text)}, SMALL_SIZE);
-      });
-      pdf.setTextColor(0);
-      headerY += 5;
-    }
-  }
-
   bodyTop = headerY;
   y = bodyTop;
   col = 0;
+
+  // Fotografía de la especie al inicio de la primera columna, al ancho de la columna.
+  if (opts.fotografia) {
+    figuraEnColumna(opts.fotografia.dataUrl, opts.fotografia.formato ?? "JPEG");
+  }
 
   // ================================================================ cuerpo
   // El orden replica el de la ficha web.
@@ -874,7 +811,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   if (temperatura) datosEcuador.push({label: "Temperatura", value: temperatura});
   if (pluviocidad) datosEcuador.push({label: "Pluviocidad", value: pluviocidad});
 
-  datosEnLinea("Distribución Ecuador", datosEcuador);
+  datosEnLinea("Distribución Ecuador", datosEcuador, "|");
 
   const altitudinalRange = ficha.altitudinalRange as AltitudinalRange | null | undefined;
 
@@ -883,11 +820,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   }
 
   if (opts.mapa) {
-    figuraEnColumna(
-      opts.mapa.dataUrl,
-      opts.mapa.tipo ?? "JPEG",
-      "Registros de colecciones para la especie.",
-    );
+    figuraEnColumna(opts.mapa.dataUrl, opts.mapa.tipo ?? "JPEG");
   }
 
   const provincias = new Set<string>();
@@ -920,19 +853,10 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   }
 
   // 3. Nombres
+  // En el PDF los nombres estándar se limitan a español e inglés.
   const idiomas: [string, string][] = [
     ["nombre_comun_espanol", "Español"],
     ["nombre_comun_ingles", "Inglés"],
-    ["nombre_comun_aleman", "Alemán"],
-    ["nombre_comun_frances", "Francés"],
-    ["nombre_comun_portugues", "Portugués"],
-    ["nombre_comun_italiano", "Italiano"],
-    ["nombre_comun_holandes", "Holandés"],
-    ["nombre_comun_chino", "Chino"],
-    ["nombre_comun_japones", "Japonés"],
-    ["nombre_comun_ruso", "Ruso"],
-    ["nombre_comun_arabe", "Árabe"],
-    ["nombre_comun_hindu", "Hindi"],
   ];
   const nombresEstandar = idiomas
     .filter(([clave]) => ficha.nombresComunes?.[clave])
