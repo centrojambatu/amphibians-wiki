@@ -510,7 +510,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     y += SECTION_SIZE * PT_TO_MM * 1.25 + 1.2;
   };
 
-  /** Pares etiqueta/valor en una línea, separados por `·` (o por `separador`). */
+  /** Pares etiqueta/valor en una línea, separados por `·` (o por `separador`; `|` sale en naranja). */
   const datosEnLinea = (
     etiqueta: string | null,
     datos: {label: string; value: string}[],
@@ -519,9 +519,13 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     if (datos.length === 0) return;
 
     const palabras: Word[] = [];
+    // La raya "|" va en naranja, como la que separa familia y especie en la cabecera.
+    const sep: Seg = {text: separador, italic: false, bold: false};
+
+    if (separador === "|") sep.color = NARANJA;
 
     datos.forEach((dato, i) => {
-      if (i > 0) palabras.push([{text: separador, italic: false, bold: false}]);
+      if (i > 0) palabras.push([sep]);
       palabras.push(...palabrasDe(dato.label, {italic: true}));
       palabras.push(...palabrasDe(dato.value));
     });
@@ -674,26 +678,26 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
 
   // ------------------------------------------------------------- cabecera
   let headerY = MARGIN.top;
+  const altoLogo = 10.35;
 
   if (opts.logo) {
-    const alto = 9;
-    const ancho = alto * opts.logo.ratio;
+    const ancho = altoLogo * opts.logo.ratio;
 
-    pdf.addImage(opts.logo.dataUrl, "PNG", MARGIN.left, headerY, ancho, alto);
+    pdf.addImage(opts.logo.dataUrl, "PNG", MARGIN.left, headerY, ancho, altoLogo);
   }
 
   aplicarFuente(SMALL_SIZE, true, false);
   pdf.setTextColor(GRAY);
-  // Una sola línea, centrada en vertical con el logo (9 mm de alto).
+  // Una sola línea, centrada en vertical con el logo.
   pdf.text(
     "Anfibios Ecuador: Referencia en línea · Versión 2.0",
     PAGE_W - MARGIN.right,
-    headerY + 5.4,
+    headerY + altoLogo / 2 + 0.9,
     {align: "right"},
   );
   pdf.setTextColor(0);
 
-  headerY += 12;
+  headerY += altoLogo + 3;
   pdf.setDrawColor(RULE);
   pdf.setLineWidth(0.3);
   pdf.line(MARGIN.left, headerY, PAGE_W - MARGIN.right, headerY);
