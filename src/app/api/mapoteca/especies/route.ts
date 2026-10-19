@@ -40,13 +40,14 @@ export async function GET(request: Request) {
 
   try {
     let query = (supabase as any)
-      .from("mv_mapoteca_especies_busqueda")
-      .select("taxon_id, nombre_especie, nombre_comun, endemica, familia, genero, lista_roja_nombre")
-      .order("nombre_especie", {ascending: true})
+      .from("vw_ficha_especie_completa")
+      .select("especie_taxon_id, nombre_cientifico, nombre_comun, endemica, familia, genero, awe_lista_roja_uicn")
+      .not("especie_taxon_id", "is", null)
+      .order("nombre_cientifico", {ascending: true})
       .limit(50);
 
     if (especie.length > 0) {
-      query = query.or(`nombre_especie.ilike.%${especie}%,nombre_comun.ilike.%${especie}%`);
+      query = query.or(`nombre_cientifico.ilike.%${especie}%,nombre_comun.ilike.%${especie}%`);
     }
 
     const {data, error} = await query;
@@ -56,10 +57,10 @@ export async function GET(request: Request) {
     const siglaMap = await getSiglaMap(supabase);
 
     const result: EspecieMapoteca[] = (data || []).map((e: any) => ({
-      id_taxon: e.taxon_id,
-      nombre_cientifico: e.nombre_especie,
+      id_taxon: e.especie_taxon_id,
+      nombre_cientifico: e.nombre_cientifico,
       endemica: e.endemica ?? null,
-      lista_roja_iucn: e.lista_roja_nombre ? siglaMap.get(e.lista_roja_nombre) ?? null : null,
+      lista_roja_iucn: e.awe_lista_roja_uicn ? siglaMap.get(e.awe_lista_roja_uicn) ?? null : null,
       familia: e.familia ?? null,
       genero: e.genero ?? null,
     }));

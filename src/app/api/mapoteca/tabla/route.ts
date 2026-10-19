@@ -13,49 +13,21 @@ export interface EspecieTabla {
   lista_roja: string | null;
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-
-  const provinciasParam = searchParams.get("provincias");
-  const provincias = provinciasParam ? provinciasParam.split(",").map((p) => p.trim()).filter(Boolean) : null;
-  const pisosParam = searchParams.get("pisos");
-  const pisos = pisosParam ? pisosParam.split(",").map((p) => p.trim()).filter(Boolean) : null;
-  const snapsParam = searchParams.get("snaps");
-  const snaps = snapsParam ? snapsParam.split(",").map((s) => s.trim()).filter(Boolean) : null;
-  const especiesParam = searchParams.get("especies");
-  const especies = especiesParam ? especiesParam.split("||").map((e) => e.trim()).filter(Boolean) : null;
-  const localidadesParam = searchParams.get("localidades");
-  const localidades = localidadesParam ? localidadesParam.split("||").map((l) => l.trim()).filter(Boolean) : null;
-  const catalogosParam = searchParams.get("catalogos");
-  const catalogos = catalogosParam ? catalogosParam.split("||").map((c) => c.trim()).filter(Boolean) : null;
-  const elevacionMin = searchParams.get("elevacion_min") !== null ? parseFloat(searchParams.get("elevacion_min")!) : null;
-  const elevacionMax = searchParams.get("elevacion_max") !== null ? parseFloat(searchParams.get("elevacion_max")!) : null;
-
-  const supabase = await createClient();
-
-  // Paso 1: obtener taxon_ids distintos via RPC (evita el límite de filas de PostgREST)
-  const { data: idData, error: idError } = await supabase.rpc("get_tabla_taxon_ids", {
-    p_provincias: provincias ?? undefined,
-    p_pisos: pisos ?? undefined,
-    p_snaps: snaps ?? undefined,
-    p_especies: especies ?? undefined,
-    p_localidades: localidades ?? undefined,
-    p_catalogos: catalogos ?? undefined,
-    p_elevacion_min: elevacionMin ?? undefined,
-    p_elevacion_max: elevacionMax ?? undefined,
-  });
-
-  if (idError) {
-    return NextResponse.json({ error: "Error al obtener colecciones" }, { status: 500 });
-  }
-
-  const taxonIds = (idData ?? []).map((r: { taxon_id: number | string }) => Number(r.taxon_id));
+// Recibe los taxon_ids de especie que el mapa ya obtuvo con los filtros activos, para que
+// la tabla liste exactamente las especies con registros publicados en el mapa.
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => null);
+  const taxonIds: number[] = Array.isArray(body?.taxon_ids)
+    ? body.taxon_ids.map(Number).filter((n: number) => Number.isInteger(n))
+    : [];
 
   if (taxonIds.length === 0) {
     return NextResponse.json({ data: [], total: 0 });
   }
 
-  // Paso 2: obtener datos taxonómicos desde vw_ficha_especie_completa
+  const supabase = await createClient();
+
+  // Obtener datos taxonómicos desde vw_ficha_especie_completa
   const { data: fichasData, error: fichasError } = await supabase
     .from("vw_ficha_especie_completa")
     .select("especie_taxon_id, nombre_cientifico, orden, familia, genero, especie, nombre_comun, awe_lista_roja_uicn")

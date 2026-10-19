@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import RedListStatus from "@/components/RedListStatus";
 import type { EspecieTabla } from "@/app/api/mapoteca/tabla/route";
@@ -32,53 +32,43 @@ function parseListaRoja(raw: string | null): RLStatus | null {
 }
 
 interface MapotecaTablaProps {
-  provinciaFilter?: string[];
-  pisoFilter?: string[];
-  snapFilter?: string[];
-  especieFilter?: string[];
-  catalogoFilter?: string[];
-  localidadesFilter?: string[];
-  elevacionMin?: number;
-  elevacionMax?: number;
+  // Especies (rank 7) presentes en los registros del mapa; undefined mientras el mapa carga
+  taxonIds?: number[];
 }
 
-export default function MapotecaTabla({
-  provinciaFilter,
-  pisoFilter,
-  snapFilter,
-  especieFilter,
-  catalogoFilter,
-  localidadesFilter,
-  elevacionMin,
-  elevacionMax,
-}: MapotecaTablaProps) {
+export default function MapotecaTabla({ taxonIds }: MapotecaTablaProps) {
   const [especies, setEspecies] = useState<EspecieTabla[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  const buildParams = useCallback(() => {
-    const params = new URLSearchParams();
-    if (provinciaFilter && provinciaFilter.length > 0) params.set("provincias", provinciaFilter.join(","));
-    if (pisoFilter && pisoFilter.length > 0) params.set("pisos", pisoFilter.join(","));
-    if (snapFilter && snapFilter.length > 0) params.set("snaps", snapFilter.join(","));
-    if (especieFilter && especieFilter.length > 0) params.set("especies", especieFilter.join("||"));
-    if (catalogoFilter && catalogoFilter.length > 0) params.set("catalogos", catalogoFilter.join("||"));
-    if (localidadesFilter && localidadesFilter.length > 0) params.set("localidades", localidadesFilter.join("||"));
-    if (elevacionMin != null) params.set("elevacion_min", String(elevacionMin));
-    if (elevacionMax != null) params.set("elevacion_max", String(elevacionMax));
-    return params;
-  }, [provinciaFilter, pisoFilter, snapFilter, especieFilter, catalogoFilter, localidadesFilter, elevacionMin, elevacionMax]);
+  // Clave estable para no repetir la petición si el mapa devuelve los mismos ids
+  const idsKey = taxonIds ? [...taxonIds].sort((x, y) => x - y).join(",") : null;
 
   useEffect(() => {
+    if (idsKey === null) {
+      setLoading(true);
+      return;
+    }
     setLoading(true);
     setPage(1);
-    const params = buildParams();
-    fetch(`/api/mapoteca/tabla?${params.toString()}`)
+    // Cancelar la petición anterior para que una respuesta lenta no pise la del filtro actual
+    const controller = new AbortController();
+    fetch("/api/mapoteca/tabla", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ taxon_ids: idsKey ? idsKey.split(",").map(Number) : [] }),
+      signal: controller.signal,
+    })
       .then((r) => r.json())
       .then((json) => setEspecies(json.data ?? []))
-      .catch(() => setEspecies([]))
-      .finally(() => setLoading(false));
-  }, [buildParams]);
+      .catch((err) => {
+        if (err?.name !== "AbortError") setEspecies([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [idsKey]);
 
   const totalPages = Math.ceil(especies.length / PAGE_SIZE);
   const paginated = especies.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
