@@ -243,6 +243,30 @@ const nombresCatalogo = (items: unknown, tipo: string): string[] => {
   return Array.from(unicos.values());
 };
 
+const MESES_MINUSCULA = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+];
+
+/** "2026-09-18" → "18 de septiembre de 2026". Se lee como texto: `new Date` lo correría un día por la zona horaria. */
+const fechaEnPalabras = (valor: unknown): string => {
+  const texto = String(valor ?? "").trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(texto);
+  const mes = m ? MESES_MINUSCULA[Number(m[2]) - 1] : undefined;
+
+  return m && mes ? `${Number(m[3])} de ${mes} de ${m[1]}` : texto;
+};
+
 const referenciaClaveTexto = (pub: any): string => {
   const citaCorta = String(
     pub.publicacion?.cita_corta || pub.publicacion?.cita || "Cita no disponible",
@@ -1061,7 +1085,7 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
     bloque("Agradecimiento", ficha.agradecimiento);
 
     if (ficha.fecha_actualizacion) {
-      bloque("Actualización", String(ficha.fecha_actualizacion), {permitirRelleno: true});
+      bloque("Actualización", fechaEnPalabras(ficha.fecha_actualizacion), {permitirRelleno: true});
     }
   }
 
