@@ -52,11 +52,13 @@ export const buildCitaSugerida = ({
 }: {
   ano: string;
   nombreCientifico?: string | null;
-  fechaConsulta: string;
+  /** Sin fecha se omite "(Consultado en: …)"; el PDF no la lleva. */
+  fechaConsulta?: string;
 }): string =>
   [
     `Centro Jambatu. ${ano}.`,
     nombreCientifico ? `Anfibios Ecuador: ${nombreCientifico}.` : "Anfibios Ecuador.",
     `Referencia en línea. Version 2.0. Base de datos electrónica en ${SITE_URL}.`,
-    `Centro Jambatu de Investigación y Conservación de Anfibios, Quito, Ecuador. (Consultado en: ${fechaConsulta})`,
+    "Centro Jambatu de Investigación y Conservación de Anfibios, Quito, Ecuador.",
+    ...(fechaConsulta ? [`(Consultado en: ${fechaConsulta})`] : []),
   ].join(" ");

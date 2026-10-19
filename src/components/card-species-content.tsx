@@ -14,7 +14,6 @@ import "yet-another-react-lightbox/plugins/captions.css";
 import {
   SITE_URL,
   buildCitaSugerida,
-  formatFechaLarga,
   getAnoActualizacion,
 } from "@/lib/cita-sitio";
 import {buildFichaPdf} from "@/lib/ficha-pdf";
@@ -450,8 +449,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
           : Promise.resolve(null),
         capturarMapa(),
       ]);
-      const fechaConsulta = formatFechaLarga(hoy);
-
       const pdf = buildFichaPdf({
         ficha: fichaEspecie,
         nombreCientifico,
@@ -464,7 +461,6 @@ export const CardSpeciesContent = ({fichaEspecie}: CardSpeciesContentProps) => {
         citaSugerida: buildCitaSugerida({
           ano: getAnoActualizacion(fichaEspecie.fecha_actualizacion, hoy),
           nombreCientifico: nombreCientificoMain,
-          fechaConsulta,
         }),
       });
 

@@ -49,7 +49,8 @@ const RULE = 190;
 /** Naranja de la marca, el mismo que separa datos en la ficha web. */
 const NARANJA: [number, number, number] = [240, 115, 4];
 /** Azul marino casi negro de los títulos de sección. */
-const AZUL_OSCURO: [number, number, number] = [16, 28, 52];
+// Azul marino de los títulos de sección (#1E3A6E): lo bastante claro para distinguirse del negro del texto
+const AZUL_OSCURO: [number, number, number] = [30, 58, 110];
 
 // jsPDF usa WinAnsi con las fuentes estándar: hay glifos que no existen.
 const REEMPLAZOS: [RegExp, string][] = [
@@ -771,10 +772,10 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   // ================================================================ cuerpo
   // El orden replica el de la ficha web.
 
-  // 1. Endemismo y distribución
+  // 1. Distribución
   const endemica = ficha.taxones?.[0]?.endemica;
 
-  seccion("Endemismo y distribución");
+  seccion("Distribución");
 
   if (endemica !== undefined && endemica !== null) {
     bloque("Endemismo", endemica ? "Endémica de Ecuador" : "No endémica", {
@@ -842,6 +843,8 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
 
   if (opts.mapa) {
     figuraEnColumna(opts.mapa.dataUrl, opts.mapa.tipo ?? "JPEG");
+    // Aire extra para que "Provincias" no quede pegado al borde inferior del mapa
+    y += 3;
   }
 
   const provincias = new Set<string>();
@@ -1016,14 +1019,16 @@ export const buildFichaPdf = (opts: FichaPdfOptions): jsPDF => {
   // 10. Referencias clave
   if (referenciasClave.length > 0) {
     seccion("Referencias clave");
-    bloque(
-      null,
-      referenciasClave
-        .filter((pub: any) => pub.publicacion)
-        .map((pub: any) => referenciaClaveTexto(pub))
-        .join(" | "),
-      {size: SMALL_SIZE, leading: 1.25},
-    );
+    // Citas separadas por una raya "|" naranja, como en la cabecera y las líneas de datos
+    const palabras: Word[] = [];
+
+    referenciasClave
+      .filter((pub: any) => pub.publicacion)
+      .forEach((pub: any, i: number) => {
+        if (i > 0) palabras.push([{text: "|", italic: false, bold: false, color: NARANJA}]);
+        palabras.push(...htmlAParrafos(referenciaClaveTexto(pub)).flat());
+      });
+    escribirParrafo(palabras, {size: SMALL_SIZE, leading: 1.25});
   }
 
   // 11. Literatura citada
