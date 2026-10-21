@@ -9,6 +9,22 @@ interface Props {
 }
 
 const WS_PLAY_EVENT = "wavesurfer-play";
+
+// Hosts que no envían CORS: el espectrograma necesita leer el audio con fetch,
+// así que se sirven a través de /api/audio-proxy.
+const HOSTS_SIN_CORS = new Set(["anfibiosecuador.ec", "www.anfibiosecuador.ec"]);
+
+function resolverSrc(src: string): string {
+  try {
+    if (HOSTS_SIN_CORS.has(new URL(src).hostname)) {
+      return `/api/audio-proxy?url=${encodeURIComponent(src)}`;
+    }
+  } catch {
+    // URL relativa o inválida: se usa tal cual
+  }
+
+  return src;
+}
 let wsPlayCounter = 0;
 
 function formatTime(seconds: number): string {
@@ -82,7 +98,7 @@ export default function AudioSpectrogramOscillogram({src, height = 80}: Props) {
           cursorColor: "#fff",
           height,
           normalize: true,
-          url: src,
+          url: resolverSrc(src),
           plugins: [spectrogramPlugin],
         });
 
