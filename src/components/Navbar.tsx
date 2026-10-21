@@ -40,7 +40,8 @@ const navLinks: NavLink[] = [
   {href: "/audioteca", label: "Audioteca"},
   {href: "/videoteca", label: "Videoteca"},
   {href: "/mapoteca", label: "Mapoteca"},
-  {href: "/colecciones", label: "Colecciones"},
+  // Oculto del menú; la página /colecciones sigue accesible por URL.
+  // {href: "/colecciones", label: "Colecciones"},
 ];
 
 export default function Navbar() {
