@@ -35,7 +35,8 @@ const navLinks: NavLink[] = [
     href: "/sapopedia/lista-roja",
     label: "Lista Roja",
   },
-  {href: "/sapoteca", label: "Biblioteca"},
+  // Oculto del menú; la página /sapoteca sigue accesible por URL.
+  // {href: "/sapoteca", label: "Biblioteca"},
   {href: "/fototeca", label: "Fototeca"},
   {href: "/audioteca", label: "Audioteca"},
   {href: "/videoteca", label: "Videoteca"},
