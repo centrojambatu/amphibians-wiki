@@ -76,7 +76,9 @@ function CategoriasInlineFilter({
     queryKey: ["/api/fototeca/categorias", "inline"],
     queryFn: async () => {
       const res = await fetch("/api/fototeca/categorias");
+
       if (!res.ok) return [];
+
       return res.json();
     },
   });
@@ -92,6 +94,7 @@ function CategoriasInlineFilter({
     <div className="flex flex-col gap-2 px-6 py-4">
       {options.map((opt) => {
         const isSelected = selected.includes(opt);
+
         return (
           <Button
             key={opt}
@@ -579,8 +582,7 @@ export default function FototecaPage() {
       generosFilter,
       tiposFilter,
       categoriasFilter,
-    ].flat().length +
-    (anioEspecifico || anioDesde || anioHasta ? 1 : 0);
+    ].flat().length + (anioEspecifico || anioDesde || anioHasta ? 1 : 0);
 
   const clearFilters = () => {
     setSearchInput("");
@@ -755,7 +757,7 @@ export default function FototecaPage() {
               stats?.foto_destacada_reciente?.nombre_cientifico || "Foto especie más reciente"
             }
             imageSrc={stats?.foto_destacada_reciente?.enlace}
-            label="Foto especie más reciente"
+            label="Especie más reciente"
           />
 
           <StatCard
@@ -763,7 +765,7 @@ export default function FototecaPage() {
             caption={stats?.foto_posiblemente_extinta?.nombre_cientifico ?? null}
             imageAlt={stats?.foto_posiblemente_extinta?.nombre_cientifico || "Posiblemente extinta"}
             imageSrc={stats?.foto_posiblemente_extinta?.enlace}
-            label="Foto posiblemente extinta"
+            label="Posiblemente extinta"
           />
 
           <button
@@ -942,110 +944,112 @@ export default function FototecaPage() {
                     </div>
 
                     <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
-                <span>
-                  {`${String(especies.length)} ${especies.length === 1 ? "especie" : "especies"}`}
-                </span>
-                {fetchingEspecies && (
-                  <span
-                    aria-label="Actualizando"
-                    className="border-muted-foreground/30 border-t-muted-foreground inline-block h-3 w-3 animate-spin rounded-full border-2"
-                  />
-                )}
-              </div>
+                      <span>
+                        {`${String(especies.length)} ${especies.length === 1 ? "especie" : "especies"}`}
+                      </span>
+                      {fetchingEspecies && (
+                        <span
+                          aria-label="Actualizando"
+                          className="border-muted-foreground/30 border-t-muted-foreground inline-block h-3 w-3 animate-spin rounded-full border-2"
+                        />
+                      )}
+                    </div>
 
-              {loadingEspecies && especies.length === 0 ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">Cargando especies...</p>
-                </div>
-              ) : especies.length > 0 ? (
-                <div
-                  className={`grid grid-cols-1 gap-3 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 ${
-                    fetchingEspecies ? "opacity-60" : "opacity-100"
-                  }`}
-                >
-                  {especies.map((especie) => {
-                    const href = `/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
-                    const queryParam = (especie.nombre_cientifico || "")
-                      .split(/\s+/)
-                      .map(encodeURIComponent)
-                      .join("+");
-                    const googleImagesUrl = `https://www.google.com/search?tbm=isch&q=${queryParam}`;
-                    const inaturalistUrl = `https://www.inaturalist.org/taxa/search?q=${queryParam}`;
-
-                    return (
-                      <div
-                        key={especie.id}
-                        className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
-                        style={{borderColor: "#dddddd"}}
-                      >
-                        <Link className="flex flex-col no-underline" href={href}>
-                          <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
-                            {especie.fotografia_url ? (
-                              <img
-                                alt={especie.nombre_cientifico}
-                                className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
-                                loading="lazy"
-                                src={especie.fotografia_url}
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-gray-300">
-                                <ImageIcon className="h-10 w-10" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-1 flex-wrap items-baseline justify-start gap-x-2 px-2 pt-3 pb-1 text-left">
-                            <span
-                              className="text-sm font-semibold italic"
-                              style={{color: "#666666"}}
-                            >
-                              {especie.nombre_cientifico}
-                            </span>
-                            {especie.nombre_comun && (
-                              <>
-                                <span className="text-xs" style={{color: "#f07304"}}>
-                                  |
-                                </span>
-                                <span className="text-xs" style={{color: "#888888"}}>
-                                  {especie.nombre_comun}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </Link>
-                        <div className="flex items-center justify-start gap-2 px-2 pt-1 pb-3">
-                          <a
-                            className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
-                            href={googleImagesUrl}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                          >
-                            Google
-                          </a>
-                          <span aria-hidden className="h-3 w-px bg-gray-300" />
-                          <a
-                            className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
-                            href={inaturalistUrl}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                          >
-                            iNaturalist
-                          </a>
-                        </div>
+                    {loadingEspecies && especies.length === 0 ? (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                        <p className="text-gray-600">Cargando especies...</p>
                       </div>
-                    );
-                  })}
+                    ) : especies.length > 0 ? (
+                      <div
+                        className={`grid grid-cols-1 gap-3 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 ${
+                          fetchingEspecies ? "opacity-60" : "opacity-100"
+                        }`}
+                      >
+                        {especies.map((especie) => {
+                          const href = `/sapopedia/species/${especie.slug}/fotos?from=fototeca${searchInput.trim() ? `&search=${encodeURIComponent(searchInput.trim())}` : ""}`;
+                          const queryParam = (especie.nombre_cientifico || "")
+                            .split(/\s+/)
+                            .map(encodeURIComponent)
+                            .join("+");
+                          const googleImagesUrl = `https://www.google.com/search?tbm=isch&q=${queryParam}`;
+                          const inaturalistUrl = `https://www.inaturalist.org/taxa/search?q=${queryParam}`;
+
+                          return (
+                            <div
+                              key={especie.id}
+                              className="group flex flex-col overflow-hidden rounded-md border bg-white text-center transition-shadow hover:shadow-md"
+                              style={{borderColor: "#dddddd"}}
+                            >
+                              <Link className="flex flex-col no-underline" href={href}>
+                                <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
+                                  {especie.fotografia_url ? (
+                                    <img
+                                      alt={especie.nombre_cientifico}
+                                      className="h-full w-full object-cover grayscale transition-[filter] duration-700 ease-in-out group-hover:grayscale-0"
+                                      loading="lazy"
+                                      src={especie.fotografia_url}
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-gray-300">
+                                      <ImageIcon className="h-10 w-10" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex flex-1 flex-wrap items-baseline justify-start gap-x-2 px-2 pt-3 pb-1 text-left">
+                                  <span
+                                    className="text-sm font-semibold italic"
+                                    style={{color: "#666666"}}
+                                  >
+                                    {especie.nombre_cientifico}
+                                  </span>
+                                  {especie.nombre_comun && (
+                                    <>
+                                      <span className="text-xs" style={{color: "#f07304"}}>
+                                        |
+                                      </span>
+                                      <span className="text-xs" style={{color: "#888888"}}>
+                                        {especie.nombre_comun}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </Link>
+                              <div className="flex items-center justify-start gap-2 px-2 pt-1 pb-3">
+                                <a
+                                  className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
+                                  href={googleImagesUrl}
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  Google
+                                </a>
+                                <span aria-hidden className="h-3 w-px bg-gray-300" />
+                                <a
+                                  className="text-[11px] font-medium text-gray-600 no-underline transition-colors hover:text-gray-900"
+                                  href={inaturalistUrl}
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  iNaturalist
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : hasFilters ? (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                        <p className="text-gray-600">
+                          No se encontraron especies con esos filtros.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+                        <p className="text-gray-600">No hay especies con fotos publicadas.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : hasFilters ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">No se encontraron especies con esos filtros.</p>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-                  <p className="text-gray-600">No hay especies con fotos publicadas.</p>
-                </div>
-              )}
-            </div>
-          </div>
 
                 {/* Panel de filtros móvil (bottom sheet) */}
                 {showMobileFilters && (
@@ -1076,9 +1080,7 @@ export default function FototecaPage() {
                           <X className="h-5 w-5" />
                         </button>
                       </div>
-                      <div className="min-h-0 flex-1 overflow-hidden">
-                        {filterPanelContent}
-                      </div>
+                      <div className="min-h-0 flex-1 overflow-hidden">{filterPanelContent}</div>
                     </div>
                   </div>
                 )}
