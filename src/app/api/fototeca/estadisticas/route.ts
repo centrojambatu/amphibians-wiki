@@ -112,7 +112,8 @@ export async function GET() {
     }
   }
 
-  // Card 5: foto destacada de especie posiblemente extinta (catalogo_awe_id = 175)
+  // Card 5: foto destacada de especie posiblemente extinta (catalogo_awe_id = 175).
+  // Se elige una especie al azar en cada petición, así la foto rota al refrescar.
   let fotoExtinta: FotoCard | null = null;
   {
     const {data: taxones} = await supabase
@@ -125,26 +126,36 @@ export async function GET() {
       .filter((id: any) => id != null);
 
     if (taxonIds.length > 0) {
-      const {data: ficha} = await supabase
+      const {data: fichas} = await supabase
         .from("ficha_especie")
         .select("fotografia_destacada_id, taxon_id")
         .in("taxon_id", taxonIds)
-        .not("fotografia_destacada_id", "is", null)
-        .limit(1)
-        .maybeSingle();
+        .not("fotografia_destacada_id", "is", null);
 
-      if (ficha?.fotografia_destacada_id) {
-        const {data} = await supabase
+      // Solo cuentan las fichas cuya foto destacada existe y tiene enlace;
+      // así el sorteo nunca cae en una especie sin imagen.
+      const taxonPorFoto = new Map<number, number>(
+        (fichas || []).map((f: any) => [f.fotografia_destacada_id, f.taxon_id]),
+      );
+
+      if (taxonPorFoto.size > 0) {
+        const {data: fotos} = await supabase
           .from("fotografia")
-          .select("id_fotografia, enlace, autor, taxon_id")
-          .eq("id_fotografia", ficha.fotografia_destacada_id)
-          .maybeSingle();
+          .select("id_fotografia, enlace, autor")
+          .in("id_fotografia", [...taxonPorFoto.keys()])
+          .not("enlace", "is", null)
+          .neq("enlace", "");
 
-        if (data) {
+        const foto = fotos?.length ? fotos[Math.floor(Math.random() * fotos.length)] : null;
+
+        if (foto) {
           fotoExtinta = {
-            enlace: data.enlace,
-            autor: data.autor ?? null,
-            nombre_cientifico: await resolverNombreCientifico(supabase, ficha.taxon_id),
+            enlace: foto.enlace,
+            autor: foto.autor ?? null,
+            nombre_cientifico: await resolverNombreCientifico(
+              supabase,
+              taxonPorFoto.get(foto.id_fotografia),
+            ),
           };
         }
       }
