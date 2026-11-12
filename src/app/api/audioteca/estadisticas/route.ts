@@ -199,7 +199,8 @@ export async function GET() {
     }
   }
 
-  // Card 5: canto destacado de una especie posiblemente extinta (catalogo_awe_id = 175)
+  // Card 5: canto destacado de una especie posiblemente extinta (catalogo_awe_id = 175).
+  // Se elige una especie al azar en cada petición, así el canto rota al refrescar.
   let cantoExtinta: CantoCard | null = null;
   {
     const {data: taxones} = await supabase
@@ -212,23 +213,30 @@ export async function GET() {
       .filter((id: any) => id != null);
 
     if (taxonIds.length > 0) {
-      const {data: ficha} = await supabase
+      const {data: fichas} = await supabase
         .from("ficha_especie")
         .select("canto_destacado_id, taxon_id")
         .in("taxon_id", taxonIds)
-        .not("canto_destacado_id", "is", null)
-        .limit(1)
-        .maybeSingle();
+        .not("canto_destacado_id", "is", null);
 
-      if (ficha?.canto_destacado_id) {
-        const {data} = await supabase
+      // Solo cuentan las fichas cuyo canto destacado existe y tiene enlace;
+      // así el sorteo nunca cae en una especie sin audio.
+      const taxonPorCanto = new Map<number, number>(
+        (fichas || []).map((f: any) => [f.canto_destacado_id, f.taxon_id]),
+      );
+
+      if (taxonPorCanto.size > 0) {
+        const {data: cantos} = await supabase
           .from("canto")
-          .select("id_canto, enlace, colector, fecha, taxon_id")
-          .eq("id_canto", ficha.canto_destacado_id)
-          .maybeSingle();
+          .select("id_canto, enlace, colector, fecha")
+          .in("id_canto", [...taxonPorCanto.keys()])
+          .not("enlace", "is", null)
+          .neq("enlace", "");
+
+        const data = cantos?.length ? cantos[Math.floor(Math.random() * cantos.length)] : null;
 
         if (data) {
-          const especie = await resolverEspecie(supabase, ficha.taxon_id);
+          const especie = await resolverEspecie(supabase, taxonPorCanto.get(data.id_canto));
 
           cantoExtinta = {
             enlace: data.enlace,

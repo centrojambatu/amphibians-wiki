@@ -59,32 +59,45 @@ export async function GET() {
     }
   }
 
-  // Card 3: foto destacada más reciente (mayor created_at entre las destacadas)
+  // Card 3: foto destacada de la especie descrita más recientemente
+  // (mayor taxon.fecha_descripcion; desempata el id_taxon más alto, porque muchas
+  // especies solo tienen el año y comparten fecha AAAA-01-01).
   let fotoDestacadaReciente: FotoCard | null = null;
   {
     const {data: fichas} = await supabase
       .from("ficha_especie")
-      .select("fotografia_destacada_id")
-      .not("fotografia_destacada_id", "is", null);
+      .select("taxon_id, fotografia_destacada_id, taxon!inner(id_taxon, fecha_descripcion)")
+      .not("fotografia_destacada_id", "is", null)
+      .not("taxon.fecha_descripcion", "is", null);
 
-    const ids = (fichas || [])
-      .map((r: any) => r.fotografia_destacada_id)
-      .filter((id: any) => id != null);
+    const candidatas = (fichas || []).sort((a: any, b: any) => {
+      const porFecha = b.taxon.fecha_descripcion.localeCompare(a.taxon.fecha_descripcion);
 
-    if (ids.length > 0) {
-      const {data} = await supabase
+      return porFecha !== 0 ? porFecha : b.taxon.id_taxon - a.taxon.id_taxon;
+    });
+
+    if (candidatas.length > 0) {
+      // Solo fotos que existen y tienen enlace, para no caer en una card vacía.
+      const {data: fotos} = await supabase
         .from("fotografia")
-        .select("id_fotografia, enlace, autor, created_at, taxon_id")
-        .in("id_fotografia", ids)
-        .order("created_at", {ascending: false, nullsFirst: false})
-        .limit(1)
-        .maybeSingle();
+        .select("id_fotografia, enlace, autor")
+        .in(
+          "id_fotografia",
+          candidatas.map((f: any) => f.fotografia_destacada_id),
+        )
+        .not("enlace", "is", null)
+        .neq("enlace", "");
 
-      if (data) {
+      const fotoPorId = new Map((fotos || []).map((f: any) => [f.id_fotografia, f]));
+      const elegida = candidatas.find((f: any) => fotoPorId.has(f.fotografia_destacada_id));
+
+      if (elegida) {
+        const foto = fotoPorId.get(elegida.fotografia_destacada_id);
+
         fotoDestacadaReciente = {
-          enlace: data.enlace,
-          autor: data.autor ?? null,
-          nombre_cientifico: await resolverNombreCientifico(supabase, data.taxon_id),
+          enlace: foto.enlace,
+          autor: foto.autor ?? null,
+          nombre_cientifico: await resolverNombreCientifico(supabase, elegida.taxon_id),
         };
       }
     }
