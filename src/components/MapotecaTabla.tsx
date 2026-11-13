@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import RedListStatus from "@/components/RedListStatus";
 import type { EspecieTabla } from "@/app/api/mapoteca/tabla/route";
+import type { MapotecaFilters } from "@/hooks/use-mapoteca-data";
 
 const PAGE_SIZE = 20;
 
@@ -32,34 +33,30 @@ function parseListaRoja(raw: string | null): RLStatus | null {
 }
 
 interface MapotecaTablaProps {
-  // Especies (rank 7) presentes en los registros del mapa; undefined mientras el mapa carga
-  taxonIds?: number[];
+  filters: MapotecaFilters;
 }
 
-export default function MapotecaTabla({ taxonIds }: MapotecaTablaProps) {
+export default function MapotecaTabla({ filters }: MapotecaTablaProps) {
   const [especies, setEspecies] = useState<EspecieTabla[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  // Clave estable para no repetir la petición si el mapa devuelve los mismos ids
-  const idsKey = taxonIds ? [...taxonIds].sort((x, y) => x - y).join(",") : null;
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
-    if (idsKey === null) {
-      setLoading(true);
-      return;
-    }
     setLoading(true);
     setPage(1);
-    // Cancelar la petición anterior para que una respuesta lenta no pise la del filtro actual
     const controller = new AbortController();
     fetch("/api/mapoteca/tabla", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ taxon_ids: idsKey ? idsKey.split(",").map(Number) : [] }),
+      body: JSON.stringify({ filters }),
       signal: controller.signal,
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Error al cargar especies");
+        return r.json();
+      })
       .then((json) => setEspecies(json.data ?? []))
       .catch((err) => {
         if (err?.name !== "AbortError") setEspecies([]);
@@ -68,7 +65,7 @@ export default function MapotecaTabla({ taxonIds }: MapotecaTablaProps) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [idsKey]);
+  }, [filtersKey]);
 
   const totalPages = Math.ceil(especies.length / PAGE_SIZE);
   const paginated = especies.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

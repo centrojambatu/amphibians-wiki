@@ -2,7 +2,6 @@ import type {OrdenesNombresLookup} from "@/lib/organize-taxonomy";
 
 import {SapopediaContent} from "@/components/sapopedia-content";
 import MapotecaStats from "@/components/mapoteca/mapoteca-stats";
-import MapotecaPrefetch from "@/components/MapotecaPrefetch";
 
 import getAllEspecies from "./get-all-especies";
 import getFilterCatalogs from "./get-filter-catalogs";
@@ -30,8 +29,6 @@ export default async function SapopediaPage() {
 
   return (
     <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-      {/* Prefetch de datos de Mapoteca en background */}
-      <MapotecaPrefetch />
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-gray-900">Anfibios Ecuador</h1>
       </div>

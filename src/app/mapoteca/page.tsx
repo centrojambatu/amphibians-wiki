@@ -18,7 +18,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import MapotecaTabla from "@/components/MapotecaTabla";
-import {useMapotecaData} from "@/hooks/use-mapoteca-data";
+import type {MapotecaFilters} from "@/hooks/use-mapoteca-data";
 import YearRangeFilter from "@/components/YearRangeFilter";
 import {
   Select,
@@ -630,9 +630,7 @@ function MapotecaContent({
     staleTime: 60 * 60 * 1000,
   });
 
-  // Mismos filtros que recibe MapotecaMap: React Query comparte la entrada de caché, así que
-  // la tabla lista las especies de los registros del mapa sin pedir los datos dos veces.
-  const {data: mapData} = useMapotecaData({
+  const mapotecaFilters: MapotecaFilters = {
     provinciaFilter: provinciaFilter.length > 0 ? provinciaFilter : undefined,
     pisoFilter: pisoFilter.length > 0 ? pisoFilter : undefined,
     snapFilter: snapFilter.length > 0 ? snapFilter : undefined,
@@ -643,14 +641,7 @@ function MapotecaContent({
     elevacionMax: elevacionMaxQuery,
     fechaDesde: fechaDesdeQuery,
     fechaHasta: fechaHastaQuery,
-  });
-  const tablaTaxonIds = useMemo(
-    () =>
-      mapData
-        ? Array.from(new Set(mapData.data.filter((u) => u.rank_id === 7).map((u) => u.taxon_id)))
-        : undefined,
-    [mapData],
-  );
+  };
 
   const clearFilters = () => {
     setProvinciaFilter([]);
@@ -862,7 +853,7 @@ function MapotecaContent({
 
             {/* Tabla de especies */}
             <div className="mt-4">
-              <MapotecaTabla taxonIds={tablaTaxonIds} />
+              <MapotecaTabla filters={mapotecaFilters} />
             </div>
           </div>
         </div>

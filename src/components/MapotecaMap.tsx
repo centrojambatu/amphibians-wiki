@@ -11,32 +11,16 @@ import {
 import L from "leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 import type { UbicacionEspecie } from "@/app/api/mapoteca/route";
-import { useMapotecaData } from "@/hooks/use-mapoteca-data";
+import type { MapotecaFilters } from "@/hooks/use-mapoteca-data";
 import { useGbifOccurrence } from "@/lib/gbif";
 
 // Componente para ajustar la vista del mapa (evita fitBounds con miles de puntos)
-function MapBoundsAdjuster({
-  bounds,
-  skip,
-}: {
-  bounds: L.LatLngBoundsExpression | null;
-  skip?: boolean;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (skip || !bounds) return;
-    map.fitBounds(bounds, { padding: [20, 20], maxZoom: 10 });
-  }, [bounds, map, skip]);
-
-  return null;
-}
-
 // Rastrea zoom/center para persistirlos al navegar
 function MapStateTracker({
   stateRef,
@@ -61,17 +45,55 @@ function MapStateTracker({
   return null;
 }
 
+interface MapViewport {
+  south: number;
+  north: number;
+  west: number;
+  east: number;
+  zoom: number;
+}
+
+function MapViewportTracker({ onChange }: { onChange: (viewport: MapViewport) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const update = () => {
+      const bounds = map.getBounds();
+      const lower = (value: number) => Math.floor(value * 1000) / 1000;
+      const upper = (value: number) => Math.ceil(value * 1000) / 1000;
+      onChange({
+        south: lower(bounds.getSouth()),
+        north: upper(bounds.getNorth()),
+        west: lower(bounds.getWest()),
+        east: upper(bounds.getEast()),
+        zoom: map.getZoom(),
+      });
+    };
+    update();
+    map.on("moveend", update);
+    map.on("zoomend", update);
+    return () => {
+      map.off("moveend", update);
+      map.off("zoomend", update);
+    };
+  }, [map, onChange]);
+
+  return null;
+}
+
 // Restaura zoom/center; abre popup del marker si es visible (o zoomToShowLayer si está clusterizado)
 function MapStateRestorer({
   center,
   zoom,
   popupKey,
+  loading,
   markerRefs,
   clusterRef,
 }: {
   center: [number, number];
   zoom: number;
   popupKey: string | null;
+  loading: boolean;
   markerRefs: React.MutableRefObject<Map<string, L.Marker>>;
   clusterRef: React.MutableRefObject<any>;
 }) {
@@ -83,10 +105,18 @@ function MapStateRestorer({
     restored.current = true;
 
     map.setView(center, zoom, { animate: false });
+  }, [map, center, zoom]);
 
-    if (!popupKey) return;
-    setTimeout(() => {
+  useEffect(() => {
+    if (loading || !popupKey) return;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const openPopup = () => {
       const marker = markerRefs.current.get(popupKey);
+      if (!marker && attempts++ < 20) {
+        timer = setTimeout(openPopup, 150);
+        return;
+      }
       if (!marker) return;
       const cluster = clusterRef.current;
       if (cluster && typeof cluster.zoomToShowLayer === "function") {
@@ -94,8 +124,10 @@ function MapStateRestorer({
       } else {
         marker.openPopup();
       }
-    }, 300);
-  }, [map, center, zoom, popupKey, markerRefs, clusterRef]);
+    };
+    timer = setTimeout(openPopup, 0);
+    return () => clearTimeout(timer);
+  }, [loading, popupKey, markerRefs, clusterRef]);
 
   return null;
 }
@@ -334,6 +366,46 @@ const ClusteredMarker = memo(function ClusteredMarker({
   );
 });
 
+interface MapotecaCluster {
+  latitud: number;
+  longitud: number;
+  registros: number;
+}
+
+const AggregateMarker = memo(function AggregateMarker({
+  cell,
+}: {
+  cell: MapotecaCluster;
+}) {
+  const map = useMap();
+  const setRef = useCallback((marker: L.Marker | null) => {
+    if (marker) {
+      (marker.options as L.MarkerOptions & { groupSize?: number }).groupSize = cell.registros;
+    }
+  }, [cell.registros]);
+  const icon = useMemo(() => {
+    const label = cell.registros >= 1000 ? `${(cell.registros / 1000).toFixed(1)}k` : String(cell.registros);
+    const size = cell.registros >= 100 ? 38 : 32;
+    return L.divIcon({
+      html: `<div class="mapoteca-cell-marker"><span>${label}</span></div>`,
+      className: "mapoteca-cell-icon",
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  }, [cell.registros]);
+
+  return (
+    <Marker
+      ref={setRef}
+      position={[cell.latitud, cell.longitud]}
+      icon={icon}
+      eventHandlers={{
+        click: () => map.flyTo([cell.latitud, cell.longitud], Math.max(10, map.getZoom() + 2)),
+      }}
+    />
+  );
+});
+
 // Icon del cluster que suma los registros (no los markers). Los markers marcan
 // `options.groupSize` con la cantidad de registros que representan.
 function createClusterIcon(cluster: L.MarkerCluster): L.DivIcon {
@@ -445,14 +517,42 @@ export default function MapotecaMap({
   mapType = "provinces",
   onNavigateToSpecies,
 }: MapotecaMapProps) {
-  const { data: queryData, isLoading: loading, error: queryError } = useMapotecaData({
+  const filters: MapotecaFilters = {
     provinciaFilter, pisoFilter, snapFilter, especieFilter,
     catalogoFilter, localidadesFilter, elevacionMin, elevacionMax,
     fechaDesde, fechaHasta,
+  };
+  const [viewport, setViewport] = useState<MapViewport | null>(null);
+  const onViewportChange = useCallback((next: MapViewport) => setViewport(next), []);
+  const viewMode = viewport && viewport.zoom >= 10 ? "points" : "clusters";
+  const viewQuery = useQuery<{
+    mode: "clusters" | "points";
+    data: MapotecaCluster[] | UbicacionEspecie[];
+    total: number;
+    truncated?: boolean;
+  }>({
+    queryKey: ["mapoteca", "vista", viewMode, filters, viewport],
+    enabled: viewport !== null,
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/mapoteca/vista", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: viewMode, filters, viewport, zoom: viewport?.zoom ?? 7 }),
+        signal,
+      });
+      if (!response.ok) throw new Error("Error al cargar datos del mapa");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (previous) => previous,
   });
 
-  const ubicaciones = queryData?.data ?? [];
-  const error = queryError ? (queryError instanceof Error ? queryError.message : "Error desconocido") : null;
+  const queryData = viewQuery.data;
+  const puntos = queryData?.mode === "points" ? queryData.data as UbicacionEspecie[] : [];
+  const clusters = queryData?.mode === "clusters" ? queryData.data as MapotecaCluster[] : [];
+  const ubicaciones = puntos;
+  const loading = viewQuery.isFetching;
+  const error = viewQuery.error instanceof Error ? viewQuery.error.message : null;
 
   const router = useRouter();
 
@@ -510,13 +610,9 @@ export default function MapotecaMap({
     [minDate, maxDate],
   );
 
-  // Agrupar por coordenada + precomputar icon y bounds
-  const { groups, bounds } = useMemo(() => {
+  // Agrupar los registros visibles por coordenada y preparar sus marcadores.
+  const groups = useMemo(() => {
     const map = new Map<string, UbicacionEspecie[]>();
-    let minLat = Infinity;
-    let maxLat = -Infinity;
-    let minLng = Infinity;
-    let maxLng = -Infinity;
 
     for (const u of ubicaciones) {
       if (u.latitud == null || u.longitud == null) continue;
@@ -524,10 +620,6 @@ export default function MapotecaMap({
       const existing = map.get(key);
       if (existing) existing.push(u);
       else map.set(key, [u]);
-      if (u.latitud < minLat) minLat = u.latitud;
-      if (u.latitud > maxLat) maxLat = u.latitud;
-      if (u.longitud < minLng) minLng = u.longitud;
-      if (u.longitud > maxLng) maxLng = u.longitud;
     }
 
     const groupsArr: {
@@ -547,15 +639,7 @@ export default function MapotecaMap({
       groupsArr.push({ key, group, icon: getDotIcon(color, radius, !!latestDate) });
     }
 
-    const b: L.LatLngBoundsExpression | null =
-      minLat === Infinity
-        ? null
-        : [
-            [minLat, minLng],
-            [maxLat, maxLng],
-          ];
-
-    return { groups: groupsArr, bounds: b };
+    return groupsArr;
   }, [ubicaciones, getColorForDate]);
 
   const saveMapState = useCallback(
@@ -658,19 +742,17 @@ export default function MapotecaMap({
         />
 
         <MapStateTracker stateRef={mapStateRef} />
+        <MapViewportTracker onChange={onViewportChange} />
 
         {savedMapState && (
           <MapStateRestorer
             center={savedMapState.center}
             zoom={savedMapState.zoom}
             popupKey={savedMapState.popupKey}
+            loading={loading}
             markerRefs={markerRefs}
             clusterRef={clusterRef}
           />
-        )}
-
-        {bounds && (
-          <MapBoundsAdjuster bounds={bounds} skip={!!savedMapState} />
         )}
 
         <MarkerClusterGroup
@@ -683,22 +765,29 @@ export default function MapotecaMap({
           maxClusterRadius={50}
           iconCreateFunction={createClusterIcon}
         >
-          {groups.map(({ key, group, icon }) => (
-            <ClusteredMarker
-              key={key}
-              markerKey={key}
-              group={group}
-              icon={icon}
-              markerRefs={markerRefs}
-              onSpeciesClick={handleTaxonClick}
-              onColeccionClick={handleColeccionClick}
-            />
-          ))}
+          {queryData?.mode === "clusters"
+            ? clusters.map((cell) => (
+                <AggregateMarker
+                  key={`${cell.latitud.toFixed(4)}_${cell.longitud.toFixed(4)}`}
+                  cell={cell}
+                />
+              ))
+            : groups.map(({ key, group, icon }) => (
+                <ClusteredMarker
+                  key={key}
+                  markerKey={key}
+                  group={group}
+                  icon={icon}
+                  markerRefs={markerRefs}
+                  onSpeciesClick={handleTaxonClick}
+                  onColeccionClick={handleColeccionClick}
+                />
+              ))}
         </MarkerClusterGroup>
       </MapContainer>
 
       {/* Leyenda de gradiente por fecha */}
-      {minDate !== null && maxDate !== null && (
+      {queryData?.mode === "points" && minDate !== null && maxDate !== null && (
         <div className="absolute bottom-14 right-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 shadow-lg">
           <p className="mb-1 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Fecha colección</p>
           <div
@@ -719,10 +808,15 @@ export default function MapotecaMap({
       {/* Contador de registros */}
       <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-2 text-sm shadow-lg">
         <span className="font-semibold text-green-700">
-          {ubicaciones.length.toLocaleString()}
+            {(queryData?.total ?? 0).toLocaleString()}
         </span>
-        <span className="text-gray-600"> registros</span>
+        <span className="text-gray-600"> registros en esta vista</span>
       </div>
+      {queryData?.truncated && (
+        <div className="absolute right-3 bottom-3 z-[1000] rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 shadow-lg">
+          Acerca más el mapa para ver todos los registros de esta zona.
+        </div>
+      )}
     </div>
   );
 }
